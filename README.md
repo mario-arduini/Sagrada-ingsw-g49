@@ -6,4 +6,4 @@ Private repository for software engineering final examination, group 49, develop
 - 10524466 Bellante Armando
 - 10525837 Casarotto Marco
 
-Link to [sagrada-info/sagrada_regole_ITA.pdf](rules)
+Link to [rules](sagrada-info/sagrada_regole_ITA.pdf)
