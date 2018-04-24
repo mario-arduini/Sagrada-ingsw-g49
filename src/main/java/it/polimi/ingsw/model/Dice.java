@@ -21,4 +21,9 @@ public class Dice {
         //Not implemented yet.
         return;
     }
+
+    public void setValue(int value){
+        this.value = value;
+        return;
+    }
 }
