@@ -14,6 +14,7 @@ public class Constraint {
     }
 
     public int getNumber(){
+
         return number;
     }
 }

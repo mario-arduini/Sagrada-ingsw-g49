@@ -10,10 +10,12 @@ public class Schema {
     }
 
     public int getDifficulty() {
+
         return difficulty;
     }
 
     public Constraint getConstraint(int row, int column) {
+
         return constraint[row][column];
     }
 }

@@ -1,5 +1,7 @@
 package it.polimi.ingsw.model;
 
+import java.util.Random;
+
 public class Dice {
     private final Color color;
     private int value;
@@ -18,12 +20,11 @@ public class Dice {
     }
 
     protected void roll(){
-        //Not implemented yet.
-        return;
+        Random diceRoller = new Random();
+        this.value = diceRoller.nextInt(6) + 1;
     }
 
     public void setValue(int value){
         this.value = value;
-        return;
     }
 }
