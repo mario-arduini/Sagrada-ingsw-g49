@@ -57,7 +57,7 @@ public class Player {
         this.privateGoal = privateGoal;
     }
 
-    protected void useFavorToken(int number) throws NotEnoughFavorTokenException {
+    protected void o(int number) throws NotEnoughFavorTokenException {
 
         if(this.favorToken >= number)
             this.favorToken -= number;

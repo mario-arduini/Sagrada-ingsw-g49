@@ -22,7 +22,7 @@ public class Window {
 
         return mosaic[row][column];
     }
-    
+
     public void addDice(int row, int column, Dice dice) throws NoSuchWindowCellException, DiceViolatesConstraintException {
         if(row >= ROW || column >= COLUMN)
             throw  new NoSuchWindowCellException();
