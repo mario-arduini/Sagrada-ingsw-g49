@@ -5,11 +5,13 @@ public class Constraint {
     private final int number;
 
     public Constraint(Color color, int number){
+
         this.color = color;
         this.number = number;
     }
 
     public Color getColor(){
+
         return color;
     }
 

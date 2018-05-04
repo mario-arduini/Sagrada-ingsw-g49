@@ -40,6 +40,7 @@ public class Player {
     }
 
     public int getFavorToken() {
+
         return favorToken;
     }
 
@@ -49,6 +50,7 @@ public class Player {
     }
 
     public boolean verifyAuthToken(String authToken){
+
         return this.authToken.equals(authToken);
     }
 
@@ -57,13 +59,12 @@ public class Player {
         this.privateGoal = privateGoal;
     }
 
-    protected void o(int number) throws NotEnoughFavorTokenException {
+    protected void useFavorToken(int number) throws NotEnoughFavorTokenException {
 
         if(this.favorToken >= number)
             this.favorToken -= number;
         else
             throw new NotEnoughFavorTokenException();
     }
-
 
 }
