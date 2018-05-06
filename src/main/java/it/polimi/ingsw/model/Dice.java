@@ -4,7 +4,7 @@ import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
 
 import java.util.Random;
 
-public class Dice{
+public class Dice {
     private final Color color;
     private int value;
 
@@ -17,6 +17,11 @@ public class Dice{
             throw  new InvalidDiceValueException();
         this.color = color;
         this.value = value;
+    }
+
+    public Dice(Dice dice){
+        this.value = dice.getValue();
+        this.color = dice.getColor();
     }
 
     public Color getColor(){
@@ -36,5 +41,10 @@ public class Dice{
     public void roll(){
         Random diceRoller = new Random();
         this.value = diceRoller.nextInt(6) + 1;
+    }
+
+    @Override
+    public boolean equals(Object dice) {
+        return dice instanceof Dice && this.color == ((Dice) dice).getColor() && this.value == ((Dice) dice).getValue();
     }
 }
