@@ -129,7 +129,7 @@ public class Window {
         }
         return adjacencyFlag;
     }
-    
+
     private boolean checkSideAdjacencies(int row, int column, Color color, int value) throws BadAdjacentDiceException{
         boolean adjacencyFlag = false;
         Dice tmp;

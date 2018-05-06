@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model;
 
+import it.polimi.ingsw.model.exceptions.InvalidFavorTokenNumberException;
 import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
 
 public class Player {
@@ -15,13 +16,13 @@ public class Player {
         this.authToken = authToken;
         this.privateGoal = null;
         this.window = null;
-        this.favorToken = -1;
+        this.favorToken = 0;
         this.suspended = false;
     }
 
     public void setWindow(Schema schema){
-
         this.window = new Window(schema);
+        setFavorToken();
     }
 
     public String getNickname() {
@@ -54,17 +55,23 @@ public class Player {
         return this.authToken.equals(authToken);
     }
 
-    protected void setPrivateGoal(PrivateGoal privateGoal){
+    //Protected?
+    public void setPrivateGoal(PrivateGoal privateGoal){
 
         this.privateGoal = privateGoal;
     }
 
-    protected void useFavorToken(int number) throws NotEnoughFavorTokenException {
-
+    //Protected?
+    public void useFavorToken(int number) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException {
+        if (number < 0) throw new InvalidFavorTokenNumberException();
         if(this.favorToken >= number)
             this.favorToken -= number;
         else
             throw new NotEnoughFavorTokenException();
+    }
+
+    private void setFavorToken(){
+        this.favorToken = window.getSchema().getDifficulty();
     }
 
 }
