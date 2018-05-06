@@ -12,7 +12,9 @@ public class Dice{
         this.color = color;
     }
 
-    public Dice(Color color, int value){
+    public Dice(Color color, int value) throws InvalidDiceValueException {
+        if(value < 1 || value > 6)
+            throw  new InvalidDiceValueException();
         this.color = color;
         this.value = value;
     }
@@ -31,7 +33,7 @@ public class Dice{
         this.value = value;
     }
 
-    protected void roll(){
+    public void roll(){
         Random diceRoller = new Random();
         this.value = diceRoller.nextInt(6) + 1;
     }

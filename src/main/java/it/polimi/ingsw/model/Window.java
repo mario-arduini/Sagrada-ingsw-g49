@@ -1,6 +1,5 @@
 package it.polimi.ingsw.model;
-import it.polimi.ingsw.model.exceptions.DiceViolatesConstraintException;
-import it.polimi.ingsw.model.exceptions.NoSuchWindowCellException;
+import it.polimi.ingsw.model.exceptions.ConstraintViolatedException;
 
 public class Window {
     private static final int ROW = 4;
@@ -23,17 +22,11 @@ public class Window {
         return mosaic[row][column];
     }
 
-    public void addDice(int row, int column, Dice dice) throws NoSuchWindowCellException, DiceViolatesConstraintException {
-        if(row >= ROW || column >= COLUMN)
-            throw  new NoSuchWindowCellException();
-//        else if(mosaic[row][column] == null)
-//            return false;
-        else {
-            Constraint constraint = schema.getConstraint(row, column);
-            if (constraint.getColor() == dice.getColor() || constraint.getNumber() == dice.getValue())
-                throw new DiceViolatesConstraintException();
-            else
-                this.mosaic[row][column] = dice;
-        }
+    public void addDice(int row, int column, Dice dice) throws ConstraintViolatedException {
+        Constraint constraint = schema.getConstraint(row, column);
+        if (constraint != null && (constraint.getColor() == dice.getColor() || constraint.getNumber() == dice.getValue()))
+            throw new ConstraintViolatedException();
+        else
+            this.mosaic[row][column] = dice;
     }
 }
