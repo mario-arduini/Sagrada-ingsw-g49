@@ -3,16 +3,15 @@ package it.polimi.ingsw.model;
 import it.polimi.ingsw.model.exceptions.DiceAlreadyExtractedException;
 import it.polimi.ingsw.model.exceptions.DiceNotInDraftPoolException;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class Round {
-    private ArrayList<Dice> draftPool;
+    private List<Dice> draftPool;
     private ArrayList<Player> players;
     private boolean diceExtracted;
 
-    public Round(ArrayList<Dice> draftPool, ArrayList<Player> players){
+    public Round(List<Dice> draftPool, ArrayList<Player> players){
         this.draftPool = draftPool;
         this.players = players;
         diceExtracted = false;
