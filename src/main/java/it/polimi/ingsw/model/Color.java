@@ -17,4 +17,20 @@ public enum Color{
     public String escape() {
         return escape;
     }
+
+    public String toString(){
+        switch (this){
+            case RED: return "Red";
+            case GREEN: return "Green";
+            case YELLOW: return "Yellow";
+            case BLUE: return "Blue";
+            case PURPLE: return "Purple";
+        }
+        return "";
+    }
+
+    public boolean equals(Color color){
+        return this.escape == color.escape();
+    }
+
 }
