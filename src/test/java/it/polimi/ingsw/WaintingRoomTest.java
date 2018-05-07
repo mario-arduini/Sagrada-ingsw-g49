@@ -62,7 +62,7 @@ public class WaintingRoomTest {
             //assertTrue(waitingRoom.getTimer() > 0);
             waitingRoom.addPlayer(player3);
             waitingRoom.addPlayer(player4);
-            //assertTrue(waitingRoom.getTimer() == 0);
+            //assertTrue(waitingRoom.getTimer() == 0); //TODO control game creation
             assertTrue(waitingRoom.getPlayers().size() == 0);
 
         } catch (PlayerAlreadyAddedException e) {
@@ -74,7 +74,7 @@ public class WaintingRoomTest {
             waitingRoom.addPlayer(player2);
             Timer timer = waitingRoom.getTimer();
             //when timer expires
-            //assertTrue(waitingRoom.getTimer() == 0);
+            //assertTrue(waitingRoom.getTimer() == 0);  //TODO control game creation
             assertTrue(waitingRoom.getPlayers().size() == 0);
         } catch (PlayerAlreadyAddedException e) {
             assertTrue(false);

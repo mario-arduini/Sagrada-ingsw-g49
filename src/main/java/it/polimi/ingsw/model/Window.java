@@ -175,9 +175,12 @@ public class Window {
         if(!(window instanceof Window))
             return false;
         for(int i = 0; i < ROW; i++)
-            for(int j = 0; j < COLUMN; j++)
-                if(!this.mosaic[i][j].equals(((Window)window).getCell(i, j)))
-                   return false;
+            for (int j = 0; j < COLUMN; j++){
+                if ((this.mosaic[i][j] != null && ((Window) window).getCell(i, j) == null) || (this.mosaic[i][j] == null && ((Window) window).getCell(i, j) != null))
+                    return false;
+                if (this.mosaic[i][j] != null && ((Window) window).getCell(i, j) != null && !this.mosaic[i][j].equals(((Window) window).getCell(i, j)))
+                    return false;
+        }
 
         return this.schema.equals(((Window)window).getSchema());
     }

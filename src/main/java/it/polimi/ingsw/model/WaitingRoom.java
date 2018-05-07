@@ -55,7 +55,7 @@ public class WaitingRoom {
         Game game = new Game(players);
         players.clear();
         timer.cancel();
-        return game;
+        return game;  //TODO fix this: Game needs to be returned somehow
     }
 
     class TimerExpired extends TimerTask {
