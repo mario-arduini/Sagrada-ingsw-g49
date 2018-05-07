@@ -15,7 +15,7 @@ public class FullSetTest {
 
     /*  b5 g3 b5 g4 b5      0
      *  p6 -  -  -  r3      0
-     *  g1 -  -  -  -
+     *  g1 -  -  -  -       0
      *  r4 -  -  -  -         */
 
     private void fillMosaic(Window window) {
@@ -44,7 +44,7 @@ public class FullSetTest {
 
     /*  b5  g3  r4  y2  p1      12 full colors set
      *  p6  b5  g1  r6  y4      5  full shades set
-     *  g1  r4  y3  p4  g5
+     *  g1  r4  y3  p4  g5      10 diagonal
      *  r4  b5  -   -   -        */
 
     private void fillMosaic2(Window window) {
@@ -123,6 +123,33 @@ public class FullSetTest {
             window = new Window(schema);
             fillMosaic2(window);
             assertEquals(5, goal.computeScore(window));
+
+
+        } catch (InvalidDifficultyValueException e) {
+            assertTrue(false);
+        } catch (UnexpectedMatrixSizeException e) {
+            assertTrue(false);
+        }
+
+    }
+
+    @Test
+    void diagonalTest() {
+        Schema schema;
+        Constraint[][] constraint;
+        Window window;
+        PublicGoal goal = new DiagonalColor();
+
+        try {
+            //Create window w/ schema
+            constraint = new Constraint[ROW][COLUMN];
+            schema = new Schema(MIN_DIFFICULTY, constraint);
+            window = new Window(schema);
+            fillMosaic(window);
+            assertEquals(0, goal.computeScore(window));
+            window = new Window(schema);
+            fillMosaic2(window);
+            assertEquals(10, goal.computeScore(window));
 
 
         } catch (InvalidDifficultyValueException e) {
