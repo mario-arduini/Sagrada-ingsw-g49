@@ -15,18 +15,22 @@ public class Factory {
 
     public static final int DICE_NUMBER_PER_COLOR = 18;
 
-    public Factory() throws InvalidDiceValueException {
+    public Factory() {
         this.toolCards = Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12);
         this.privateGoalCards = Arrays.asList(Color.BLUE,Color.GREEN,Color.PURPLE,Color.RED,Color.YELLOW);
         this.publicGoalCards = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
         this.diceBag = new ArrayList<Dice>();
         Random diceRoller = new Random();
-        for(int i=0;i<DICE_NUMBER_PER_COLOR;i++){
-            diceBag.add(new Dice(Color.BLUE,diceRoller.nextInt(6) + 1));
-            diceBag.add(new Dice(Color.RED,diceRoller.nextInt(6) + 1));
-            diceBag.add(new Dice(Color.GREEN,diceRoller.nextInt(6) + 1));
-            diceBag.add(new Dice(Color.YELLOW,diceRoller.nextInt(6) + 1));
-            diceBag.add(new Dice(Color.PURPLE,diceRoller.nextInt(6) + 1));
+        try {
+            for (int i = 0; i < DICE_NUMBER_PER_COLOR; i++) {
+                diceBag.add(new Dice(Color.BLUE, diceRoller.nextInt(6) + 1));
+                diceBag.add(new Dice(Color.RED, diceRoller.nextInt(6) + 1));
+                diceBag.add(new Dice(Color.GREEN, diceRoller.nextInt(6) + 1));
+                diceBag.add(new Dice(Color.YELLOW, diceRoller.nextInt(6) + 1));
+                diceBag.add(new Dice(Color.PURPLE, diceRoller.nextInt(6) + 1));
+            }
+        } catch (InvalidDiceValueException e) {
+            e.printStackTrace();
         }
         this.schemas = new ArrayList<Integer>();
         schemasNumber = 24; // TODO: autodetect of schemasNumber

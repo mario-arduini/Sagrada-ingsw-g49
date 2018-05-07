@@ -11,7 +11,7 @@ public class Game {
     private int nextFirstPlayer;
     private Round currentRound;
 
-    public Game(ArrayList<Player> players){ //Fix UML for players
+    public Game(ArrayList<Player> players) { //Fix UML for players
         this.dealer = new Factory();
         this.roundTrack = new Dice[10];
         this.toolCards = new ToolCard[3];

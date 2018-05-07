@@ -15,14 +15,7 @@ public class FactoryTest {
     @Test
     void factoryTest(){
 
-        try {
-            Factory factory = new Factory();
-
-
-
-        } catch (InvalidDiceValueException e) {
-            e.printStackTrace();
-        }
+        //TODO
 
     }
 }

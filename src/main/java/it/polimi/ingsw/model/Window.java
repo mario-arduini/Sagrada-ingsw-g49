@@ -1,10 +1,9 @@
 package it.polimi.ingsw.model;
-import com.sun.tools.internal.jxc.ap.Const;
 import it.polimi.ingsw.model.exceptions.*;
 
 public class Window {
-    private static final int ROW = 4;
-    private static final int COLUMN = 5;
+    public static final int ROW = 4;
+    public static final int COLUMN = 5;
     private final Schema schema;
     private Dice[][] mosaic;
     private boolean firstDice;
