@@ -18,6 +18,7 @@ public enum Color{
         return escape;
     }
 
+    @Override
     public String toString(){
         switch (this){
             case RED: return "Red";
@@ -28,9 +29,4 @@ public enum Color{
         }
         return "";
     }
-
-    public boolean equals(Color color){
-        return this.escape == color.escape();
-    }
-
 }

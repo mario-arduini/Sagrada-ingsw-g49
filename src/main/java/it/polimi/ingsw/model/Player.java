@@ -2,6 +2,7 @@ package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.model.exceptions.InvalidFavorTokenNumberException;
 import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
+import it.polimi.ingsw.model.exceptions.PrivateGoalAlreadySetException;
 
 public class Player {
     private final String nickname;
@@ -18,6 +19,35 @@ public class Player {
         this.window = null;
         this.favorToken = 0;
         this.suspended = false;
+    }
+
+    public Player(Player player){
+        this.nickname = player.nickname;
+        this.authToken = player.authToken;
+        this.privateGoal = player.privateGoal;
+        this.window = new Window(player.window);
+        this.favorToken = player.favorToken;
+        this.suspended = player.suspended;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (! (obj instanceof Player))
+            return false;
+        Player player = (Player) obj;
+        if (this.privateGoal == null && player.privateGoal != null
+                || this.privateGoal != null && player.privateGoal == null
+                || this.window == null && player.window != null
+                || this.window != null && player.window == null)
+            return false;
+        if (this.privateGoal != null && !this.privateGoal.equals(player.privateGoal)
+                || this.window != null && !this.window.equals(player.window))
+            return false;
+
+        return this.nickname.equals(player.nickname)
+                && this.authToken.equals(player.authToken)
+                && this.favorToken == player.favorToken
+                && this.suspended == player.suspended;
     }
 
     public void setWindow(Schema schema){
@@ -59,13 +89,12 @@ public class Player {
         return this.authToken.equals(authToken);
     }
 
-    //Protected?
-    public void setPrivateGoal(PrivateGoal privateGoal){
-
+    public void setPrivateGoal(PrivateGoal privateGoal) throws PrivateGoalAlreadySetException{
+        if (privateGoal != null)
+            throw new PrivateGoalAlreadySetException();
         this.privateGoal = privateGoal;
     }
 
-    //Protected?
     public void useFavorToken(int number) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException {
         if (number < 0) throw new InvalidFavorTokenNumberException();
         if(this.favorToken >= number)

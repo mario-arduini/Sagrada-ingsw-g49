@@ -22,6 +22,8 @@ public class PlayerTest {
     @Test
     void testConstructor() {
         Player player;
+        Player player2;
+        Player player3;
 
         player = new Player(NICKNAME, AUTH_TOKEN);
         assertEquals(NICKNAME, player.getNickname());
@@ -29,6 +31,12 @@ public class PlayerTest {
         assertEquals(null, player.getPrivateGoal());
         assertEquals(0, player.getFavorToken());
         assertFalse(player.isSuspended());
+
+        player2 = new Player(NICKNAME, AUTH_TOKEN);
+        assertEquals(player, player2);
+
+        player3 = new Player(NICKNAME + "A", AUTH_TOKEN);
+        assertFalse(player.equals(player3));
     }
 
     @Test
