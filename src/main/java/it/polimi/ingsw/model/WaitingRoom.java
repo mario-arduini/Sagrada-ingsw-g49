@@ -3,6 +3,7 @@ package it.polimi.ingsw.model;
 import it.polimi.ingsw.model.exceptions.PlayerAlreadyAddedException;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -23,18 +24,18 @@ public class WaitingRoom {
         return waitingRoom;
     }
 
-    public ArrayList<Player> getPlayers(){
+    public List<Player> getPlayers(){
         return players;
     }
 
     public void addPlayer(Player newPlayer) throws PlayerAlreadyAddedException {
         for(Player player: players)
-            if(newPlayer.getNickname() == player.getNickname())
+            if(newPlayer.getNickname().equals(player.getNickname()))
                 throw new PlayerAlreadyAddedException();
         players.add(newPlayer);
         if(players.size() == 2) {
             timer = new Timer();
-            timer.schedule(new TimerExpired(), secondsTimer * 1000);
+            timer.schedule(new TimerExpired(), (long) secondsTimer * 1000);
         }
         else if(players.size() >= 4)
             startGame();

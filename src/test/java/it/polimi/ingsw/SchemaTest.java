@@ -21,7 +21,7 @@ public class SchemaTest {
     }
 
     @Test
-    void testSchema() {
+    void schemaTest() {
         Schema schema;
         Constraint[][] constraint;
 
