@@ -21,11 +21,9 @@ public class PrivateGoal implements Goal{
             for(int j=0;j<Window.COLUMN;j++)
                 mosaic.add( window.getCell(i,j) );
 
-        int score = mosaic.stream().filter(Objects::nonNull)
+        return mosaic.stream().filter(Objects::nonNull)
                 .filter(dice -> dice.getColor() == this.color)
                 .map(dice -> dice.getValue())
                 .reduce(0, (sum,val) -> sum+val);
-
-        return score;
     }
 }
