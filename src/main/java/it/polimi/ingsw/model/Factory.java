@@ -1,46 +1,95 @@
 package it.polimi.ingsw.model;
 
-import java.util.ArrayList;
-import java.util.Set;
+
+import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
+
+import java.util.*;
 
 public class Factory {
-    private ArrayList<Integer> toolCards;
-    private ArrayList<Color> publicGoalCards;
-    private ArrayList<Integer> privateGoalCards;
-    private ArrayList<Dice> diceBag;
-    private ArrayList<Integer> schemas;
+    private List<Integer> toolCards;
+    private List<Color> privateGoalCards;
+    private List<Integer> publicGoalCards;
+    private List<Dice> diceBag;
+    private List<Integer> schemas;
+    private int schemasNumber;
 
-    public Factory(){
+    public static final int DICE_NUMBER_PER_COLOR = 18;
+
+    public Factory() throws InvalidDiceValueException {
+        this.toolCards = Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12);
+        this.privateGoalCards = Arrays.asList(Color.BLUE,Color.GREEN,Color.PURPLE,Color.RED,Color.YELLOW);
+        this.publicGoalCards = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+        this.diceBag = new ArrayList<Dice>();
+        Random diceRoller = new Random();
+        for(int i=0;i<DICE_NUMBER_PER_COLOR;i++){
+            diceBag.add(new Dice(Color.BLUE,diceRoller.nextInt(6) + 1));
+            diceBag.add(new Dice(Color.RED,diceRoller.nextInt(6) + 1));
+            diceBag.add(new Dice(Color.GREEN,diceRoller.nextInt(6) + 1));
+            diceBag.add(new Dice(Color.YELLOW,diceRoller.nextInt(6) + 1));
+            diceBag.add(new Dice(Color.PURPLE,diceRoller.nextInt(6) + 1));
+        }
+        this.schemas = new ArrayList<Integer>();
+        schemasNumber = 24; // TODO: autodetect of schemasNumber
+        for(int i=0;i<schemasNumber;i++) schemas.add(i);
+
+        java.util.Collections.shuffle(toolCards);
+        java.util.Collections.shuffle(privateGoalCards);
+        java.util.Collections.shuffle(publicGoalCards);
+        java.util.Collections.shuffle(diceBag);
+        java.util.Collections.shuffle(schemas);
+
 
     }
 
-    private void shuffleCards(){
-        // TODO
+    public List<Schema> extractSchemas(int schemasToExtract) throws IndexOutOfBoundsException {
+        List<Schema> extracted = new ArrayList<Schema>();
+        for(int i=0;i<schemasToExtract;i++){
+            Schema current = getSchemaFromIndex(schemas.remove(schemas.size()-1));
+            extracted.add(current);
+        }
+        return extracted;
     }
 
-    public ArrayList<Schema> extractSchemas(int schemasNumber){
+    private Schema getSchemaFromIndex(Integer index) {
         // TODO
         return null;
     }
 
-    protected ToolCard extractToolCard(){
-        // TODO
+    protected ToolCard extractToolCard() throws IndexOutOfBoundsException {
+        int index = toolCards.remove(toolCards.size()-1);
+        ToolCard tool = null;
+        switch (index){
+            case 1: tool = new GrozingPliers(); break;
+            case 2: tool = new EglomiseBrush(); break;
+            case 3: tool = new CopperFoilBurnisher(); break;
+            case 4: tool = new Lathekin(); break;
+            case 5: tool = new LensCutter(); break;
+            case 6: tool = new FluxBrush(); break;
+            case 7: tool = new GlazingHammer(); break;
+            case 8: tool = new RunningPliers(); break;
+            case 9: tool = new CorkBackedStraightedge(); break;
+            case 10: tool = new GrindingStone(); break;
+            case 11: tool = new FluxRemover(); break;
+            case 12: tool = new TapWheel(); break;
+        }
+        return tool;
+    }
+
+    protected PrivateGoal extractPrivateGoal() throws IndexOutOfBoundsException {
+        return new PrivateGoal(privateGoalCards.remove(privateGoalCards.size()-1));
+    }
+
+    protected PublicGoal extractPublicGoal() throws  IndexOutOfBoundsException {
+        //TODO
         return null;
     }
 
-    protected PrivateGoal extractPrivateGoal(){
-        // TODO
-        return null;
-    }
+    protected List<Dice> extractPool(int dicesNumber) throws IndexOutOfBoundsException{
+        List<Dice> extracted = new ArrayList<Dice>();
+        for(int i=0;i<dicesNumber;i++)
+            extracted.add( diceBag.remove(diceBag.size()-1) );
 
-    protected PublicGoal extractPublicGoal(){
-        // TODO
-        return null;
-    }
-
-    protected Set<Dice> extractPool(int dicesNumber){
-        // TODO
-        return null;
+        return extracted;
     }
 
 }
