@@ -3,7 +3,7 @@ package it.polimi.ingsw.model;
 import it.polimi.ingsw.model.exceptions.InvalidDifficultyValueException;
 import it.polimi.ingsw.model.exceptions.UnexpectedMatrixSizeException;
 
-public class Schema {
+public final class Schema {
     private final int difficulty;
     private final Constraint[][] constraint;
     private static final int ROW = 4;
@@ -30,5 +30,20 @@ public class Schema {
     public Constraint getConstraint(int row, int column) {
 
         return constraint[row][column];
+    }
+
+    @Override
+    public boolean equals(Object schema) {
+
+        if(!(schema instanceof Schema))
+            return false;
+
+
+        for (int i = 0; i < ROW; i++)
+            for(int j = 0; j < COLUMN; j++)
+                if(!this.constraint[i][j].equals(((Schema)schema).getConstraint(i,j)))
+                    return  false;
+
+        return this.difficulty == ((Schema) schema).getDifficulty();
     }
 }

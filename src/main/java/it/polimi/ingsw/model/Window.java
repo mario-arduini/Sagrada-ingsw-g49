@@ -8,6 +8,19 @@ public class Window {
     private Dice[][] mosaic;
     private boolean firstDice;
 
+    public Window(Window window){
+        this.schema = window.schema;
+        this.mosaic = new Dice[ROW][COLUMN];
+        this.firstDice = false;
+
+        for(int i = 0; i < ROW; i++)
+            for(int j = 0; j < COLUMN; j++)
+                if(window.getCell(i, j) != null){
+                    firstDice = true;
+                    this.mosaic[i][j] = new Dice(window.getCell(i, j));
+                }
+    }
+
     public Window(Schema schema){
         this.schema = schema;
         this.mosaic = new Dice[ROW][COLUMN];
@@ -156,4 +169,16 @@ public class Window {
         return adjacencyFlag;
     }
 
+    @Override
+    public boolean equals(Object window) {
+
+        if(!(window instanceof Window))
+            return false;
+        for(int i = 0; i < ROW; i++)
+            for(int j = 0; j < COLUMN; j++)
+                if(!this.mosaic[i][j].equals(((Window)window).getCell(i, j)))
+                   return false;
+
+        return this.schema.equals(((Window)window).getSchema());
+    }
 }

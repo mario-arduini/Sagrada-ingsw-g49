@@ -2,7 +2,7 @@ package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.model.exceptions.InvalidConstraintValueException;
 
-public class Constraint {
+public final class Constraint {
     private final Color color;
     private final int number;
 
@@ -27,5 +27,10 @@ public class Constraint {
     public int getNumber(){
 
         return number;
+    }
+
+    @Override
+    public boolean equals(Object constraint) {
+        return constraint instanceof Constraint && this.color == ((Constraint) constraint).getColor() && this.number == ((Constraint) constraint).getNumber();
     }
 }
