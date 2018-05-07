@@ -13,6 +13,11 @@ public class VarietyTest {
     private static final int COLUMN = 5;
     private static final int MIN_DIFFICULTY = 3;
 
+    /*  b5 g3 b5 g4 b5      0
+     *  p6 -  -  -  r3      4
+     *  g1 -  -  -  -       0
+     *  r4 -  -  -  -       4  */
+
     private void fillMosaic(Window window){
         try {
             window.addDice(0,0,new Dice(Color.BLUE,5));
@@ -36,6 +41,11 @@ public class VarietyTest {
             e.printStackTrace();
         }
     }
+
+    /*  b5  g3  r4  y2  p1      10 rowColVar
+     *  p6  b5  g1  r6  y4      4  colColVar
+     *  g1  r4  y3  p4  g5      5  rowShaVar
+     *  r4  b5  -   -   -       4  colShaVar */
 
     private void fillMosaic2(Window window){
         try {
@@ -85,7 +95,7 @@ public class VarietyTest {
             assertEquals(0,goal.computeScore(window));
             window = new Window(schema);
             fillMosaic2(window);
-            assertEquals(10,goal.computeScore(window));
+            assertEquals(12,goal.computeScore(window));
 
 
         } catch (InvalidDifficultyValueException e) {
@@ -109,10 +119,10 @@ public class VarietyTest {
             schema = new Schema(MIN_DIFFICULTY, constraint);
             window = new Window(schema);
             fillMosaic(window);
-            assertEquals(4,goal.computeScore(window));
+            assertEquals(5,goal.computeScore(window));
             window = new Window(schema);
             fillMosaic2(window);
-            assertEquals(4,goal.computeScore(window));
+            assertEquals(5,goal.computeScore(window));
 
 
         } catch (InvalidDifficultyValueException e) {
