@@ -1,20 +1,26 @@
 package it.polimi.ingsw.model;
 
-import it.polimi.ingsw.model.exceptions.DiceAlreadyExtractedException;
-import it.polimi.ingsw.model.exceptions.DiceNotInDraftPoolException;
-import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
+import it.polimi.ingsw.model.exceptions.*;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Round {
     private List<Dice> draftPool;
-    private ArrayList<Player> players;
+    private List<Player> players;
     private boolean diceExtracted;
 
-    public Round(List<Dice> draftPool, ArrayList<Player> players){
-        this.draftPool = draftPool;
-        this.players = players;
+    public Round(List<Dice> draftPool, List<Player> players){
+        this.draftPool = new ArrayList<Dice>(draftPool);
+        this.players = new ArrayList<Player>(players);
         diceExtracted = false;
+    }
+
+    public Round(Round round){
+        this.draftPool = new ArrayList<Dice>(round.draftPool);
+        this.players = new ArrayList<>(players);
+        this.diceExtracted = round.diceExtracted;
     }
 
     public List<Dice> getDraftPool(){
@@ -29,6 +35,8 @@ public class Round {
         Player player = players.get(1);
         players.remove(0);
         diceExtracted = false;
+        if(players.get(0).isSuspended())
+            return nextPlayer();
         return player;
     }
 
@@ -37,19 +45,18 @@ public class Round {
         return players.size() == 1;
     }
 
-    public boolean isDiceExtracted(){
-        return diceExtracted;
-    }
-
-    protected void useDice(Dice choice) throws DiceNotInDraftPoolException, DiceAlreadyExtractedException {
+    public void useDice(int row, int column, Dice dice) throws NoAdjacentDiceException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, DiceNotInDraftPoolException, DiceAlreadyExtractedException {
         if(diceExtracted)
             throw new DiceAlreadyExtractedException();
-        for(Dice dice: draftPool)
-            if(dice.equals(choice)) {
-                draftPool.remove(choice);
-                diceExtracted = true;
-                return;
-            }
-        throw new DiceNotInDraftPoolException();
+        if (!draftPool.contains(dice))
+            throw new DiceNotInDraftPoolException();
+
+        players.get(0).getWindow().addDice(row,column,dice);
+        draftPool.remove(dice);
+        diceExtracted = true;
+    }
+
+    public void suspendPlayer(){
+        players.get(0).suspend();
     }
 }

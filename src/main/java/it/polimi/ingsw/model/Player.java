@@ -50,6 +50,10 @@ public class Player {
         return suspended;
     }
 
+    public void suspend(){
+        this.suspended = true;
+    }
+
     public boolean verifyAuthToken(String authToken){
 
         return this.authToken.equals(authToken);
