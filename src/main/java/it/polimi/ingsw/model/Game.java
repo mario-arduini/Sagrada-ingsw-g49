@@ -82,6 +82,10 @@ public class Game {
         return 0;
     }
 
+    public boolean isGameFinished(){
+        return trackIndex == 11;
+    }
+
     public void nextRound(){
         List<Player> roundPlayers = new ArrayList<Player>();
         List<Dice> draftPool;

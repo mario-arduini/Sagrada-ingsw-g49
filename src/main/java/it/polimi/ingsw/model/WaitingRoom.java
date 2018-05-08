@@ -13,6 +13,9 @@ public class WaitingRoom {
     private int secondsTimer;
     private Timer timer;
 
+    //reference to obj that contains the list of games currently running
+    //when it's time to create a new game startgame() will call a method of that obj passing the new game
+
     private WaitingRoom(){
         players = new ArrayList<Player>();
         //TODO: LOAD secondsTime FROM FILE
@@ -51,11 +54,11 @@ public class WaitingRoom {
         return timer;
     }
 
-    private Game startGame(){
+    private void startGame(){
         Game game = new Game(players);
         players.clear();
         timer.cancel();
-        return game;  //TODO fix this: Game needs to be returned somehow
+        //controller.addGame(game);  //TODO fix this: Game needs to be returned somehow (look commet above)
     }
 
     class TimerExpired extends TimerTask {
