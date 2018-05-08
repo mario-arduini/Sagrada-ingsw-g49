@@ -2,13 +2,11 @@ package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.model.exceptions.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Game {
     private final Factory dealer;
-    private final ArrayList<Player> players;
+    private final List<Player> players;
     private Dice[] roundTrack;
     private int trackIndex;
     private final ToolCard[] toolCards;
@@ -16,22 +14,23 @@ public class Game {
     private int nextFirstPlayer;
     private Round currentRound;
 
-    public Game(ArrayList<Player> players) { //Fix UML for players
+    public Game(List<Player> playerList) { //Fix UML for players
         this.dealer = new Factory();
         this.roundTrack = new Dice[10];
         this.toolCards = new ToolCard[3];
         this.trackIndex = 0;
         this.publicGoals = new PublicGoal[3];
-        this.players = new ArrayList<Player>();
-        for (int i = 0; i < players.size(); i++)
-            this.players.add(players.get(i));
+        this.players = new ArrayList<>();
+        this.players.addAll(playerList);
         for (int j = 0; j<3; j++)
             this.publicGoals[j] = dealer.extractPublicGoal();
         nextFirstPlayer = (new Random()).nextInt(players.size());
-        nextRound();
+
+        int size = players.size();
+        currentRound = new Round(dealer.extractPool(2*(size) + 1),createRoundPlayers(size));
     }
 
-    public ArrayList<Player> getPlayers() {
+    public List<Player> getPlayers() {
         return players;
     }
 
@@ -56,7 +55,10 @@ public class Game {
     }
 
     public Player getPlayerByNick(String nick){
-        return (Player) players.stream().filter(player -> player.getNickname().equals(nick));
+        Optional<Player> playerFetched = players.stream().filter(player -> player.getNickname().equals(nick)).findFirst();
+
+        if (!playerFetched.isPresent()) throw new NoSuchElementException();
+        return playerFetched.get();
     }
 
     //Fix UML
@@ -87,25 +89,33 @@ public class Game {
     }
 
     public void nextRound(){
-        List<Player> roundPlayers = new ArrayList<Player>();
+        List<Player> roundPlayers;
         List<Dice> draftPool;
+
         int size = players.size();
-        int j;
-
-        nextFirstPlayer = (nextFirstPlayer + 1)%size;
-        //Add players
-        for (j = nextFirstPlayer; j == (nextFirstPlayer - 1)%size; j = (j+1)%size)
-            roundPlayers.add(players.get(j));
-        roundPlayers.add(players.get(nextFirstPlayer - 1));
-
-        //Add players in reverse order
-        for (j = (nextFirstPlayer-1)%size; j == nextFirstPlayer; j = (j-1)%size)
-            roundPlayers.add(players.get(j));
-        roundPlayers.add(players.get(nextFirstPlayer));
+        roundPlayers = createRoundPlayers(size);
 
         draftPool = currentRound.getDraftPool();
         addDiceToTracker(draftPool.get((new Random()).nextInt(draftPool.size())));
         currentRound = new Round(dealer.extractPool(2*(size) + 1), roundPlayers);
     }
 
+    private List<Player> createRoundPlayers(int size){
+        List<Player> roundPlayers = new ArrayList<>();
+        int j;
+
+        nextFirstPlayer = (nextFirstPlayer + 1)%size;
+        //Add players
+        for (j = nextFirstPlayer; j == Math.abs(nextFirstPlayer - 1)%size; j = (j+1)%size)
+            roundPlayers.add(players.get(j));
+        roundPlayers.add(players.get(Math.abs(nextFirstPlayer - 1)%size));
+
+        //Add players in reverse order
+        for (j = Math.abs(nextFirstPlayer-1)%size; j == nextFirstPlayer; j = Math.abs(j-1)%size)
+            roundPlayers.add(players.get(j));
+        roundPlayers.add(players.get(nextFirstPlayer));
+
+        return roundPlayers;
+
+    }
 }
