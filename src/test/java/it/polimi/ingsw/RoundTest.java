@@ -38,7 +38,7 @@ public class RoundTest {
             p2 = new Player("Luca", "jksd123?kjsd");
             p3 = new Player("Matteo", "jksd12323kjsd");
             p4 = new Player("Maria", "9032wsdj");
-            p2.setWindow(schema);
+            p1.setWindow(schema);
 
             players.add(p1);
             players.add(p2);
@@ -77,7 +77,7 @@ public class RoundTest {
         assertFalse(round.isLastTurn());
 
         try {
-            assertEquals(p2, round.nextPlayer());
+            assertEquals(p1, round.nextPlayer());
         } catch (NoMorePlayersException e) {
             assertTrue(false);
         }
@@ -107,6 +107,7 @@ public class RoundTest {
         draftPool.remove(d1);
         assertArrayEquals(draftPool.toArray(), round.getDraftPool().toArray());
 
+        p2.suspend();
         p3.suspend();
         try {
             assertEquals(p4, round.nextPlayer());
