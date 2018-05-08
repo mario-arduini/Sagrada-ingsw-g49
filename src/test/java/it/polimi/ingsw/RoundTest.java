@@ -26,6 +26,7 @@ public class RoundTest {
         Player p2 = null;
         Player p3 = null;
         Player p4 = null;
+        Player p5 = null;
         List<Player> players = new ArrayList<Player>();
         List<Player> players2 = new ArrayList<Player>();
         List<Dice> draftPool = new ArrayList<Dice>();
@@ -38,12 +39,14 @@ public class RoundTest {
             p2 = new Player("Luca", "jksd123?kjsd");
             p3 = new Player("Matteo", "jksd12323kjsd");
             p4 = new Player("Maria", "9032wsdj");
+            p5 = new Player("Maria", "9032wsdj");
             p1.setWindow(schema);
 
             players.add(p1);
             players.add(p2);
             players.add(p3);
             players.add(p4);
+            players.add(p5);
         } catch (InvalidDifficultyValueException e) {
             assertTrue(false);
         } catch (UnexpectedMatrixSizeException e) {
@@ -114,10 +117,16 @@ public class RoundTest {
         } catch (NoMorePlayersException e) {
             assertTrue(false);
         }
+
+        try {
+            assertEquals(p5, round.nextPlayer());
+        } catch (NoMorePlayersException e) {
+            assertTrue(false);
+        }
         assertTrue(round.isLastTurn());
 
         round.suspendPlayer();
-        assertTrue(p4.isSuspended());
+        assertTrue(p5.isSuspended());
 
         try {
             round.nextPlayer();
