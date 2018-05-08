@@ -19,7 +19,7 @@ public class Round {
 
     public Round(Round round){
         this.draftPool = new ArrayList<Dice>(round.draftPool);
-        this.players = new ArrayList<>(players);
+        this.players = new ArrayList<>(round.players);
         this.diceExtracted = round.diceExtracted;
     }
 
