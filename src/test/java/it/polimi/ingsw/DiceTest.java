@@ -3,6 +3,7 @@ package it.polimi.ingsw;
 import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

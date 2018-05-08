@@ -59,4 +59,13 @@ public class Round {
     public void suspendPlayer(){
         players.get(0).suspend();
     }
+
+    @Override
+    public boolean equals(Object round) {
+
+        if(!(round instanceof Round))
+            return false;
+
+        return this.draftPool.equals(((Round) round).draftPool) && this.players.equals(((Round) round).players) && this.diceExtracted == ((Round) round).diceExtracted;
+    }
 }

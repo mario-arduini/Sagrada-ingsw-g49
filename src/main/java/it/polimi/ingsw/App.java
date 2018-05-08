@@ -19,7 +19,6 @@ public class App
 //        } catch (DiceViolatesConstraintException e) {
 //            e.printStackTrace();
 //        }
-
         /*WaitingRoom w = WaitingRoom.getWaitingRoom();
 
         try {
