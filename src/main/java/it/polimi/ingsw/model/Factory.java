@@ -2,13 +2,17 @@ package it.polimi.ingsw.model;
 
 
 import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
+import it.polimi.ingsw.model.exceptions.OutOfCardsException;
 
 import java.util.*;
 
 public class Factory {
     private List<Integer> toolCards;
+    private int toolCardsIndex;
     private List<Color> privateGoalCards;
+    private int privateGoalCardsIndex;
     private List<Integer> publicGoalCards;
+    private int publicGoalCardsIndex;
     private List<Dice> diceBag;
     private List<Integer> schemas;
     private int schemasNumber;
@@ -17,8 +21,11 @@ public class Factory {
 
     public Factory() {
         this.toolCards = Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12);
+        this.toolCardsIndex = 0;
         this.privateGoalCards = Arrays.asList(Color.BLUE,Color.GREEN,Color.PURPLE,Color.RED,Color.YELLOW);
+        this.privateGoalCardsIndex = 0;
         this.publicGoalCards = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+        this.publicGoalCardsIndex = 0;
         this.diceBag = new ArrayList<Dice>();
         Random diceRoller = new Random();
         try {
@@ -54,13 +61,14 @@ public class Factory {
         return extracted;
     }
 
-    private Schema getSchemaFromIndex(Integer index) {
-        // TODO
+    public Schema getSchemaFromIndex(Integer index) {
+        // TODO require all the available schemas in the game, will be read from file
         return null;
     }
 
-    protected ToolCard extractToolCard() throws IndexOutOfBoundsException {
-        int index = toolCards.remove(toolCards.size()-1);
+    public ToolCard extractToolCard() throws OutOfCardsException {
+        if(toolCardsIndex>=toolCards.size()) throw new OutOfCardsException("Cannot extract Tool Card");
+        int index = toolCards.get(toolCardsIndex++);
         ToolCard tool = null;
         switch (index){
             case 1: tool = new GrozingPliers(); break;
@@ -79,16 +87,17 @@ public class Factory {
         return tool;
     }
 
-    protected PrivateGoal extractPrivateGoal() throws IndexOutOfBoundsException {
-        return new PrivateGoal(privateGoalCards.remove(privateGoalCards.size()-1));
+    public PrivateGoal extractPrivateGoal() throws OutOfCardsException {
+        if(privateGoalCardsIndex>=privateGoalCards.size()) throw new OutOfCardsException("Cannot extract Private Goal");
+        return new PrivateGoal(privateGoalCards.get(privateGoalCardsIndex++));
     }
 
-    protected PublicGoal extractPublicGoal() throws  IndexOutOfBoundsException {
+    public PublicGoal extractPublicGoal() throws  IndexOutOfBoundsException {
         //TODO
         return null;
     }
 
-    protected List<Dice> extractPool(int dicesNumber) throws IndexOutOfBoundsException{
+    public List<Dice> extractPool(int dicesNumber) throws IndexOutOfBoundsException{
         List<Dice> extracted = new ArrayList<Dice>();
         for(int i=0;i<dicesNumber;i++)
             extracted.add( diceBag.remove(diceBag.size()-1) );
