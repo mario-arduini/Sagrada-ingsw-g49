@@ -9,18 +9,21 @@ import java.util.stream.Collectors;
 public class Round {
     private List<Dice> draftPool;
     private List<Player> players;
+    private int currentPlayer;
     private boolean diceExtracted;
 
     public Round(List<Dice> draftPool, List<Player> players){
         this.draftPool = new ArrayList<Dice>(draftPool);
         this.players = new ArrayList<Player>(players);
         diceExtracted = false;
+        currentPlayer = -1;
     }
 
     public Round(Round round){
         this.draftPool = new ArrayList<Dice>(round.draftPool);
         this.players = new ArrayList<>(round.players);
         this.diceExtracted = round.diceExtracted;
+        this.currentPlayer = round.currentPlayer;
     }
 
     public List<Dice> getDraftPool(){
@@ -29,15 +32,24 @@ public class Round {
     }
 
     public Player nextPlayer() throws NoMorePlayersException {
-        if(players.size() <= 1) {
+        currentPlayer++;
+        if(currentPlayer == players.size()) {
             throw new NoMorePlayersException();
         }
-        Player player = players.get(1);
-        players.remove(0);
         diceExtracted = false;
-        if(players.get(0).isSuspended())
+        if(players.get(currentPlayer).isSuspended())
             return nextPlayer();
-        return player;
+        return players.get(currentPlayer);
+
+//        if(players.size() <= 1) {
+//            throw new NoMorePlayersException();
+//        }
+//        Player player = players.get(1);
+//        players.remove(0);
+//        diceExtracted = false;
+//        if(players.get(0).isSuspended())
+//            return nextPlayer();
+//        return player;
     }
 
     public boolean isLastTurn(){
@@ -51,7 +63,7 @@ public class Round {
         if (!draftPool.contains(dice))
             throw new DiceNotInDraftPoolException();
 
-        players.get(0).getWindow().addDice(row,column,dice);
+        players.get(currentPlayer).getWindow().addDice(row,column,dice);
         draftPool.remove(dice);
         diceExtracted = true;
     }
