@@ -123,10 +123,22 @@ public class RoundTest {
         } catch (NoMorePlayersException e) {
             assertTrue(false);
         }
-        assertTrue(round.isLastTurn());
 
         round.suspendPlayer();
         assertTrue(p5.isSuspended());
+
+        try {
+            assertEquals(p4, round.nextPlayer());
+        } catch (NoMorePlayersException e) {
+            assertTrue(false);
+        }
+
+        try {
+            assertEquals(p1, round.nextPlayer());
+        } catch (NoMorePlayersException e) {
+            assertTrue(false);
+        }
+        assertTrue(round.isLastTurn());
 
         try {
             round.nextPlayer();

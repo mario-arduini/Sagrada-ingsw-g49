@@ -13,14 +13,16 @@ public class Round {
     private boolean diceExtracted;
 
     public Round(List<Dice> draftPool, List<Player> players){
-        this.draftPool = new ArrayList<Dice>(draftPool);
-        this.players = new ArrayList<Player>(players);
+        this.draftPool = new ArrayList<>(draftPool);
+        this.players = new ArrayList<>(players);
+        for(int i = players.size() - 1; i >= 0; i--)
+            this.players.add(this.players.get(i));
         diceExtracted = false;
         currentPlayer = -1;
     }
 
     public Round(Round round){
-        this.draftPool = new ArrayList<Dice>(round.draftPool);
+        this.draftPool = new ArrayList<>(round.draftPool);
         this.players = new ArrayList<>(round.players);
         this.diceExtracted = round.diceExtracted;
         this.currentPlayer = round.currentPlayer;
