@@ -12,5 +12,5 @@
 - [x] *Private Goal*	compute score
 - [x] *Public Goal*	compute score
 - [ ] *Waiting Room*
-- [ ] *Factory*
-- [ ] *Game*
+- [x] *Factory*
+- [x] *Game*
