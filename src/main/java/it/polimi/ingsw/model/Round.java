@@ -54,7 +54,7 @@ public class Round {
 
     public boolean isLastTurn(){
 
-        return players.size() == 1;
+        return currentPlayer == players.size() - 1;
     }
 
     public void useDice(int row, int column, Dice dice) throws NoAdjacentDiceException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, DiceNotInDraftPoolException, DiceAlreadyExtractedException {
@@ -69,7 +69,7 @@ public class Round {
     }
 
     public void suspendPlayer(){
-        players.get(0).suspend();
+        players.get(currentPlayer).suspend();
     }
 
     @Override
