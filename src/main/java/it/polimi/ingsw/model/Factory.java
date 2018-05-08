@@ -92,9 +92,23 @@ public class Factory {
         return new PrivateGoal(privateGoalCards.get(privateGoalCardsIndex++));
     }
 
-    public PublicGoal extractPublicGoal() throws  IndexOutOfBoundsException {
-        //TODO
-        return null;
+    public PublicGoal extractPublicGoal() throws  OutOfCardsException {
+        if(publicGoalCardsIndex>=publicGoalCards.size()) throw new OutOfCardsException("Cannot extract Public Goal");
+        int index = publicGoalCards.get(publicGoalCardsIndex++);
+        PublicGoal pub = null;
+        switch (index){
+            case 1: pub = new RowColorVariety(); break;
+            case 2: pub = new ColumnColorVariety(); break;
+            case 3: pub = new RowShadeVariety(); break;
+            case 4: pub = new ColumnShadeVariety(); break;
+            case 5: pub = new LightShades(); break;
+            case 6: pub = new MediumShades(); break;
+            case 7: pub = new DarkShades(); break;
+            case 8: pub = new FullShadeVariety(); break;
+            case 9: pub = new DiagonalColor(); break;
+            case 10: pub = new FullColorVariety(); break;
+        }
+        return pub;
     }
 
     public List<Dice> extractPool(int dicesNumber) throws IndexOutOfBoundsException{

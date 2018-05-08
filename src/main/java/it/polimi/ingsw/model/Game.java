@@ -22,8 +22,13 @@ public class Game {
         this.publicGoals = new PublicGoal[3];
         this.players = new ArrayList<>();
         this.players.addAll(playerList);
-        for (int j = 0; j<3; j++)
-            this.publicGoals[j] = dealer.extractPublicGoal();
+        for (int j = 0; j<3; j++) {
+            try {
+                this.publicGoals[j] = dealer.extractPublicGoal();
+            } catch (OutOfCardsException e) {
+                e.printStackTrace();
+            }
+        }
         nextFirstPlayer = (new Random()).nextInt(players.size());
 
         int size = players.size();

@@ -1,18 +1,13 @@
 package it.polimi.ingsw;
 
-import it.polimi.ingsw.model.Color;
-import it.polimi.ingsw.model.Factory;
-import it.polimi.ingsw.model.PrivateGoal;
-import it.polimi.ingsw.model.ToolCard;
+import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
 import it.polimi.ingsw.model.exceptions.OutOfCardsException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FactoryTest {
 
@@ -26,12 +21,11 @@ public class FactoryTest {
                 current = factory.extractToolCard();
             } catch (OutOfCardsException e) {
                 e.printStackTrace();
+                assertTrue(false);
             }
             for(ToolCard t : tools) assertNotEquals(t.getName(),current.getName());
         }
         assertThrows(OutOfCardsException.class,()->{ factory.extractToolCard(); });
-
-
     }
 
     @Test
@@ -44,11 +38,27 @@ public class FactoryTest {
                 current = factory.extractPrivateGoal();
             } catch (OutOfCardsException e) {
                 e.printStackTrace();
+                assertTrue(false);
             }
             for(PrivateGoal t : priv) assertNotEquals(t.getName(),current.getName());
         }
         assertThrows(OutOfCardsException.class,()->{ factory.extractPrivateGoal(); });
+    }
 
-
+    @Test
+    void extractPublicTest(){
+        ArrayList<PublicGoal>  pub = new ArrayList<PublicGoal>();
+        PublicGoal current = null;
+        Factory factory = new Factory();
+        for (int i=0;i<10;i++){
+            try {
+                current = factory.extractPublicGoal();
+            } catch (OutOfCardsException e) {
+                e.printStackTrace();
+                assertTrue(false);
+            }
+            for(PublicGoal t : pub) assertNotEquals(t.getName(),current.getName());
+        }
+        assertThrows(OutOfCardsException.class,()->{ factory.extractPublicGoal(); });
     }
 }
