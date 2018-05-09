@@ -40,11 +40,11 @@ public final class Schema {
 
         for (int i = 0; i < ROW; i++)
             for(int j = 0; j < COLUMN; j++) {
-                if((this.constraint[i][j] != null && ((Schema) schema).getConstraint(i, j) == null) || (this.constraint[i][j] == null && ((Schema) schema).getConstraint(i, j) != null))
+                if((this.constraint[i][j] != null && ((Schema) schema).constraint[i][j] == null) || (this.constraint[i][j] == null && ((Schema) schema).constraint[i][j] != null))
                     return false;
-                if (this.constraint[i][j] != null && ((Schema) schema).getConstraint(i, j) != null && !this.constraint[i][j].equals(((Schema) schema).getConstraint(i, j)))
+                if (this.constraint[i][j] != null && ((Schema) schema).constraint[i][j] != null && !this.constraint[i][j].equals(((Schema) schema).constraint[i][j]))
                     return false;
             }
-        return this.difficulty == ((Schema) schema).getDifficulty();
+        return this.difficulty == ((Schema) schema).difficulty;
     }
 }
