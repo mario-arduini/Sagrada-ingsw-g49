@@ -1,7 +1,6 @@
 package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
-
 import java.util.Random;
 
 public class Dice {
@@ -20,8 +19,8 @@ public class Dice {
     }
 
     public Dice(Dice dice){
-        this.value = dice.getValue();
-        this.color = dice.getColor();
+        this.value = dice.value;
+        this.color = dice.color;
     }
 
     public Color getColor(){
@@ -45,6 +44,6 @@ public class Dice {
 
     @Override
     public boolean equals(Object dice) {
-        return dice instanceof Dice && this.color == ((Dice) dice).getColor() && this.value == ((Dice) dice).getValue();
+        return dice instanceof Dice && this.color == ((Dice) dice).color && this.value == ((Dice) dice).value;
     }
 }
