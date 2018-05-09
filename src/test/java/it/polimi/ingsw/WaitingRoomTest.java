@@ -4,18 +4,16 @@ import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.WaitingRoom;
 import it.polimi.ingsw.model.exceptions.PlayerAlreadyAddedException;
 import org.junit.jupiter.api.Test;
-
-import java.util.Timer;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class WaitingRoomTest {
+class WaitingRoomTest {
     @Test
     void waitingRoomTest(){
 
         WaitingRoom waitingRoom = WaitingRoom.getWaitingRoom();
-        assertTrue(waitingRoom.getPlayers().size() == 0);
+        assertEquals(0, waitingRoom.getPlayers().size());
         Player player1 = new Player("Marco", "ahk3jh3244b3");
         Player player2 = new Player("Armando", "b9832782nx");
         Player player3 = new Player("Mario", "sknjeh48!");
@@ -28,19 +26,19 @@ public class WaitingRoomTest {
             assertTrue(false);
 
         } catch (PlayerAlreadyAddedException e) {
-            assertTrue(waitingRoom.getPlayers().size() == 1);
+            assertEquals(1, waitingRoom.getPlayers().size());
             assertEquals(player1, waitingRoom.getPlayers().get(0));
         }
 
-        /*try {
+        try {
             waitingRoom.addPlayer(player2);
-            assertTrue(waitingRoom.getPlayers().size() == 2);
+            assertEquals(2, waitingRoom.getPlayers().size());
             assertEquals(player2, waitingRoom.getPlayers().get(1));
             waitingRoom.removePlayer(player2);
-            assertTrue(waitingRoom.getPlayers().size() == 1);
+            assertEquals(1, waitingRoom.getPlayers().size());
             assertEquals(player1, waitingRoom.getPlayers().get(0));
             waitingRoom.removePlayer(player1);
-            assertTrue(waitingRoom.getPlayers().size() == 0);
+            assertEquals(0, waitingRoom.getPlayers().size());
 
         } catch (PlayerAlreadyAddedException e) {
             assertTrue(false);
@@ -49,20 +47,20 @@ public class WaitingRoomTest {
         try {
             waitingRoom.addPlayer(player1);
             waitingRoom.addPlayer(player2);
-            assertTrue(waitingRoom.getPlayers().size() == 2);
+            assertEquals(2, waitingRoom.getPlayers().size());
             assertEquals(player1, waitingRoom.getPlayers().get(0));
             assertEquals(player2, waitingRoom.getPlayers().get(1));
-            //assertTrue(waitingRoom.getTimer() > 0);
+            assertTrue(waitingRoom.isTimerRunning());
             waitingRoom.removePlayer(player2);
-            //assertTrue(waitingRoom.getTimer() == 0);
+            assertFalse(waitingRoom.isTimerRunning());
             waitingRoom.addPlayer(player2);
             waitingRoom.addPlayer(player3);
             waitingRoom.removePlayer(player3);
-            //assertTrue(waitingRoom.getTimer() > 0);
+            assertTrue(waitingRoom.isTimerRunning());
             waitingRoom.addPlayer(player3);
             waitingRoom.addPlayer(player4);
-            //assertTrue(waitingRoom.getTimer() == 0); //TODO control game creation
-            assertTrue(waitingRoom.getPlayers().size() == 0);
+            assertFalse(waitingRoom.isTimerRunning()); //TODO control game creation
+            assertEquals(0, waitingRoom.getPlayers().size());
 
         } catch (PlayerAlreadyAddedException e) {
             assertTrue(false);
@@ -71,12 +69,15 @@ public class WaitingRoomTest {
         try {
             waitingRoom.addPlayer(player1);
             waitingRoom.addPlayer(player2);
-            Timer timer = waitingRoom.getTimer();
+
             //when timer expires
-            //assertTrue(waitingRoom.getTimer() == 0);  //TODO control game creation
-            //assertTrue(waitingRoom.getPlayers().size() == 0);
+            if(!waitingRoom.isTimerRunning()) {  //TODO control game creation
+                assertEquals(0, waitingRoom.getPlayers().size());
+                waitingRoom.addPlayer(player5);
+                assertEquals(1, waitingRoom.getPlayers().size());
+            }
         } catch (PlayerAlreadyAddedException e) {
             assertTrue(false);
-        }*/
+        }
     }
 }
