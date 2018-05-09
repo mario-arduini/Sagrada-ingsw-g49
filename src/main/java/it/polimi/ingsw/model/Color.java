@@ -26,7 +26,7 @@ public enum Color{
             case YELLOW: return "Yellow";
             case BLUE: return "Blue";
             case PURPLE: return "Purple";
+            default: return "";
         }
-        return "";
     }
 }

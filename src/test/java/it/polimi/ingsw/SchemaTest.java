@@ -3,94 +3,62 @@ package it.polimi.ingsw;
 import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.Constraint;
 import it.polimi.ingsw.model.Schema;
-import it.polimi.ingsw.model.exceptions.InvalidConstraintValueException;
 import it.polimi.ingsw.model.exceptions.InvalidDifficultyValueException;
 import it.polimi.ingsw.model.exceptions.UnexpectedMatrixSizeException;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.concurrent.atomic.AtomicReference;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class SchemaTest {
+class SchemaTest {
 
-    boolean checkConstraints(Constraint[][] constraint, Schema schema){
+    private boolean checkConstraints(Constraint[][] constraint, Schema schema){
         for (int i = 0; i < constraint.length; i++)
             for (int j = 0; j < constraint[i].length; j++)
-                if(constraint[i][j] != schema.getConstraint(i,j)) {
+                if((constraint[i][j] == null && schema.getConstraint(i,j) != null) ||
+                        (constraint[i][j] != null && !constraint[i][j].equals(schema.getConstraint(i,j))))
                     return false;
-                }
         return true;
     }
 
     @Test
     void schemaTest() {
-        Schema schema;
-        Constraint[][] constraint;
+        AtomicReference<Schema> schema = new AtomicReference<>();
+        AtomicReference<Constraint[][]> constraint = new AtomicReference<>();
+        constraint.getAndSet(new Constraint[4][5]);
 
-        try {
-            constraint = new Constraint[4][5];
-            schema = new Schema(3, constraint);
-            assertTrue(schema.getDifficulty() == 3);
-            assertTrue(checkConstraints(constraint, schema));
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
-        }
+        assertDoesNotThrow(() -> schema.getAndSet(new Schema(3, constraint.get())));
+        assertEquals(3, schema.get().getDifficulty());
+        assertTrue(checkConstraints(constraint.get(), schema.get()));
 
-        try {
-            constraint = new Constraint[3][5];
-            schema = new Schema(3, constraint);
-            assertTrue(false);
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(true);
-        }
+        constraint.getAndSet(new Constraint[3][5]);
+        assertThrows(UnexpectedMatrixSizeException.class, () -> new Schema(3, constraint.get()));
 
-        try {
-            constraint = new Constraint[4][6];
-            schema = new Schema(3, constraint);
-            assertTrue(false);
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(true);
-        }
+        constraint.getAndSet(new Constraint[4][6]);
+        assertThrows(UnexpectedMatrixSizeException.class, () -> new Schema(3, constraint.get()));
 
-        try {
-            constraint = new Constraint[4][5];
-            schema = new Schema(7, constraint);
-            assertTrue(false);
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(true);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
-        }
+        constraint.getAndSet(new Constraint[4][5]);
+        assertThrows(InvalidDifficultyValueException.class, () -> new Schema(7, constraint.get()));
+        assertThrows(InvalidDifficultyValueException.class, () -> new Schema(2, constraint.get()));
 
-        try {
-            constraint = new Constraint[4][5];
-            schema = new Schema(2, constraint);
-            assertTrue(false);
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(true);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
-        }
+        constraint.get()[2][3] = new Constraint(Color.RED);
+        constraint.get()[3][4] = new Constraint(Color.PURPLE);
+        assertDoesNotThrow(() -> constraint.get()[0][0] = new Constraint(2));
+        assertDoesNotThrow(() -> schema.getAndSet(new Schema(5, constraint.get())));
+        assertTrue(checkConstraints(constraint.get(), schema.get()));
 
-        try {
-            constraint = new Constraint[4][5];
-            constraint[2][3] = new Constraint(Color.RED);
-            constraint[0][0] = new Constraint(2);
-            constraint[3][4] = new Constraint(Color.PURPLE);
-            schema = new Schema(5, constraint);
-            assertTrue(checkConstraints(constraint, schema));
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
-        } catch (InvalidConstraintValueException e) {
-            assertTrue(false);
-        }
+        AtomicReference<Schema> schema1 = new AtomicReference<>();
+        AtomicReference<Constraint[][]> constraint1 = new AtomicReference<>();
+        constraint1.getAndSet(new Constraint[4][5]);
 
+        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(5, constraint1.get())));
+        assertNotEquals(schema.get(), schema1.get());
 
+        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(4, constraint1.get())));
+        assertNotEquals(schema.get(), schema1.get());
+
+        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(5, constraint.get())));
+        assertEquals(schema.get(), schema1.get());
+
+        assertNotEquals(schema.get(), new Object());
     }
 }

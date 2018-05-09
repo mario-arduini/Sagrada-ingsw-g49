@@ -38,7 +38,6 @@ public final class Schema {
         if(!(schema instanceof Schema))
             return false;
 
-
         for (int i = 0; i < ROW; i++)
             for(int j = 0; j < COLUMN; j++) {
                 if((this.constraint[i][j] != null && ((Schema) schema).getConstraint(i, j) == null) || (this.constraint[i][j] == null && ((Schema) schema).getConstraint(i, j) != null))

@@ -31,6 +31,6 @@ public final class Constraint {
 
     @Override
     public boolean equals(Object constraint) {
-        return constraint instanceof Constraint && this.color == ((Constraint) constraint).getColor() && this.number == ((Constraint) constraint).getNumber();
+        return constraint instanceof Constraint && this.color == ((Constraint) constraint).color && this.number == ((Constraint) constraint).number;
     }
 }
