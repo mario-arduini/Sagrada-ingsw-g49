@@ -47,13 +47,12 @@ class SchemaTest {
         assertTrue(checkConstraints(constraint.get(), schema.get()));
 
         AtomicReference<Schema> schema1 = new AtomicReference<>();
-        AtomicReference<Constraint[][]> constraint1 = new AtomicReference<>();
-        constraint1.getAndSet(new Constraint[4][5]);
+        Constraint[][] constraint1 = new Constraint[4][5];
 
-        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(5, constraint1.get())));
+        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(5, constraint1)));
         assertNotEquals(schema.get(), schema1.get());
 
-        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(4, constraint1.get())));
+        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(4, constraint1)));
         assertNotEquals(schema.get(), schema1.get());
 
         assertDoesNotThrow(() -> schema1.getAndSet(new Schema(5, constraint.get())));

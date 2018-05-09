@@ -1,7 +1,6 @@
 package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.model.exceptions.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,16 +41,6 @@ public class Round {
         if(players.get(currentPlayer).isSuspended())
             return nextPlayer();
         return players.get(currentPlayer);
-
-//        if(players.size() <= 1) {
-//            throw new NoMorePlayersException();
-//        }
-//        Player player = players.get(1);
-//        players.remove(0);
-//        diceExtracted = false;
-//        if(players.get(0).isSuspended())
-//            return nextPlayer();
-//        return player;
     }
 
     public boolean isLastTurn(){

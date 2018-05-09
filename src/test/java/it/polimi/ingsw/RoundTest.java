@@ -3,14 +3,13 @@ package it.polimi.ingsw;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import org.junit.jupiter.api.Test;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
+import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RoundTest {
+class RoundTest {
 
     private static final int ROW = 4;
     private static final int COLUMN = 5;
@@ -19,58 +18,40 @@ public class RoundTest {
     @Test
     void roundTest() {
 
-        Schema schema;
+        AtomicReference<Schema> schema = new AtomicReference<>();
         Constraint[][] constraint;
         Round round;
-        Player p1 = null;
-        Player p2 = null;
-        Player p3 = null;
-        Player p4 = null;
-        Player p5 = null;
-        List<Player> players = new ArrayList<Player>();
-        List<Player> players2 = new ArrayList<Player>();
-        List<Dice> draftPool = new ArrayList<Dice>();
+        Round round1;
+        AtomicReference<Player> player = new AtomicReference<>();
+        Player player1 = new Player("Marco", "jksdkjsd");
+        Player player2 = new Player("Luca", "jksdice23?kjsd");
+        Player player3 = new Player("Matteo", "jksdice2323kjsd");
+        Player player4 = new Player("Maria", "9032wsdj");
+        Player player5 = new Player("Maria", "9032wsdj");
+        List<Player> players = new ArrayList<>();
+        List<Player> players2 = new ArrayList<>();
+        List<Dice> draftPool = new ArrayList<>();
+        List<Dice> draftPool1;
+        constraint = new Constraint[ROW][COLUMN];
 
-        try {
-            constraint = new Constraint[ROW][COLUMN];
-            schema = new Schema(MIN_DIFFICULTY, constraint);
+        assertDoesNotThrow(() ->  schema.getAndSet(new Schema(MIN_DIFFICULTY, constraint)));
 
-            p1 = new Player("Marco", "jksdkjsd");
-            p2 = new Player("Luca", "jksd123?kjsd");
-            p3 = new Player("Matteo", "jksd12323kjsd");
-            p4 = new Player("Maria", "9032wsdj");
-            p5 = new Player("Maria", "9032wsdj");
-            p1.setWindow(schema);
+        player1.setWindow(schema.get());
+        players.add(player1);
+        players.add(player2);
+        players.add(player3);
+        players.add(player4);
+        players.add(player5);
 
-            players.add(p1);
-            players.add(p2);
-            players.add(p3);
-            players.add(p4);
-            players.add(p5);
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
-        }
+        AtomicReference<Dice> dice = new AtomicReference<>();
+        assertDoesNotThrow(() -> dice.getAndSet(new Dice(Color.RED, 2)));
 
-        Dice d1 = null;
-        try {
-            d1 = new Dice(Color.RED, 2);
-        } catch (InvalidDiceValueException e) {
-            e.printStackTrace();
-        }
-        draftPool.add(d1);
+        draftPool.add(dice.get());
+        for(int i = 0; i < 4; i++)
+            assertDoesNotThrow(() -> draftPool.add(new Dice(Color.RED, (new Random()).nextInt(6) + 1)));
 
-        for(int i = 0; i < 4; i++) {
-            try {
-                draftPool.add(new Dice(Color.RED, (new Random()).nextInt(6) + 1));
-            } catch (InvalidDiceValueException e) {
-                e.printStackTrace();
-            }
-        }
-        players2.add(p1);
-        players2.add(p2);
-
+        players2.add(player1);
+        players2.add(player2);
 
         round = new Round(draftPool, players);
         assertEquals(round, new Round(draftPool, players));
@@ -79,73 +60,48 @@ public class RoundTest {
         assertArrayEquals(draftPool.toArray(), round.getDraftPool().toArray());
         assertFalse(round.isLastTurn());
 
-        try {
-            assertEquals(p1, round.nextPlayer());
-        } catch (NoMorePlayersException e) {
-            assertTrue(false);
-        }
+        assertDoesNotThrow(() -> player.getAndSet(round.nextPlayer()));
+        assertEquals(player1, player.get());
 
-        try {
-            round.useDice(0, 0, new Dice(Color.GREEN));
-        } catch (DiceNotInDraftPoolException e) {
-            assertTrue(true);
-        } catch (Exception e) {
-            assertTrue(false);
-        }
+        assertThrows(DiceNotInDraftPoolException.class, () -> round.useDice(0, 0, new Dice(Color.GREEN)));
+        assertDoesNotThrow(() -> round.useDice(0, 0, dice.get()));
+        assertThrows(DiceAlreadyExtractedException.class, () -> round.useDice(0, 0, dice.get()));
 
-        try {
-            round.useDice(0, 0, d1);
-        } catch (Exception e) {
-            assertTrue(false);
-        }
-
-        try {
-            round.useDice(0, 0, d1);
-        } catch (DiceAlreadyExtractedException e) {
-            assertTrue(true);
-        } catch (Exception e) {
-            assertTrue(false);
-        }
-
-        draftPool.remove(d1);
+        draftPool.remove(dice.get());
         assertArrayEquals(draftPool.toArray(), round.getDraftPool().toArray());
 
-        p2.suspend();
-        p3.suspend();
-        try {
-            assertEquals(p4, round.nextPlayer());
-        } catch (NoMorePlayersException e) {
-            assertTrue(false);
-        }
-
-        try {
-            assertEquals(p5, round.nextPlayer());
-        } catch (NoMorePlayersException e) {
-            assertTrue(false);
-        }
+        player2.suspend();
+        player3.suspend();
+        assertDoesNotThrow(() -> player.getAndSet(round.nextPlayer()));
+        assertEquals(player4, player.get());
+        assertDoesNotThrow(() -> player.getAndSet(round.nextPlayer()));
+        assertEquals(player5, player.get());
 
         round.suspendPlayer();
-        assertTrue(p5.isSuspended());
+        assertTrue(player5.isSuspended());
 
-        try {
-            assertEquals(p4, round.nextPlayer());
-        } catch (NoMorePlayersException e) {
-            assertTrue(false);
-        }
-
-        try {
-            assertEquals(p1, round.nextPlayer());
-        } catch (NoMorePlayersException e) {
-            assertTrue(false);
-        }
+        assertDoesNotThrow(() -> player.getAndSet(round.nextPlayer()));
+        assertEquals(player4, player.get());
+        assertDoesNotThrow(() -> player.getAndSet(round.nextPlayer()));
+        assertEquals(player1, player.get());
         assertTrue(round.isLastTurn());
 
-        try {
-            round.nextPlayer();
-            assertTrue(false);
+        assertThrows(NoMorePlayersException.class, round::nextPlayer);
 
-        } catch (NoMorePlayersException e) {
-            assertTrue(true);
-        }
+        round1 = new Round(round);
+        assertEquals(round, round1);
+
+        draftPool1 = new ArrayList<>(draftPool);
+        round1 = new Round(draftPool1, players);
+        assertEquals(round, round1);
+
+        draftPool1.add(new Dice(Color.RED));
+        round1 = new Round(draftPool1, players);
+        assertNotEquals(round, round1);
+
+        round1 = new Round(draftPool1, new ArrayList<>());
+        assertNotEquals(round, round1);
+
+        assertNotEquals(round, new Object());
     }
 }
