@@ -1,8 +1,10 @@
 package it.polimi.ingsw;
 
 import it.polimi.ingsw.model.*;
-import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
 import it.polimi.ingsw.model.exceptions.OutOfCardsException;
+import it.polimi.ingsw.model.goalcards.PrivateGoal;
+import it.polimi.ingsw.model.goalcards.PublicGoal;
+import it.polimi.ingsw.model.toolcards.ToolCard;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

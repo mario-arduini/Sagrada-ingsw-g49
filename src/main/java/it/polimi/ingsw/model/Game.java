@@ -1,6 +1,8 @@
 package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.model.goalcards.PublicGoal;
+import it.polimi.ingsw.model.toolcards.ToolCard;
 
 import java.util.*;
 

@@ -1,6 +1,8 @@
-package it.polimi.ingsw.model;
+package it.polimi.ingsw.model.toolcards;
 
-public class GrozingPliers extends ToolCard {
+import it.polimi.ingsw.model.Player;
+
+public class EglomiseBrush extends ToolCard {
     public String getName(){
         return this.getClass().getName();
     }

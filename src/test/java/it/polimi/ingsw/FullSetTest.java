@@ -2,6 +2,10 @@ package it.polimi.ingsw;
 
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.model.goalcards.DiagonalColor;
+import it.polimi.ingsw.model.goalcards.FullColorVariety;
+import it.polimi.ingsw.model.goalcards.FullShadeVariety;
+import it.polimi.ingsw.model.goalcards.PublicGoal;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

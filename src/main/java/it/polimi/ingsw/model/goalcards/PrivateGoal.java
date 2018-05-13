@@ -1,4 +1,8 @@
-package it.polimi.ingsw.model;
+package it.polimi.ingsw.model.goalcards;
+
+import it.polimi.ingsw.model.Color;
+import it.polimi.ingsw.model.Dice;
+import it.polimi.ingsw.model.Window;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +16,7 @@ public class PrivateGoal implements Goal{
     }
 
     public String getName() {
-        return "ShadesOf" + color.toString();       //control the use of toString()
+        return "ShadesOf" + color.toString(); //control the use of toString()
     }
 
     public int computeScore(Window window) {

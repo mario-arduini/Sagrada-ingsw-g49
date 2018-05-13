@@ -1,4 +1,6 @@
-package it.polimi.ingsw.model;
+package it.polimi.ingsw.model.toolcards;
+
+import it.polimi.ingsw.model.Player;
 
 public class CorkBackedStraightedge extends ToolCard {
     public String getName(){

@@ -1,8 +1,6 @@
-package it.polimi.ingsw.model;
+package it.polimi.ingsw.model.goalcards;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import it.polimi.ingsw.model.Window;
 
 public class FullColorVariety extends PublicGoal {
     @Override

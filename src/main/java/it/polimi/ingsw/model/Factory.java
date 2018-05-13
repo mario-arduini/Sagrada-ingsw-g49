@@ -3,6 +3,8 @@ package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
 import it.polimi.ingsw.model.exceptions.OutOfCardsException;
+import it.polimi.ingsw.model.goalcards.*;
+import it.polimi.ingsw.model.toolcards.*;
 
 import java.util.*;
 

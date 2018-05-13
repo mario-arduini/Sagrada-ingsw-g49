@@ -1,6 +1,8 @@
-package it.polimi.ingsw.model;
+package it.polimi.ingsw.model.toolcards;
 
-public class CopperFoilBurnisher extends ToolCard{
+import it.polimi.ingsw.model.Player;
+
+public class GlazingHammer extends ToolCard {
     public String getName(){
         return this.getClass().getName();
     }

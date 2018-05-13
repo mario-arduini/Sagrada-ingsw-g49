@@ -1,6 +1,8 @@
-package it.polimi.ingsw.model;
+package it.polimi.ingsw.model.goalcards;
 
-public class RowShadeVariety extends PublicGoal {
+import it.polimi.ingsw.model.Window;
+
+public class RowColorVariety extends PublicGoal {
 
     public String getName() {
         return this.getClass().getName();
@@ -13,11 +15,11 @@ public class RowShadeVariety extends PublicGoal {
             flag = true;
             for(int j=1;j<Window.COLUMN&&flag;j++)
                 for(int k=0;k<j;k++) {
-                    if (window.getCell(i,j)==null||window.getCell(i,k)==null||window.getCell(i, j).getValue() == window.getCell(i, k).getValue()) {
+                    if (window.getCell(i,j)==null||window.getCell(i,k)==null||window.getCell(i, j).getColor() == window.getCell(i, k).getColor()) {
                         flag = false;
                     }
                 }
-            if(flag) score += 5;
+            if(flag) score += 6;
         }
         return score;
     }

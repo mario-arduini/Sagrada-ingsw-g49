@@ -1,4 +1,7 @@
-package it.polimi.ingsw.model;
+package it.polimi.ingsw.model.goalcards;
+
+import it.polimi.ingsw.model.Dice;
+import it.polimi.ingsw.model.Window;
 
 import java.util.ArrayList;
 import java.util.List;

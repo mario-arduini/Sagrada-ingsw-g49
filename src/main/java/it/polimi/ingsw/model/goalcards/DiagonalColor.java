@@ -1,4 +1,7 @@
-package it.polimi.ingsw.model;
+package it.polimi.ingsw.model.goalcards;
+
+import it.polimi.ingsw.model.Color;
+import it.polimi.ingsw.model.Window;
 
 public class DiagonalColor extends PublicGoal {
     @Override

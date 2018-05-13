@@ -3,6 +3,7 @@ package it.polimi.ingsw.model;
 import it.polimi.ingsw.model.exceptions.InvalidFavorTokenNumberException;
 import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
 import it.polimi.ingsw.model.exceptions.PrivateGoalAlreadySetException;
+import it.polimi.ingsw.model.goalcards.PrivateGoal;
 
 public class Player {
     private final String nickname;
