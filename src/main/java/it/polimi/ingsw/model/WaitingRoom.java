@@ -8,7 +8,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class WaitingRoom {
-    private static final String TIMEOUT_FILE_NAME = "resources/timeout.txt";
+    private static final String TIMEOUT_FILE_NAME = "src/main/resources/timeout.txt";
     private static WaitingRoom waitingRoom;
     private ArrayList<Player> players;
     private boolean timerRunnig;
@@ -22,11 +22,10 @@ public class WaitingRoom {
         players = new ArrayList<>();
         timerRunnig = false;
 
-
         BufferedReader reader = null;
         String s = (new File("./")).getAbsolutePath();
         s = s.substring(0, s.length() - 1) + TIMEOUT_FILE_NAME;
-
+        s = this.getClass().getResource("timeout.txt").getPath();
         try {
             reader = new BufferedReader(new FileReader(new File(s)));
             String text;
