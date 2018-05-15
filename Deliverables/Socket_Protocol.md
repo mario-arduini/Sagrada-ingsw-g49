@@ -12,7 +12,7 @@ s: login\<TAB>\<existing_nickname>\<TAB>tokenCR
 c: token\<TAB>\<user_token>CR  
 s: \[verified | failed]CR   
 
-//after log
+//after log  
 s: lobbyplayers:\<TAB>\<player_list>CR  
 
 //on new player connection  
@@ -26,7 +26,7 @@ s: privateGoal\<TAB><privateGoalID>CR
 
 //schema choice  
 s: schemas\<TAB>\[\<schemaID>]<sup>4</sup>CR  
-c: schema\<TAB>\<schemaID>CR
+c: schema\<TAB>\<schemaID>CR  
 s: \[ok|invalid]CR  
 
 //public goal choice  
@@ -39,7 +39,7 @@ s: dice\[\<TAB>\<dice_extracted>]<sup>+</sup>CR
 
 //exhaustive user turn cases
 
-//place a dice and pass
+//place a dice and pass  
 s: your-turnCR  
 c: place\<TAB>\<dice>\<TAB>\<row>\<TAB>\<column>\<TAB>\<option>CR  
 s: \[ok|invalid_dice|constrains_violated|bad_request]CR  
