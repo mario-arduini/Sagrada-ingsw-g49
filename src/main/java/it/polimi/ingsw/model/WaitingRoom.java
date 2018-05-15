@@ -25,7 +25,7 @@ public class WaitingRoom {
         BufferedReader reader = null;
         String s = (new File("./")).getAbsolutePath();
         s = s.substring(0, s.length() - 1) + TIMEOUT_FILE_NAME;
-        s = this.getClass().getResource("timeout.txt").getPath();
+        //s = this.getClass().getResource("timeout.txt").getPath();
         try {
             reader = new BufferedReader(new FileReader(new File(s)));
             String text;
