@@ -122,7 +122,7 @@ c: active_tool_card\<TAB>\<toolCardID>CR
 s: \[ok|not_enough_token|not_valid_choice]CR  
 c: put_in_bag\<TAB><dice>CR  
 s: dice_from_pool\<TAB><dice>CR  
-c: set_value\<TAB><value>CR
+c: set_value\<TAB><value>CR  
 s: [ok|not_valid]CR  
 c: place\<TAB>\<dice>\<TAB>\<row>\<TAB>\<column>CR  
 s: \[ok|invalid_dice|constrains_violated|bad_request]CR  
