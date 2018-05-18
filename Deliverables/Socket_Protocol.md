@@ -1,6 +1,6 @@
 ## Socket Protocol
 
-s: \<welcome_message>CR
+s: welcomeCR
 
 c: login\<TAB>\<nickname>CR
 
