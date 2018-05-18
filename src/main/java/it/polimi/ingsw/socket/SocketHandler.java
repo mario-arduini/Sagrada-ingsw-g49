@@ -28,35 +28,39 @@ public class SocketHandler implements Runnable{
             e1.printStackTrace();
         }
 
-        socketPrintLine("Welcome to LM49's Sagrada!");
+        socketPrintLine("welcome");
         while (!this.login()) {
-            socketPrintLine("Login failed, try again.");
+            socketPrintLine("failed");
         }
 
-        socketPrintLine("OK");
+        //socketPrintLine("OK");
         socketClose();
     }
 
     private boolean login() {
         String token;
-        socketPrint("login: ");
+        //socketPrint("login: ");
 
         this.nickname = socketReadLine();
+        this.nickname = nickname.substring(nickname.indexOf(" ") + 1);
 
         token = usersHandler.login(this.nickname);
 
         if (token != null) {
-            socketPrintLine("Welcome " + this.nickname + "\nYour login token is: " + token);
+            socketPrintLine("login " + this.nickname + " " + token);
             return true;
         }
-        socketPrint("Nickname already in use\nDo you have a recovery token?\n>");
+        socketPrintLine("login " + this.nickname + " token");
 
-        if (socketReadLine().toLowerCase().equalsIgnoreCase("yes")) {
-            socketPrint("token:");
-            if (usersHandler.loginLost(this.nickname, socketReadLine()))
-                socketPrintLine("Welcome back " + this.nickname + "!");
+        //if (socketReadLine().toLowerCase().equalsIgnoreCase("yes")) {
+            //socketPrint("token:");
+        token = socketReadLine();
+        token = token.substring(token.indexOf(" ") + 1);
+        if (usersHandler.loginLost(this.nickname, token)) {
+            socketPrintLine("verified");
             return true;
         }
+        //}
         return false;
     }
 
