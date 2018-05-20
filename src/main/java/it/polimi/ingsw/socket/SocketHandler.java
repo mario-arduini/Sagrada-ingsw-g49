@@ -3,8 +3,9 @@ import it.polimi.ingsw.socket.UsersHandler;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 
-public class SocketHandler implements Runnable{
+public class SocketHandler implements Runnable, ConnectionHandler{
     private Socket socket;
     private BufferedReader input;
     private PrintWriter output;
@@ -17,6 +18,9 @@ public class SocketHandler implements Runnable{
     }
 
     public void run(){
+        String message;
+        boolean logged = false;
+
         try {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e1) {
@@ -33,9 +37,41 @@ public class SocketHandler implements Runnable{
             socketPrintLine("failed");
         }
 
+        logged = true;
+
+        while(logged){
+            message = socketReadLine();
+            switch (message.toLowerCase()) {
+                case "logout":
+                    usersHandler.logout(this.nickname);
+                    logged = false;
+                    socketClose();
+                    break;
+
+            }
+        }
+
+
         //socketPrintLine("OK");
         socketClose();
     }
+
+    @Override
+    public void notifyPlayers(String nickname) {
+        socketPrintLine("new_player " + nickname);
+    }
+
+    @Override
+    public void notifyPlayers(List<String> nicknames){
+        StringBuilder nicks = new StringBuilder();
+        for (String nick:nicknames){
+            nicks.append(" ");
+            nicks.append(nick);
+        }
+        if (nicks.length() != 0)
+            socketPrintLine("new_player" + nicks);
+    }
+
 
     private boolean login() {
         String token;
@@ -44,7 +80,7 @@ public class SocketHandler implements Runnable{
         this.nickname = socketReadLine();
         this.nickname = nickname.substring(nickname.indexOf(" ") + 1);
 
-        token = usersHandler.login(this.nickname);
+        token = usersHandler.login(this.nickname, this);
 
         if (token != null) {
             socketPrintLine("login " + this.nickname + " " + token);
@@ -56,7 +92,7 @@ public class SocketHandler implements Runnable{
             //socketPrint("token:");
         token = socketReadLine();
         token = token.substring(token.indexOf(" ") + 1);
-        if (usersHandler.loginLost(this.nickname, token)) {
+        if (usersHandler.login(this.nickname, this, token)) {
             socketPrintLine("verified");
             return true;
         }
@@ -78,6 +114,7 @@ public class SocketHandler implements Runnable{
             return input.readLine();
         } catch (IOException e) {
             e.printStackTrace();
+            Logger.print("Exception while reading.");
         }
         return null;
     }
@@ -87,6 +124,7 @@ public class SocketHandler implements Runnable{
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
+            Logger.print("Exception while closing connection.");
         }
     }
 }

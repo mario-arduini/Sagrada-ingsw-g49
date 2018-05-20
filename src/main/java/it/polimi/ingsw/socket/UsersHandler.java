@@ -1,14 +1,13 @@
 package it.polimi.ingsw.socket;
 
-import it.polimi.ingsw.model.Player;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class UsersHandler {
-    private List<Player> players;
+    private List<User> players;
     private static final String ALPHABETH = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final int N = ALPHABETH.length();
     private static Random rand = new Random();
@@ -17,19 +16,30 @@ public class UsersHandler {
         this.players = new ArrayList<>();
     }
 
-    public synchronized String login(String nickname){
+    public synchronized String login(String nickname, ConnectionHandler connection){
         String token;
-        Optional<Player> playerFetched = findPlayer(nickname);
+        User user;
+        Optional<User> playerFetched = findPlayer(nickname);
         if (playerFetched.isPresent())
             return null;
         token = tokenGenerator();
-        players.add(new Player(nickname, token));
+        players.stream().forEach(p -> p.notifyUsers(nickname));
+        user = new User(nickname, token, connection);
+        user.notifyUsers(players.stream().map(player -> player.getNickname()).collect(Collectors.toList()));
+        Logger.print("Logged in: " + nickname);
+        players.add(user);
         return token;
     }
 
-    public synchronized boolean loginLost(String nickname, String token) {
-        Optional<Player> playerFetched = findPlayer(nickname);
-        return playerFetched.isPresent() && playerFetched.get().verifyAuthToken(token);
+    public synchronized boolean login(String nickname,  ConnectionHandler connection, String token) {
+        Optional<User> playerFetched = findPlayer(nickname);
+        if (playerFetched.isPresent() && playerFetched.get().verifyAuthToken(token)) {
+            playerFetched.get().setConnection(connection);
+            Logger.print("Reconnected: " + nickname);
+            return true;
+        }
+
+        return false;
     }
 
     private String tokenGenerator(){
@@ -38,7 +48,14 @@ public class UsersHandler {
         return builder.toString();
     }
 
-    private Optional<Player> findPlayer(String nickname){
+    private Optional<User> findPlayer(String nickname){
         return players.stream().filter(player -> player.getNickname().equalsIgnoreCase(nickname)).findFirst();
     }
+
+    public void logout(String nickname){
+        Optional<User> playerFetched = findPlayer(nickname);
+        players.remove(playerFetched.get());
+        Logger.print("Logged out: " + nickname);
+    }
+
 }
