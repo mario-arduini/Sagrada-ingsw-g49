@@ -23,9 +23,9 @@ public class UsersHandler {
         if (playerFetched.isPresent())
             return null;
         token = tokenGenerator();
-        players.stream().forEach(p -> p.notifyUsers(nickname));
+        players.stream().forEach(p -> p.notifyLogin(nickname));
         user = new User(nickname, token, connection);
-        user.notifyUsers(players.stream().map(player -> player.getNickname()).collect(Collectors.toList()));
+        user.notifyLogin(getPlayerNicks());
         Logger.print("Logged in: " + nickname);
         players.add(user);
         return token;
@@ -33,12 +33,20 @@ public class UsersHandler {
 
     public synchronized boolean login(String nickname,  ConnectionHandler connection, String token) {
         Optional<User> playerFetched = findPlayer(nickname);
-        if (playerFetched.isPresent() && playerFetched.get().verifyAuthToken(token)) {
-            playerFetched.get().setConnection(connection);
-            Logger.print("Reconnected: " + nickname);
-            return true;
+        User user;
+        if (playerFetched.isPresent()){
+            user = playerFetched.get();
+            if (user.verifyAuthToken(token)) {
+                user.setConnection(connection);
+                Logger.print("Reconnected: " + nickname);
+                List<String> users = getPlayerNicks();
+                for (String nick:users)
+                    if (nickname.equalsIgnoreCase(nick))
+                        users.remove(nick);
+                connection.notifyLogin(users);
+                return true;
+            }
         }
-
         return false;
     }
 
@@ -52,10 +60,16 @@ public class UsersHandler {
         return players.stream().filter(player -> player.getNickname().equalsIgnoreCase(nickname)).findFirst();
     }
 
-    public void logout(String nickname){
+    private List<String> getPlayerNicks(){
+        return players.stream().map(player -> player.getNickname()).collect(Collectors.toList());
+    }
+
+    public synchronized void logout(String nickname){
         Optional<User> playerFetched = findPlayer(nickname);
-        players.remove(playerFetched.get());
-        Logger.print("Logged out: " + nickname);
+        User user = playerFetched.get();
+        players.remove(user);
+        players.stream().forEach(p -> p.notifyLogout(nickname));
+        Logger.print("Logged out: " + user.getNickname());
     }
 
 }

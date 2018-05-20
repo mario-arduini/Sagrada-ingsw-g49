@@ -57,12 +57,12 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public void notifyPlayers(String nickname) {
+    public void notifyLogin(String nickname) {
         socketPrintLine("new_player " + nickname);
     }
 
     @Override
-    public void notifyPlayers(List<String> nicknames){
+    public void notifyLogin(List<String> nicknames){
         StringBuilder nicks = new StringBuilder();
         for (String nick:nicknames){
             nicks.append(" ");
@@ -72,6 +72,10 @@ public class SocketHandler implements Runnable, ConnectionHandler{
             socketPrintLine("new_player" + nicks);
     }
 
+    @Override
+    public void notifyLogout(String nickname){
+        socketPrintLine("quit " + nickname);
+    }
 
     private boolean login() {
         String token;
@@ -104,6 +108,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         output.println(p);
         output.flush();
     }
+
     private void socketPrint(String p) {
         output.print(p);
         output.flush();

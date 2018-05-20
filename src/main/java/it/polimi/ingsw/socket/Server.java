@@ -9,28 +9,27 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    private static int PORT;
+    private int port;
     //private static WaitingRoom waitingRoom;
     private ExecutorService executor;
     private UsersHandler usersHandler;
 
-
-    public Server(int port) {
-        this.PORT = port;
+    private Server(int port) {
+        this.port = port;
         //this.waitingRoom = WaitingRoom.getWaitingRoom();
         this.usersHandler = new UsersHandler();
         this.executor = Executors.newCachedThreadPool();
     }
 
     private void startServer() throws IOException {
-        ServerSocket serverSocket = null;
-        Socket clientSocket = null;
+        ServerSocket serverSocket;
+        Socket clientSocket;
 
-        serverSocket = new ServerSocket(PORT);
+        serverSocket = new ServerSocket(port);
 
 
 
-        System.out.println("Server listening on port " + PORT + ".");
+        System.out.println("Server listening on port " + port + ".");
 
         while(true) {
             try {
@@ -41,7 +40,6 @@ public class Server {
             }
         }
     }
-
 
     public static void main(String[] args){
         BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));

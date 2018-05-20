@@ -7,7 +7,6 @@ import java.util.List;
 public class User extends Player {
     ConnectionHandler connection;
 
-
     public User(String nickname, String authToken, ConnectionHandler connection) {
         super(nickname, authToken);
         this.connection = connection;
@@ -17,11 +16,16 @@ public class User extends Player {
         this.connection = connection;
     }
 
-    public void notifyUsers(String nickname) {
-        this.connection.notifyPlayers(nickname);
+    public void notifyLogin(String nickname) {
+        this.connection.notifyLogin(nickname);
     }
 
-    public void notifyUsers(List<String> nicknames) {
-        this.connection.notifyPlayers(nicknames);
+    public void notifyLogin(List<String> nicknames) {
+        this.connection.notifyLogin(nicknames);
     }
+
+    public void notifyLogout(String nickname) {
+        this.connection.notifyLogout(nickname);
+    }
+
 }
