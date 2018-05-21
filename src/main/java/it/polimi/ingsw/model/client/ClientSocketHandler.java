@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ClientSocketHandler implements Connection {
+
+    private static final Logger LOGGER = Logger.getLogger( ClientSocketHandler.class.getName() );
 
     private BufferedReader input;
     private BufferedReader inputConsole;
@@ -23,9 +27,9 @@ public class ClientSocketHandler implements Connection {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new PrintWriter(socket.getOutputStream(), true);
             if (socketReadLine().equals("welcome"))
-                System.out.println("Welcome to Sagrada!");
+                ClientLogger.println("Welcome to Sagrada!");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.toString(), e);
         }
     }
 
@@ -37,78 +41,48 @@ public class ClientSocketHandler implements Connection {
             try {
                 wait();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.WARNING, e.toString(), e);
             }
 
         if (splitCommand[2].equals("token")) {
-            System.out.print("Insert your token: ");
+            ClientLogger.print("Insert your token: ");
             try {
                 socketPrintLine("token " + inputConsole.readLine());
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.WARNING, e.toString(), e);
             }
             while (flagLogin)
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOGGER.log(Level.WARNING, e.toString(), e);
                 }
 
             switch (splitCommand[0]) {
                 case "failed":
-                    System.out.println("Login failed, token is not correct");
+                    ClientLogger.println("Login failed, token is not correct");
                     return false;
                 case "verified":
-                    System.out.println("Login successful, token is correct");
+                    ClientLogger.println("Login successful, token is correct");
                     return true;
             }
 
         }
-        System.out.println("Login successful, your token is " + splitCommand[2]);
+        ClientLogger.println("Login successful, your token is " + splitCommand[2]);
         flagLogin = false;
         return true;
     }
 
-    public synchronized void setCommand(String[] splitCommand){
+    synchronized void continueLogin(String[] splitCommand){
         flagLogin = !flagLogin;
         this.splitCommand = splitCommand;
         notifyAll();
     }
 
-
-
-        /*while(!split[0].equals("login")) {
-            loginResult = socketReadLine();
-            split = loginResult.split(" ");
-        }
-
-        if (split[2].equals("token")) {
-            System.out.print("Insert your token: ");
-            try {
-                socketPrintLine("token " + inputConsole.readLine());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            while (true) {
-                loginResult = socketReadLine();
-                switch (loginResult) {
-                    case "failed":
-                        System.out.println("Login failed, token is not correct");
-                        return false;
-                    case "verified":
-                        System.out.println("Login successful, token is correct");
-                        return true;
-                }
-            }
-        }
-        System.out.println("Login successful, your token is " + split[2]);
-        return true;*/
-
-
     public void logout(){
         socketPrintLine("logout");
         socketClose();
-        System.out.println("Logged out");
+        ClientLogger.println("Logged out");
     }
 
     private void socketPrintLine(String p) {
@@ -120,7 +94,7 @@ public class ClientSocketHandler implements Connection {
         try {
             return input.readLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.toString(), e);
         }
         return null;
     }
@@ -129,7 +103,7 @@ public class ClientSocketHandler implements Connection {
         try {
             socket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.toString(), e);
         }
     }
 }
