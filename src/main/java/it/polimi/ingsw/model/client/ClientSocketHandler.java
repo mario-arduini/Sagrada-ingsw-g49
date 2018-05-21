@@ -94,7 +94,7 @@ public class ClientSocketHandler implements Connection {
         try {
             return input.readLine();
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, e.toString(), e);
+            //LOGGER.log(Level.WARNING, e.toString(), e);
         }
         return null;
     }

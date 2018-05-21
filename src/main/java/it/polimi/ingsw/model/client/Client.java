@@ -155,9 +155,10 @@ public class Client {
         try {
             String command = input.readLine();
             if(command.equals("logout")){
-                serverListener.stop();
                 server.logout();
                 logged = false;
+                serverListener.setConnected(false);
+                serverListener.interrupt();
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, e.toString(), e);
