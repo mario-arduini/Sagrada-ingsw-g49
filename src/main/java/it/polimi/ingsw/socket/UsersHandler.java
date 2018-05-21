@@ -40,11 +40,9 @@ public class UsersHandler {
                 user.setConnection(connection);
                 Logger.print("Reconnected: " + nickname);
                 List<String> users = getPlayerNicks();
-                List<String> users2 = getPlayerNicks();
-                for (String nick:users)
-                    if (nickname.equalsIgnoreCase(nick))
-                        users2.remove(nick);
-                connection.notifyLogin(users2);
+                List<String> loggedUsers = users.stream().filter(nick -> nick.equalsIgnoreCase(nickname)).collect(Collectors.toList());
+
+                user.notifyLogin(loggedUsers);
                 return true;
             }
         }
