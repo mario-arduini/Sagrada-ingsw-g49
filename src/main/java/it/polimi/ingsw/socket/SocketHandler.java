@@ -3,7 +3,9 @@ import it.polimi.ingsw.socket.UsersHandler;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class SocketHandler implements Runnable, ConnectionHandler{
     private Socket socket;
@@ -11,6 +13,8 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     private PrintWriter output;
     private String nickname;
     private UsersHandler usersHandler;
+    private boolean logged = false;
+
 
     public SocketHandler(Socket socket, UsersHandler usersHandler) {
         this.socket = socket;
@@ -19,7 +23,6 @@ public class SocketHandler implements Runnable, ConnectionHandler{
 
     public void run(){
         String message;
-        boolean logged = false;
 
         try {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -41,14 +44,14 @@ public class SocketHandler implements Runnable, ConnectionHandler{
 
         while(logged){
             message = socketReadLine();
-            switch (message.toLowerCase()) {
-                case "logout":
-                    usersHandler.logout(this.nickname);
-                    logged = false;
-                    socketClose();
-                    break;
-
-            }
+            if (message != null)
+                switch (message.toLowerCase()) {
+                    case "logout":
+                        usersHandler.logout(this.nickname);
+                        logged = false;
+                        socketClose();
+                        break;
+                }
         }
 
 
@@ -131,5 +134,10 @@ public class SocketHandler implements Runnable, ConnectionHandler{
             e.printStackTrace();
             Logger.print("Exception while closing connection.");
         }
+    }
+
+    public void close(){
+        this.logged = false;
+        socketClose();
     }
 }
