@@ -23,6 +23,7 @@ public class Client {
     private List<String> players;
     private ServerListener serverListener;
     private boolean logged;
+    private boolean serverConnected;
 
     private Client(){
         players = new ArrayList<>();
@@ -39,6 +40,7 @@ public class Client {
 
         while(server == null)
             server = createConnection();
+        serverConnected = true;
 
         serverListener = new ServerListener(this, server);
         serverListener.start();
@@ -169,6 +171,10 @@ public class Client {
         return logged;
     }
 
+    private boolean isServerConnected(){
+        return serverConnected;
+    }
+
     void addPlayers(String[] newPlayers){
 
         players.addAll(Arrays.asList(newPlayers));
@@ -185,11 +191,22 @@ public class Client {
         ClientLogger.println(nickname + " logged out");
     }
 
-    public static void main(String[] args) {
+    void serverDisconnected(){
+        if(logged) {
+            ClientLogger.println("\nServer disconnected");
+            logged = false;
+            serverConnected = false;
+            serverListener.setConnected(false);
+            serverListener.interrupt();
+        }
+    }
 
+    public static void main(String[] args) {
         Client client = new Client();
-        while(!client.isLogged())
+        while(!client.isLogged() && client.isServerConnected())
             client.login();
-        client.logout();
+
+        if(client.isServerConnected())
+            client.logout();
     }
 }

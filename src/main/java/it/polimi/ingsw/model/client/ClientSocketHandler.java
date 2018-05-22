@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,6 +66,7 @@ public class ClientSocketHandler implements Connection {
                 case "verified":
                     ClientLogger.println("Login successful, token is correct");
                     return true;
+                default: return false;
             }
 
         }
@@ -93,7 +95,7 @@ public class ClientSocketHandler implements Connection {
     String socketReadLine(){
         try {
             return input.readLine();
-        } catch (IOException e) {
+        }  catch (IOException e) {
             //LOGGER.log(Level.WARNING, e.toString(), e);
         }
         return null;

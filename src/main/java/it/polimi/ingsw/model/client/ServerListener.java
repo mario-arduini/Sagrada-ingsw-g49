@@ -20,7 +20,7 @@ public class ServerListener extends Thread {
             while (connected){
 
                 command = ((ClientSocketHandler) server).socketReadLine();
-                if(command != null)
+                if(command != null) {
                     switch (command.split(" ")[0]) {
                         case "new_player":
                             client.addPlayers(command.substring(command.indexOf(" ") + 1).split(" "));
@@ -33,8 +33,11 @@ public class ServerListener extends Thread {
                         case "failed":
                             ((ClientSocketHandler) server).continueLogin(command.split(" "));
                             break;
-                        default: break;
+                        default:
+                            break;
                     }
+                }else
+                    client.serverDisconnected();
             }
 
     }
