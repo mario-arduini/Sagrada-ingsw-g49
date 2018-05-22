@@ -12,6 +12,10 @@ public class User extends Player {
         this.connection = connection;
     }
 
+    public ConnectionHandler getConnection(){
+        return this.connection;
+    }
+
     public void setConnection(ConnectionHandler connection) {
         this.connection.close();
         this.connection = connection;

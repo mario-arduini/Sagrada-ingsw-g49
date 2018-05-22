@@ -26,7 +26,7 @@ public class UsersHandler {
         players.stream().forEach(p -> p.notifyLogin(nickname));
         user = new User(nickname, token, connection);
         user.notifyLogin(getPlayerNicks());
-        Logger.print("Logged in: " + nickname);
+        Logger.print("Logged in: " + nickname + " " + connection.getRemoteAddress());
         players.add(user);
         return token;
     }
@@ -38,9 +38,9 @@ public class UsersHandler {
             user = playerFetched.get();
             if (user.verifyAuthToken(token)) {
                 user.setConnection(connection);
-                Logger.print("Reconnected: " + nickname);
+                Logger.print("Reconnected: " + nickname + " " + connection.getRemoteAddress());
                 List<String> users = getPlayerNicks();
-                List<String> loggedUsers = users.stream().filter(nick -> nick.equalsIgnoreCase(nickname)).collect(Collectors.toList());
+                List<String> loggedUsers = users.stream().filter(nick -> !nick.equalsIgnoreCase(nickname)).collect(Collectors.toList());
 
                 user.notifyLogin(loggedUsers);
                 return true;
@@ -68,7 +68,7 @@ public class UsersHandler {
         User user = playerFetched.get();
         players.remove(user);
         players.stream().forEach(p -> p.notifyLogout(nickname));
-        Logger.print("Logged out: " + user.getNickname());
+        Logger.print("Logged out: " + user.getNickname() + " " + user.getConnection().getRemoteAddress());
     }
 
 }

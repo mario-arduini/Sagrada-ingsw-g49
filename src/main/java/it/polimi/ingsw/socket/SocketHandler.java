@@ -52,6 +52,10 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                         socketClose();
                         break;
                 }
+            else {
+                Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
+                logged = false;
+            }
         }
 
 
@@ -120,7 +124,9 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     private String socketReadLine(){
         try {
             return input.readLine();
-        } catch (IOException e) {
+        } catch(SocketException e){
+        }
+        catch (IOException e) {
             e.printStackTrace();
             Logger.print("Exception while reading.");
         }
@@ -137,7 +143,14 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     public void close(){
-        this.logged = false;
-        socketClose();
+        if (this.logged){
+            this.logged = false;
+            socketClose();
+        }
     }
+
+    public String getRemoteAddress(){
+        return socket.getRemoteSocketAddress().toString();
+    }
+
 }
