@@ -1,4 +1,4 @@
-package it.polimi.ingsw.model.client;
+package it.polimi.ingsw.network.client;
 
 class ClientLogger {
     static synchronized void print(Object object){

@@ -1,4 +1,4 @@
-package it.polimi.ingsw.model.client;
+package it.polimi.ingsw.network.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,31 +14,32 @@ public class ClientSocketHandler implements Connection {
     private static final Logger LOGGER = Logger.getLogger( ClientSocketHandler.class.getName() );
 
     private BufferedReader input;
-    private BufferedReader inputConsole;
     private PrintWriter output;
     private Socket socket;
-    private Boolean flagLogin = false;
+    private Boolean flagWaitLogin = false;
     private String[] splitCommand;
+    private Client client;
+    private ServerListener serverListener;
 
-    ClientSocketHandler(String serverAddress, int serverPort) {
-        inputConsole = new BufferedReader(new InputStreamReader(System.in));
+    ClientSocketHandler(Client client, String serverAddress, int serverPort) {
+        this.client = client;
 
         try {
             socket = new Socket(serverAddress, serverPort);
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new PrintWriter(socket.getOutputStream(), true);
-            if (socketReadLine().equals("welcome"))
-                ClientLogger.println("Welcome to Sagrada!");
+            serverListener = new ServerListener(client, this);
+            serverListener.start();
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, e.toString(), e);
         }
     }
 
-    public synchronized boolean login(String nickname) {
+    public synchronized boolean login() {
 
-        socketPrintLine("login " + nickname);
+        socketPrintLine("login " + client.askNickname());
 
-        while (!flagLogin)
+        while (!flagWaitLogin)
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -46,45 +47,36 @@ public class ClientSocketHandler implements Connection {
             }
 
         if (splitCommand[2].equals("token")) {
-            ClientLogger.print("Insert your token: ");
-            try {
-                socketPrintLine("token " + inputConsole.readLine());
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, e.toString(), e);
-            }
-            while (flagLogin)
+            socketPrintLine("token " + client.askToken());
+
+            while (flagWaitLogin)
                 try {
                     wait();
                 } catch (InterruptedException e) {
                     LOGGER.log(Level.WARNING, e.toString(), e);
                 }
-
-            switch (splitCommand[0]) {
-                case "failed":
-                    ClientLogger.println("Login failed, token is not correct");
-                    return false;
-                case "verified":
-                    ClientLogger.println("Login successful, token is correct");
-                    return true;
-                default: return false;
-            }
-
+            return splitCommand[0].equals("verified");
         }
-        ClientLogger.println("Login successful, your token is " + splitCommand[2]);
-        flagLogin = false;
+        client.printToken(splitCommand[2]);
+        flagWaitLogin = false;
         return true;
     }
 
     synchronized void continueLogin(String[] splitCommand){
-        flagLogin = !flagLogin;
+        flagWaitLogin = !flagWaitLogin;
         this.splitCommand = splitCommand;
         notifyAll();
     }
 
     public void logout(){
         socketPrintLine("logout");
+        serverListener.setConnected(false);
+        stopServerListener();
+    }
+
+    void stopServerListener(){
+        serverListener.interrupt();
         socketClose();
-        ClientLogger.println("Logged out");
     }
 
     private void socketPrintLine(String p) {
@@ -95,7 +87,9 @@ public class ClientSocketHandler implements Connection {
     String socketReadLine(){
         try {
             return input.readLine();
-        }  catch (IOException e) {
+        }  catch(SocketException e){
+            return null;
+        } catch(IOException e) {
             //LOGGER.log(Level.WARNING, e.toString(), e);
         }
         return null;

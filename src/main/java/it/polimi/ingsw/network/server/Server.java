@@ -1,4 +1,4 @@
-package it.polimi.ingsw.socket;
+package it.polimi.ingsw.network.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class Server {
         while(true) {
             try {
                 clientSocket = serverSocket.accept();
-                Logger.print("Connection over socket: " + clientSocket.getRemoteSocketAddress().toString());
+                Logger.print("Connection over server: " + clientSocket.getRemoteSocketAddress().toString());
                 executor.submit(new SocketHandler(clientSocket, usersHandler));
             } catch (IOException e) {
                 e.printStackTrace();

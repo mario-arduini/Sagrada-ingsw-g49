@@ -1,4 +1,4 @@
-package it.polimi.ingsw.model.client;
+package it.polimi.ingsw.network.client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,10 +18,9 @@ public class Client {
     private int serverPort;
     private BufferedReader input;
     private Connection server;
-    private ConnectionType connectionType;
     private enum ConnectionType{ RMI, SOCKET }
+    private ConnectionType connectionType;
     private List<String> players;
-    private ServerListener serverListener;
     private boolean logged;
     private boolean serverConnected;
 
@@ -40,10 +39,30 @@ public class Client {
 
         while(server == null)
             server = createConnection();
-        serverConnected = true;
+    }
 
-        serverListener = new ServerListener(this, server);
-        serverListener.start();
+    synchronized void welcomePlayer(){
+        ClientLogger.println("Welcome to Sagrada!");
+        serverConnected = true;
+        notifyAll();
+    }
+
+    private synchronized void start(){
+        while (!serverConnected) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                LOGGER.log(Level.WARNING, e.toString(), e);
+            }
+        }
+        while(!isLogged())  //&& client.isServerConnected())
+            if(!server.login())
+                ClientLogger.println("Login failed, token is not correct");
+            else{
+                ClientLogger.println("Login successful");
+                logged = true;
+            }
+        logout();
     }
 
     private String askServerAddress(){
@@ -112,41 +131,48 @@ public class Client {
         return  null;
     }
 
-    private String askNickname(){
-        String user;
-        ClientLogger.print("Insert your nickname: ");
-        try {
-            user =  input.readLine();
-            if(user.equals("logout")){
-                ClientLogger.println("Invalid nickname");
-                return null;
+    String askNickname(){
+        String user = null;
+        while(user == null) {
+            ClientLogger.print("Insert your nickname: ");
+            try {
+                user = input.readLine();
+                if(!checkNicknameProperties(user))
+                    user = null;
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, e.toString(), e);
+                ClientLogger.println(INVALID_COMMAND);
+                user = null;
             }
+        }
+        nickname = user;
+        return user;
+    }
+
+    private boolean checkNicknameProperties(String user){
+        return user != null && !user.equals("");
+    }
+
+    String askToken(){
+        try {
+            ClientLogger.print("Insert your token: ");
+            return input.readLine();
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, e.toString(), e);
-            ClientLogger.println(INVALID_COMMAND);
-            return null;
         }
-        return user;
+        return null;
+    }
+
+    void printToken(String token){
+        ClientLogger.println("Your token is " + token);
     }
 
     private Connection createConnection(){
         if(connectionType == ConnectionType.SOCKET)
-            return new ClientSocketHandler(serverAddress, serverPort);
+            return new ClientSocketHandler(this, serverAddress, serverPort);
         else if(connectionType == ConnectionType.RMI)
             return null;
         return null;
-    }
-
-    private void login(){
-        while(nickname == null)
-            nickname = askNickname();
-        if(server.login(nickname)) {
-            players.add(nickname);
-            logged = true;
-            return;
-        }
-        nickname = null;
-        logged = false;
     }
 
     private void startGame(){
@@ -158,9 +184,8 @@ public class Client {
             String command = input.readLine();
             if(command.equals("logout")){
                 server.logout();
+                ClientLogger.println("Logged out");
                 logged = false;
-                serverListener.setConnected(false);
-                serverListener.interrupt();
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, e.toString(), e);
@@ -169,10 +194,6 @@ public class Client {
 
     private boolean isLogged(){
         return logged;
-    }
-
-    private boolean isServerConnected(){
-        return serverConnected;
     }
 
     void addPlayers(String[] newPlayers){
@@ -196,17 +217,11 @@ public class Client {
             ClientLogger.println("\nServer disconnected");
             logged = false;
             serverConnected = false;
-            serverListener.setConnected(false);
-            serverListener.interrupt();
         }
     }
 
     public static void main(String[] args) {
         Client client = new Client();
-        while(!client.isLogged() && client.isServerConnected())
-            client.login();
-
-        if(client.isServerConnected())
-            client.logout();
+        client.start();
     }
 }

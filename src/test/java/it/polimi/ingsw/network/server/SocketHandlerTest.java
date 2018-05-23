@@ -1,9 +1,9 @@
-package it.polimi.ingsw.socket;
+package it.polimi.ingsw.network.server;
 
 import org.junit.jupiter.api.Test;
 
 
-public class UsersHandlerTest {
+public class SocketHandlerTest {
     @Test
     void test(){
     }

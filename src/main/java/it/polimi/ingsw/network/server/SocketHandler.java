@@ -1,11 +1,9 @@
-package it.polimi.ingsw.socket;
-import it.polimi.ingsw.socket.UsersHandler;
+package it.polimi.ingsw.network.server;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class SocketHandler implements Runnable, ConnectionHandler{
     private Socket socket;
