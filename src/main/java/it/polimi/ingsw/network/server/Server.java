@@ -34,7 +34,7 @@ public class Server {
         while(true) {
             try {
                 clientSocket = serverSocket.accept();
-                Logger.print("Connection over server: " + clientSocket.getRemoteSocketAddress().toString());
+                Logger.print("Connection over socket: " + clientSocket.getRemoteSocketAddress().toString());
                 executor.submit(new SocketHandler(clientSocket, usersHandler));
             } catch (IOException e) {
                 e.printStackTrace();
