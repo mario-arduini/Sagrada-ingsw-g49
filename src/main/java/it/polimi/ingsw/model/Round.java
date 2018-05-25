@@ -9,6 +9,9 @@ public class Round {
     private List<Player> players;
     private int currentPlayer;
     private boolean diceExtracted;
+    private Dice currentDiceDrafted;
+    private int activeToolCard;
+    private int playersNumber;
 
     public Round(List<Dice> draftPool, List<Player> players){
         this.draftPool = new ArrayList<>(draftPool);
@@ -16,7 +19,10 @@ public class Round {
         for(int i = players.size() - 1; i >= 0; i--)
             this.players.add(this.players.get(i));
         diceExtracted = false;
+        currentDiceDrafted = null;
         currentPlayer = -1;
+        activeToolCard = 0;
+        playersNumber = players.size()/2;
     }
 
     public Round(Round round){
@@ -24,11 +30,25 @@ public class Round {
         this.players = new ArrayList<>(round.players);
         this.diceExtracted = round.diceExtracted;
         this.currentPlayer = round.currentPlayer;
+        this.currentDiceDrafted = round.currentDiceDrafted;
+        this.activeToolCard = round.activeToolCard;
+        this.playersNumber = round.playersNumber;
     }
 
     public List<Dice> getDraftPool(){
-
         return draftPool;
+    }
+
+    public int getCurrentPlayerIndex() { return currentPlayer; }
+
+    public Player getCurrentPlayer() { return players.get(currentPlayer); }
+
+    public int getPlayersNumber() { return playersNumber; }
+
+    public Dice getCurrentDiceDrafted() { return currentDiceDrafted; }
+
+    public void setActiveToolCard(int toolCardNumber){
+        activeToolCard = toolCardNumber;
     }
 
     public Player nextPlayer() throws NoMorePlayersException {
@@ -37,6 +57,8 @@ public class Round {
             throw new NoMorePlayersException();
         }
         diceExtracted = false;
+        activeToolCard = 0;
+        currentDiceDrafted = null;
         if(players.get(currentPlayer).isSuspended())
             return nextPlayer();
         return players.get(currentPlayer);
@@ -53,8 +75,13 @@ public class Round {
         if (!draftPool.contains(dice))
             throw new DiceNotInDraftPoolException();
 
-        players.get(currentPlayer).getWindow().addDice(row,column,dice);
         draftPool.remove(dice);
+        currentDiceDrafted = dice;
+
+        // use "after draft" type toolcards
+
+        players.get(currentPlayer).getWindow().addDice(row,column,dice);
+
         diceExtracted = true;
     }
 

@@ -1,17 +1,18 @@
 package it.polimi.ingsw.model.toolcards;
 
-import it.polimi.ingsw.model.Player;
+import it.polimi.ingsw.model.Round;
 
 public class LensCutter extends ToolCard {
     public String getName(){
         return this.getClass().getName();
     }
 
-    public boolean canBeUsed(Player player){
+    public boolean canBeUsed(Round round){
         return false;
     }
 
-    public void use(Player player){
+    public boolean use(Round round){
 
+        return false;
     }
 }
