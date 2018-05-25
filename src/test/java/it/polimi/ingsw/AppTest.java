@@ -1,5 +1,6 @@
 package it.polimi.ingsw;
 
+import it.polimi.ingsw.model.toolcards.ToolCard;
 import org.junit.jupiter.api.Test;
 
 class FirstJUnitTest{
@@ -15,6 +16,7 @@ class FirstJUnitTest{
         ShadesSetTest shadesSetTest = new ShadesSetTest();
         VarietyTest varietyTest = new VarietyTest();
         WindowTest windowTest = new WindowTest();
+        ToolCardsTest toolCardsTest = new ToolCardsTest();
 
         new DiceTest();
         new ConstraintTest();
@@ -53,5 +55,7 @@ class FirstJUnitTest{
 
         windowTest.tesAddDice();
         windowTest.testWindowCostructor();
+
+        toolCardsTest.glazingHammerTest();
     }
 }
