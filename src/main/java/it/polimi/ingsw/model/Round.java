@@ -67,11 +67,30 @@ public class Round {
     }
 
     public boolean isLastTurn(){
-
         return currentPlayer == players.size() - 1;
     }
 
+
+    /* TODO CONSIDER THIS FUNCTION
+    public void chooseFromDraft(Dice dice) throws DiceNotInDraftPoolException, DiceAlreadyExtractedException {
+        // TODO: consider choices change
+        if(diceExtracted)
+            throw new DiceAlreadyExtractedException();
+        if (!draftPool.contains(dice))
+            throw new DiceNotInDraftPoolException();
+
+        draftPool.remove(dice);
+        currentDiceDrafted = dice;
+
+        // use "after draft" type toolcards
+        if(activeToolCard!=null && activeToolCard.isUsedAfterDraft()){
+            activeToolCard.use(this);
+        }
+
+    } */
+
     public void useDice(int row, int column, Dice dice) throws NoAdjacentDiceException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, DiceNotInDraftPoolException, DiceAlreadyExtractedException {
+
         if(diceExtracted)
             throw new DiceAlreadyExtractedException();
         if (!draftPool.contains(dice))
