@@ -42,11 +42,45 @@ public class Window {
 
         if (!firstDice) {
             checkBorder(row, column);
-            checkConstraint(constraint, dice);
+            checkColorConstraint(constraint, dice);
+            checkValueConstraint(constraint, dice);
             this.firstDice = true;
         }
         else {
-            checkConstraint(constraint, dice);
+            checkColorConstraint(constraint, dice);
+            checkValueConstraint(constraint, dice);
+            checkAdjacencies(row,column, dice);
+        }
+
+        this.mosaic[row][column] = new Dice(dice);
+    }
+
+    public void addDiceIgnoreColorConstraint(int row, int column, Dice dice) throws ConstraintViolatedException, FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {
+        Constraint constraint = schema.getConstraint(row, column);
+
+        if (!firstDice) {
+            checkBorder(row, column);
+            checkValueConstraint(constraint, dice);
+            this.firstDice = true;
+        }
+        else {
+            checkValueConstraint(constraint, dice);
+            checkAdjacencies(row,column, dice);
+        }
+
+        this.mosaic[row][column] = new Dice(dice);
+    }
+
+    public void addDiceIgnoreValueConstraint(int row, int column, Dice dice) throws ConstraintViolatedException, FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {
+        Constraint constraint = schema.getConstraint(row, column);
+
+        if (!firstDice) {
+            checkBorder(row, column);
+            checkColorConstraint(constraint, dice);
+            this.firstDice = true;
+        }
+        else {
+            checkColorConstraint(constraint, dice);
             checkAdjacencies(row,column, dice);
         }
 
@@ -61,13 +95,16 @@ public class Window {
             throw new FirstDiceMisplacedException();
     }
 
-    private void checkConstraint(Constraint constraint, Dice dice) throws ConstraintViolatedException {
+    private void checkColorConstraint(Constraint constraint, Dice dice) throws ConstraintViolatedException {
         if (constraint != null)
             if (constraint.getColor() != null && dice.getColor() != constraint.getColor())
                 throw new ConstraintViolatedException();
-            else if(constraint.getNumber() != 0 && dice.getValue() != constraint.getNumber())
-                throw new ConstraintViolatedException();
+    }
 
+    private void checkValueConstraint(Constraint constraint, Dice dice) throws ConstraintViolatedException {
+        if (constraint != null)
+           if(constraint.getNumber() != 0 && dice.getValue() != constraint.getNumber())
+                throw new ConstraintViolatedException();
     }
 
     private void checkAdjacencies(int row, int column, Dice dice) throws NoAdjacentDiceException, BadAdjacentDiceException {

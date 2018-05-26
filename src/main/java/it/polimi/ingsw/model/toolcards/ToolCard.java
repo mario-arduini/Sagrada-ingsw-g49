@@ -31,7 +31,11 @@ public abstract class ToolCard {
     }
 
     public boolean use(Round round){
-        return canBeUsed(round);
+        return false;
+    }
+
+    public boolean use(Round round,int x1_start,int y1_start,int x1_end,int y1_end,int x2_start,int y2_start,int x2_end,int y2_end){
+        return false;
     }
 
     public boolean isUsedAfterDraft(){
