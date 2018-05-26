@@ -1,11 +1,9 @@
 package it.polimi.ingsw;
 
 import it.polimi.ingsw.model.*;
-import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
-import it.polimi.ingsw.model.exceptions.InvalidDifficultyValueException;
-import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
-import it.polimi.ingsw.model.exceptions.UnexpectedMatrixSizeException;
+import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.toolcards.GlazingHammer;
+import it.polimi.ingsw.model.toolcards.GrindingStone;
 import it.polimi.ingsw.model.toolcards.ToolCard;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +22,7 @@ public class ToolCardsTest {
     private Round initRound(){
         List<Player> players = new ArrayList<>();
         List<Dice> draftPool = new ArrayList<>();
-        Player player1,player2,player3,player4;
+        Player player1,player2;
         Schema schema = null;
         try {
             schema = new Schema(3,new Constraint[ROW][COLUMN]);
@@ -75,5 +73,44 @@ public class ToolCardsTest {
         assertTrue(glazingHammer.use(round));
         assertEquals(0,round.getCurrentPlayer().getFavorToken());
         assertFalse(glazingHammer.use(round));
+    }
+
+    @Test
+    public void grindingStoneTest(){
+        Round round = initRound();
+        ToolCard grindingStone = new GrindingStone();
+        try {
+            round.nextPlayer();
+            round.setActiveToolCard(grindingStone);
+            round.useDice(0,0, new Dice(Color.RED,3));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        assertEquals(4,round.getCurrentPlayer().getWindow().getCell(0,0).getValue());
+        try {
+            round.nextPlayer();
+            round.setActiveToolCard(grindingStone);
+            round.useDice(0,0, new Dice(Color.BLUE,5));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        assertEquals(2,round.getCurrentPlayer().getWindow().getCell(0,0).getValue());
+        try {
+            round.nextPlayer();
+            round.setActiveToolCard(grindingStone);
+            round.useDice(0,1, new Dice(Color.GREEN,4));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // Can't use toolcard due to not enough favor tokens
+        assertEquals(4,round.getCurrentPlayer().getWindow().getCell(0,1).getValue());
+        try {
+            round.nextPlayer();
+            round.setActiveToolCard(grindingStone);
+            round.useDice(0,1, new Dice(Color.PURPLE,1));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        assertEquals(6,round.getCurrentPlayer().getWindow().getCell(0,1).getValue());
     }
 }

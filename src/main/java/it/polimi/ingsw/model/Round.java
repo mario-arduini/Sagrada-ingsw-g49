@@ -1,6 +1,8 @@
 package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.model.toolcards.ToolCard;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +12,7 @@ public class Round {
     private int currentPlayer;
     private boolean diceExtracted;
     private Dice currentDiceDrafted;
-    private int activeToolCard;
+    private ToolCard activeToolCard;
     private int playersNumber;
 
     public Round(List<Dice> draftPool, List<Player> players){
@@ -21,7 +23,7 @@ public class Round {
         diceExtracted = false;
         currentDiceDrafted = null;
         currentPlayer = -1;
-        activeToolCard = 0;
+        activeToolCard = null;
         playersNumber = players.size()/2;
     }
 
@@ -47,8 +49,8 @@ public class Round {
 
     public Dice getCurrentDiceDrafted() { return currentDiceDrafted; }
 
-    public void setActiveToolCard(int toolCardNumber){
-        activeToolCard = toolCardNumber;
+    public void setActiveToolCard(ToolCard toolCard){
+        activeToolCard = toolCard;
     }
 
     public Player nextPlayer() throws NoMorePlayersException {
@@ -57,7 +59,7 @@ public class Round {
             throw new NoMorePlayersException();
         }
         diceExtracted = false;
-        activeToolCard = 0;
+        activeToolCard = null;
         currentDiceDrafted = null;
         if(players.get(currentPlayer).isSuspended())
             return nextPlayer();
@@ -79,8 +81,11 @@ public class Round {
         currentDiceDrafted = dice;
 
         // use "after draft" type toolcards
+        if(activeToolCard!=null && activeToolCard.isUsedAfterDraft()){
+            activeToolCard.use(this);
+        }
 
-        players.get(currentPlayer).getWindow().addDice(row,column,dice);
+        players.get(currentPlayer).getWindow().addDice(row,column,currentDiceDrafted);
 
         diceExtracted = true;
     }

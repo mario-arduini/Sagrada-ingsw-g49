@@ -13,7 +13,7 @@ public abstract class ToolCard {
     }
 
     public String getName(){
-        return "";
+        return this.getClass().getName();
     }
 
     public boolean canBeUsed(Round round){
@@ -32,5 +32,9 @@ public abstract class ToolCard {
 
     public boolean use(Round round){
         return canBeUsed(round);
+    }
+
+    public boolean isUsedAfterDraft(){
+        return false;
     }
 }

@@ -6,9 +6,6 @@ import it.polimi.ingsw.model.Round;
 import java.util.List;
 
 public class GlazingHammer extends ToolCard {
-    public String getName(){
-        return this.getClass().getName();
-    }
 
     @Override
     public boolean canBeUsed(Round round){
