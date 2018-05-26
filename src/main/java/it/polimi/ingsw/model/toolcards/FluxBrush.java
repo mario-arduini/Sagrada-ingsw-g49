@@ -1,18 +1,27 @@
 package it.polimi.ingsw.model.toolcards;
 
+import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Round;
 
 public class FluxBrush extends ToolCard {
-    public String getName(){
-        return this.getClass().getName();
+
+    @Override
+    public boolean isUsedAfterDraft(){
+        return true;
     }
 
-    public boolean canBeUsed(Round round){
-        return false;
-    }
-
+    @Override
     public boolean use(Round round){
+        // check if tool card can be used and in case remove favor tokens
+        if(!canBeUsed(round)) return false;
 
-        return false;
+        Dice currentDice = round.getCurrentDiceDrafted();
+
+        if(currentDice==null) return false;
+
+        currentDice.roll();
+
+        return true;
     }
+
 }

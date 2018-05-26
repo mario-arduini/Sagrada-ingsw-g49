@@ -113,4 +113,6 @@ public class ToolCardsTest {
         }
         assertEquals(6,round.getCurrentPlayer().getWindow().getCell(0,1).getValue());
     }
+
+    // TODO: test for FLUX BRUSH require a canBePlaced(Dice d) function into player
 }
