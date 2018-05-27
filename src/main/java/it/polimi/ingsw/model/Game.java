@@ -68,7 +68,7 @@ public class Game {
         return playerFetched.get();
     }
 
-    //Fix UML
+    //TODO: Fix UML
     public Round getCurrentRound(){
         return new Round(currentRound);
     }
@@ -77,7 +77,7 @@ public class Game {
         currentRound.useDice(row, column, dice);
     }
 
-    //Throws Exception
+    //TODO: Throws Exception
     public void tryToolCard(){
         //TODO
     }

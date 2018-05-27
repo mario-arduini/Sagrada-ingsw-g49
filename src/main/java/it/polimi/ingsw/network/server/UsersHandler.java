@@ -1,19 +1,35 @@
 package it.polimi.ingsw.network.server;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import it.polimi.ingsw.model.Game;
+import it.polimi.ingsw.model.Player;
+import it.polimi.ingsw.model.WaitingRoom;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class UsersHandler {
     private List<User> players;
+    private HashMap<User,Game> gameReference;
     private static final String ALPHABETH = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final int N = ALPHABETH.length();
+    private static final String TIMEOUT_FILE_NAME = "src/main/resources/timeout.txt";
     private static Random rand = new Random();
+    private int secondsTimer;
+    private Timer timer;
+
 
     public UsersHandler(){
         this.players = new ArrayList<>();
+        this.gameReference = new HashMap<>();
+        String filename = (new File("./")).getAbsolutePath();
+        filename = filename.substring(0, filename.length() - 1) + TIMEOUT_FILE_NAME;
+        this.secondsTimer = readIntFromFile(filename);
+        //TODO: Throw exception if file does not exist
     }
 
     public synchronized String login(String nickname, ConnectionHandler connection){
@@ -28,9 +44,11 @@ public class UsersHandler {
         user.notifyLogin(getPlayerNicks());
         Logger.print("Logged in: " + nickname + " " + connection.getRemoteAddress());
         players.add(user);
+        waitingRoomNewPlayer();
         return token;
     }
 
+    //TODO: introduce remove from waiting room if disconnection.
     public synchronized boolean login(String nickname,  ConnectionHandler connection, String token) {
         Optional<User> playerFetched = findPlayer(nickname);
         User user;
@@ -69,6 +87,65 @@ public class UsersHandler {
         players.remove(user);
         players.stream().forEach(p -> p.notifyLogout(nickname));
         Logger.print("Logged out: " + user.getNickname() + " " + user.getConnection().getRemoteAddress());
+        if (players.contains(user))
+            waitingRoomLeftPlayer(user);
+    }
+
+    private int readIntFromFile(String filename){
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(new File(filename)));
+            String text;
+
+            if ((text = reader.readLine()) != null)
+                return Integer.parseInt(text);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (reader != null)
+                    reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return -1;
+    }
+
+    private synchronized void waitingRoomNewPlayer(){
+        if(players.size() == 2) {
+            timer = new Timer();
+            timer.schedule(new UsersHandler.TimerExpired(), (long) secondsTimer * 1000);
+        }
+        else if(players.size() >= 4)
+            startGame();
+    }
+
+    private synchronized void waitingRoomLeftPlayer(User player){
+        players.remove(player);
+        if(players.size() < 2 && timer != null) {
+            timer.cancel();
+        }
+    }
+
+    private synchronized void startGame() {
+        List<Player> playerList = new ArrayList<>(players);
+        Game game = new Game(playerList);
+
+        for (User player:players)
+            gameReference.put(player, game);
+
+        Logger.print(String.format("Game Started: %s", getPlayerNicks().toString()));
+        players.clear();
+        if (timer != null)
+            timer.cancel();
+    }
+
+    class TimerExpired extends TimerTask {
+        public void run() {
+            startGame();
+        }
     }
 
 }
