@@ -16,10 +16,11 @@ public class ClientSocketHandler implements Connection {
     private BufferedReader input;
     private PrintWriter output;
     private Socket socket;
-    private Boolean flagWaitLogin = false;
-    private String[] splitCommand;
+    //private String[] splitCommand;
     private Client client;
     private ServerListener serverListener;
+    private boolean flagWaitLogin;
+    private boolean connected;
 
     ClientSocketHandler(Client client, String serverAddress, int serverPort) {
         this.client = client;
@@ -33,6 +34,7 @@ public class ClientSocketHandler implements Connection {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, e.toString(), e);
         }
+        flagWaitLogin = false;
     }
 
     public synchronized boolean login() {
@@ -45,8 +47,13 @@ public class ClientSocketHandler implements Connection {
             } catch (InterruptedException e) {
                 LOGGER.log(Level.WARNING, e.toString(), e);
             }
+        flagWaitLogin = false;
+        return connected;
 
-        if (splitCommand[2].equals("token")) {
+
+
+
+        /*if (splitCommand[2].equals("token")) {
             socketPrintLine("token " + client.askToken());
 
             while (flagWaitLogin)
@@ -59,13 +66,17 @@ public class ClientSocketHandler implements Connection {
         }
         client.printToken(splitCommand[2]);
         flagWaitLogin = false;
-        return true;
+        return true;*/
     }
 
-    synchronized void continueLogin(String[] splitCommand){
-        flagWaitLogin = !flagWaitLogin;
-        this.splitCommand = splitCommand;
+    synchronized void resultLogin(boolean result){
+        flagWaitLogin = true;
+        connected = result;
         notifyAll();
+    }
+
+    void sendToken(){
+        socketPrintLine("token " + client.askToken());
     }
 
     public void logout(){

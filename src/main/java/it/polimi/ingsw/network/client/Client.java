@@ -131,6 +131,14 @@ public class Client {
         return  null;
     }
 
+    private Connection createConnection(){
+        if(connectionType == ConnectionType.SOCKET)
+            return new ClientSocketHandler(this, serverAddress, serverPort);
+        else if(connectionType == ConnectionType.RMI)
+            return null;
+        return null;
+    }
+
     String askNickname(){
         String user = null;
         while(user == null) {
@@ -167,17 +175,7 @@ public class Client {
         ClientLogger.println("Your token is " + token);
     }
 
-    private Connection createConnection(){
-        if(connectionType == ConnectionType.SOCKET)
-            return new ClientSocketHandler(this, serverAddress, serverPort);
-        else if(connectionType == ConnectionType.RMI)
-            return null;
-        return null;
-    }
-
-    private void startGame(){
-
-    }
+    void setPrivateGoal(String[] privateGoal){}
 
     private void logout(){
         try {
