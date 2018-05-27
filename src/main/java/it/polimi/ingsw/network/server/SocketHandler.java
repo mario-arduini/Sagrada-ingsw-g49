@@ -1,22 +1,29 @@
 package it.polimi.ingsw.network.server;
 
+import it.polimi.ingsw.controller.GameFlowHandler;
+import it.polimi.ingsw.controller.GamesHandler;
+import it.polimi.ingsw.model.Game;
+import it.polimi.ingsw.model.Player;
+
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SocketHandler implements Runnable, ConnectionHandler{
     private Socket socket;
     private BufferedReader input;
     private PrintWriter output;
     private String nickname;
-    private UsersHandler usersHandler;
-    private boolean logged = false;
+    private boolean logged;
+    private GameFlowHandler gameFlowHandler;
 
 
-    public SocketHandler(Socket socket, UsersHandler usersHandler) {
+    public SocketHandler(Socket socket, GameFlowHandler gameFlowHandler) {
         this.socket = socket;
-        this.usersHandler = usersHandler;
+        this.gameFlowHandler = gameFlowHandler;
+        this.logged = false;
     }
 
     public void run(){
@@ -45,16 +52,22 @@ public class SocketHandler implements Runnable, ConnectionHandler{
             if (message != null)
                 switch (message.toLowerCase()) {
                     case "logout":
-                        usersHandler.logout(this.nickname);
+                        gameFlowHandler.logout();
                         logged = false;
                         socketClose();
                         break;
+                    case "players":
+                        List<String> players = gameFlowHandler.getPlayers();
+
+                        socketPrintLine(players.toString());
                 }
             else {
                 Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
+                this.gameFlowHandler.disconnected();
                 logged = false;
             }
         }
+
 
 
         //socketPrintLine("OK");
@@ -89,7 +102,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         this.nickname = socketReadLine();
         this.nickname = nickname.substring(nickname.indexOf(" ") + 1);
 
-        token = usersHandler.login(this.nickname, this);
+        token = gameFlowHandler.login(this.nickname, this);
 
         if (token != null) {
             socketPrintLine("login " + this.nickname + " " + token);
@@ -101,7 +114,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
             //socketPrint("token:");
         token = socketReadLine();
         token = token.substring(token.indexOf(" ") + 1);
-        if (usersHandler.login(this.nickname, this, token)) {
+        if (gameFlowHandler.reconnection(this.nickname, this, token)) {
             socketPrintLine("verified");
             return true;
         }
@@ -149,6 +162,11 @@ public class SocketHandler implements Runnable, ConnectionHandler{
 
     public String getRemoteAddress(){
         return socket.getRemoteSocketAddress().toString();
+    }
+
+    @Override
+    public void setGame(Game game){
+        this.gameFlowHandler.setGame(game);
     }
 
 }

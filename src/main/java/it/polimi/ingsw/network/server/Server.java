@@ -1,5 +1,8 @@
 package it.polimi.ingsw.network.server;
 
+import it.polimi.ingsw.controller.GameFlowHandler;
+import it.polimi.ingsw.controller.GamesHandler;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,12 +15,11 @@ public class Server {
     private int port;
     //private static WaitingRoom waitingRoom;
     private ExecutorService executor;
-    private UsersHandler usersHandler;
+    private GamesHandler gamesHandler;
 
     private Server(int port) {
         this.port = port;
-        //this.waitingRoom = WaitingRoom.getWaitingRoom();
-        this.usersHandler = new UsersHandler();
+        this.gamesHandler = new GamesHandler();
         this.executor = Executors.newCachedThreadPool();
     }
 
@@ -35,7 +37,7 @@ public class Server {
             try {
                 clientSocket = serverSocket.accept();
                 Logger.print("Connection over socket: " + clientSocket.getRemoteSocketAddress().toString());
-                executor.submit(new SocketHandler(clientSocket, usersHandler));
+                executor.submit(new SocketHandler(clientSocket, new GameFlowHandler(gamesHandler)));
             } catch (IOException e) {
                 e.printStackTrace();
             }

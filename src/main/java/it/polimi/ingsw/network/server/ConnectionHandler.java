@@ -1,5 +1,7 @@
 package it.polimi.ingsw.network.server;
 
+import it.polimi.ingsw.model.Game;
+
 import java.util.List;
 
 public interface ConnectionHandler{
@@ -8,4 +10,6 @@ public interface ConnectionHandler{
     void notifyLogout(String nickname);
     String getRemoteAddress();
     void close();
+    void setGame(Game game);
+
 }

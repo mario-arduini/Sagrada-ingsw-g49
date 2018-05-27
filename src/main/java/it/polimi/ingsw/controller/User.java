@@ -1,6 +1,9 @@
-package it.polimi.ingsw.network.server;
+package it.polimi.ingsw.controller;
 
+import it.polimi.ingsw.model.Constraint;
+import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
+import it.polimi.ingsw.network.server.ConnectionHandler;
 
 import java.util.List;
 
@@ -16,9 +19,19 @@ public class User extends Player {
         return this.connection;
     }
 
-    public void setConnection(ConnectionHandler connection) {
+    public void setConnection(ConnectionHandler connection){
         this.connection.close();
         this.connection = connection;
+    }
+
+    public void setConnection(ConnectionHandler connection, Game game) {
+        this.connection.close();
+        this.connection = connection;
+        this.connection.setGame(game);
+    }
+
+    public void setGame(Game game){
+        this.connection.setGame(game);
     }
 
     public void notifyLogin(String nickname) {
