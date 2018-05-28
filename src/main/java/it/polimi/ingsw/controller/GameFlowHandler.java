@@ -2,6 +2,7 @@ package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
+import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.network.server.ConnectionHandler;
 
 import java.util.List;
@@ -11,6 +12,7 @@ public class GameFlowHandler {
     private User player;
     private Game game;
     private GamesHandler gamesHandler;
+    private List<Schema> initialSchemas;
 
     public GameFlowHandler(GamesHandler gamesHandler){
         this.player = null;
@@ -20,6 +22,12 @@ public class GameFlowHandler {
 
     public void setGame(Game game) {
         this.game = game;
+        initialSchemas = game.extractSchemas();
+        player.notifySchemas(initialSchemas);
+    }
+
+    public void chooseSchema(Integer schemaNumber){
+        player.setWindow(initialSchemas.get(schemaNumber));
     }
 
     public void disconnected(){

@@ -139,8 +139,6 @@ public class GamesHandler {
         for (User player:players) {
             gameReference.put(player, game);
             player.setGame(game);
-            player.notifySchemas(game.extractSchemas());
-            //player.notifySchemas(game.get);
         }
 
         Logger.print(String.format("Game Started: %s", getPlayerNicks().toString()));

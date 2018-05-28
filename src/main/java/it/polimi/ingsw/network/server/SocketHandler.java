@@ -61,11 +61,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
             try {
                 message = socketReadCommand();
 
-                try {
-                    command = message.get("command").getAsString();
-                } catch (Exception e) {
-                    command = null;
-                }
+                command = getJsonStringValue(message, "command");
 
                 if (command != null)
                     switch (command.toLowerCase()) {
@@ -74,10 +70,21 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                             connected = false;
                             socketClose();
                             break;
+                        //debugging    
                         case "players":
                             List<String> players = gameFlowHandler.getPlayers();
 
                             socketPrintLine(players.toString());
+                            break;
+                        case "schema":
+                            try {
+                                gameFlowHandler.chooseSchema(getJsonPositiveIntValue(message, "id"));
+                                socketSendMessage(createMessage("verified"));
+                            } catch (IndexOutOfBoundsException e){
+                                socketSendMessage(createMessage("failed"));
+                            }
+                            break;
+
                     }
             }catch (NullPointerException e){
                 Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
@@ -87,6 +94,22 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         }
 
         socketClose();
+    }
+
+    private String getJsonStringValue(JsonObject message, String key){
+        try {
+            return message.get(key).getAsString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private int getJsonPositiveIntValue(JsonObject message, String key){
+        try {
+            return message.get(key).getAsInt();
+        }catch (Exception e){
+            return -1;
+        }
     }
 
     @Override
