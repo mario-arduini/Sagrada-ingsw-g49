@@ -1,5 +1,7 @@
 package it.polimi.ingsw.network.client;
 
+import com.google.gson.JsonObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,11 +18,12 @@ public class ClientSocketHandler implements Connection {
     private BufferedReader input;
     private PrintWriter output;
     private Socket socket;
-    //private String[] splitCommand;
     private Client client;
     private ServerListener serverListener;
     private boolean flagWaitLogin;
     private boolean connected;
+    JsonObject jsonObject;
+
 
     ClientSocketHandler(Client client, String serverAddress, int serverPort) {
         this.client = client;
@@ -39,7 +42,11 @@ public class ClientSocketHandler implements Connection {
 
     public synchronized boolean login() {
 
-        socketPrintLine("login " + client.askNickname());
+        createJsonCommand("login");
+        jsonObject.addProperty("nickname", client.askNickname());
+        jsonObject.addProperty("password", client.askPassword());
+
+        socketPrintLine(jsonObject);
 
         while (!flagWaitLogin)
             try {
@@ -49,24 +56,6 @@ public class ClientSocketHandler implements Connection {
             }
         flagWaitLogin = false;
         return connected;
-
-
-
-
-        /*if (splitCommand[2].equals("token")) {
-            socketPrintLine("token " + client.askToken());
-
-            while (flagWaitLogin)
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    LOGGER.log(Level.WARNING, e.toString(), e);
-                }
-            return splitCommand[0].equals("verified");
-        }
-        client.printToken(splitCommand[2]);
-        flagWaitLogin = false;
-        return true;*/
     }
 
     synchronized void resultLogin(boolean result){
@@ -75,12 +64,15 @@ public class ClientSocketHandler implements Connection {
         notifyAll();
     }
 
-    void sendToken(){
-        socketPrintLine("token " + client.askToken());
-    }
+//    void sendToken(){
+//        createJsonCommand("token");
+//        jsonObject.addProperty("token", client.askToken());
+//        socketPrintLine(jsonObject);
+//    }
 
     public void logout(){
-        socketPrintLine("logout");
+        createJsonCommand("logout");
+        socketPrintLine(jsonObject);
         serverListener.setConnected(false);
         stopServerListener();
     }
@@ -90,8 +82,13 @@ public class ClientSocketHandler implements Connection {
         socketClose();
     }
 
-    private void socketPrintLine(String p) {
-        output.println(p);
+    private void createJsonCommand(String command){
+        jsonObject = new JsonObject();
+        jsonObject.addProperty("command", command);
+    }
+
+    private void socketPrintLine(JsonObject jsonObject) {
+        output.println(jsonObject);
         output.flush();
     }
 
