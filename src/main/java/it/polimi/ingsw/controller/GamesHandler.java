@@ -29,15 +29,15 @@ public class GamesHandler {
         //TODO: Throw exception if file does not exist
     }
 
-    public synchronized User login(String nickname, ConnectionHandler connection, String token){
+    public synchronized User login(String nickname, String password, ConnectionHandler connection){
         User user;
         Optional<User> playerFetched = findPlayer(nickname);
 
         if (playerFetched.isPresent())
-            return null;
+            return reconnection(nickname, password, connection);
 
         players.forEach(p -> p.notifyLogin(nickname));
-        user = new User(nickname, token, connection);
+        user = new User(nickname, password, connection);
         user.notifyLogin(getPlayerNicks());
         Logger.print("Logged in: " + nickname + " " + connection.getRemoteAddress());
         players.add(user);
@@ -45,12 +45,12 @@ public class GamesHandler {
         return user;
     }
 
-    public synchronized User reconnection(String nickname,  ConnectionHandler connection, String token) {
+    public synchronized User reconnection(String nickname, String password, ConnectionHandler connection) {
         Optional<User> playerFetched = findPlayer(nickname);
         User user;
         if (playerFetched.isPresent()){
             user = playerFetched.get();
-            if (gameReference.containsKey(user) && user.verifyAuthToken(token)){
+            if (gameReference.containsKey(user) && user.verifyAuthToken(password)){
                 user.setConnection(connection);
                 user.setGame(gameReference.get(user));
                 Logger.print("Reconnected: " + nickname + " " + connection.getRemoteAddress());
@@ -64,15 +64,15 @@ public class GamesHandler {
         return null;
     }
 
-    private Optional<User> findPlayer(String nickname){
+    private synchronized Optional<User> findPlayer(String nickname){
         List <User> allPlayers = new ArrayList<>();
         allPlayers.addAll(this.players);
         allPlayers.addAll(this.gameReference.keySet());
         return allPlayers.stream().filter(player -> player.getNickname().equalsIgnoreCase(nickname)).findFirst();
     }
 
-    private List<String> getPlayerNicks(){
-        return players.stream().map(player -> player.getNickname()).collect(Collectors.toList());
+    private synchronized List<String> getPlayerNicks(){
+        return players.stream().map(Player::getNickname).collect(Collectors.toList());
     }
 
     public synchronized void logout(String nickname){
@@ -140,6 +140,7 @@ public class GamesHandler {
         for (User player:players) {
             gameReference.put(player, game);
             player.setGame(game);
+            //player.notifySchemas(game.get);
         }
 
         Logger.print(String.format("Game Started: %s", getPlayerNicks().toString()));
@@ -158,7 +159,7 @@ public class GamesHandler {
         }
     }
 
-    public List<User> getPlayersByGame(Game game) {
+    private List<User> getPlayersByGame(Game game) {
         List<User> keys = new ArrayList<>();
         for (Map.Entry<User, Game> entry : gameReference.entrySet()) {
             if (Objects.equals(game, entry.getValue())) {

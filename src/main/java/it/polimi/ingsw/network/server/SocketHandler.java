@@ -1,33 +1,41 @@
 package it.polimi.ingsw.network.server;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
-import it.polimi.ingsw.controller.GamesHandler;
 import it.polimi.ingsw.model.Game;
-import it.polimi.ingsw.model.Player;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SocketHandler implements Runnable, ConnectionHandler{
     private Socket socket;
     private BufferedReader input;
     private PrintWriter output;
     private String nickname;
-    private boolean logged;
+    private boolean connected;
     private GameFlowHandler gameFlowHandler;
+    private Gson gson;
+    JsonObject jsonObject;
+    JsonParser parser;
+
 
 
     public SocketHandler(Socket socket, GameFlowHandler gameFlowHandler) {
         this.socket = socket;
         this.gameFlowHandler = gameFlowHandler;
-        this.logged = false;
+        this.parser = new JsonParser();
+        this.gson = new Gson();
+        this.connected = true;
     }
 
     public void run(){
-        String message;
+        JsonObject message;
+        String command;
 
         try {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -40,91 +48,126 @@ public class SocketHandler implements Runnable, ConnectionHandler{
             e1.printStackTrace();
         }
 
-        socketPrintLine("welcome");
-        while (!this.login()) {
-            socketPrintLine("failed");
+        message = createMessage("welcome");
+        socketSendMessage(message);
+
+
+        while (connected && !this.login()) {
+            message = createMessage("failed");
+            socketSendMessage(message);
         }
 
-        logged = true;
+        while(connected){
 
-        while(logged){
-            message = socketReadLine();
-            if (message != null)
-                switch (message.toLowerCase()) {
-                    case "logout":
-                        gameFlowHandler.logout();
-                        logged = false;
-                        socketClose();
-                        break;
-                    case "players":
-                        List<String> players = gameFlowHandler.getPlayers();
+            try {
+                message = socketReadCommand();
 
-                        socketPrintLine(players.toString());
+                try {
+                    command = message.get("command").getAsString();
+                } catch (Exception e) {
+                    command = null;
                 }
-            else {
+
+                if (command != null)
+                    switch (command.toLowerCase()) {
+                        case "logout":
+                            gameFlowHandler.logout();
+                            connected = false;
+                            socketClose();
+                            break;
+                        case "players":
+                            List<String> players = gameFlowHandler.getPlayers();
+
+                            socketPrintLine(players.toString());
+                    }
+            }catch (NullPointerException e){
                 Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
                 this.gameFlowHandler.disconnected();
-                logged = false;
+                connected = false;
             }
         }
 
-
-
-        //socketPrintLine("OK");
         socketClose();
     }
 
     @Override
     public void notifyLogin(String nickname) {
-        socketPrintLine("new_player " + nickname);
+        JsonObject message;
+        message = createMessage("new_player");
+        message.addProperty("nicknames", gson.toJson((new ArrayList<String>()).add(nickname)));
+        socketSendMessage(message);
     }
 
     @Override
     public void notifyLogin(List<String> nicknames){
-        StringBuilder nicks = new StringBuilder();
-        for (String nick:nicknames){
-            nicks.append(" ");
-            nicks.append(nick);
-        }
-        if (nicks.length() != 0)
-            socketPrintLine("new_player" + nicks);
+        JsonObject message;
+        message = createMessage("new_player");
+        message.addProperty("nicknames", gson.toJson(nicknames));
+        socketSendMessage(message);
     }
 
     @Override
     public void notifyLogout(String nickname){
-        socketPrintLine("quit " + nickname);
+        JsonObject message;
+        message = createMessage("quit");
+        message.addProperty("nickname", nickname);
+        socketSendMessage(message);
+    }
+
+    private JsonObject createMessage(String message){
+        jsonObject = new JsonObject();
+        jsonObject.addProperty("message", message);
+        return jsonObject;
     }
 
     private boolean login() {
-        String token;
-        //socketPrint("login: ");
+        JsonObject command;
+        String password;
 
-        this.nickname = socketReadLine();
-        this.nickname = nickname.substring(nickname.indexOf(" ") + 1);
-
-        token = gameFlowHandler.login(this.nickname, this);
-
-        if (token != null) {
-            socketPrintLine("login " + this.nickname + " " + token);
-            return true;
+        try {
+            command = socketReadCommand();
+            try{
+                if (command.get("command").getAsString().equals("login")){
+                    this.nickname = command.get("nickname").getAsString();
+                    password = command.get("password").getAsString();
+                    if (gameFlowHandler.login(this.nickname, password, this)){
+                        socketSendMessage(createMessage("verified"));
+                        return true;
+                    }else{
+                        socketSendMessage(createMessage("failed"));
+                        return false;
+                    }
+                }
+            }catch (NullPointerException e){
+                this.nickname = null;
+                socketSendMessage(createMessage("Invalid option"));
+            }
+        }catch (NullPointerException e){
+            Logger.print("Disconnected before login: " + socket.getRemoteSocketAddress().toString());
+            this.gameFlowHandler.disconnected();
+            connected = false;
         }
-        socketPrintLine("login " + this.nickname + " token");
-
-        //if (socketReadLine().toLowerCase().equalsIgnoreCase("yes")) {
-            //socketPrint("token:");
-        token = socketReadLine();
-        token = token.substring(token.indexOf(" ") + 1);
-        if (gameFlowHandler.reconnection(this.nickname, this, token)) {
-            socketPrintLine("verified");
-            return true;
-        }
-        //}
         return false;
+
     }
 
-    private void socketPrintLine(String p) {
-        output.println(p);
+    private void socketSendMessage(JsonObject json) {
+        output.println(json);
         output.flush();
+    }
+
+    private void socketPrintLine(String json) {
+        output.println(json);
+        output.flush();
+    }
+
+    private JsonObject socketReadCommand(){
+        try {
+            return parser.parse(socketReadLine()).getAsJsonObject();
+        }
+        catch (IllegalStateException e){
+        }
+        return null;
     }
 
     private void socketPrint(String p) {
@@ -154,8 +197,8 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     public void close(){
-        if (this.logged){
-            this.logged = false;
+        if (this.connected){
+            this.connected = false;
             socketClose();
         }
     }

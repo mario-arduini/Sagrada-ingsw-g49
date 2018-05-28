@@ -1,6 +1,5 @@
 package it.polimi.ingsw.controller;
 
-import it.polimi.ingsw.model.Constraint;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.network.server.ConnectionHandler;
@@ -8,7 +7,7 @@ import it.polimi.ingsw.network.server.ConnectionHandler;
 import java.util.List;
 
 public class User extends Player {
-    ConnectionHandler connection;
+    private ConnectionHandler connection;
 
     public User(String nickname, String authToken, ConnectionHandler connection) {
         super(nickname, authToken);
@@ -44,6 +43,9 @@ public class User extends Player {
 
     public void notifyLogout(String nickname) {
         this.connection.notifyLogout(nickname);
+    }
+
+    public void notifySchemas(){
     }
 
 }
