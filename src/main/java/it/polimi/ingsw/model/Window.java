@@ -33,8 +33,11 @@ public class Window {
     }
 
     public Dice getCell(int row, int column){
-
         return mosaic[row][column];
+    }
+
+    public void removeDice(int row,int column){
+        mosaic[row][column] = null;
     }
 
     public void addDice(int row, int column, Dice dice) throws ConstraintViolatedException, FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {

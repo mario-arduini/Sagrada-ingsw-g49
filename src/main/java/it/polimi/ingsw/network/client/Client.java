@@ -2,6 +2,12 @@ package it.polimi.ingsw.network.client;
 
 import it.polimi.ingsw.model.Color;
 
+import it.polimi.ingsw.model.Constraint;
+import it.polimi.ingsw.model.Schema;
+import it.polimi.ingsw.model.exceptions.InvalidConstraintValueException;
+import it.polimi.ingsw.model.exceptions.InvalidDifficultyValueException;
+import it.polimi.ingsw.model.exceptions.UnexpectedMatrixSizeException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,6 +20,9 @@ public class Client {
 
     private static final Logger LOGGER = Logger.getLogger( Client.class.getName() );
     private static final String INVALID_COMMAND = "Invalid command";
+    private static final String CLI_SCHEMA_ROW = "---------------------    ---------------------";
+    private static final int ROWS_NUMBER = 4;
+    private static final int COLUMNS_NUMBER = 5;
 
     private String nickname;
     private String serverAddress;
@@ -29,7 +38,15 @@ public class Client {
     public Client(){
         players = new ArrayList<>();
         input = new BufferedReader(new InputStreamReader(System.in));
+    }
 
+    synchronized void welcomePlayer(){
+        ClientLogger.println("Welcome to Sagrada!");
+        serverConnected = true;
+        notifyAll();
+    }
+
+    private synchronized void start(){
         while(serverAddress == null)
             serverAddress = askServerAddress();
 
@@ -41,15 +58,7 @@ public class Client {
 
         while(server == null)
             server = createConnection();
-    }
 
-    synchronized void welcomePlayer(){
-        ClientLogger.println("Welcome to Sagrada!");
-        serverConnected = true;
-        notifyAll();
-    }
-
-    private synchronized void start(){
         while (!serverConnected) {
             try {
                 wait();
@@ -297,5 +306,36 @@ public class Client {
     public static void main(String[] args) {
         Client client = new Client();
         client.start();
+    }
+
+    private void print_schemas(List<Schema> schemas){
+        Constraint constraint;
+        Schema currentSchema;
+        ClientLogger.println("Choose your schema:");
+        for(int i=0;i<schemas.size();i+=2){
+            ClientLogger.println("");
+            ClientLogger.println("Schema ("+i+")               Schema ("+(i+1)+")");
+            ClientLogger.println(CLI_SCHEMA_ROW);
+            for(int r=0;r<ROWS_NUMBER;r++){
+                currentSchema = schemas.get(i);
+                for(int c=0;c<COLUMNS_NUMBER;c++){
+                    constraint = currentSchema.getConstraint(r,c);
+                    if(constraint==null) ClientLogger.print("|   ");
+                    else if(constraint.getColor()!=null) ClientLogger.print("| "+ constraint.getColor().escape() +"■ "+Color.RESET);
+                    else if(constraint.getNumber()!=0) ClientLogger.print("| "+constraint.getNumber()+" ");
+                }
+                ClientLogger.print("|    ");
+                currentSchema = schemas.get(i+1);
+                for(int c=0;c<COLUMNS_NUMBER;c++){
+                    constraint = currentSchema.getConstraint(r,c);
+                    if(constraint==null) ClientLogger.print("|   ");
+                    else if(constraint.getColor()!=null) ClientLogger.print("| "+ constraint.getColor().escape() +"■ "+Color.RESET);
+                    else if(constraint.getNumber()!=0) ClientLogger.print("| "+constraint.getNumber()+" ");
+                }
+                ClientLogger.println("|");
+                ClientLogger.println(CLI_SCHEMA_ROW);
+            }
+            ClientLogger.println("Difficulty: "+schemas.get(i).getDifficulty()+"            Difficulty: "+schemas.get(i+1).getDifficulty());
+        }
     }
 }
