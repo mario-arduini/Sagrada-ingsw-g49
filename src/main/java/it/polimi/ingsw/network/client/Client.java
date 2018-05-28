@@ -3,12 +3,10 @@ package it.polimi.ingsw.network.client;
 import it.polimi.ingsw.model.Color;
 
 import it.polimi.ingsw.model.Constraint;
-import it.polimi.ingsw.model.Schema;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.*;
 
@@ -238,13 +236,13 @@ public class Client {
         }
     }
 
-    private void print_schemas(List<Schema> schemas){
+    void print_schemas(List<Schema> schemas){
         Constraint constraint;
         Schema currentSchema;
         ClientLogger.println("Choose your schema:");
         for(int i=0;i<schemas.size();i+=2){
             ClientLogger.println("");
-            ClientLogger.println("Schema ("+i+")               Schema ("+(i+1)+")");
+            ClientLogger.println("Schema ("+(i+1)+")               Schema ("+(i+2)+")");
             ClientLogger.println(CLI_SCHEMA_ROW);
             for(int r=0;r<ROWS_NUMBER;r++){
                 currentSchema = schemas.get(i);
@@ -267,6 +265,25 @@ public class Client {
             }
             ClientLogger.println("Difficulty: "+schemas.get(i).getDifficulty()+"            Difficulty: "+schemas.get(i+1).getDifficulty());
         }
+    }
+
+    void chooseSchema(){
+        int choice = 0;
+        while (choice == 0) {
+            ClientLogger.print("Insert your choice: ");
+            try {
+                choice = Integer.parseInt(input.readLine());
+                if(choice < 1 || choice > 4){
+                    choice = 0;
+                    ClientLogger.print("Choice not valid");
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, e.toString(), e);
+                ClientLogger.println(INVALID_COMMAND);
+                choice = 0;
+            }
+        }
+        server.sendSchema(choice - 1);
     }
 
     public static void main(String[] args) {

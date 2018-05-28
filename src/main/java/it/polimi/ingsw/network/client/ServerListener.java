@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ServerListener extends Thread {
 
@@ -25,8 +26,9 @@ public class ServerListener extends Thread {
     public void run() {
 
         Gson gson = new Gson();
-        JsonObject jsonObject = null;
+        JsonObject jsonObject;
         JsonParser parser = new JsonParser();
+        Type listType;
 
         while (connected){
             jsonObject = null;
@@ -45,7 +47,7 @@ public class ServerListener extends Thread {
                         client.welcomePlayer();
                         break;
                     case "new_player":
-                        Type listType = new TypeToken<List<String>>(){}.getType();
+                        listType = new TypeToken<List<String>>(){}.getType();
                         client.addPlayers(gson.fromJson(jsonObject.get("nicknames").getAsString(), listType));
                         break;
                     case "quit":
@@ -58,10 +60,15 @@ public class ServerListener extends Thread {
                         server.resultLogin(false);
                         break;
                     case "privateGoal":
-                        client.setPrivateGoal(null);
+                        client.setPrivateGoal(null);  //TODO
                         break;
                     case "schema":
-
+                        List<Schema> schemas = new ArrayList<>();
+                        //listType = new TypeToken<List<Schema>>(){}.getType();
+                        for(Integer i = 0; i < jsonObject.keySet().size() - 1; i++)
+                            schemas.add(gson.fromJson(jsonObject.get(i.toString()).getAsString(), Schema.class));
+                        client.print_schemas(schemas);
+                        client.chooseSchema();
                         break;
                     default:
                         break;
@@ -69,9 +76,6 @@ public class ServerListener extends Thread {
             } catch (NullPointerException e) {
             }
         }
-
-
-
     }
     void setConnected(boolean connected){
         this.connected = connected;

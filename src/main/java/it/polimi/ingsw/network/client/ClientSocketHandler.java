@@ -20,7 +20,7 @@ public class ClientSocketHandler implements Connection {
     private Socket socket;
     private Client client;
     private ServerListener serverListener;
-    private boolean flagWaitLogin;
+    private boolean flagContinue;
     private boolean connected;
     JsonObject jsonObject;
 
@@ -37,7 +37,7 @@ public class ClientSocketHandler implements Connection {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, e.toString(), e);
         }
-        flagWaitLogin = false;
+        flagContinue = false;
     }
 
     public synchronized boolean login() {
@@ -48,27 +48,27 @@ public class ClientSocketHandler implements Connection {
 
         socketPrintLine(jsonObject);
 
-        while (!flagWaitLogin)
+        while (!flagContinue)
             try {
                 wait();
             } catch (InterruptedException e) {
                 LOGGER.log(Level.WARNING, e.toString(), e);
             }
-        flagWaitLogin = false;
+        flagContinue = false;
         return connected;
     }
 
     synchronized void resultLogin(boolean result){
-        flagWaitLogin = true;
+        flagContinue = true;
         connected = result;
         notifyAll();
     }
 
-//    void sendToken(){
-//        createJsonCommand("token");
-//        jsonObject.addProperty("token", client.askToken());
-//        socketPrintLine(jsonObject);
-//    }
+    public void sendSchema(int schema){
+        createJsonCommand("schema");
+        jsonObject.addProperty("schema", schema);
+        socketPrintLine(jsonObject);
+    }
 
     public void logout(){
         createJsonCommand("logout");
@@ -77,7 +77,7 @@ public class ClientSocketHandler implements Connection {
         stopServerListener();
     }
 
-    void stopServerListener(){
+    private void stopServerListener(){
         serverListener.interrupt();
         socketClose();
     }
