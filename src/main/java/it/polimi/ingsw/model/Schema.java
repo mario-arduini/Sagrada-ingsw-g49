@@ -8,8 +8,9 @@ public final class Schema {
     private final Constraint[][] constraint;
     private static final int ROW = 4;
     private static final int COLUMN = 5;
+    private final String name;
 
-    public Schema(int difficulty, Constraint[][] constraint) throws InvalidDifficultyValueException, UnexpectedMatrixSizeException {
+    public Schema(int difficulty, Constraint[][] constraint, String name) throws InvalidDifficultyValueException, UnexpectedMatrixSizeException {
         if (difficulty < 3 || difficulty > 6)
             throw new InvalidDifficultyValueException();
         if (constraint.length != ROW)
@@ -20,6 +21,11 @@ public final class Schema {
         }
         this.difficulty = difficulty;
         this.constraint = constraint;
+        this.name = name;
+    }
+
+    public String getName(){
+        return name;
     }
 
     public int getDifficulty() {

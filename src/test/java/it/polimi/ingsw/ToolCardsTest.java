@@ -24,8 +24,10 @@ public class ToolCardsTest {
         List<Dice> draftPool = new ArrayList<>();
         Player player1,player2;
         Schema schema = null;
+        String name = "Schema";
+
         try {
-            schema = new Schema(3,new Constraint[ROW][COLUMN]);
+            schema = new Schema(3,new Constraint[ROW][COLUMN], name);
         } catch (InvalidDifficultyValueException e) {
             e.printStackTrace();
         } catch (UnexpectedMatrixSizeException e) {

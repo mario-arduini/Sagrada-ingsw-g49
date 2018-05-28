@@ -23,7 +23,7 @@ public class WindowTest {
         //Create window w/ schema
         try {
             constraint = new Constraint[ROW][COLUMN];
-            schema = new Schema(MIN_DIFFICULTY, constraint);
+            schema = new Schema(MIN_DIFFICULTY, constraint, SchemaTest.name);
             window = new Window(schema);
             assertEquals(schema, window.getSchema());
         } catch (InvalidDifficultyValueException e) {
@@ -36,7 +36,7 @@ public class WindowTest {
         try {
             constraint = new Constraint[ROW][COLUMN];
             constraint[ROW/2][COLUMN/2] = new Constraint(6);
-            schema = new Schema(MIN_DIFFICULTY, constraint);
+            schema = new Schema(MIN_DIFFICULTY, constraint, SchemaTest.name);
             window = new Window(schema);
             assertEquals(schema, window.getSchema());
 
@@ -65,7 +65,7 @@ public class WindowTest {
             constraint = new Constraint[ROW][COLUMN];
             constraint[1][0] = new Constraint(6);
             dice = new Dice(Color.RED, 3);
-            schema = new Schema(3, constraint);
+            schema = new Schema(3, constraint, SchemaTest.name);
             window = new Window(schema);
 
             //Add first dice in the middle of the mosaic

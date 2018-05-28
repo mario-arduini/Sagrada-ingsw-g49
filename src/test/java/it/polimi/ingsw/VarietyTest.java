@@ -90,7 +90,7 @@ public class VarietyTest {
         try {
             //Create window w/ schema
             constraint = new Constraint[ROW][COLUMN];
-            schema = new Schema(MIN_DIFFICULTY, constraint);
+            schema = new Schema(MIN_DIFFICULTY, constraint, SchemaTest.name);
             window = new Window(schema);
             fillMosaic(window);
             assertEquals(0,goal.computeScore(window));
@@ -117,7 +117,7 @@ public class VarietyTest {
         try {
             //Create window w/ schema
             constraint = new Constraint[ROW][COLUMN];
-            schema = new Schema(MIN_DIFFICULTY, constraint);
+            schema = new Schema(MIN_DIFFICULTY, constraint, SchemaTest.name);
             window = new Window(schema);
             fillMosaic(window);
             assertEquals(5,goal.computeScore(window));
@@ -144,7 +144,7 @@ public class VarietyTest {
         try {
             //Create window w/ schema
             constraint = new Constraint[ROW][COLUMN];
-            schema = new Schema(MIN_DIFFICULTY, constraint);
+            schema = new Schema(MIN_DIFFICULTY, constraint, SchemaTest.name);
             window = new Window(schema);
             fillMosaic(window);
             assertEquals(0,goal.computeScore(window));
@@ -171,7 +171,7 @@ public class VarietyTest {
         try {
             //Create window w/ schema
             constraint = new Constraint[ROW][COLUMN];
-            schema = new Schema(MIN_DIFFICULTY, constraint);
+            schema = new Schema(MIN_DIFFICULTY, constraint, SchemaTest.name);
             window = new Window(schema);
             fillMosaic(window);
             assertEquals(4,goal.computeScore(window));

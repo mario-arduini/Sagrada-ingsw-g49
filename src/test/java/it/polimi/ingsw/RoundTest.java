@@ -34,7 +34,7 @@ class RoundTest {
         List<Dice> draftPool1;
         constraint = new Constraint[ROW][COLUMN];
 
-        assertDoesNotThrow(() ->  schema.getAndSet(new Schema(MIN_DIFFICULTY, constraint)));
+        assertDoesNotThrow(() ->  schema.getAndSet(new Schema(MIN_DIFFICULTY, constraint, SchemaTest.name)));
 
         player1.setWindow(schema.get());
         players.add(player1);

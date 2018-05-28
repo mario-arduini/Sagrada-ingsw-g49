@@ -11,6 +11,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SchemaTest {
 
+    public final static String name = "Schema";
+
+
     private boolean checkConstraints(Constraint[][] constraint, Schema schema){
         for (int i = 0; i < constraint.length; i++)
             for (int j = 0; j < constraint[i].length; j++)
@@ -26,36 +29,36 @@ class SchemaTest {
         AtomicReference<Constraint[][]> constraint = new AtomicReference<>();
         constraint.getAndSet(new Constraint[4][5]);
 
-        assertDoesNotThrow(() -> schema.getAndSet(new Schema(3, constraint.get())));
+        assertDoesNotThrow(() -> schema.getAndSet(new Schema(3, constraint.get(), name)));
         assertEquals(3, schema.get().getDifficulty());
         assertTrue(checkConstraints(constraint.get(), schema.get()));
 
         constraint.getAndSet(new Constraint[3][5]);
-        assertThrows(UnexpectedMatrixSizeException.class, () -> new Schema(3, constraint.get()));
+        assertThrows(UnexpectedMatrixSizeException.class, () -> new Schema(3, constraint.get(), name));
 
         constraint.getAndSet(new Constraint[4][6]);
-        assertThrows(UnexpectedMatrixSizeException.class, () -> new Schema(3, constraint.get()));
+        assertThrows(UnexpectedMatrixSizeException.class, () -> new Schema(3, constraint.get(), name));
 
         constraint.getAndSet(new Constraint[4][5]);
-        assertThrows(InvalidDifficultyValueException.class, () -> new Schema(7, constraint.get()));
-        assertThrows(InvalidDifficultyValueException.class, () -> new Schema(2, constraint.get()));
+        assertThrows(InvalidDifficultyValueException.class, () -> new Schema(7, constraint.get(), name));
+        assertThrows(InvalidDifficultyValueException.class, () -> new Schema(2, constraint.get(), name));
 
         constraint.get()[2][3] = new Constraint(Color.RED);
         constraint.get()[3][4] = new Constraint(Color.PURPLE);
         assertDoesNotThrow(() -> constraint.get()[0][0] = new Constraint(2));
-        assertDoesNotThrow(() -> schema.getAndSet(new Schema(5, constraint.get())));
+        assertDoesNotThrow(() -> schema.getAndSet(new Schema(5, constraint.get(), name)));
         assertTrue(checkConstraints(constraint.get(), schema.get()));
 
         AtomicReference<Schema> schema1 = new AtomicReference<>();
         Constraint[][] constraint1 = new Constraint[4][5];
 
-        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(5, constraint1)));
+        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(5, constraint1, name)));
         assertNotEquals(schema.get(), schema1.get());
 
-        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(4, constraint1)));
+        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(4, constraint1, name)));
         assertNotEquals(schema.get(), schema1.get());
 
-        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(5, constraint.get())));
+        assertDoesNotThrow(() -> schema1.getAndSet(new Schema(5, constraint.get(), name)));
         assertEquals(schema.get(), schema1.get());
 
         assertNotEquals(schema.get(), new Object());

@@ -48,7 +48,7 @@ public class PlayerTest {
 
         try {
             constraint = new Constraint[ROW][COLUMN];
-            schema = new Schema(MIN_DIFFICULTY, constraint);
+            schema = new Schema(MIN_DIFFICULTY, constraint, SchemaTest.name);
             player = new Player(NICKNAME, AUTH_TOKEN);
 
             //Set window and favor tokens
