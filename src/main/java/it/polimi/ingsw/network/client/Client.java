@@ -4,10 +4,6 @@ import it.polimi.ingsw.model.Color;
 
 import it.polimi.ingsw.model.Constraint;
 import it.polimi.ingsw.model.Schema;
-import it.polimi.ingsw.model.exceptions.InvalidConstraintValueException;
-import it.polimi.ingsw.model.exceptions.InvalidDifficultyValueException;
-import it.polimi.ingsw.model.exceptions.UnexpectedMatrixSizeException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,7 +31,7 @@ public class Client {
     private boolean logged;
     private boolean serverConnected;
 
-    public Client(){
+    private Client(){
         players = new ArrayList<>();
         input = new BufferedReader(new InputStreamReader(System.in));
     }
@@ -184,7 +180,7 @@ public class Client {
             ClientLogger.print("Insert your password: ");
             try {
                 password = input.readLine();
-                if(!checkNicknameProperties(password)) {
+                if(!checkPasswordProperties(password)) {
                     password = null;
                     ClientLogger.println("Invalid nickname, must be at least 8 character");
                 }
@@ -197,69 +193,8 @@ public class Client {
         return password;
 
     }
-//    String askToken(){
-//        try {
-//            ClientLogger.print("Insert your token: ");
-//            return input.readLine();
-//        } catch (IOException e) {
-//            LOGGER.log(Level.WARNING, e.toString(), e);
-//        }
-//        return null;
-//    }
-//
-//    void printToken(String token){
-//        ClientLogger.println("Your token is " + token);
-//    }
 
     void setPrivateGoal(String[] privateGoal){}
-
-    public void showSchema(char[][] schema, int difficulty){
-        ClientLogger.println("");
-        ClientLogger.println("Questa finestra ha difficoltà " + difficulty);
-        for(int i = 0; i < 4; i++) {
-            for (int j = 0; j < 5; j++) {
-                switch (schema[i][j]){
-                    case 'R':
-                        ClientLogger.print(Color.RED.escape() + "[R] " + Color.RESET);
-                        break;
-                    case 'G':
-                        ClientLogger.print(Color.GREEN.escape() + "[G] " + Color.RESET);
-                        break;
-                    case 'Y':
-                        ClientLogger.print(Color.YELLOW.escape() + "[Y] " + Color.RESET);
-                        break;
-                    case 'P':
-                        ClientLogger.print(Color.PURPLE.escape() + "[P] " + Color.RESET);
-                        break;
-                    case 'B':
-                        ClientLogger.print(Color.BLUE.escape() + "[B] " + Color.RESET);
-                        break;
-                    case '1':
-                        ClientLogger.print("[1] ");
-                        break;
-                    case '2':
-                        ClientLogger.print("[2] ");
-                        break;
-                    case '3':
-                        ClientLogger.print("[3] ");
-                        break;
-                    case '4':
-                        ClientLogger.print("[4] ");
-                        break;
-                    case '5':
-                        ClientLogger.print("[5] ");
-                        break;
-                    case '6':
-                        ClientLogger.print("[6] ");
-                        break;
-                    default:
-                        ClientLogger.print("[ ] ");
-                        break;
-                }
-            }
-            ClientLogger.println("");
-        }
-    }
 
     private void logout(){
         try {
@@ -278,16 +213,16 @@ public class Client {
         return logged;
     }
 
-    void addPlayers(String[] newPlayers){
+    void addPlayers(List<String> newPlayers){
 
-        players.addAll(Arrays.asList(newPlayers));
+        players.addAll(newPlayers);
         if(!logged){
-            ClientLogger.println("Wainting room:");
+            ClientLogger.println("Waiting room:");
             ClientLogger.println(nickname);
-            Arrays.stream(newPlayers).forEach(ClientLogger::println);
+            newPlayers.forEach(ClientLogger::println);
         }
         else
-            Arrays.stream(newPlayers).forEach(name -> ClientLogger.println(name + " is now playing"));
+            newPlayers.forEach(name -> ClientLogger.println(name + " is now playing"));
     }
 
     void removePlayer(String nickname){
@@ -301,11 +236,6 @@ public class Client {
             logged = false;
             serverConnected = false;
         }
-    }
-
-    public static void main(String[] args) {
-        Client client = new Client();
-        client.start();
     }
 
     private void print_schemas(List<Schema> schemas){
@@ -337,5 +267,10 @@ public class Client {
             }
             ClientLogger.println("Difficulty: "+schemas.get(i).getDifficulty()+"            Difficulty: "+schemas.get(i+1).getDifficulty());
         }
+    }
+
+    public static void main(String[] args) {
+        Client client = new Client();
+        client.start();
     }
 }

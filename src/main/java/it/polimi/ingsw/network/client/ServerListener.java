@@ -3,7 +3,9 @@ package it.polimi.ingsw.network.client;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,19 +45,12 @@ public class ServerListener extends Thread {
                         client.welcomePlayer();
                         break;
                     case "new_player":
-                        client.addPlayers(gson.fromJson(jsonObject.get("nicknames").getAsString(), String[].class));
+                        Type listType = new TypeToken<List<String>>(){}.getType();
+                        client.addPlayers(gson.fromJson(jsonObject.get("nicknames").getAsString(), listType));
                         break;
                     case "quit":
                         client.removePlayer(jsonObject.get("nickname").getAsString());
                         break;
-    //                        case "login":
-    //                            if (jsonObject.get("token").getAsString().equals(""))
-    //                                server.sendToken();
-    //                            else {
-    //                                client.printToken(jsonObject.get("token").getAsString());
-    //                                server.resultLogin(true);
-    //                            }
-    //                            break;
                     case "verified":
                         server.resultLogin(true);
                         break;
