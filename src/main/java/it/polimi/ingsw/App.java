@@ -5,13 +5,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.polimi.ingsw.model.Color;
+import it.polimi.ingsw.network.client.Client;
 
 import java.util.Random;
 
 public class App
 {
     public static void main(String[] args) {
-        /*Gson gson = new Gson();
+
+        Gson gson = new Gson();
         Color colors[][] = new Color[4][5];
         Color chose = Color.RED;
         for(int i = 0; i < 4; i++) {
@@ -77,8 +79,8 @@ public class App
             System.out.println();
         }
 
-        command=null;
-        jsonObject = parser.parse(command).getAsJsonObject();*/
+        command = null;
+        jsonObject = parser.parse(command).getAsJsonObject();
     }
 }
 

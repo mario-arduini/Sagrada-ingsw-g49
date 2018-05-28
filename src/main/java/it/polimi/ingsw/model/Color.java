@@ -8,6 +8,7 @@ public enum Color{
     BLUE("\u001B[34m"),
     PURPLE("\u001B[35m");
 
+    public static final String RESET = "\u001B[0m";
     private String escape;
 
     Color(String escape) {

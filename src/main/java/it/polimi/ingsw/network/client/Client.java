@@ -1,5 +1,7 @@
 package it.polimi.ingsw.network.client;
 
+import it.polimi.ingsw.model.Color;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,7 +26,7 @@ public class Client {
     private boolean logged;
     private boolean serverConnected;
 
-    private Client(){
+    public Client(){
         players = new ArrayList<>();
         input = new BufferedReader(new InputStreamReader(System.in));
 
@@ -57,7 +59,7 @@ public class Client {
         }
         while(!isLogged())  //&& client.isServerConnected())
             if(!server.login())
-                ClientLogger.println("Login failed, token is not correct");
+                ClientLogger.println("Login failed, password is not correct");
             else{
                 ClientLogger.println("Login successful");
                 logged = true;
@@ -145,8 +147,10 @@ public class Client {
             ClientLogger.print("Insert your nickname: ");
             try {
                 user = input.readLine();
-                if(!checkNicknameProperties(user))
+                if(!checkNicknameProperties(user)) {
                     user = null;
+                    ClientLogger.println("Invalid nickname");
+                }
             } catch (IOException e) {
                 LOGGER.log(Level.WARNING, e.toString(), e);
                 ClientLogger.println(INVALID_COMMAND);
@@ -157,25 +161,96 @@ public class Client {
         return user;
     }
 
+    private boolean checkPasswordProperties(String password){
+        return password != null && !password.equals("") && password.length() >= 8;
+    }
+
     private boolean checkNicknameProperties(String user){
         return user != null && !user.equals("");
     }
 
-    String askToken(){
-        try {
-            ClientLogger.print("Insert your token: ");
-            return input.readLine();
-        } catch (IOException e) {
-            LOGGER.log(Level.WARNING, e.toString(), e);
+    String askPassword(){
+        String password = null;
+        while(password == null) {
+            ClientLogger.print("Insert your password: ");
+            try {
+                password = input.readLine();
+                if(!checkNicknameProperties(password)) {
+                    password = null;
+                    ClientLogger.println("Invalid nickname, must be at least 8 character");
+                }
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, e.toString(), e);
+                ClientLogger.println(INVALID_COMMAND);
+                password = null;
+            }
         }
-        return null;
-    }
+        return password;
 
-    void printToken(String token){
-        ClientLogger.println("Your token is " + token);
     }
+//    String askToken(){
+//        try {
+//            ClientLogger.print("Insert your token: ");
+//            return input.readLine();
+//        } catch (IOException e) {
+//            LOGGER.log(Level.WARNING, e.toString(), e);
+//        }
+//        return null;
+//    }
+//
+//    void printToken(String token){
+//        ClientLogger.println("Your token is " + token);
+//    }
 
     void setPrivateGoal(String[] privateGoal){}
+
+    public void showSchema(char[][] schema, int difficulty){
+        ClientLogger.println("");
+        ClientLogger.println("Questa finestra ha difficoltà " + difficulty);
+        for(int i = 0; i < 4; i++) {
+            for (int j = 0; j < 5; j++) {
+                switch (schema[i][j]){
+                    case 'R':
+                        ClientLogger.print(Color.RED.escape() + "[R] " + Color.RESET);
+                        break;
+                    case 'G':
+                        ClientLogger.print(Color.GREEN.escape() + "[G] " + Color.RESET);
+                        break;
+                    case 'Y':
+                        ClientLogger.print(Color.YELLOW.escape() + "[Y] " + Color.RESET);
+                        break;
+                    case 'P':
+                        ClientLogger.print(Color.PURPLE.escape() + "[P] " + Color.RESET);
+                        break;
+                    case 'B':
+                        ClientLogger.print(Color.BLUE.escape() + "[B] " + Color.RESET);
+                        break;
+                    case '1':
+                        ClientLogger.print("[1] ");
+                        break;
+                    case '2':
+                        ClientLogger.print("[2] ");
+                        break;
+                    case '3':
+                        ClientLogger.print("[3] ");
+                        break;
+                    case '4':
+                        ClientLogger.print("[4] ");
+                        break;
+                    case '5':
+                        ClientLogger.print("[5] ");
+                        break;
+                    case '6':
+                        ClientLogger.print("[6] ");
+                        break;
+                    default:
+                        ClientLogger.print("[ ] ");
+                        break;
+                }
+            }
+            ClientLogger.println("");
+        }
+    }
 
     private void logout(){
         try {
@@ -198,7 +273,8 @@ public class Client {
 
         players.addAll(Arrays.asList(newPlayers));
         if(!logged){
-            ClientLogger.println("Users playing:");
+            ClientLogger.println("Wainting room:");
+            ClientLogger.println(nickname);
             Arrays.stream(newPlayers).forEach(ClientLogger::println);
         }
         else
