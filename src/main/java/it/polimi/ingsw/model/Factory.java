@@ -1,11 +1,20 @@
 package it.polimi.ingsw.model;
 
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
 import it.polimi.ingsw.model.exceptions.OutOfCardsException;
 import it.polimi.ingsw.model.goalcards.*;
 import it.polimi.ingsw.model.toolcards.*;
+import it.polimi.ingsw.network.server.Logger;
+import it.polimi.ingsw.utilities.FilesUtil;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.*;
 
 public class Factory {
@@ -16,8 +25,7 @@ public class Factory {
     private List<Integer> publicGoalCards;
     private int publicGoalCardsIndex;
     private List<Dice> diceBag;
-    private List<Integer> schemas;
-    private int schemasNumber;
+    private Stack<Schema> schemas;
 
     public static final int DICE_NUMBER_PER_COLOR = 18;
 
@@ -28,7 +36,7 @@ public class Factory {
         this.privateGoalCardsIndex = 0;
         this.publicGoalCards = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
         this.publicGoalCardsIndex = 0;
-        this.diceBag = new ArrayList<Dice>();
+        this.diceBag = new ArrayList<>();
         Random diceRoller = new Random();
         try {
             for (int i = 0; i < DICE_NUMBER_PER_COLOR; i++) {
@@ -41,9 +49,7 @@ public class Factory {
         } catch (InvalidDiceValueException e) {
             e.printStackTrace();
         }
-        this.schemas = new ArrayList<Integer>();
-        schemasNumber = 24; // TODO: autodetect of schemasNumber
-        for(int i=0;i<schemasNumber;i++) schemas.add(i);
+        this.schemas = loadSchemasFromFile();
 
         java.util.Collections.shuffle(toolCards);
         java.util.Collections.shuffle(privateGoalCards);
@@ -54,13 +60,32 @@ public class Factory {
 
     }
 
+
     public List<Schema> extractSchemas(int schemasToExtract) throws IndexOutOfBoundsException {
-        List<Schema> extracted = new ArrayList<Schema>();
+        Stack<Schema> extracted = new Stack<>();
         for(int i=0;i<schemasToExtract;i++){
-            Schema current = getSchemaFromIndex(schemas.remove(schemas.size()-1));
-            extracted.add(current);
+            extracted.add(schemas.pop());
         }
         return extracted;
+    }
+
+    public Stack<Schema> loadSchemasFromFile(){
+        Stack<Schema> schemas= new Stack<>();
+        List<File> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER);
+        JsonParser parser = new JsonParser();
+        JsonObject jsonObject;
+        Gson gson = new Gson();
+
+        for (File file:files){
+            try {
+                jsonObject = parser.parse(new FileReader(file)).getAsJsonObject();
+                schemas.push(gson.fromJson(jsonObject, Schema.class));
+            } catch (FileNotFoundException e) {
+                Logger.print(String.format("Schema not found %s", file.getAbsolutePath()));
+                e.printStackTrace();
+            }
+        }
+        return schemas;
     }
 
     public Schema getSchemaFromIndex(Integer index) {

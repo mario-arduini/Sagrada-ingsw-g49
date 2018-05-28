@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class GamesHandler {
     private List<User> players;
     private HashMap<User,Game> gameReference;
-    private static final String TIMEOUT_FILE_NAME = "src/main/resources/timeout.txt";
+    private static final String TIMEOUT_FILE_NAME = "timeout.txt";
     private int secondsTimer;
     private Timer timer;
 
@@ -23,8 +23,7 @@ public class GamesHandler {
     public GamesHandler(){
         this.players = new ArrayList<>();
         this.gameReference = new HashMap<>();
-        String filename = (new File("./")).getAbsolutePath();
-        filename = filename.substring(0, filename.length() - 1) + TIMEOUT_FILE_NAME;
+        String filename = getClass().getClassLoader().getResource(TIMEOUT_FILE_NAME).getFile();
         this.secondsTimer = readIntFromFile(filename);
         //TODO: Throw exception if file does not exist
     }
@@ -140,6 +139,7 @@ public class GamesHandler {
         for (User player:players) {
             gameReference.put(player, game);
             player.setGame(game);
+            player.notifySchemas(game.extractSchemas());
             //player.notifySchemas(game.get);
         }
 

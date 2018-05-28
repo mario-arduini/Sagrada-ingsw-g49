@@ -5,6 +5,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
 import it.polimi.ingsw.model.Game;
+import it.polimi.ingsw.model.Player;
+import it.polimi.ingsw.model.Schema;
 
 import java.io.*;
 import java.net.Socket;
@@ -52,10 +54,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         socketSendMessage(message);
 
 
-        while (connected && !this.login()) {
-            message = createMessage("failed");
-            socketSendMessage(message);
-        }
+        while (connected && !this.login());
 
         while(connected){
 
@@ -94,7 +93,9 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     public void notifyLogin(String nickname) {
         JsonObject message;
         message = createMessage("new_player");
-        message.addProperty("nicknames", gson.toJson((new ArrayList<String>()).add(nickname)));
+        List <String> nicks = new ArrayList<>();
+        nicks.add(nickname);
+        message.addProperty("nicknames", gson.toJson(nicks));
         socketSendMessage(message);
     }
 
@@ -111,6 +112,15 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         JsonObject message;
         message = createMessage("quit");
         message.addProperty("nickname", nickname);
+        socketSendMessage(message);
+    }
+
+    @Override
+    public void notifySchemas(List<Schema> schemas){
+        JsonObject message;
+        message = createMessage("schema");
+        for (Integer i = 0; i < schemas.size(); i++)
+            message.addProperty(i.toString(), gson.toJson(schemas.get(i)));
         socketSendMessage(message);
     }
 

@@ -2,6 +2,7 @@ package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
+import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.network.server.ConnectionHandler;
 
 import java.util.List;
@@ -45,7 +46,8 @@ public class User extends Player {
         this.connection.notifyLogout(nickname);
     }
 
-    public void notifySchemas(){
+    public void notifySchemas(List<Schema> schemas){
+        this.connection.notifySchemas(schemas);
     }
 
 }

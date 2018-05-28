@@ -15,6 +15,7 @@ public class Game {
     private final PublicGoal[] publicGoals;
     private int nextFirstPlayer;
     private Round currentRound;
+    private static final int schemaPerPlayer = 4;
 
     public Game(List<Player> playerList) { //Fix UML for players
         this.dealer = new Factory();
@@ -124,5 +125,9 @@ public class Game {
 
         return roundPlayers;
 
+    }
+
+    public List<Schema> extractSchemas(){
+        return this.dealer.extractSchemas(schemaPerPlayer);
     }
 }
