@@ -224,7 +224,7 @@ public class Client {
             ClientLogger.print("Insert column: ");
             column = readInt();
 
-            while(!server.placeDice(draftpool.get(dice - 1), row, column)) {
+            while(dice>draftpool.size()||dice<=0||!server.placeDice(draftpool.get(dice - 1), row, column)) {
                 ClientLogger.println("Invalid move!");
                 ClientLogger.print("Insert dice number: ");
                 dice = readInt();
