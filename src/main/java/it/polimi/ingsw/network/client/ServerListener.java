@@ -6,10 +6,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ServerListener extends Thread {
 
@@ -86,6 +83,9 @@ public class ServerListener extends Thread {
                     case "schema-chosen":
                         listType = new TypeToken<HashMap<String, Schema>>(){}.getType();
                         HashMap<String, Schema> windows = gson.fromJson(jsonObject.get("content").getAsString(), listType);
+                        for (Map.Entry<String, Schema> entry : windows.entrySet()) {
+                            if(entry.getKey()!=client.getGameSnapshot().getPlayer().getNickname()) client.getGameSnapshot().addOtherPlayer(entry.getKey(),entry.getValue());
+                        }
 //                        Set<String> keys = innerObject.keySet();
 //                        keys.remove("schema-chosen");
 //                        for(String key : keys)

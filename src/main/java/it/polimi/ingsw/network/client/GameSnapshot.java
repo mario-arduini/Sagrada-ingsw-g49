@@ -1,8 +1,7 @@
 package it.polimi.ingsw.network.client;
 
 import it.polimi.ingsw.network.client.Dice;
-import it.polimi.ingsw.model.Player;
-import it.polimi.ingsw.model.Schema;
+import it.polimi.ingsw.network.client.Schema;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
@@ -32,6 +31,12 @@ public class GameSnapshot {
 
     public PlayerSnapshot getPlayer() {
         return player;
+    }
+
+    public void addOtherPlayer(String nick,Schema schema){
+        PlayerSnapshot newPlayer = new PlayerSnapshot(nick);
+        newPlayer.setWindow(schema);
+        otherPlayers.add(newPlayer);
     }
 
     public List<PlayerSnapshot> getOtherPlayers() {
