@@ -90,7 +90,6 @@ public class Round {
     } */
 
     public void useDice(int row, int column, Dice dice) throws NoAdjacentDiceException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, DiceNotInDraftPoolException, DiceAlreadyExtractedException {
-
         if(diceExtracted)
             throw new DiceAlreadyExtractedException();
         if (!draftPool.contains(dice))

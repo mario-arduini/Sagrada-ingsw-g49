@@ -92,9 +92,11 @@ public class ServerListener extends Thread {
                         int row = jsonObject.get("row").getAsInt();
                         int col = jsonObject.get("column").getAsInt();
                         String nick = jsonObject.get("nickname").getAsString();
-                        client.getGameSnapshot().getDraftPool().remove(dicePlaced);
-                        client.getGameSnapshot().findPlayer(nick).get().getWindow().addDice(row,col,dicePlaced);
-                        client.printGame();
+                        if(!nick.equals(client.getGameSnapshot().getPlayer().getNickname())){
+                            client.getGameSnapshot().getDraftPool().remove(dicePlaced);
+                            client.getGameSnapshot().findPlayer(nick).get().getWindow().addDice(row,col,dicePlaced);
+                            client.printGame();
+                        }
                         break;
                     default:
                         break;
