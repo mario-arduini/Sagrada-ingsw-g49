@@ -78,8 +78,10 @@ public class ServerListener extends Thread {
                     case "round":
                         listType = new TypeToken<List<Dice>>(){}.getType();
                         client.notifyNewRound(jsonObject.get("player").getAsString(), jsonObject.get("new-round").getAsBoolean());
-                        //client.printDraftPool(gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType));
-                        client.playRound();
+                        List<Dice> draftPool = gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType);
+                        client.getGameSnapshot().setDraftPool(draftPool);
+                        client.printGame();
+                        client.playRound(draftPool);
                         break;
                     case "schema-chosen":
                         listType = new TypeToken<HashMap<String, Schema>>(){}.getType();

@@ -54,6 +54,10 @@ public class GameSnapshot {
         return draftPool;
     }
 
+    public void setDraftPool(List<Dice> draftPool){
+        this.draftPool = draftPool;
+    }
+
     private void addDiceToTracker(Dice dice){
         this.roundTrack[trackIndex++] = new Dice(dice);
     }

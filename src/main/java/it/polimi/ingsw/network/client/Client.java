@@ -212,7 +212,7 @@ public class Client {
             myTurn = false;
         }
     }
-     void playRound(){
+     void playRound(List<Dice> draftpool){
         int dice, row, column;
         if(myTurn)
             try {
@@ -223,8 +223,8 @@ public class Client {
                 ClientLogger.print("Insert column: ");
                 column = Integer.parseInt(input.readLine());
 
-                if(!server.placeDice(dice, row, column)) {
-                    playRound();
+                if(!server.placeDice(draftpool.get(dice), row, column)) {
+                    playRound(draftpool);
                     ClientLogger.println("Invalid move!");
                 }
             }catch (IOException e){

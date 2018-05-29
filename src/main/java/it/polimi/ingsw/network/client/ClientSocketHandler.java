@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.client;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -94,16 +95,18 @@ public class ClientSocketHandler implements Connection {
     }
 
     @Override
-    public boolean placeDice(int dice, int row, int column){
+    public boolean placeDice(Dice dice, int row, int column){
         JsonParser parser = new JsonParser();
-        createJsonCommand("place");
-        jsonObject.addProperty("dice", dice);
-        jsonObject.addProperty("row", row);
-        jsonObject.addProperty("column", column);
+        Gson gson = new Gson();
+        createJsonCommand("place-dice");
+        jsonObject.addProperty("dice", gson.toJson(dice));
+        jsonObject.addProperty("row", row - 1);
+        jsonObject.addProperty("column", column - 1);
         socketPrintLine(jsonObject);
 
-        jsonObject = parser.parse(socketReadLine()).getAsJsonObject();
-        return jsonObject.get("message").getAsBoolean();
+        if(parser.parse(socketReadLine()).getAsJsonObject().get("message").getAsString().equals("verified"))
+            return true;
+        return false;
     }
 
     @Override
