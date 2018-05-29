@@ -229,11 +229,10 @@ public class Client {
                 }
 
                 gameSnapshot.getDraftPool().remove(dice);
-                gameSnapshot.getPlayer().getWindow().addDice(row,column,draftpool.get(dice-1));
+                gameSnapshot.getPlayer().getWindow().addDice(row-1,column-1,draftpool.get(dice-1));
                 printGame();
 
-                if(input.readLine().equals("pass"))
-                    server.pass();
+                server.pass();
             }catch (IOException e){
 
             }
