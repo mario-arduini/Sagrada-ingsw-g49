@@ -223,10 +223,12 @@ public class Client {
                 ClientLogger.print("Insert column: ");
                 column = Integer.parseInt(input.readLine());
 
-                if(!server.placeDice(draftpool.get(dice), row, column)) {
-                    playRound(draftpool);
+                if(!server.placeDice(draftpool.get(dice - 1), row, column)) {
                     ClientLogger.println("Invalid move!");
+                    playRound(draftpool);
                 }
+                if(input.readLine().equals("pass"))
+                    server.pass();
             }catch (IOException e){
 
             }

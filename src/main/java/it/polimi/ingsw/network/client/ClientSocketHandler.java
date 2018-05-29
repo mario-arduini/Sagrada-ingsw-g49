@@ -109,6 +109,10 @@ public class ClientSocketHandler implements Connection {
         return false;
     }
 
+    public void pass(){
+        createJsonCommand("pass");
+    }
+
     @Override
     public void logout(){
         createJsonCommand("logout");
