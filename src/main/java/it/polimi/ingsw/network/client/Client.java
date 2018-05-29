@@ -216,6 +216,7 @@ public class Client {
         int dice, row, column;
         if(myTurn)
             try {
+
                 ClientLogger.print("Insert dice number: ");
                 dice = Integer.parseInt(input.readLine());
                 ClientLogger.print("Insert row: ");
@@ -223,9 +224,14 @@ public class Client {
                 ClientLogger.print("Insert column: ");
                 column = Integer.parseInt(input.readLine());
 
-                if(!server.placeDice(draftpool.get(dice - 1), row, column)) {
+                while(!server.placeDice(draftpool.get(dice - 1), row, column)) {
                     ClientLogger.println("Invalid move!");
-                    playRound(draftpool);
+                    ClientLogger.print("Insert dice number: ");
+                    dice = Integer.parseInt(input.readLine());
+                    ClientLogger.print("Insert row: ");
+                    row = Integer.parseInt(input.readLine());
+                    ClientLogger.print("Insert column: ");
+                    column = Integer.parseInt(input.readLine());
                 }
 
                 gameSnapshot.getDraftPool().remove(dice-1);
