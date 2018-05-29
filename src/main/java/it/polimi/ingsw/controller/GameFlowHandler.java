@@ -1,8 +1,11 @@
 package it.polimi.ingsw.controller;
 
+import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
+import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.Schema;
+import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.server.ConnectionHandler;
 
 import java.util.List;
@@ -28,6 +31,20 @@ public class GameFlowHandler {
 
     public void chooseSchema(Integer schemaNumber){
         player.setWindow(initialSchemas.get(schemaNumber));
+    }
+
+    public void placeDice(int row, int column, Dice dice) throws NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException {
+        if (!game.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
+        game.placeDice(row, column, dice);
+    }
+
+    public void notifyDicePlaced(int row, int column, Dice dice){
+        gamesHandler.notifyAllDicePlaced(game, player.getNickname(), row, column, dice);
+    }
+
+    public void pass() throws NotYourTurnException{
+        if (!game.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
+        gamesHandler.goOn(game);
     }
 
     public void checkGameReady(){

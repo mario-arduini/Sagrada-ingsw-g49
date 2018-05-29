@@ -60,4 +60,8 @@ public class User extends Player {
         connection.notifyOthersSchemas(playersSchemas);
     }
 
+    public void notifyDicePlaced(String nickname, int row, int column, Dice dice){
+        connection.notifyDicePlaced(nickname, row, column, dice);
+    }
+
 }

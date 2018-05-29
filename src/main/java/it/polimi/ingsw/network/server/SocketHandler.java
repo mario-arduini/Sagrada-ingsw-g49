@@ -12,6 +12,7 @@ import it.polimi.ingsw.model.Schema;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,11 +84,27 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                                 gameFlowHandler.chooseSchema(getJsonPositiveIntValue(message, "id"));
                                 socketSendMessage(createMessage("verified"));
                                 gameFlowHandler.checkGameReady();
-                            } catch (IndexOutOfBoundsException e){
+                            } catch (IndexOutOfBoundsException | InvalidParameterException e){
                                 socketSendMessage(createMessage("failed"));
                             }
                             break;
-
+                        case "place-dice":
+                            try{
+                                gameFlowHandler.placeDice(getJsonPositiveIntValue(message, "row"), getJsonPositiveIntValue(message, "column"), gson.fromJson(message.get("dice").getAsString(), Dice.class));
+                                socketSendMessage(createMessage("verified"));
+                                gameFlowHandler.notifyDicePlaced(getJsonPositiveIntValue(message, "row"), getJsonPositiveIntValue(message, "column"), gson.fromJson(message.get("dice").getAsString(), Dice.class));
+                                //TODO: separe Exceptions and send appropriate failure message
+                            } catch (Exception e){
+                                Logger.print(e);
+                                socketSendMessage(createMessage("failed"));
+                            }
+                            break;
+                        case "pass":
+                            try{
+                                gameFlowHandler.pass();
+                            }catch (Exception e){
+                                Logger.print(e);
+                            }
                     }
             }catch (NullPointerException e){
                 Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
@@ -107,12 +124,21 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         }
     }
 
-    private int getJsonPositiveIntValue(JsonObject message, String key){
+    private int getJsonPositiveIntValue(JsonObject message, String key) throws InvalidParameterException{
+        int i;
         try {
-            return message.get(key).getAsInt();
+            i = message.get(key).getAsInt();
         }catch (Exception e){
             return -1;
         }
+        if (i<0) throw new InvalidParameterException();
+        return i;
+    }
+
+    private void createErrorMessage(String description){
+        JsonObject message;
+        message = createMessage("failed");
+        message.addProperty("info", description);
     }
 
     @Override
@@ -165,6 +191,17 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         message.addProperty("player", currentPlayer);
         message.addProperty("draft-pool", gson.toJson(draftPool));
         message.addProperty("new-round", newRound);
+        socketSendMessage(message);
+    }
+
+    @Override
+    public void notifyDicePlaced(String nickname, int row, int column, Dice dice){
+        JsonObject message;
+        message = createMessage("update-window");
+        message.addProperty("nickname", nickname);
+        message.addProperty("row", row);
+        message.addProperty("column", column);
+        message.addProperty("dice", gson.toJson(dice));
         socketSendMessage(message);
     }
 

@@ -35,11 +35,39 @@ public class GamesHandler {
             List<Dice> draftPool = game.getCurrentRound().getDraftPool();
             HashMap<String, Schema> playersSchemas = new HashMap<>();
 
-            coplayers.forEach(player -> player.notifyRound(firstPlayer, draftPool, true));
             for (Player player : coplayers)
                 playersSchemas.put(player.getNickname(), player.getWindow().getSchema());
             coplayers.forEach(player -> player.notifyOthersSchemas(playersSchemas));
+
+            coplayers.forEach(player -> player.notifyRound(firstPlayer, draftPool, true));
         }
+    }
+
+    public synchronized void goOn(Game game) {
+        boolean newRound = false;
+        List<User> coplayers = getPlayersByGame(game);
+        String firstPlayer;
+        try {
+            firstPlayer = game.getCurrentRound().nextPlayer().getNickname();
+            //Logger.print("Player playing1: " + game.getCurrentRound().getCurrentPlayer().getNickname());
+        }catch (NoMorePlayersException e){
+            game.nextRound();
+            firstPlayer = game.getCurrentRound().getCurrentPlayer().getNickname();
+            newRound = true;
+            //Logger.print("Player playing2: " + game.getCurrentRound().getCurrentPlayer().getNickname());
+        }
+        List<Dice> draftPool = game.getCurrentRound().getDraftPool();
+
+        //TODO: why does functional require those final values here??
+        boolean finalNewRound = newRound;
+        String finalFirstPlayer = firstPlayer;
+        coplayers.forEach(player -> player.notifyRound(finalFirstPlayer, draftPool, finalNewRound));
+    }
+
+    public synchronized void notifyAllDicePlaced(Game game, String nickname, int row, int column, Dice dice){
+        boolean newRound = false;
+        List<User> coplayers = getPlayersByGame(game);
+        coplayers.forEach(player -> player.notifyDicePlaced(nickname, row, column, dice));
     }
 
     public synchronized User login(String nickname, String password, ConnectionHandler connection){

@@ -117,6 +117,11 @@ public class Game {
         draftPool = currentRound.getDraftPool();
         addDiceToTracker(draftPool.get((new Random()).nextInt(draftPool.size())));
         currentRound = new Round(dealer.extractPool(2*(size) + 1), roundPlayers);
+        try {
+            currentRound.nextPlayer();
+        } catch (NoMorePlayersException e) {
+            e.printStackTrace();
+        }
     }
 
     private List<Player> createRoundPlayers(int size){

@@ -96,7 +96,8 @@ public class Round {
         if (!draftPool.contains(dice))
             throw new DiceNotInDraftPoolException();
 
-        draftPool.remove(dice);
+
+        //TODO: fix for toolcards
         currentDiceDrafted = dice;
 
         // use "after draft" type toolcards
@@ -104,8 +105,9 @@ public class Round {
             activeToolCard.use(this);
         }
 
-        players.get(currentPlayer).getWindow().addDice(row,column,currentDiceDrafted);
+        players.get(currentPlayer).getWindow().addDice(row, column, currentDiceDrafted);
 
+        draftPool.remove(dice);
         diceExtracted = true;
     }
 
