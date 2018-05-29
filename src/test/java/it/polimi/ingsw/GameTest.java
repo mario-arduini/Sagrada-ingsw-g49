@@ -68,7 +68,7 @@ public class GameTest {
 
         //Check first player is circular
 
-        assertDoesNotThrow(() -> tmpPlayer.getAndSet(game.get().getCurrentRound().nextPlayer()));
+        assertDoesNotThrow(() -> tmpPlayer.getAndSet(game.get().getCurrentRound().getCurrentPlayer()));
         assertTrue(players.contains(tmpPlayer.get()));
         assertEquals(players.get((index + 1) % players.size()), tmpPlayer.get());
 

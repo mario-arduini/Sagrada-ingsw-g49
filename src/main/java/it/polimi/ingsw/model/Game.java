@@ -82,7 +82,7 @@ public class Game {
 
     //TODO: Fix UML
     public Round getCurrentRound(){
-        return new Round(currentRound);
+        return this.currentRound;
     }
 
     public void placeDice(int row, int column, Dice dice) throws NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException {
