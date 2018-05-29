@@ -228,7 +228,7 @@ public class Client {
                     playRound(draftpool);
                 }
 
-                gameSnapshot.getDraftPool().remove(dice);
+                gameSnapshot.getDraftPool().remove(dice-1);
                 gameSnapshot.getPlayer().getWindow().addDice(row-1,column-1,draftpool.get(dice-1));
                 printGame();
 
