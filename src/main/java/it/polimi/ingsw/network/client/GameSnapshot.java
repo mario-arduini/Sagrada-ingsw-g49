@@ -63,6 +63,13 @@ public class GameSnapshot {
         this.draftPool = draftPool;
     }
 
+    public Optional<PlayerSnapshot> findPlayer(String nickname){
+        List <PlayerSnapshot> allPlayers = new ArrayList<>();
+        allPlayers.add(this.player);
+        allPlayers.addAll(this.otherPlayers);
+        return allPlayers.stream().filter(player -> player.getNickname().equalsIgnoreCase(nickname)).findFirst();
+    }
+
     private void addDiceToTracker(Dice dice){
         this.roundTrack[trackIndex++] = new Dice(dice);
     }

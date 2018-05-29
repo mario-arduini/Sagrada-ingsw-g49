@@ -86,11 +86,15 @@ public class ServerListener extends Thread {
                         for (Map.Entry<String, Schema> entry : windows.entrySet()) {
                             if(!entry.getKey().equals(client.getGameSnapshot().getPlayer().getNickname())) client.getGameSnapshot().addOtherPlayer(entry.getKey(),entry.getValue());
                         }
-//                        Set<String> keys = innerObject.keySet();
-//                        keys.remove("schema-chosen");
-//                        for(String key : keys)
-//                            windows.put(key, gson.fromJson(innerObject.get(key).getAsString(), Schema.class));
-                        //client.printOthersSchema(windows);
+                        break;
+                    case "update-window":
+                        Dice dicePlaced = gson.fromJson(jsonObject.get("dice").getAsString(),Dice.class);
+                        int row = jsonObject.get("row").getAsInt();
+                        int col = jsonObject.get("column").getAsInt();
+                        String nick = jsonObject.get("nickname").getAsString();
+                        client.getGameSnapshot().getDraftPool().remove(dicePlaced);
+                        client.getGameSnapshot().findPlayer(nick).get().getWindow().addDice(row,col,dicePlaced);
+                        client.printGame();
                         break;
                     default:
                         break;
