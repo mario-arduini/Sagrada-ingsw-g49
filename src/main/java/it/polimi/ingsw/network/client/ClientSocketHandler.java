@@ -111,6 +111,7 @@ public class ClientSocketHandler implements Connection {
 
     public void pass(){
         createJsonCommand("pass");
+        socketPrintLine(jsonObject);
     }
 
     @Override

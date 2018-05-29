@@ -84,7 +84,7 @@ public class ServerListener extends Thread {
                         listType = new TypeToken<HashMap<String, Schema>>(){}.getType();
                         HashMap<String, Schema> windows = gson.fromJson(jsonObject.get("content").getAsString(), listType);
                         for (Map.Entry<String, Schema> entry : windows.entrySet()) {
-                            if(entry.getKey()!=client.getGameSnapshot().getPlayer().getNickname()) client.getGameSnapshot().addOtherPlayer(entry.getKey(),entry.getValue());
+                            if(!entry.getKey().equals(client.getGameSnapshot().getPlayer().getNickname())) client.getGameSnapshot().addOtherPlayer(entry.getKey(),entry.getValue());
                         }
 //                        Set<String> keys = innerObject.keySet();
 //                        keys.remove("schema-chosen");
