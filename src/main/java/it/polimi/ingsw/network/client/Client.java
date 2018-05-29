@@ -234,8 +234,8 @@ public class Client {
                     column = Integer.parseInt(input.readLine());
                 }
 
-                gameSnapshot.getDraftPool().remove(dice-1);
                 gameSnapshot.getPlayer().getWindow().addDice(row-1,column-1,draftpool.get(dice-1));
+                gameSnapshot.getDraftPool().remove(dice-1);
                 printGame();
 
                 server.pass();
