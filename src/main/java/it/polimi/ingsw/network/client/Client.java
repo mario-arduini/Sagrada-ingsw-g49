@@ -227,6 +227,11 @@ public class Client {
                     ClientLogger.println("Invalid move!");
                     playRound(draftpool);
                 }
+
+                gameSnapshot.getDraftPool().remove(dice);
+                gameSnapshot.getPlayer().getWindow().addDice(row,column,draftpool.get(dice-1));
+                printGame();
+
                 if(input.readLine().equals("pass"))
                     server.pass();
             }catch (IOException e){
