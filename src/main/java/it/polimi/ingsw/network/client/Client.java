@@ -95,7 +95,7 @@ public class Client {
         int port;
         ClientLogger.print("Insert server port: ");
         try {
-            port = Integer.parseInt(input.readLine());
+            port = readInt();
             if(port < 1000 || port > 65535) {
                 ClientLogger.println("Invalid server port");
                 return  0;
@@ -105,11 +105,11 @@ public class Client {
             ClientLogger.println("Server port must be a number");
             return 0;
         }
-        catch (IOException e) {
-            LOGGER.log(Level.WARNING, e.toString(), e);
-            ClientLogger.println(INVALID_COMMAND);
-            return 0;
-        }
+//        catch (IOException e) {
+//            LOGGER.log(Level.WARNING, e.toString(), e);
+//            ClientLogger.println(INVALID_COMMAND);
+//            return 0;
+//        }
         return port;
     }
 
@@ -215,33 +215,46 @@ public class Client {
      void playRound(List<Dice> draftpool){
         int dice, row, column;
         if(myTurn)
-            try {
+        {
 
+            ClientLogger.print("Insert dice number: ");
+            dice = readInt();
+            ClientLogger.print("Insert row: ");
+            row = readInt();
+            ClientLogger.print("Insert column: ");
+            column = readInt();
+
+            while(!server.placeDice(draftpool.get(dice - 1), row, column)) {
+                ClientLogger.println("Invalid move!");
                 ClientLogger.print("Insert dice number: ");
-                dice = Integer.parseInt(input.readLine());
+                dice = readInt();
                 ClientLogger.print("Insert row: ");
-                row = Integer.parseInt(input.readLine());
+                row = readInt();
                 ClientLogger.print("Insert column: ");
-                column = Integer.parseInt(input.readLine());
-
-                while(!server.placeDice(draftpool.get(dice - 1), row, column)) {
-                    ClientLogger.println("Invalid move!");
-                    ClientLogger.print("Insert dice number: ");
-                    dice = Integer.parseInt(input.readLine());
-                    ClientLogger.print("Insert row: ");
-                    row = Integer.parseInt(input.readLine());
-                    ClientLogger.print("Insert column: ");
-                    column = Integer.parseInt(input.readLine());
-                }
-
-                gameSnapshot.getPlayer().getWindow().addDice(row-1,column-1,draftpool.get(dice-1));
-                gameSnapshot.getDraftPool().remove(dice-1);
-                printGame();
-
-                server.pass();
-            }catch (IOException e){
-
+                column = readInt();
             }
+
+            gameSnapshot.getPlayer().getWindow().addDice(row-1,column-1,draftpool.get(dice-1));
+            gameSnapshot.getDraftPool().remove(dice-1);
+            printGame();
+
+            server.pass();
+        }
+     }
+
+     private int readInt(){
+        boolean ok = false;
+        int inputConsole = 0;
+        while (!ok){
+            try{
+                inputConsole = Integer.parseInt(input.readLine());
+                ok = true;
+            }
+            catch (Exception e){
+                ClientLogger.print("Invalid format, retry: ");
+            }
+        }
+        return inputConsole;
      }
 
     void setPrivateGoal(String[] privateGoal){}
@@ -323,17 +336,17 @@ public class Client {
         int choice = 0;
         while (choice == 0) {
             ClientLogger.print("Insert your choice: ");
-            try {
-                choice = Integer.parseInt(input.readLine());  //TODO whyyyy?
+            //try {
+                choice = readInt();  //TODO whyyyy?
                 if(choice < 1 || choice > 4){
                     choice = 0;
                     ClientLogger.print("Choice not valid");
                 }
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, e.toString(), e);
-                ClientLogger.println(INVALID_COMMAND);
-                choice = 0;
-            }
+//            } catch (IOException e) {
+//                LOGGER.log(Level.WARNING, e.toString(), e);
+//                ClientLogger.println(INVALID_COMMAND);
+//                choice = 0;
+//            }
         }
         //server.sendSchema(choice - 1);
         if(!server.sendSchema(choice - 1)) {
