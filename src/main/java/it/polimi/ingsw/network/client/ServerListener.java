@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -54,21 +55,38 @@ public class ServerListener extends Thread {
                         client.removePlayer(jsonObject.get("nickname").getAsString());
                         break;
                     case "verified":
-                        server.resultLogin(true);
+                        server.notifyContinue(true);
                         break;
                     case "failed":
-                        server.resultLogin(false);
+                        server.notifyContinue(false);
+                        break;
+                    case "start_game":
+                        client.notifyStartGame();
                         break;
                     case "privateGoal":
                         client.setPrivateGoal(null);  //TODO
                         break;
-                    case "schema":
+                    case "schema-choice":
                         List<Schema> schemas = new ArrayList<>();
-                        //listType = new TypeToken<List<Schema>>(){}.getType();
                         for(Integer i = 0; i < jsonObject.keySet().size() - 1; i++)
                             schemas.add(gson.fromJson(jsonObject.get(i.toString()).getAsString(), Schema.class));
-                        client.print_schemas(schemas);
+                        client.printSchemas(schemas);
                         client.chooseSchema();
+                        break;
+                    case "round":
+                        listType = new TypeToken<List<Dice>>(){}.getType();
+                        client.notifyNewRound(jsonObject.get("player").getAsString(), jsonObject.get("new-round").getAsBoolean());
+                        client.printDraftPool(gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType));
+                        client.playRound();
+                        break;
+                    case "schema-chosen":
+                        listType = new TypeToken<HashMap<String, Schema>>(){}.getType();
+                        HashMap<String, Schema> windows = gson.fromJson(jsonObject.get("content").getAsString(), listType);
+//                        Set<String> keys = innerObject.keySet();
+//                        keys.remove("schema-chosen");
+//                        for(String key : keys)
+//                            windows.put(key, gson.fromJson(innerObject.get(key).getAsString(), Schema.class));
+                        //client.printOthersSchema(windows);
                         break;
                     default:
                         break;

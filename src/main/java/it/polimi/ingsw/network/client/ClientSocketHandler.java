@@ -1,6 +1,8 @@
 package it.polimi.ingsw.network.client;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.text.DecimalFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,6 +25,7 @@ public class ClientSocketHandler implements Connection {
     private ServerListener serverListener;
     private boolean flagContinue;
     private boolean connected;
+    private boolean serverResult;
     JsonObject jsonObject;
 
 
@@ -40,6 +44,7 @@ public class ClientSocketHandler implements Connection {
         flagContinue = false;
     }
 
+    @Override
     public synchronized boolean login() {
 
         createJsonCommand("login");
@@ -54,22 +59,55 @@ public class ClientSocketHandler implements Connection {
             } catch (InterruptedException e) {
                 LOGGER.log(Level.WARNING, e.toString(), e);
             }
+        connected = serverResult;
         flagContinue = false;
         return connected;
     }
 
-    synchronized void resultLogin(boolean result){
+    synchronized void notifyContinue(boolean result){
+        serverResult = result;
         flagContinue = true;
-        connected = result;
         notifyAll();
     }
 
-    public void sendSchema(int schema){
+    @Override
+    public synchronized boolean sendSchema(int schema){
+        JsonParser parser = new JsonParser();
         createJsonCommand("schema");
-        jsonObject.addProperty("schema", schema);
+        jsonObject.addProperty("id", schema);
         socketPrintLine(jsonObject);
+
+        jsonObject = parser.parse(socketReadLine()).getAsJsonObject();
+        if(jsonObject.get("message").getAsString().equals("verified"))
+            return true;
+        return false;
+
+//        while (!flagContinue)
+//            try {
+//                wait();
+//            } catch (InterruptedException e) {
+//                LOGGER.log(Level.WARNING, e.toString(), e);
+//            }
+//        flagContinue = false;
+//        if(serverResult)
+//            return true;
+//        return false;
     }
 
+    @Override
+    public boolean placeDice(int dice, int row, int column){
+        JsonParser parser = new JsonParser();
+        createJsonCommand("place");
+        jsonObject.addProperty("dice", dice);
+        jsonObject.addProperty("row", row);
+        jsonObject.addProperty("column", column);
+        socketPrintLine(jsonObject);
+
+        jsonObject = parser.parse(socketReadLine()).getAsJsonObject();
+        return jsonObject.get("message").getAsBoolean();
+    }
+
+    @Override
     public void logout(){
         createJsonCommand("logout");
         socketPrintLine(jsonObject);

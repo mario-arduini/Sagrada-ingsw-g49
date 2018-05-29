@@ -2,6 +2,7 @@ package it.polimi.ingsw.network.client;
 
 public interface Connection {
     boolean login();
-    void sendSchema(int schema);
+    boolean sendSchema(int schema);
+    boolean placeDice(int dice, int row, int column);
     void logout();
 }
