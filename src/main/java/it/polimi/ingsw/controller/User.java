@@ -1,10 +1,12 @@
 package it.polimi.ingsw.controller;
 
+import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.network.server.ConnectionHandler;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class User extends Player {
@@ -48,6 +50,14 @@ public class User extends Player {
 
     public void notifySchemas(List<Schema> schemas){
         this.connection.notifySchemas(schemas);
+    }
+
+    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound){
+        connection.notifyRound(currentPlayer, draftPool, newRound);
+    }
+
+    public void notifyOthersSchemas(HashMap<String, Schema> playersSchemas){
+        connection.notifyOthersSchemas(playersSchemas);
     }
 
 }

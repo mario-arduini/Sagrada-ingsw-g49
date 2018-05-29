@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,54 +27,51 @@ public class GameTest {
     @Test
     void testConstructor(){
 
-        Game game;
+        AtomicReference<Game> game = new AtomicReference<>();
         List<Player> players;
-
         players = createPlayers();
-        game = new Game(players);
+        assertDoesNotThrow(() -> game.getAndSet(new Game(players)));
 
-        assertEquals(players, game.getPlayers());
-        assertEquals(2, game.getPlayers().size());
-        assertNotEquals(null, game.getPublicGoals());
-        assertEquals(3,game.getPublicGoals().length);
-        assertNotEquals(null, game.getToolCards());
-        assertEquals(3, game.getToolCards().length);
-        assertFalse(game.isGameFinished());
-        assertNotEquals(null, game.getCurrentRound());
-        assertNotEquals(null, game.getRoundTrack());
-        System.out.println(game.getPlayerByNick(nick1));
-        assertEquals(players.get(0), game.getPlayerByNick(nick1));
-        assertEquals(players.get(1), game.getPlayerByNick(nick2));
+
+        assertEquals(players, game.get().getPlayers());
+        assertEquals(2, game.get().getPlayers().size());
+        assertNotEquals(null, game.get().getPublicGoals());
+        assertEquals(3,game.get().getPublicGoals().length);
+        assertNotEquals(null, game.get().getToolCards());
+        assertEquals(3, game.get().getToolCards().length);
+        assertFalse(game.get().isGameFinished());
+        assertNotEquals(null, game.get().getCurrentRound());
+        assertNotEquals(null, game.get().getRoundTrack());
+        System.out.println(game.get().getPlayerByNick(nick1));
+        assertEquals(players.get(0), game.get().getPlayerByNick(nick1));
+        assertEquals(players.get(1), game.get().getPlayerByNick(nick2));
     }
 
     @Test
     void testNextRound(){
-        Game game;
+        AtomicReference<Game> game = new AtomicReference<>();
         List<Player> players;
-        Player tmpPlayer;
         int index = 0;
 
         players = createPlayers();
-        game = new Game(players);
+        assertDoesNotThrow(() -> game.getAndSet(new Game(players)));
 
         //Check first player is inserted in round
-        try {
-            tmpPlayer = game.getCurrentRound().nextPlayer();
-            assertTrue(players.contains(tmpPlayer));
-            index = players.indexOf(tmpPlayer);
-        } catch (NoMorePlayersException e) {
-            assertTrue(false);
-        }
-        game.nextRound();
+
+
+        AtomicReference<Player> tmpPlayer = new AtomicReference<>();
+        assertDoesNotThrow(() -> tmpPlayer.getAndSet(game.get().getCurrentRound().getCurrentPlayer()));
+        assertTrue(players.contains(tmpPlayer.get()));
+        index = players.indexOf(tmpPlayer.get());
+
+        game.get().nextRound();
 
         //Check first player is circular
-        try {
-            tmpPlayer = game.getCurrentRound().nextPlayer();
-            assertTrue(players.contains(tmpPlayer));
-            assertEquals(players.get((index + 1) % players.size()), tmpPlayer);
-        } catch (NoMorePlayersException e) {
-            assertTrue(false);
-        }
+
+        assertDoesNotThrow(() -> tmpPlayer.getAndSet(game.get().getCurrentRound().nextPlayer()));
+        assertTrue(players.contains(tmpPlayer.get()));
+        assertEquals(players.get((index + 1) % players.size()), tmpPlayer.get());
+
 
     }
 

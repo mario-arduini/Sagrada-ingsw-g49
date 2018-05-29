@@ -30,6 +30,14 @@ public class GameFlowHandler {
         player.setWindow(initialSchemas.get(schemaNumber));
     }
 
+    public void checkGameReady(){
+        List<Player> inGamePlayers = game.getPlayers();
+        for (Player player: inGamePlayers)
+            if (player.getWindow()==null)
+                return;
+        gamesHandler.gameReady(game);
+    }
+
     public void disconnected(){
         if (game == null){
             gamesHandler.waitingRoomDisconnection(player);

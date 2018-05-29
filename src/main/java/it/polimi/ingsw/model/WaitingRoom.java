@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model;
 
+import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
 import it.polimi.ingsw.model.exceptions.PlayerAlreadyAddedException;
 import java.io.*;
 import java.util.ArrayList;
@@ -86,7 +87,11 @@ public class WaitingRoom {
     }
 
     private void startGame() {
-        Game game = new Game(players);
+        try {
+            Game game = new Game(players);
+        } catch (NoMorePlayersException e) {
+            e.printStackTrace();
+        }
         players.clear();
         timer.cancel();
         timerRunnig = false;

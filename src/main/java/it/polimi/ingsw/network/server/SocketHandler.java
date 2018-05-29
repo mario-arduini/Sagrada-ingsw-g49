@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
+import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.Schema;
@@ -12,6 +13,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class SocketHandler implements Runnable, ConnectionHandler{
@@ -70,7 +72,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                             connected = false;
                             socketClose();
                             break;
-                        //debugging    
+                        //debugging
                         case "players":
                             List<String> players = gameFlowHandler.getPlayers();
 
@@ -80,6 +82,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                             try {
                                 gameFlowHandler.chooseSchema(getJsonPositiveIntValue(message, "id"));
                                 socketSendMessage(createMessage("verified"));
+                                gameFlowHandler.checkGameReady();
                             } catch (IndexOutOfBoundsException e){
                                 socketSendMessage(createMessage("failed"));
                             }
@@ -141,9 +144,27 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     @Override
     public void notifySchemas(List<Schema> schemas){
         JsonObject message;
-        message = createMessage("schema");
+        message = createMessage("schema-choice");
         for (Integer i = 0; i < schemas.size(); i++)
             message.addProperty(i.toString(), gson.toJson(schemas.get(i)));
+        socketSendMessage(message);
+    }
+
+    @Override
+    public void notifyOthersSchemas(HashMap<String, Schema> playersSchemas){
+        JsonObject message;
+        message = createMessage("schema-chosen");
+        message.addProperty("content", gson.toJson(playersSchemas));
+        socketSendMessage(message);
+    }
+
+    @Override
+    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound){
+        JsonObject message;
+        message = createMessage("round");
+        message.addProperty("player", currentPlayer);
+        message.addProperty("draft-pool", gson.toJson(draftPool));
+        message.addProperty("new-round", newRound);
         socketSendMessage(message);
     }
 

@@ -16,8 +16,9 @@ public class Game {
     private int nextFirstPlayer;
     private Round currentRound;
     private static final int schemaPerPlayer = 4;
+    private boolean playing;
 
-    public Game(List<Player> playerList) { //Fix UML for players
+    public Game(List<Player> playerList) throws NoMorePlayersException { //Fix UML for players
         this.dealer = new Factory();
         this.roundTrack = new Dice[10];
         this.toolCards = new ToolCard[3];
@@ -36,6 +37,16 @@ public class Game {
 
         int size = players.size();
         currentRound = new Round(dealer.extractPool(2*(size) + 1),createRoundPlayers(size));
+        currentRound.nextPlayer();
+        this.playing = false;
+    }
+
+    public void setPlaying(boolean playing){
+        this.playing = playing;
+    }
+
+    public boolean getPlaying(){
+        return playing;
     }
 
     public List<Player> getPlayers() {
