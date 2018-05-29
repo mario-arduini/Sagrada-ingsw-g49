@@ -30,6 +30,7 @@ public class Client {
     private boolean logged;
     private boolean serverConnected;
     private GameSnapshot gameSnapshot;
+    private boolean myTurn;
 
     private Client(){
         players = new ArrayList<>();
@@ -194,6 +195,43 @@ public class Client {
 
     }
 
+    void notifyStartGame(){
+        ClientLogger.println("Game started!");
+    }
+
+    void notifyNewRound(String nickname, boolean newRound){
+        if(newRound)
+            ClientLogger.println("New round started");
+
+        if(nickname.equals(this.nickname)){
+            ClientLogger.println("It's your turn");
+            myTurn = true;
+        }
+        else{
+            ClientLogger.println("It's " + nickname  + "'s turn");
+            myTurn = false;
+        }
+    }
+     void playRound(){
+        int dice, row, column;
+        if(myTurn)
+            try {
+                ClientLogger.print("Insert dice number: ");
+                dice = Integer.parseInt(input.readLine());
+                ClientLogger.print("Insert row: ");
+                row = Integer.parseInt(input.readLine());
+                ClientLogger.print("Insert column: ");
+                column = Integer.parseInt(input.readLine());
+
+                if(!server.placeDice(dice, row, column)) {
+                    playRound();
+                    ClientLogger.println("Invalid move!");
+                }
+            }catch (IOException e){
+
+            }
+     }
+
     void setPrivateGoal(String[] privateGoal){}
 
     private void logout(){
@@ -238,7 +276,7 @@ public class Client {
         }
     }
 
-    void print_schemas(List<Schema> schemas){
+    void printSchemas(List<Schema> schemas){
         Constraint constraint;
         Schema currentSchema;
         ClientLogger.println("Choose your schema:");
@@ -274,7 +312,7 @@ public class Client {
         while (choice == 0) {
             ClientLogger.print("Insert your choice: ");
             try {
-                choice = Integer.parseInt(input.readLine());
+                choice = Integer.parseInt(input.readLine());  //TODO whyyyy?
                 if(choice < 1 || choice > 4){
                     choice = 0;
                     ClientLogger.print("Choice not valid");
@@ -285,8 +323,12 @@ public class Client {
                 choice = 0;
             }
         }
-        server.sendSchema(choice - 1);
-        return  choice-1;
+        //server.sendSchema(choice - 1);
+        if(!server.sendSchema(choice - 1)) {
+            ClientLogger.print("Choice not valid");
+            return chooseSchema();
+        }
+        return choice-1;
     }
 
     public void printGame(){
@@ -364,6 +406,7 @@ public class Client {
 
     public GameSnapshot getGameSnapshot(){
         return gameSnapshot;
+
     }
 
     public static void main(String[] args) {

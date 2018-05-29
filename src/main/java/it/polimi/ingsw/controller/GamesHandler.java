@@ -1,7 +1,7 @@
 package it.polimi.ingsw.controller;
 
-import it.polimi.ingsw.model.Game;
-import it.polimi.ingsw.model.Player;
+import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
 import it.polimi.ingsw.network.server.ConnectionHandler;
 import it.polimi.ingsw.network.server.Logger;
 
@@ -26,6 +26,20 @@ public class GamesHandler {
         String filename = getClass().getClassLoader().getResource(TIMEOUT_FILE_NAME).getFile();
         this.secondsTimer = readIntFromFile(filename);
         //TODO: Throw exception if file does not exist
+    }
+
+    public synchronized void gameReady(Game game){
+        if (!game.getPlaying()) {
+            List<User> coplayers = getPlayersByGame(game);
+            String firstPlayer = game.getCurrentRound().getCurrentPlayer().getNickname();
+            List<Dice> draftPool = game.getCurrentRound().getDraftPool();
+            HashMap<String, Schema> playersSchemas = new HashMap<>();
+
+            coplayers.forEach(player -> player.notifyRound(firstPlayer, draftPool, true));
+            for (Player player : coplayers)
+                playersSchemas.put(player.getNickname(), player.getWindow().getSchema());
+            coplayers.forEach(player -> player.notifyOthersSchemas(playersSchemas));
+        }
     }
 
     public synchronized User login(String nickname, String password, ConnectionHandler connection){
@@ -134,17 +148,24 @@ public class GamesHandler {
 
     private synchronized void startGame() {
         List<Player> playerList = new ArrayList<>(players);
-        Game game = new Game(playerList);
+        Game game = null;
+        try {
+            game = new Game(playerList);
 
-        for (User player:players) {
-            gameReference.put(player, game);
-            player.setGame(game);
+            for (User player:players) {
+                gameReference.put(player, game);
+                player.setGame(game);
+            }
+
+            Logger.print(String.format("Game Started: %s", getPlayerNicks().toString()));
+
+        } catch (NoMorePlayersException e) {
+            Logger.print(String.format("Game couldn't start because of Round, kicking out %s", players));
+        }finally {
+            players.clear();
+            if (timer != null)
+                timer.cancel();
         }
-
-        Logger.print(String.format("Game Started: %s", getPlayerNicks().toString()));
-        players.clear();
-        if (timer != null)
-            timer.cancel();
     }
 
     public List<String> getWaitingPlayers() {
