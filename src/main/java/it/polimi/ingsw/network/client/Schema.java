@@ -1,6 +1,6 @@
 package it.polimi.ingsw.network.client;
 
-import it.polimi.ingsw.model.Constraint;
+import it.polimi.ingsw.network.client.Constraint;
 import it.polimi.ingsw.model.exceptions.InvalidDifficultyValueException;
 import it.polimi.ingsw.model.exceptions.UnexpectedMatrixSizeException;
 

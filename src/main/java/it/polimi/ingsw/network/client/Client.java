@@ -2,7 +2,7 @@ package it.polimi.ingsw.network.client;
 
 import it.polimi.ingsw.model.Color;
 
-import it.polimi.ingsw.model.Constraint;
+import it.polimi.ingsw.network.client.Constraint;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,6 +15,7 @@ public class Client {
     private static final Logger LOGGER = Logger.getLogger( Client.class.getName() );
     private static final String INVALID_COMMAND = "Invalid command";
     private static final String CLI_SCHEMA_ROW = "---------------------    ---------------------";
+    private static final String CLI_21_DASH = "---------------------";
     private static final int ROWS_NUMBER = 4;
     private static final int COLUMNS_NUMBER = 5;
 
@@ -28,6 +29,7 @@ public class Client {
     private List<String> players;
     private boolean logged;
     private boolean serverConnected;
+    private GameSnapshot gameSnapshot;
 
     private Client(){
         players = new ArrayList<>();
@@ -267,7 +269,7 @@ public class Client {
         }
     }
 
-    void chooseSchema(){
+    public int chooseSchema(){
         int choice = 0;
         while (choice == 0) {
             ClientLogger.print("Insert your choice: ");
@@ -284,6 +286,84 @@ public class Client {
             }
         }
         server.sendSchema(choice - 1);
+        return  choice-1;
+    }
+
+    public void printGame(){
+        PlayerSnapshot p = gameSnapshot.getPlayer();
+        List<PlayerSnapshot> otherPlayers = gameSnapshot.getOtherPlayers();
+        int whiteSpaceNum,opNum=otherPlayers.size();
+        Window currentWindow;
+        Constraint constraint;
+
+        ClientLogger.println("");
+        ClientLogger.print(p.getNickname());
+        whiteSpaceNum = 25 - p.getNickname().length();
+        for(int i=0;i<whiteSpaceNum;i++) ClientLogger.print(" ");
+        ClientLogger.print("|");
+        for(PlayerSnapshot op : otherPlayers){
+            ClientLogger.print("    "+op.getNickname());
+            whiteSpaceNum = 21 - op.getNickname().length();
+            for(int i=0;i<whiteSpaceNum;i++) ClientLogger.print(" ");
+        }
+        ClientLogger.println("");
+
+        ClientLogger.print(CLI_21_DASH+"    |");
+        for(int i=0;i<opNum;i++)
+            ClientLogger.print("    "+CLI_21_DASH);
+        ClientLogger.println("");
+
+        for(int r=0;r<ROWS_NUMBER;r++){
+            currentWindow = p.getWindow();
+            for(int c=0;c<COLUMNS_NUMBER;c++){
+                if(currentWindow.getCell(r,c)!=null) ClientLogger.print("| "+currentWindow.getCell(r,c)+" ");
+                else {
+                    constraint = currentWindow.getSchema().getConstraint(r,c);
+                    if(constraint==null) ClientLogger.print("|   ");
+                    else if(constraint.getColor()!=null) ClientLogger.print("| "+ constraint.getColor().escape() +"■ "+Color.RESET);
+                    else if(constraint.getNumber()!=0) ClientLogger.print("| "+constraint.getNumber()+" ");
+                }
+            }
+            ClientLogger.print("|    |");
+
+            for(PlayerSnapshot op : otherPlayers){
+                currentWindow = op.getWindow();
+                ClientLogger.print("    ");
+                for(int c=0;c<COLUMNS_NUMBER;c++){
+                    if(currentWindow.getCell(r,c)!=null) ClientLogger.print("| "+currentWindow.getCell(r,c)+" ");
+                    else {
+                        constraint = currentWindow.getSchema().getConstraint(r,c);
+                        if(constraint==null) ClientLogger.print("|   ");
+                        else if(constraint.getColor()!=null) ClientLogger.print("| "+ constraint.getColor().escape() +"■ "+Color.RESET);
+                        else if(constraint.getNumber()!=0) ClientLogger.print("| "+constraint.getNumber()+" ");
+                    }
+                }
+                ClientLogger.print("|");
+            }
+            ClientLogger.println("");
+
+
+            ClientLogger.print(CLI_21_DASH+"    |");
+            for(int i=0;i<opNum;i++)
+                ClientLogger.print("    "+CLI_21_DASH);
+            ClientLogger.println("");
+        }
+
+        // print draftpool
+        ClientLogger.println("");
+        ClientLogger.println("Draft Pool");
+        for(Dice dice : gameSnapshot.getDraftPool()){
+            ClientLogger.print(dice+"  ");
+        }
+        ClientLogger.println("");
+    }
+
+    void initGameSnapshot(){
+        this.gameSnapshot = new GameSnapshot(this.nickname);
+    }
+
+    public GameSnapshot getGameSnapshot(){
+        return gameSnapshot;
     }
 
     public static void main(String[] args) {

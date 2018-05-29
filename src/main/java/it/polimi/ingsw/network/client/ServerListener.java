@@ -54,6 +54,7 @@ public class ServerListener extends Thread {
                         client.removePlayer(jsonObject.get("nickname").getAsString());
                         break;
                     case "verified":
+                        client.initGameSnapshot();
                         server.resultLogin(true);
                         break;
                     case "failed":
@@ -68,7 +69,8 @@ public class ServerListener extends Thread {
                         for(Integer i = 0; i < jsonObject.keySet().size() - 1; i++)
                             schemas.add(gson.fromJson(jsonObject.get(i.toString()).getAsString(), Schema.class));
                         client.print_schemas(schemas);
-                        client.chooseSchema();
+                        Schema choseSchema = schemas.get(client.chooseSchema());
+                        client.getGameSnapshot().getPlayer().setWindow(choseSchema);
                         break;
                     default:
                         break;
