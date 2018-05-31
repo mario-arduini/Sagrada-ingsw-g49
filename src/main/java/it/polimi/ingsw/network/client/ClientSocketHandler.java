@@ -23,6 +23,7 @@ public class ClientSocketHandler implements Connection {
     private Socket socket;
     private Client client;
     private ServerListener serverListener;
+    private Thread thread;
     private boolean flagContinue;
     private boolean connected;
     private boolean serverResult;
@@ -37,7 +38,8 @@ public class ClientSocketHandler implements Connection {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new PrintWriter(socket.getOutputStream(), true);
             serverListener = new ServerListener(client, this);
-            serverListener.start();
+            thread = new Thread(serverListener);
+            thread.start();
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, e.toString(), e);
         }
@@ -118,12 +120,12 @@ public class ClientSocketHandler implements Connection {
     public void logout(){
         createJsonCommand("logout");
         socketPrintLine(jsonObject);
-        serverListener.setConnected(false);
         stopServerListener();
     }
 
     private void stopServerListener(){
-        serverListener.interrupt();
+        serverListener.setConnected(false);
+        thread.interrupt();
         socketClose();
     }
 

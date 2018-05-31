@@ -2,10 +2,6 @@ package it.polimi.ingsw.network.client;
 
 import it.polimi.ingsw.model.Color;
 
-import it.polimi.ingsw.network.client.Constraint;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.*;
@@ -13,7 +9,6 @@ import java.util.logging.*;
 public class Client {
 
     private static final Logger LOGGER = Logger.getLogger( Client.class.getName() );
-    private static final String INVALID_COMMAND = "Invalid command";
     private static final String CLI_SCHEMA_ROW = "---------------------    ---------------------";
     private static final String CLI_21_DASH = "---------------------";
     private static final int ROWS_NUMBER = 4;
@@ -22,7 +17,6 @@ public class Client {
     private String nickname;
     private String serverAddress;
     private int serverPort;
-    private BufferedReader input;
     private Connection server;
     private enum ConnectionType{ RMI, SOCKET }
     private ConnectionType connectionType;
@@ -31,10 +25,16 @@ public class Client {
     private boolean serverConnected;
     private GameSnapshot gameSnapshot;
     private boolean myTurn;
+    private boolean waitingInput;
+    private String inputConsole;
+    private CLIListener cliListener;
+    private Thread thread;
 
     private Client(){
         players = new ArrayList<>();
-        input = new BufferedReader(new InputStreamReader(System.in));
+        cliListener = new CLIListener(this);
+        thread = new Thread(cliListener);
+        thread.start();
     }
 
     synchronized void welcomePlayer(){
@@ -46,12 +46,15 @@ public class Client {
     private synchronized void start(){
         while(serverAddress == null)
             serverAddress = askServerAddress();
+        inputConsole = null;
 
         while(serverPort == 0)
             serverPort = askServerPort();
+        inputConsole = null;
 
         while(connectionType == null)
             connectionType = askConnectionType();
+        inputConsole = null;
 
         while(server == null)
             server = createConnection();
@@ -70,73 +73,123 @@ public class Client {
                 ClientLogger.println("Login successful");
                 logged = true;
             }
-        logout();
+        //logout();
     }
 
     private String askServerAddress(){
-        String address;
+
+        //String address;
         ClientLogger.print("Insert server address: ");
-        try {
-            address = input.readLine();
-            if(address.equals("") || address.equals(" ") || address.contains(" ")) {
+        waitingInput = true;
+        waitInput();
+        //try {
+            //address = input.readLine();
+            if(inputConsole.equals("") || inputConsole.equals(" ") || inputConsole.contains(" ")) {
                 ClientLogger.println("Invalid server address");
+                inputConsole = null;
                 return null;
             }
-        } catch (IOException e) {
-            LOGGER.log(Level.WARNING, e.toString(), e);
-            ClientLogger.println(INVALID_COMMAND);
-            return null;
-        }
-        return  address;
+//        } catch (IOException e) {
+//            LOGGER.log(Level.WARNING, e.toString(), e);
+//            ClientLogger.println(INVALID_COMMAND);
+//            return null;
+//        }
+        waitingInput = false;
+        return  inputConsole;
+
+//        String address;
+//        ClientLogger.print("Insert server address: ");
+//        try {
+//            address = input.readLine();
+//            if(address.equals("") || address.equals(" ") || address.contains(" ")) {
+//                ClientLogger.println("Invalid server address");
+//                return null;
+//            }
+//        } catch (IOException e) {
+//            LOGGER.log(Level.WARNING, e.toString(), e);
+//            ClientLogger.println(INVALID_COMMAND);
+//            return null;
+//        }
+//        return  address;
     }
 
     private int askServerPort(){
 
         int port;
         ClientLogger.print("Insert server port: ");
+        waitingInput = true;
+        waitInput();
+
         try {
-            port = readInt();
-            if(port < 1000 || port > 65535) {
-                ClientLogger.println("Invalid server port");
-                return  0;
-            }
-        }
-        catch (NumberFormatException e){
+            port = Integer.parseInt(inputConsole);
+        }catch (NumberFormatException e){
             ClientLogger.println("Server port must be a number");
+            inputConsole = null;
             return 0;
         }
-//        catch (IOException e) {
-//            LOGGER.log(Level.WARNING, e.toString(), e);
-//            ClientLogger.println(INVALID_COMMAND);
+
+        if(port < 1000 || port > 65535) {
+            ClientLogger.println("Invalid server port");
+            inputConsole = null;
+            return 0;
+        }
+        waitingInput = false;
+        return  port;
+
+
+//        int port;
+//        ClientLogger.print("Insert server port: ");
+//        try {
+//            port = readInt();
+//            if(port < 1000 || port > 65535) {
+//                ClientLogger.println("Invalid server port");
+//                return  0;
+//            }
+//        }
+//        catch (NumberFormatException e){
+//            ClientLogger.println("Server port must be a number");
 //            return 0;
 //        }
-        return port;
+////        catch (IOException e) {
+////            LOGGER.log(Level.WARNING, e.toString(), e);
+////            ClientLogger.println(INVALID_COMMAND);
+////            return 0;
+////        }
+//        return port;
     }
 
     private ConnectionType askConnectionType(){
+        int choice;
         ClientLogger.println("Connection types:");
         ClientLogger.println("[0] Socket");
         ClientLogger.println("[1] RMI");
         ClientLogger.print("Your choice: ");
+        waitingInput = true;
+        waitInput();
 
         try {
-            switch (input.readLine()) {
-                case "0":
-                    ClientLogger.println("You chose Socket");
-                    return ConnectionType.SOCKET;
-                case "1":
-                    ClientLogger.println("You chose RMI");
-                    return ConnectionType.RMI;
-                default:
-                    ClientLogger.println(INVALID_COMMAND);
-                    return null;
-            }
+            choice = Integer.parseInt(inputConsole);
+        }catch (NumberFormatException e){
+            ClientLogger.println("Not a valid choice");
+            inputConsole = null;
+            return null;
         }
-        catch (IOException e){
-            LOGGER.log(Level.WARNING, e.toString(), e);
+
+
+        switch (choice) {
+            case 0:
+                ClientLogger.println("You chose Socket");
+                waitingInput = false;
+                return ConnectionType.SOCKET;
+            case 1:
+                ClientLogger.println("You chose RMI");
+                waitingInput = false;
+                return ConnectionType.RMI;
+            default:
+                ClientLogger.println("Not a valid choice");
+                inputConsole = null;
+                return null;
         }
-        ClientLogger.println(INVALID_COMMAND);
-        return  null;
     }
 
     private Connection createConnection(){
@@ -148,23 +201,38 @@ public class Client {
     }
 
     String askNickname(){
-        String user = null;
-        while(user == null) {
+        while(inputConsole == null) {
             ClientLogger.print("Insert your nickname: ");
-            try {
-                user = input.readLine();
-                if(!checkNicknameProperties(user)) {
-                    user = null;
-                    ClientLogger.println("Invalid nickname");
-                }
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, e.toString(), e);
-                ClientLogger.println(INVALID_COMMAND);
-                user = null;
+            waitingInput = true;
+            waitInput();
+
+            if(!checkNicknameProperties(inputConsole)) {
+                inputConsole = null;
+                ClientLogger.println("Invalid nickname");
             }
         }
-        nickname = user;
-        return user;
+        waitingInput = false;
+        nickname = inputConsole;
+        inputConsole = null;
+        return nickname;
+    }
+
+    String askPassword(){
+        String password;
+        while(inputConsole == null) {
+            ClientLogger.print("Insert your password: ");
+            waitingInput = true;
+            waitInput();
+
+            if(!checkPasswordProperties(inputConsole)) {
+                inputConsole = null;
+                ClientLogger.println("Invalid password, must be at least 8 character");
+            }
+        }
+        waitingInput = false;
+        password = inputConsole;
+        inputConsole = null;
+        return password;
     }
 
     private boolean checkPasswordProperties(String password){
@@ -175,24 +243,30 @@ public class Client {
         return user != null && !user.equals("");
     }
 
-    String askPassword(){
-        String password = null;
-        while(password == null) {
-            ClientLogger.print("Insert your password: ");
+    int chooseSchema(){
+        int choice = 0;
+        while (choice == 0) {
+            ClientLogger.print("Insert your choice: ");
+            waitingInput = true;
+            waitInput();
+
             try {
-                password = input.readLine();
-                if(!checkPasswordProperties(password)) {
-                    password = null;
-                    ClientLogger.println("Invalid nickname, must be at least 8 character");
-                }
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, e.toString(), e);
-                ClientLogger.println(INVALID_COMMAND);
-                password = null;
+                choice = Integer.parseInt(inputConsole);
+            }catch (NumberFormatException e){
+                ClientLogger.println("Invalid choice");
+                inputConsole = null;
+            }
+
+            if(choice < 1 || choice > 4 || !server.sendSchema(choice - 1)){
+                choice = 0;
+                ClientLogger.print("Invalid choice");
+                inputConsole = null;
             }
         }
-        return password;
 
+        inputConsole = null;
+        waitingInput = false;
+        return choice - 1;
     }
 
     void notifyStartGame(){
@@ -212,68 +286,98 @@ public class Client {
             myTurn = false;
         }
     }
-     void playRound(List<Dice> draftpool){
+
+    void playRound(List<Dice> draftpool){
         int dice, row, column;
+        boolean ask = true;
         if(myTurn)
         {
-
-            ClientLogger.print("Insert dice number: ");
-            dice = readInt();
-            ClientLogger.print("Insert row: ");
-            row = readInt();
-            ClientLogger.print("Insert column: ");
-            column = readInt();
-
-            while(dice>draftpool.size()||dice<=0||!server.placeDice(draftpool.get(dice - 1), row, column)) {
-                ClientLogger.println("Invalid move!");
+            while (ask) {
                 ClientLogger.print("Insert dice number: ");
                 dice = readInt();
                 ClientLogger.print("Insert row: ");
                 row = readInt();
                 ClientLogger.print("Insert column: ");
                 column = readInt();
+
+                if (dice > draftpool.size() || dice <= 0 || !server.placeDice(draftpool.get(dice - 1), row, column))
+                    ClientLogger.println("Invalid move!");
+                else {
+
+                    gameSnapshot.getPlayer().getWindow().addDice(row - 1, column - 1, draftpool.get(dice - 1));
+                    gameSnapshot.getDraftPool().remove(dice - 1);
+                    printGame();
+                    server.pass();
+
+                    ask = false;
+                }
             }
-
-            gameSnapshot.getPlayer().getWindow().addDice(row-1,column-1,draftpool.get(dice-1));
-            gameSnapshot.getDraftPool().remove(dice-1);
-            printGame();
-
-            server.pass();
         }
      }
 
      private int readInt(){
         boolean ok = false;
-        int inputConsole = 0;
+        int value = 0;
         while (!ok){
             try{
-                inputConsole = Integer.parseInt(input.readLine());
+                waitingInput = true;
+                waitInput();
+                value = Integer.parseInt(inputConsole);
                 ok = true;
             }
-            catch (Exception e){
-                ClientLogger.print("Invalid format, retry: ");
+            catch (NumberFormatException e){
+                ClientLogger.print("Must be a number, retry: ");
+                inputConsole = null;
             }
         }
-        return inputConsole;
+        inputConsole = null;
+        waitingInput = false;
+        return value;
      }
 
     void setPrivateGoal(String[] privateGoal){}
 
-    private void logout(){
-        try {
-            String command = input.readLine();
-            if(command.equals("logout")){
-                server.logout();
-                ClientLogger.println("Logged out");
-                logged = false;
-            }
-        } catch (IOException e) {
-            LOGGER.log(Level.WARNING, e.toString(), e);
-        }
+    void logout(){
+//        try {
+//            String command = input.readLine();
+//            if(command.equals("logout")){
+        if(serverConnected)
+            server.logout();
+
+        cliListener.setRead(false);
+        thread.interrupt();
+
+        ClientLogger.println("Logged out");
+        logged = false;
+        Thread.currentThread().interrupt();
+//            }
+//        } catch (IOException e) {
+//            LOGGER.log(Level.WARNING, e.toString(), e);
+//        }
     }
 
     private boolean isLogged(){
         return logged;
+    }
+
+    boolean getWaitingInput(){
+        return waitingInput;
+    }
+
+    synchronized void setInput(String input){
+        this.inputConsole = input;
+        notifyAll();
+    }
+
+    private synchronized void waitInput(){
+        while (inputConsole == null) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                //LOGGER.log(Level.WARNING, e.toString(), e);   //TODO exception when logout
+            }
+        }
+        waitingInput = false;
     }
 
     void addPlayers(List<String> newPlayers){
@@ -332,31 +436,7 @@ public class Client {
         }
     }
 
-    public int chooseSchema(){
-        int choice = 0;
-        while (choice == 0) {
-            ClientLogger.print("Insert your choice: ");
-            //try {
-                choice = readInt();  //TODO whyyyy?
-                if(choice < 1 || choice > 4){
-                    choice = 0;
-                    ClientLogger.print("Choice not valid");
-                }
-//            } catch (IOException e) {
-//                LOGGER.log(Level.WARNING, e.toString(), e);
-//                ClientLogger.println(INVALID_COMMAND);
-//                choice = 0;
-//            }
-        }
-        //server.sendSchema(choice - 1);
-        if(!server.sendSchema(choice - 1)) {
-            ClientLogger.print("Choice not valid");
-            return chooseSchema();
-        }
-        return choice-1;
-    }
-
-    public void printGame(){
+    void printGame(){
         PlayerSnapshot p = gameSnapshot.getPlayer();
         List<PlayerSnapshot> otherPlayers = gameSnapshot.getOtherPlayers();
         int whiteSpaceNum,opNum=otherPlayers.size();
@@ -429,7 +509,7 @@ public class Client {
         this.gameSnapshot = new GameSnapshot(this.nickname);
     }
 
-    public GameSnapshot getGameSnapshot(){
+    GameSnapshot getGameSnapshot(){
         return gameSnapshot;
 
     }

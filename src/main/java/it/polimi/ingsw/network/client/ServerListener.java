@@ -8,7 +8,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.*;
 
-public class ServerListener extends Thread {
+public class ServerListener implements Runnable {
 
     private Client client;
     private ClientSocketHandler server;
