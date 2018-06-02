@@ -18,8 +18,7 @@ import java.io.FileReader;
 import java.util.*;
 
 public class Factory {
-    private List<Integer> toolCards;
-    private int toolCardsIndex;
+    private Stack<File> toolCards;
     private List<Color> privateGoalCards;
     private int privateGoalCardsIndex;
     private List<Integer> publicGoalCards;
@@ -27,11 +26,14 @@ public class Factory {
     private List<Dice> diceBag;
     private Stack<Schema> schemas;
 
-    public static final int DICE_NUMBER_PER_COLOR = 18;
+    private static final int DICE_NUMBER_PER_COLOR = 18;
 
     public Factory() {
-        this.toolCards = Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12);
-        this.toolCardsIndex = 0;
+        this.toolCards = new Stack<>();
+        List<File> files = FilesUtil.listFiles(FilesUtil.TOOLCARD_FOLDER);
+        for (File file:files){
+            toolCards.push(file);
+        }
         this.privateGoalCards = Arrays.asList(Color.BLUE,Color.GREEN,Color.PURPLE,Color.RED,Color.YELLOW);
         this.privateGoalCardsIndex = 0;
         this.publicGoalCards = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
@@ -69,7 +71,7 @@ public class Factory {
         return extracted;
     }
 
-    public Stack<Schema> loadSchemasFromFile(){
+    private Stack<Schema> loadSchemasFromFile(){
         Stack<Schema> schemas= new Stack<>();
         List<File> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER);
         JsonParser parser = new JsonParser();
@@ -88,30 +90,27 @@ public class Factory {
         return schemas;
     }
 
-    public Schema getSchemaFromIndex(Integer index) {
-        // TODO require all the available schemas in the game, will be read from file
-        return null;
+    public ToolCard extractToolCard() throws OutOfCardsException {
+        ToolCard toolCard;
+        try {
+            toolCard = loadToolCardFromFile(toolCards.pop());
+        } catch (FileNotFoundException | EmptyStackException e) {
+            throw new OutOfCardsException();
+        }
+        return toolCard;
     }
 
-    public ToolCard extractToolCard() throws OutOfCardsException {
-        if(toolCardsIndex>=toolCards.size()) throw new OutOfCardsException("Cannot extract Tool Card");
-        int index = toolCards.get(toolCardsIndex++);
-        ToolCard tool = null;
-        switch (index){
-            case 1: tool = new GrozingPliers(); break;
-            case 2: tool = new EglomiseBrush(); break;
-            case 3: tool = new CopperFoilBurnisher(); break;
-            case 4: tool = new Lathekin(); break;
-            case 5: tool = new LensCutter(); break;
-            case 6: tool = new FluxBrush(); break;
-            case 7: tool = new GlazingHammer(); break;
-            case 8: tool = new RunningPliers(); break;
-            case 9: tool = new CorkBackedStraightedge(); break;
-            case 10: tool = new GrindingStone(); break;
-            case 11: tool = new FluxRemover(); break;
-            case 12: tool = new TapWheel(); break;
-        }
-        return tool;
+    private ToolCard loadToolCardFromFile(File file) throws FileNotFoundException {
+        ToolCard toolCard;
+        JsonParser parser = new JsonParser();
+        JsonObject jsonObject;
+        Gson gson = new Gson();
+
+
+        jsonObject = parser.parse(new FileReader(file)).getAsJsonObject();
+        toolCard = gson.fromJson(jsonObject, ToolCard.class);
+
+        return toolCard;
     }
 
     public PrivateGoal extractPrivateGoal() throws OutOfCardsException {

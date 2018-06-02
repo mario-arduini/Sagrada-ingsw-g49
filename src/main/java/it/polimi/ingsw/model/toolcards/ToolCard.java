@@ -1,19 +1,33 @@
 package it.polimi.ingsw.model.toolcards;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import it.polimi.ingsw.model.Dice;
+import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.Round;
+import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
 import it.polimi.ingsw.model.exceptions.InvalidFavorTokenNumberException;
 import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
 
-public class ToolCard {
-    protected boolean used;
+import java.util.ArrayList;
+import java.util.List;
 
-    public ToolCard(){
+public class ToolCard {
+    private String cardName;
+    private boolean used;
+    private boolean useAfterDraft;
+    private JsonArray effects;
+
+    public ToolCard(JsonObject toolCard){
+        this.cardName = toolCard.get("name").getAsString();
+        this.useAfterDraft = toolCard.get("use-after-draft").getAsBoolean();
+        this.effects = toolCard.get("effects").getAsJsonArray();
         this.used = false;
     }
 
     public String getName(){
-        return this.getClass().getName();
+        return this.cardName;
     }
 
     public boolean canBeUsed(Round round){
@@ -30,15 +44,35 @@ public class ToolCard {
         }
     }
 
-    public boolean use(Round round){
-        return false;
-    }
+    public void use(Round round) throws InvalidDiceValueException {
+        JsonObject effect;
+        String command;
+        JsonObject arguments;
+        Dice dice = null;
 
-    public boolean use(Round round,int x1_start,int y1_start,int x1_end,int y1_end,int x2_start,int y2_start,int x2_end,int y2_end){
-        return false;
+        for (int i = 0; i < effects.size(); i++) {
+            effect = effects.get(i).getAsJsonObject();
+            command = effect.keySet().toString();
+            arguments = effect.get(command).getAsJsonObject();
+            switch (command) {
+                case "change-value":
+                    Effects.changeValue(dice, arguments.get("plus").getAsBoolean(), arguments.get("value").getAsInt());
+                    break;
+                case "flip":
+                    Effects.flip(dice);
+                    break;
+                case "get-dice-from-round":
+                    dice = round.getCurrentDiceDrafted();
+                    break;
+                case "remove-turn":
+                    Effects.removeTurn(round);
+                    break;
+
+            }
+        }
     }
 
     public boolean isUsedAfterDraft(){
-        return false;
+        return this.useAfterDraft;
     }
 }

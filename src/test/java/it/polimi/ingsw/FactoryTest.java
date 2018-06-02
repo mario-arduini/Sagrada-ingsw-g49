@@ -18,7 +18,7 @@ public class FactoryTest {
         ArrayList<ToolCard>  tools = new ArrayList<ToolCard>();
         ToolCard current = null;
         Factory factory = new Factory();
-        for (int i=0;i<12;i++){
+        for (int i=0;i<3;i++){
             try {
                 current = factory.extractToolCard();
             } catch (OutOfCardsException e) {

@@ -16,6 +16,7 @@ public class FilesUtil {
      * @param directoryName to be listed
      */
     public final static String SCHEMA_FOLDER = "schemas";
+    public final static String TOOLCARD_FOLDER = "toolcards";
 
     public static List<File> listFiles(String directoryName) {
         File directory = new File(FilesUtil.class.getClassLoader().getResource(directoryName).getPath());

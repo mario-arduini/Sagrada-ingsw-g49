@@ -103,7 +103,11 @@ public class Round {
 
         // use "after draft" type toolcards
         if(activeToolCard!=null && activeToolCard.isUsedAfterDraft()){
-            activeToolCard.use(this);
+            try {
+                activeToolCard.use(this);
+            } catch (InvalidDiceValueException e) {
+                e.printStackTrace();
+            }
         }
 
         players.get(currentPlayer).getWindow().addDice(row, column, currentDiceDrafted);

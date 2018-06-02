@@ -1,9 +1,6 @@
 package it.polimi.ingsw;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.Constraint;
 import it.polimi.ingsw.model.Schema;
@@ -46,6 +43,14 @@ public class App
 
             Schema schema = new Schema(difficulty, constraints, name);
             System.out.println(gson.toJson(schema));
+
+            JsonObject jo = new JsonObject();
+            jo.addProperty("name", "foo");
+            jo.add("effects", new JsonArray());
+            jo.addProperty("use-after-draft", true);
+
+            System.out.println(jo);
+
         }catch (Exception e){
 
         }
