@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
-import java.text.DecimalFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,20 +20,18 @@ public class ClientSocketHandler implements Connection {
     private BufferedReader input;
     private PrintWriter output;
     private Socket socket;
-    private Client client;
     private ServerListener serverListener;
     private Thread thread;
     private boolean flagContinue;
     private boolean connected;
     private boolean serverResult;
-    JsonObject jsonObject;
+    private JsonObject jsonObject;
 
 
     ClientSocketHandler(Client client, String serverAddress, int serverPort) {
-        this.client = client;
 
         try {
-            socket = new Socket(serverAddress, serverPort);
+            socket = new Socket(serverAddress, serverPort);     //TODO handle exception if connection not go well
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new PrintWriter(socket.getOutputStream(), true);
             serverListener = new ServerListener(client, this);
@@ -47,11 +44,11 @@ public class ClientSocketHandler implements Connection {
     }
 
     @Override
-    public synchronized boolean login() {
+    public synchronized boolean login(String nickname, String password) {
 
         createJsonCommand("login");
-        jsonObject.addProperty("nickname", client.askNickname());
-        jsonObject.addProperty("password", client.askPassword());
+        jsonObject.addProperty("nickname", nickname);
+        jsonObject.addProperty("password", password);
 
         socketPrintLine(jsonObject);
 
@@ -66,7 +63,7 @@ public class ClientSocketHandler implements Connection {
         return connected;
     }
 
-    synchronized void notifyContinue(boolean result){
+    synchronized void notifyResult(boolean result){
         serverResult = result;
         flagContinue = true;
         notifyAll();
@@ -80,24 +77,11 @@ public class ClientSocketHandler implements Connection {
         socketPrintLine(jsonObject);
 
         jsonObject = parser.parse(socketReadLine()).getAsJsonObject();
-        if(jsonObject.get("message").getAsString().equals("verified"))
-            return true;
-        return false;
-
-//        while (!flagContinue)
-//            try {
-//                wait();
-//            } catch (InterruptedException e) {
-//                LOGGER.log(Level.WARNING, e.toString(), e);
-//            }
-//        flagContinue = false;
-//        if(serverResult)
-//            return true;
-//        return false;
+        return jsonObject.get("message").getAsString().equals("verified");
     }
 
     @Override
-    public boolean placeDice(Dice dice, int row, int column){
+    public synchronized boolean placeDice(Dice dice, int row, int column){
         JsonParser parser = new JsonParser();
         Gson gson = new Gson();
         createJsonCommand("place-dice");
@@ -106,9 +90,15 @@ public class ClientSocketHandler implements Connection {
         jsonObject.addProperty("column", column - 1);
         socketPrintLine(jsonObject);
 
-        if(parser.parse(socketReadLine()).getAsJsonObject().get("message").getAsString().equals("verified"))
-            return true;
-        return false;
+        while (!flagContinue)
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                LOGGER.log(Level.WARNING, e.toString(), e);
+            }
+        boolean result = serverResult;
+        flagContinue = false;
+        return result;
     }
 
     public void pass(){
@@ -145,7 +135,6 @@ public class ClientSocketHandler implements Connection {
         }  catch(SocketException e){
             return null;
         } catch(IOException e) {
-            //LOGGER.log(Level.WARNING, e.toString(), e);
         }
         return null;
     }

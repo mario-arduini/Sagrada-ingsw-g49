@@ -52,14 +52,10 @@ public class ServerListener implements Runnable {
                         client.removePlayer(jsonObject.get("nickname").getAsString());
                         break;
                     case "verified":
-                        client.initGameSnapshot();
-                        server.notifyContinue(true);
+                        server.notifyResult(true);
                         break;
                     case "failed":
-                        server.notifyContinue(false);
-                        break;
-                    case "start_game":
-                        client.notifyStartGame();
+                        server.notifyResult(false);
                         break;
                     case "privateGoal":
                         client.setPrivateGoal(null);  //TODO
@@ -74,17 +70,17 @@ public class ServerListener implements Runnable {
                         break;
                     case "round":
                         listType = new TypeToken<List<Dice>>(){}.getType();
-                        client.notifyNewRound(jsonObject.get("player").getAsString(), jsonObject.get("new-round").getAsBoolean());
+                        client.notifyNewTurn(jsonObject.get("player").getAsString(), jsonObject.get("new-round").getAsBoolean());
                         List<Dice> draftPool = gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType);
                         client.getGameSnapshot().setDraftPool(draftPool);
                         client.printGame();
-                        client.playRound(draftPool);
                         break;
                     case "schema-chosen":
                         listType = new TypeToken<HashMap<String, Schema>>(){}.getType();
                         HashMap<String, Schema> windows = gson.fromJson(jsonObject.get("content").getAsString(), listType);
                         for (Map.Entry<String, Schema> entry : windows.entrySet()) {
-                            if(!entry.getKey().equals(client.getGameSnapshot().getPlayer().getNickname())) client.getGameSnapshot().addOtherPlayer(entry.getKey(),entry.getValue());
+                            if(!entry.getKey().equals(client.getGameSnapshot().getPlayer().getNickname()))
+                                client.getGameSnapshot().addOtherPlayer(entry.getKey(), entry.getValue());
                         }
                         break;
                     case "update-window":

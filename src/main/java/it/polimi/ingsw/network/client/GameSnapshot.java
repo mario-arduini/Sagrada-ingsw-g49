@@ -60,7 +60,7 @@ public class GameSnapshot {
     }
 
     public void setDraftPool(List<Dice> draftPool){
-        this.draftPool = draftPool;
+        this.draftPool = new ArrayList<>(draftPool);
     }
 
     public Optional<PlayerSnapshot> findPlayer(String nickname){
