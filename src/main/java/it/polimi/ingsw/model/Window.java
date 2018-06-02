@@ -55,39 +55,11 @@ public class Window {
             checkAdjacencies(row,column, dice);
         }
 
-        this.mosaic[row][column] = new Dice(dice);
+        setDice(row,column,dice);
     }
 
-    public void addDiceIgnoreColorConstraint(int row, int column, Dice dice) throws ConstraintViolatedException, FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {
-        Constraint constraint = schema.getConstraint(row, column);
-
-        if (!firstDice) {
-            checkBorder(row, column);
-            checkValueConstraint(constraint, dice);
-            this.firstDice = true;
-        }
-        else {
-            checkValueConstraint(constraint, dice);
-            checkAdjacencies(row,column, dice);
-        }
-
-        this.mosaic[row][column] = new Dice(dice);
-    }
-
-    public void addDiceIgnoreValueConstraint(int row, int column, Dice dice) throws ConstraintViolatedException, FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {
-        Constraint constraint = schema.getConstraint(row, column);
-
-        if (!firstDice) {
-            checkBorder(row, column);
-            checkColorConstraint(constraint, dice);
-            this.firstDice = true;
-        }
-        else {
-            checkColorConstraint(constraint, dice);
-            checkAdjacencies(row,column, dice);
-        }
-
-        this.mosaic[row][column] = new Dice(dice);
+    public void setDice(int row,int column, Dice dice){
+        mosaic[row][column] = new Dice(dice);
     }
 
     private void checkBorder(int row, int column) throws FirstDiceMisplacedException {

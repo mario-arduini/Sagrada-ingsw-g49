@@ -15,7 +15,7 @@ public final class Effects {
         super();
     }
 
-    public static void flip(Round round){
+    static void flip(Round round){
         Dice dice = round.getCurrentDiceDrafted();
         try {
             dice.setValue(7-dice.getValue());
@@ -41,5 +41,16 @@ public final class Effects {
                 e.printStackTrace();
             }
         });
+    }
+
+    static void changeValue(Dice dice,boolean isPlus,int value) throws InvalidDiceValueException {
+        if (isPlus) dice.setValue(dice.getValue()+value);
+        else dice.setValue(dice.getValue()-value);
+        return;
+    }
+
+    static void changeValue(Dice dice,int value) throws InvalidDiceValueException {
+        dice.setValue(value);
+        return;
     }
 }
