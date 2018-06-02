@@ -16,7 +16,7 @@ class FirstJUnitTest{
         ShadesSetTest shadesSetTest = new ShadesSetTest();
         VarietyTest varietyTest = new VarietyTest();
         WindowTest windowTest = new WindowTest();
-        
+
         new DiceTest();
         new ConstraintTest();
         new RoundTest();
