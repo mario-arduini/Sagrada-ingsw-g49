@@ -49,7 +49,11 @@ public class Round {
 
     public Dice getCurrentDiceDrafted() { return currentDiceDrafted; }
 
-    public List<Player> getPlayersOrder() { return players; }
+    public void removeTurn() {
+        for(int i = currentPlayer + 1; i < players.size(); i++)
+            if(players.get(i).getNickname().equals(players.get(currentPlayer).getNickname()))
+                players.remove(i);
+    }
 
     public void setActiveToolCard(ToolCard toolCard){
         activeToolCard = toolCard;
