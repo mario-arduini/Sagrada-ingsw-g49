@@ -16,8 +16,7 @@ class FirstJUnitTest{
         ShadesSetTest shadesSetTest = new ShadesSetTest();
         VarietyTest varietyTest = new VarietyTest();
         WindowTest windowTest = new WindowTest();
-        ToolCardsTest toolCardsTest = new ToolCardsTest();
-
+        
         new DiceTest();
         new ConstraintTest();
         new RoundTest();
@@ -55,7 +54,5 @@ class FirstJUnitTest{
 
         windowTest.tesAddDice();
         windowTest.testWindowCostructor();
-
-        toolCardsTest.glazingHammerTest();
     }
 }

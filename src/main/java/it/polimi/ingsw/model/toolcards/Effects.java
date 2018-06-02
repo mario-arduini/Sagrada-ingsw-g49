@@ -6,5 +6,7 @@ public final class Effects {
         super();
     }
 
+    public static void flip
+
     
 }
