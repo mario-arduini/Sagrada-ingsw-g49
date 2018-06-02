@@ -6,7 +6,6 @@ import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Game;
-import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.Schema;
 
 import java.io.*;
@@ -14,8 +13,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SocketHandler implements Runnable, ConnectionHandler{
     private Socket socket;
@@ -25,12 +24,10 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     private boolean connected;
     private GameFlowHandler gameFlowHandler;
     private Gson gson;
-    JsonObject jsonObject;
-    JsonParser parser;
+    private JsonParser parser;
+    private static final String NICKNAME_STRING = "nickname";
 
-
-
-    public SocketHandler(Socket socket, GameFlowHandler gameFlowHandler) {
+    SocketHandler(Socket socket, GameFlowHandler gameFlowHandler) {
         this.socket = socket;
         this.gameFlowHandler = gameFlowHandler;
         this.parser = new JsonParser();
@@ -69,42 +66,21 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                 if (command != null)
                     switch (command.toLowerCase()) {
                         case "logout":
-                            gameFlowHandler.logout();
-                            connected = false;
-                            socketClose();
+                            logout();
                             break;
                         //debugging
                         case "players":
                             List<String> players = gameFlowHandler.getPlayers();
-
                             socketPrintLine(players.toString());
                             break;
                         case "schema":
-                            try {
-                                gameFlowHandler.chooseSchema(getJsonPositiveIntValue(message, "id"));
-                                socketSendMessage(createMessage("verified"));
-                                gameFlowHandler.checkGameReady();
-                            } catch (IndexOutOfBoundsException | InvalidParameterException e){
-                                socketSendMessage(createMessage("failed"));
-                            }
+                            chooseSchema(message);
                             break;
                         case "place-dice":
-                            try{
-                                gameFlowHandler.placeDice(getJsonPositiveIntValue(message, "row"), getJsonPositiveIntValue(message, "column"), gson.fromJson(message.get("dice").getAsString(), Dice.class));
-                                socketSendMessage(createMessage("verified"));
-                                gameFlowHandler.notifyDicePlaced(getJsonPositiveIntValue(message, "row"), getJsonPositiveIntValue(message, "column"), gson.fromJson(message.get("dice").getAsString(), Dice.class));
-                                //TODO: separe Exceptions and send appropriate failure message
-                            } catch (Exception e){
-                                Logger.print(e);
-                                socketSendMessage(createMessage("failed"));
-                            }
+                            placeDice(message);
                             break;
                         case "pass":
-                            try{
-                                gameFlowHandler.pass();
-                            }catch (Exception e){
-                                Logger.print(e);
-                            }
+                            pass();
                     }
             }catch (NullPointerException e){
                 Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
@@ -135,10 +111,40 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         return i;
     }
 
-    private void createErrorMessage(String description){
-        JsonObject message;
-        message = createMessage("failed");
-        message.addProperty("info", description);
+    private void placeDice(JsonObject message){
+        try{
+            gameFlowHandler.placeDice(getJsonPositiveIntValue(message, "row"), getJsonPositiveIntValue(message, "column"), gson.fromJson(message.get("dice").getAsString(), Dice.class));
+            socketSendMessage(createMessage("verified"));
+            gameFlowHandler.notifyDicePlaced(getJsonPositiveIntValue(message, "row"), getJsonPositiveIntValue(message, "column"), gson.fromJson(message.get("dice").getAsString(), Dice.class));
+            //TODO: separe Exceptions and send appropriate failure message
+        } catch (Exception e){
+            Logger.print(e);
+            socketSendMessage(createMessage("failed"));
+        }
+    }
+
+    private void pass(){
+        try{
+            gameFlowHandler.pass();
+        }catch (Exception e){
+            Logger.print(e);
+        }
+    }
+
+    private void chooseSchema(JsonObject message){
+        try {
+            gameFlowHandler.chooseSchema(getJsonPositiveIntValue(message, "id"));
+            socketSendMessage(createMessage("verified"));
+            gameFlowHandler.checkGameReady();
+        } catch (IndexOutOfBoundsException | InvalidParameterException e){
+            socketSendMessage(createMessage("failed"));
+        }
+    }
+
+    private void logout(){
+        gameFlowHandler.logout();
+        connected = false;
+        socketClose();
     }
 
     @Override
@@ -163,7 +169,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     public void notifyLogout(String nickname){
         JsonObject message;
         message = createMessage("quit");
-        message.addProperty("nickname", nickname);
+        message.addProperty(SocketHandler.NICKNAME_STRING, nickname);
         socketSendMessage(message);
     }
 
@@ -177,7 +183,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public void notifyOthersSchemas(HashMap<String, Schema> playersSchemas){
+    public void notifyOthersSchemas(Map<String, Schema> playersSchemas){
         JsonObject message;
         message = createMessage("schema-chosen");
         message.addProperty("content", gson.toJson(playersSchemas));
@@ -198,17 +204,11 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     public void notifyDicePlaced(String nickname, int row, int column, Dice dice){
         JsonObject message;
         message = createMessage("update-window");
-        message.addProperty("nickname", nickname);
+        message.addProperty(SocketHandler.NICKNAME_STRING, nickname);
         message.addProperty("row", row);
         message.addProperty("column", column);
         message.addProperty("dice", gson.toJson(dice));
         socketSendMessage(message);
-    }
-
-    private JsonObject createMessage(String message){
-        jsonObject = new JsonObject();
-        jsonObject.addProperty("message", message);
-        return jsonObject;
     }
 
     private boolean login() {
@@ -219,7 +219,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
             command = socketReadCommand();
             try{
                 if (command.get("command").getAsString().equals("login")){
-                    this.nickname = command.get("nickname").getAsString();
+                    this.nickname = command.get(SocketHandler.NICKNAME_STRING).getAsString();
                     password = command.get("password").getAsString();
                     if (gameFlowHandler.login(this.nickname, password, this)){
                         socketSendMessage(createMessage("verified"));
@@ -303,4 +303,16 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         this.gameFlowHandler.setGame(game);
     }
 
+    private static JsonObject createErrorMessage(String description){
+        JsonObject message;
+        message = createMessage("failed");
+        message.addProperty("info", description);
+        return message;
+    }
+
+    private static JsonObject createMessage(String message){
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("message", message);
+        return jsonObject;
+    }
 }

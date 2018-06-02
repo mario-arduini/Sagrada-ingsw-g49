@@ -7,6 +7,7 @@ import it.polimi.ingsw.model.Schema;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface ConnectionHandler{
     void notifyLogin(String nickname);
@@ -14,7 +15,7 @@ public interface ConnectionHandler{
     void notifyLogout(String nickname);
     void notifySchemas(List<Schema> schemas);
     void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound);
-    void notifyOthersSchemas(HashMap<String, Schema> playersSchemas);
+    void notifyOthersSchemas(Map<String, Schema> playersSchemas);
     void notifyDicePlaced(String nickname, int row, int column, Dice dice);
     String getRemoteAddress();
     void close();
