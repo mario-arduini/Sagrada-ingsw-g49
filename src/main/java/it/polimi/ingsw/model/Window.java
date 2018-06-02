@@ -70,19 +70,19 @@ public class Window {
             throw new FirstDiceMisplacedException();
     }
 
-    private void checkColorConstraint(Constraint constraint, Dice dice) throws ConstraintViolatedException {
+    public void checkColorConstraint(Constraint constraint, Dice dice) throws ConstraintViolatedException {
         if (constraint != null)
             if (constraint.getColor() != null && dice.getColor() != constraint.getColor())
                 throw new ConstraintViolatedException();
     }
 
-    private void checkValueConstraint(Constraint constraint, Dice dice) throws ConstraintViolatedException {
+    public void checkValueConstraint(Constraint constraint, Dice dice) throws ConstraintViolatedException {
         if (constraint != null)
            if(constraint.getNumber() != 0 && dice.getValue() != constraint.getNumber())
                 throw new ConstraintViolatedException();
     }
 
-    private void checkAdjacencies(int row, int column, Dice dice) throws NoAdjacentDiceException, BadAdjacentDiceException {
+    public void checkAdjacencies(int row, int column, Dice dice) throws NoAdjacentDiceException, BadAdjacentDiceException {
         Color color = dice.getColor();
         int value = dice.getValue();
         boolean adjacencyFlag = false;
