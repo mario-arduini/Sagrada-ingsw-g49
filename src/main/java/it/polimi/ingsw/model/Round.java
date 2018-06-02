@@ -49,6 +49,8 @@ public class Round {
 
     public Dice getCurrentDiceDrafted() { return currentDiceDrafted; }
 
+    public List<Player> getPlayersOrder() { return players; }
+
     public void setActiveToolCard(ToolCard toolCard){
         activeToolCard = toolCard;
     }
