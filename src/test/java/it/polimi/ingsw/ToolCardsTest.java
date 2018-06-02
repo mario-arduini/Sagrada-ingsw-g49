@@ -2,8 +2,6 @@ package it.polimi.ingsw;
 
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.model.toolcards.GlazingHammer;
-import it.polimi.ingsw.model.toolcards.GrindingStone;
 import it.polimi.ingsw.model.toolcards.ToolCard;
 import org.junit.jupiter.api.Test;
 

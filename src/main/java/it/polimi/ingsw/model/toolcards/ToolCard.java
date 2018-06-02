@@ -5,7 +5,7 @@ import it.polimi.ingsw.model.Round;
 import it.polimi.ingsw.model.exceptions.InvalidFavorTokenNumberException;
 import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
 
-public abstract class ToolCard {
+public class ToolCard {
     protected boolean used;
 
     public ToolCard(){
