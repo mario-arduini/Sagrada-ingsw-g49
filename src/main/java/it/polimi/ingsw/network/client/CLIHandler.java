@@ -290,6 +290,10 @@ class CLIHandler {
             ClientLogger.println("Not your turn! You can only logout");
     }
 
+    boolean getPlayingRounf(){
+        return playindRound;
+    }
+
     private int readInt(){
         boolean ok = false;
         int value = 0;
