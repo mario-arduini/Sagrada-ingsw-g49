@@ -1,4 +1,10 @@
 package it.polimi.ingsw.model.toolcards;
 
-public class Effects {
+public final class Effects {
+
+    private Effects(){
+        super();
+    }
+
+    
 }
