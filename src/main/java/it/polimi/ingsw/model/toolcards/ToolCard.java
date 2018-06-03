@@ -65,7 +65,7 @@ public class ToolCard {
                     dice = round.getCurrentDiceDrafted();
                     break;
                 case "remove-turn":
-                    Effects.removeTurn(round);
+                    round.removeTurn();
                     break;
 
             }
