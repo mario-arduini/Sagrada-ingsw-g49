@@ -63,11 +63,11 @@ public class ServerListener implements Runnable {
                     case "publicGoal":  //TODO
                         break;
                     case "toolCard":
-//                        ToolCard[] toolCards = new ToolCard[3];
-//                        toolCards[0] = new ToolCard(jsonObject.get("0").getAsString());
-//                        toolCards[0] = new ToolCard(jsonObject.get("1").getAsString());
-//                        toolCards[0] = new ToolCard(jsonObject.get("2").getAsString());
-//                        client.getGameSnapshot().setToolCards(toolCards);
+                        List<ToolCard> toolCards = new ArrayList<>();
+                        /*toolCards.add(new ToolCard(jsonObject.get("0").getAsString()));
+                        toolCards[0] = new ToolCard(jsonObject.get("1").getAsString());
+                        toolCards[0] = new ToolCard(jsonObject.get("2").getAsString());*/
+                        client.getGameSnapshot().setToolCards(toolCards);
                         break;
                     case "schema-choice":
                         List<Schema> schemas = new ArrayList<>();
