@@ -264,8 +264,8 @@ public class Client {
                 ClientLogger.print("Choose an option:\n- Logout\n- Toolcard\n- Pass\nYour choice: ");
         else
             ClientLogger.println("If you want you can logout");
-        if(!cliHandler.getPlayingRounf()) {
-            cliHandler.setPlayindRound(true);
+        if(!cliHandler.getPlayingRound()) {
+            cliHandler.setPlayingRound(true);
             synchronized (cliHandler) {
                 cliHandler.notifyAll();
             }

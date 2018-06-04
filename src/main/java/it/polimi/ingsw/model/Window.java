@@ -42,27 +42,31 @@ public class Window {
 
     public void addDice(int row, int column, Dice dice) throws ConstraintViolatedException, FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {
         Constraint constraint = schema.getConstraint(row, column);
-
-        if (!firstDice) {
-            checkBorder(row, column);
-            checkColorConstraint(constraint, dice);
-            checkValueConstraint(constraint, dice);
-            this.firstDice = true;
-        }
-        else {
-            checkColorConstraint(constraint, dice);
-            checkValueConstraint(constraint, dice);
-            checkAdjacencies(row,column, dice);
-        }
+        checkColorConstraint(constraint, dice);
+        checkValueConstraint(constraint, dice);
+        checkPlacementConstraint(row, column, dice);
 
         setDice(row,column,dice);
     }
 
-    public void setDice(int row,int column, Dice dice){
+    public void checkPlacementConstraint(int row, int column, Dice dice) throws FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {
+        if (!firstDice) {
+            checkBorder(row, column);
+            this.firstDice = true;
+        }
+        else
+            checkAdjacencies(row,column, dice);
+    }
+
+    public boolean isFirstDice() {
+        return firstDice;
+    }
+
+    public void setDice(int row, int column, Dice dice){
         mosaic[row][column] = new Dice(dice);
     }
 
-    private void checkBorder(int row, int column) throws FirstDiceMisplacedException {
+    public void checkBorder(int row, int column) throws FirstDiceMisplacedException {
         if (row != 0 && row != ROW - 1)
             throw new FirstDiceMisplacedException();
 

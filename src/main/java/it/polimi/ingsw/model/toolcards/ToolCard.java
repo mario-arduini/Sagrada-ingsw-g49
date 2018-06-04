@@ -56,6 +56,7 @@ public class ToolCard {
             arguments = effect.get(command).getAsJsonObject();
             switch (command) {
                 case "change-value":
+
                     Effects.changeValue(dice, arguments.get("plus").getAsBoolean(), arguments.get("value").getAsInt());
                     break;
                 case "flip":

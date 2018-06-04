@@ -7,7 +7,7 @@ import it.polimi.ingsw.model.exceptions.*;
 import java.util.List;
 import java.util.Random;
 
-public final class Effects {
+final class Effects {
 
     enum RuleIgnored{ COLOR, NUMBER, ADJACENCIES, NONE }
 
@@ -53,28 +53,43 @@ public final class Effects {
         return;
     }
 
-    static void placeDice(Round round, int row, int column, RuleIgnored ruleIgnored) throws ConstraintViolatedException, NoAdjacentDiceException, BadAdjacentDiceException, FirstDiceMisplacedException {
+    static void placeDice(Round round, int row, int column, RuleIgnored ruleIgnored) throws NotWantedAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, BadAdjacentDiceException, FirstDiceMisplacedException {
         switch (ruleIgnored){
             case COLOR:
                 round.getCurrentPlayer().getWindow().checkValueConstraint(round.getCurrentPlayer().getWindow().getSchema().getConstraint(row, column), round.getCurrentDiceDrafted());
-                round.getCurrentPlayer().getWindow().checkAdjacencies(row, column, round.getCurrentDiceDrafted());
+                round.getCurrentPlayer().getWindow().checkPlacementConstraint(row, column, round.getCurrentDiceDrafted());
                 round.getCurrentPlayer().getWindow().setDice(row, column, round.getCurrentDiceDrafted());
                 break;
             case NUMBER:
                 round.getCurrentPlayer().getWindow().checkColorConstraint(round.getCurrentPlayer().getWindow().getSchema().getConstraint(row, column), round.getCurrentDiceDrafted());
-                round.getCurrentPlayer().getWindow().checkAdjacencies(row, column, round.getCurrentDiceDrafted());
+                round.getCurrentPlayer().getWindow().checkPlacementConstraint(row, column, round.getCurrentDiceDrafted());
                 round.getCurrentPlayer().getWindow().setDice(row, column, round.getCurrentDiceDrafted());
                 break;
             case ADJACENCIES:
                 round.getCurrentPlayer().getWindow().checkValueConstraint(round.getCurrentPlayer().getWindow().getSchema().getConstraint(row, column), round.getCurrentDiceDrafted());
                 round.getCurrentPlayer().getWindow().checkColorConstraint(round.getCurrentPlayer().getWindow().getSchema().getConstraint(row, column), round.getCurrentDiceDrafted());
-                round.getCurrentPlayer().getWindow().setDice(row, column, round.getCurrentDiceDrafted());
+                if(!round.getCurrentPlayer().getWindow().isFirstDice())
+                    try {
+                        round.getCurrentPlayer().getWindow().checkAdjacencies(row, column, round.getCurrentDiceDrafted());
+                        throw new NotWantedAdjacentDiceException();
+                    }catch (NoAdjacentDiceException e){
+                        round.getCurrentPlayer().getWindow().setDice(row, column, round.getCurrentDiceDrafted());
+                    }
+                else
+                    try {
+                        round.getCurrentPlayer().getWindow().checkBorder(row, column);
+                        throw new NotWantedAdjacentDiceException();
+                    }catch (FirstDiceMisplacedException e){
+                        round.getCurrentPlayer().getWindow().setDice(row, column, round.getCurrentDiceDrafted());
+                    }
                 break;
             case NONE:
                 round.getCurrentPlayer().getWindow().addDice(row, column, round.getCurrentDiceDrafted());
                 break;
         }
     }
+
+
 
     static void exchange(List<Dice> draftPool, int draftPoolIndex, Dice[] roundTrack, int roundTrackIndex){
         Dice dice = draftPool.get(draftPoolIndex);

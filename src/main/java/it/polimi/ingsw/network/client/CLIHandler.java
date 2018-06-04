@@ -73,7 +73,7 @@ class CLIHandler {
                         ClientLogger.print("Invalid choice, dice already extracted\nRetry: ");
                     break;
                 case "toolcard":
-                    useToolcard();
+                    useToolCard();
                     break;
                 default:
                     ClientLogger.print("Invalid choice, retry: ");
@@ -236,7 +236,7 @@ class CLIHandler {
         return choice - 1;
     }
 
-    void setPlayindRound(boolean playindRound){
+    void setPlayingRound(boolean playindRound){
         this.playindRound = playindRound;
     }
 
@@ -283,14 +283,14 @@ class CLIHandler {
             ClientLogger.println("Not your turn! You can only logout");
     }
 
-    private void useToolcard(){
+    private void useToolCard(){
         if(client.isMyTurn()){
 
         }else
             ClientLogger.println("Not your turn! You can only logout");
     }
 
-    boolean getPlayingRounf(){
+    boolean getPlayingRound(){
         return playindRound;
     }
 
