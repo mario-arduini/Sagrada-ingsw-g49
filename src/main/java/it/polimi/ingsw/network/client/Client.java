@@ -125,6 +125,10 @@ public class Client {
         return diceExtracted;
     }
 
+    boolean useToolCard(String name){
+        return server.useToolCard(name);
+    }
+
     void pass(){
         server.pass();
     }

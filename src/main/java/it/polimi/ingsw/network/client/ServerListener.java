@@ -64,9 +64,9 @@ public class ServerListener implements Runnable {
                         break;
                     case "toolCard":
                         List<ToolCard> toolCards = new ArrayList<>();
-                        /*toolCards.add(new ToolCard(jsonObject.get("0").getAsString()));
-                        toolCards[0] = new ToolCard(jsonObject.get("1").getAsString());
-                        toolCards[0] = new ToolCard(jsonObject.get("2").getAsString());*/
+                        toolCards.add(new ToolCard(jsonObject.get("0").getAsJsonObject().get("name").getAsString(),jsonObject.get("0").getAsJsonObject().get("description").getAsString()));
+                        toolCards.add(new ToolCard(jsonObject.get("1").getAsJsonObject().get("name").getAsString(),jsonObject.get("0").getAsJsonObject().get("description").getAsString()));
+                        toolCards.add(new ToolCard(jsonObject.get("2").getAsJsonObject().get("name").getAsString(),jsonObject.get("0").getAsJsonObject().get("description").getAsString()));
                         client.getGameSnapshot().setToolCards(toolCards);
                         break;
                     case "schema-choice":
@@ -91,6 +91,13 @@ public class ServerListener implements Runnable {
                             if(!entry.getKey().equals(client.getGameSnapshot().getPlayer().getNickname()))
                                 client.getGameSnapshot().addOtherPlayer(entry.getKey(), entry.getValue());
                         }
+                        break;
+                    case "toolCard-used":
+                        List<ToolCard> toolCards1 = client.getGameSnapshot().getToolCards();
+                        String name = jsonObject.get("name").getAsString();
+                        for (ToolCard aToolCards1 : toolCards1)
+                            if (aToolCards1.getName().equalsIgnoreCase(name))
+                                aToolCards1.setUsed();
                         break;
                     case "update-window":
                         Dice dicePlaced = gson.fromJson(jsonObject.get("dice").getAsString(),Dice.class);

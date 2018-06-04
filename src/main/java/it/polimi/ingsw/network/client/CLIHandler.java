@@ -120,10 +120,9 @@ class CLIHandler {
     }
 
     private Client.ConnectionType askConnectionType(){
-        int choice = 0;
-        boolean ok = false;
+        int choice = -1;
 
-        while (!ok) {
+        while (choice != 0 && choice != 1) {
             ClientLogger.println("Connection types:");
             ClientLogger.println("[0] Socket");
             ClientLogger.println("[1] RMI");
@@ -132,12 +131,10 @@ class CLIHandler {
             try {
                 choice = Integer.parseInt(input.readLine());
             } catch (IOException | NumberFormatException e) {
-                ClientLogger.println("Not a valid choice");
+                choice = -1;
             }
             if(choice != 0 && choice != 1)
                 ClientLogger.println("Not a valid choice");
-            else
-                ok = true;
         }
         if(choice == 1){
             ClientLogger.println("You chose RMI");
@@ -285,9 +282,33 @@ class CLIHandler {
 
     private void useToolCard(){
         if(client.isMyTurn()){
-
+            int choice = -1;
+            printToolCards();
+            while (choice < 1 || choice > 3) {
+                ClientLogger.print("Your choice: ");
+                try {
+                    choice = Integer.parseInt(input.readLine());
+                } catch (IOException | NumberFormatException e) {
+                    choice = -1;
+                }
+                if(choice < 1 || choice > 3)
+                    ClientLogger.println("Not a valid choice");
+            }
+            if(!client.useToolCard( client.getGameSnapshot().getToolCards().get(choice - 1).getName())) {
+                ClientLogger.println("You can't use this card now");
+                return;
+            }
         }else
             ClientLogger.println("Not your turn! You can only logout");
+    }
+
+    private void printToolCards(){
+        int i = 0;
+        ClientLogger.println("0) Go back");
+        for (ToolCard toolcard: client.getGameSnapshot().getToolCards()) {
+            ClientLogger.println(i + ") " + toolcard.getName());
+            ClientLogger.println("   Description: " + toolcard.getDescription());
+        }
     }
 
     boolean getPlayingRound(){

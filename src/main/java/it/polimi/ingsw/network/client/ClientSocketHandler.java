@@ -96,11 +96,27 @@ public class ClientSocketHandler implements Connection {
             } catch (InterruptedException e) {
                 LOGGER.log(Level.WARNING, e.toString(), e);
             }
-        boolean result = serverResult;
         flagContinue = false;
-        return result;
+        return serverResult;
     }
 
+    @Override
+    public synchronized boolean useToolCard(String name) {
+        createJsonCommand("toolCard");
+        jsonObject.addProperty("name", name);
+        socketPrintLine(jsonObject);
+
+        while (!flagContinue)
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                LOGGER.log(Level.WARNING, e.toString(), e);
+            }
+        flagContinue = false;
+        return serverResult;
+    }
+
+    @Override
     public void pass(){
         createJsonCommand("pass");
         socketPrintLine(jsonObject);
