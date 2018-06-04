@@ -2,6 +2,7 @@ package it.polimi.ingsw.model.toolcards;
 
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Round;
+import it.polimi.ingsw.model.Window;
 import it.polimi.ingsw.model.exceptions.*;
 
 import java.util.List;
@@ -96,5 +97,14 @@ final class Effects {
         draftPool.remove(draftPoolIndex);
         draftPool.add(roundTrack[roundTrackIndex]);
         roundTrack[roundTrackIndex] = new Dice(dice);
+    }
+
+    static void move(Round round){
+        List<Integer> positions = null;
+        // ask positions to client
+        Window currentPlayerWindow = round.getCurrentPlayer().getWindow();
+        Dice rem = currentPlayerWindow.getCell(positions.get(0),positions.get(1));
+        currentPlayerWindow.removeDice(positions.get(0),positions.get(1));
+
     }
 }

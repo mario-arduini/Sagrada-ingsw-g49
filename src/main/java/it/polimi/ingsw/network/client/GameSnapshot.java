@@ -4,26 +4,26 @@ import it.polimi.ingsw.network.client.Dice;
 import it.polimi.ingsw.network.client.Schema;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
-import it.polimi.ingsw.model.toolcards.ToolCard;
+import it.polimi.ingsw.network.client.ToolCard;
 
 import java.util.*;
 
 public class GameSnapshot {
     private PlayerSnapshot player;
     private final List<PlayerSnapshot> otherPlayers;
-    private Dice[] roundTrack;
+    private List<Dice> roundTrack;
     private int trackIndex;
-    private final ToolCard[] toolCards;
-    private final PublicGoal[] publicGoals;
+    private List<ToolCard> toolCards;
+    private List<PublicGoal> publicGoals;
     private int nextFirstPlayer;
     private List<Dice> draftPool;
     private static final int schemaPerPlayer = 4;
 
     public GameSnapshot(String playerNick) { //Fix UML for players
-        this.roundTrack = new Dice[10];
-        this.toolCards = new ToolCard[3];
+        this.roundTrack = null;
+        this.toolCards = null;
         this.trackIndex = 0;
-        this.publicGoals = new PublicGoal[3];
+        this.publicGoals = null;
         this.otherPlayers = new ArrayList<>();
         this.player = new PlayerSnapshot(playerNick);
         this.draftPool = new ArrayList<>();
@@ -43,15 +43,15 @@ public class GameSnapshot {
         return otherPlayers;
     }
 
-    public ToolCard[] getToolCards() {
+    public List<ToolCard> getToolCards() {
         return toolCards;
     }
 
-    public PublicGoal[] getPublicGoals() {
+    public List<PublicGoal> getPublicGoals() {
         return publicGoals;
     }
 
-    public Dice[] getRoundTrack() {
+    public List<Dice> getRoundTrack() {
         return roundTrack;
     }
 
@@ -63,6 +63,10 @@ public class GameSnapshot {
         this.draftPool = new ArrayList<>(draftPool);
     }
 
+    public void setToolCards(List<ToolCard> extractedToolCards){
+        toolCards = extractedToolCards;
+    }
+
     public Optional<PlayerSnapshot> findPlayer(String nickname){
         List <PlayerSnapshot> allPlayers = new ArrayList<>();
         allPlayers.add(this.player);
@@ -70,9 +74,7 @@ public class GameSnapshot {
         return allPlayers.stream().filter(player -> player.getNickname().equalsIgnoreCase(nickname)).findFirst();
     }
 
-    private void addDiceToTracker(Dice dice){
-        this.roundTrack[trackIndex++] = new Dice(dice);
-    }
+
 
 
 }
