@@ -57,9 +57,9 @@ public class ToolCard {
             }
             switch (command) {
                 case "change-value":
-                    if(arguments.get("plus")!= null)
+                    if (arguments.get("plus") != null)
                         Effects.changeValue(game.getCurrentRound(), arguments.get("value").getAsInt());
-                    else if(arguments.get("value")!= null) ;
+                    else if (arguments.get("value") != null) ;
                     else Effects.changeValue(game.getCurrentRound());
                     break;
                 case "flip":
@@ -78,10 +78,11 @@ public class ToolCard {
                     Effects.swapRoundTrack(game);
                     break;
                 case "move":
-                    Effects.move(game.getCurrentRound(),gson.fromJson(arguments.get("ignore"), Effects.RuleIgnored.class));
+                    Effects.move(game.getCurrentRound(), gson.fromJson(arguments.get("ignore"), Effects.RuleIgnored.class));
                     break;
             }
         }
+        this.used = true;
     }
 
 }
