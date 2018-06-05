@@ -222,7 +222,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         message.addProperty("toolcard", toolcard);
         socketSendMessage(message);
     }
-    
+
     @Override
     public void notifyOthersSchemas(Map<String, Schema> playersSchemas){
         JsonObject message;
