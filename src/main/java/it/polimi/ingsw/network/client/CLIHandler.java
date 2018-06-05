@@ -438,13 +438,13 @@ class CLIHandler {
         Coordinate coordinate = null;
         boolean ask = true;
 
-        ClientLogger.print("Choose a dice from your window");
+        ClientLogger.println("Choose a cell from your window");
         while (ask) {
             coordinate = getPosition();
 
-            if (client.getGameSnapshot().getPlayer().getWindow().getCell(coordinate.getRow(), coordinate.getColumn()) == null)
-                ClientLogger.println("Invalid choice!");
-            else
+//            if (client.getGameSnapshot().getPlayer().getWindow().getCell(coordinate.getRow(), coordinate.getColumn()) == null)
+//                ClientLogger.println("Invalid choice!");
+//            else
                 ask = false;
         }
         return coordinate;
@@ -454,13 +454,13 @@ class CLIHandler {
         Coordinate coordinate = null;
         boolean ask = true;
 
-        ClientLogger.print("Choose a free position on your window");
+        ClientLogger.println("Choose a free position on your window");
         while (ask) {
             coordinate = getPosition();
 
-            if (client.getGameSnapshot().getPlayer().getWindow().getCell(coordinate.getRow(), coordinate.getColumn()) != null)
-                ClientLogger.println("Invalid choice!");
-            else
+//            if (client.getGameSnapshot().getPlayer().getWindow().getCell(coordinate.getRow(), coordinate.getColumn()) != null)
+//                ClientLogger.println("Invalid choice!");
+//            else
                 ask = false;
         }
         return coordinate;
