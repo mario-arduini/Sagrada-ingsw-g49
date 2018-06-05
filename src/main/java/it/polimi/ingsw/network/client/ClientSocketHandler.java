@@ -168,7 +168,7 @@ public class ClientSocketHandler implements Connection {
     @Override
     public void sendPlusMinusOption(String choice){
         createJsonCommand("toolcard-plus-minus");
-        jsonObject.addProperty("choice", choice.equals("+") ? 0 : 1);
+        jsonObject.addProperty("choice", choice.equals("+"));
         socketPrintLine(jsonObject);
     }
 

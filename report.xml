@@ -28,15 +28,9 @@
       <arch>x86_64</arch>
       <command_line>tcpflow -c -i lo0</command_line>
       <uid>0</uid>
-      <start_time>2018-06-05T14:09:50Z</start_time>
+      <start_time>2018-06-05T14:31:51Z</start_time>
     </execution_environment>
   </creator>
   <configuration>
   </configuration>
   <tdelta>0</tdelta>
-  <configuration>
-    <fileobject>
-      <filename>127.000.000.001.50366-127.000.000.001.31337</filename>
-      <filesize>61</filesize>
-      <tcpflow startime='2018-06-05T16:10:34.289784Z' endtime='2018-06-05T16:19:22.295534Z' src_ipn='127.0.0.1' dst_ipn='127.0.0.1' mac_daddr='02:00:00:00:45:00' mac_saddr='00:40:00:00:40:00' packets='10' srcport='50366' dstport='31337' family='2' />
-    </fileobject>
