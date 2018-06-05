@@ -9,6 +9,7 @@ import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.Round;
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.network.server.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,7 @@ public class ToolCard {
     public void use(Game game) throws InvalidDiceValueException, NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException {
         JsonObject effect;
         String command;
-        JsonObject arguments;
+        JsonObject arguments = null;
         for (String prerequisite : prerequisites) {
             switch (prerequisite) {
                 case "favor-token": Prerequisites.checkFavorToken(game.getCurrentRound().getCurrentPlayer(), used ? 2 : 1); break;
@@ -48,8 +49,12 @@ public class ToolCard {
 
         for (int i = 0; i < effects.size(); i++) {
             effect = effects.get(i).getAsJsonObject();
-            command = effect.keySet().toString();
-            arguments = effect.get(command).getAsJsonObject();
+            command = effect.keySet().toArray()[0].toString();
+            try {
+                arguments = effect.get(command).getAsJsonObject();
+            }catch (NullPointerException e) {
+                Logger.print("ToolCard " + e);
+            }
             switch (command) {
                 case "change-value":
                     if(arguments.get("plus")!= null)
