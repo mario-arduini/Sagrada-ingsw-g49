@@ -1,7 +1,5 @@
 package it.polimi.ingsw.network.client;
 
-import it.polimi.ingsw.model.Player;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -334,12 +332,17 @@ class CLIHandler {
 
     void printMenu(){
         if(client.isMyTurn())
-            if(!client.diceAlreadyExtracted())
-                ClientLogger.print("Choose an option:\n- Logout\n- Place dice\n- Toolcard\n- Pass\nYour choice: ");
-            else
-                ClientLogger.print("Choose an option:\n- Logout\n- Toolcard\n- Pass\nYour choice: ");
+            ClientLogger.print("Choose an option:\n- Logout" + (!client.diceAlreadyExtracted() ? "\n- Place dice" : "") + (!client.cardToolAlreadyUsed() ? "\n- Toolcard" : "") + "\n- Pass\nYour choice: ");
+//            if(!client.diceAlreadyExtracted())
+//                ClientLogger.print("Choose an option:\n- Logout\n- Place dice\n- Toolcard\n- Pass\nYour choice: ");
+//            else
+//                ClientLogger.print("Choose an option:\n- Logout\n- Toolcard\n- Pass\nYour choice: ");
         else
             ClientLogger.println("If you want you can logout");
+    }
+
+    void notifyEndTurn(){
+        ClientLogger.println("Your turn is finished!");
     }
 
     boolean getPlayingRound(){

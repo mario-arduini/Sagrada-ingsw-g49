@@ -2,7 +2,6 @@ package it.polimi.ingsw.network.client;
 
 import it.polimi.ingsw.model.Color;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.*;
@@ -20,16 +19,16 @@ public class Client {
     private int serverPort;
     private Connection server;
     enum ConnectionType{ RMI, SOCKET }
-    private List<String> players;
     private boolean logged;
     private boolean serverConnected;
     private GameSnapshot gameSnapshot;
     private boolean myTurn;
     private boolean diceExtracted;
+    private boolean usedToolCard;
     private CLIHandler cliHandler;
 
     private Client(){
-        players = new ArrayList<>();
+        super();
     }
 
     private void setCliHandler(CLIHandler cliHandler){
@@ -95,6 +94,7 @@ public class Client {
     void notifyNewTurn(String nickname, boolean newRound){
         myTurn = nickname.equals(this.nickname);
         diceExtracted = false;
+        usedToolCard = false;
         if(myTurn)
             cliHandler.notifyNewTurn(newRound);
         else
@@ -108,6 +108,7 @@ public class Client {
             gameSnapshot.getDraftPool().remove(dice - 1);
             diceExtracted = true;
             printGame();
+            verifyEndTurn();
             return true;
         }
         return false;
@@ -133,8 +134,21 @@ public class Client {
         return diceExtracted;
     }
 
+    boolean cardToolAlreadyUsed(){
+        return usedToolCard;
+    }
+
     boolean useToolCard(String name){
-        return server.useToolCard(name);
+        usedToolCard =  server.useToolCard(name);
+        verifyEndTurn();
+        return usedToolCard;
+    }
+
+    private void verifyEndTurn(){
+        if(diceExtracted && usedToolCard){
+            cliHandler.notifyEndTurn();
+            pass();
+        }
     }
 
     void pass(){
@@ -269,7 +283,7 @@ public class Client {
         }
     }
 
-    void initGameSnapshot(){
+    private void initGameSnapshot(){
         this.gameSnapshot = new GameSnapshot(this.nickname);
     }
 
