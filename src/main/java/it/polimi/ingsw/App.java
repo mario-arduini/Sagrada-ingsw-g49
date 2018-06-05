@@ -4,7 +4,6 @@ import com.google.gson.*;
 import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.Constraint;
 import it.polimi.ingsw.model.Schema;
-import it.polimi.ingsw.model.toolcards.Effects;
 import it.polimi.ingsw.network.client.Client;
 
 import java.util.Random;
@@ -15,7 +14,7 @@ public class App
 
         Gson gson = new Gson();
 
-        System.out.println(gson.toJson(Effects.RuleIgnored.COLOR));
+
 
         /*
         String name = "Ripples of Light";
