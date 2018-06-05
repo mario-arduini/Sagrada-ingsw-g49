@@ -31,7 +31,7 @@ public class Client {
         super();
     }
 
-    private void setCliHandler(CLIHandler cliHandler){
+    private void setCLIHandler(CLIHandler cliHandler){
         this.cliHandler = cliHandler;
     }
 
@@ -341,7 +341,7 @@ public class Client {
         switch (mode){
             case "CLI":
                 cliHandler = new CLIHandler(client);
-                client.setCliHandler(cliHandler);
+                client.setCLIHandler(cliHandler);
                 cliHandler.start();
                 break;
             case "GUI":

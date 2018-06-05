@@ -31,7 +31,7 @@ public class ServerListener implements Runnable {
         while (connected){
             jsonObject = null;
             try {
-                jsonObject = parser.parse(server.socketReadLine()).getAsJsonObject();
+                jsonObject = parser.parse(server.socketReadLine()).getAsJsonObject();  //TODO: bring here socketReadLine
             } catch (IllegalStateException e) {
             } catch (NullPointerException e)
             {
@@ -80,6 +80,8 @@ public class ServerListener implements Runnable {
                     case "round":
                         listType = new TypeToken<List<Dice>>(){}.getType();
                         client.notifyNewTurn(jsonObject.get("player").getAsString(), jsonObject.get("new-round").getAsBoolean());
+                        if(jsonObject.get("new-round").getAsBoolean())
+                            client.getGameSnapshot().getRoundTrack().add(gson.fromJson(jsonObject.get("roundtrack-dice").getAsString(),Dice.class));
                         List<Dice> draftPool = gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType);
                         client.getGameSnapshot().setDraftPool(draftPool);
                         client.printGame();
