@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
-import it.polimi.ingsw.model.Dice;
-import it.polimi.ingsw.model.Game;
-import it.polimi.ingsw.model.Schema;
+import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
+import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.exceptions.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -81,6 +81,9 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                             break;
                         case "pass":
                             pass();
+                            break;
+                        case "toolcard":
+                            useToolCard(message);
                     }
             }catch (NullPointerException e){
                 Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
@@ -147,6 +150,20 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         socketClose();
     }
 
+    private void useToolCard(JsonObject message){
+        try {
+            gameFlowHandler.useToolCard(message.get("name").toString());
+            socketSendMessage(createMessage("verified"));
+        } catch (InvalidParameterException | NoSuchToolCardException |
+                InvalidDiceValueException | NoDiceInWindowException |
+                InvalidFavorTokenNumberException | AlreadyDraftedException |
+                NotEnoughFavorTokenException | NotYourSecondTurnException |
+                NoDiceInRoundTrackException e){
+            Logger.print("Toolcard :" + nickname + e);
+            socketSendMessage(createMessage("failed"));
+        }
+    }
+
     @Override
     public void notifyLogin(String nickname) {
         JsonObject message;
@@ -209,6 +226,58 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         message.addProperty("column", column);
         message.addProperty("dice", gson.toJson(dice));
         socketSendMessage(message);
+    }
+
+    @Override
+    public Coordinate askDiceWindow() {
+        JsonObject command;
+        socketSendMessage(createMessage("toolcard-dice-window"));
+        try{
+            command = socketReadCommand();
+
+            return gson.fromJson(command.get("choice").getAsString(), Coordinate.class);
+
+        } catch (NullPointerException e){
+            Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
+            this.gameFlowHandler.disconnected();
+            connected = false;
+        }
+
+        return null;
+    }
+
+    @Override
+    public Dice askDiceDraftPool(){
+        JsonObject command;
+        socketSendMessage(createMessage("toolcard-dice-draftpool"));
+        try{
+            command = socketReadCommand();
+
+            return gson.fromJson(command.get("choice").getAsString(), Dice.class);
+
+        } catch (NullPointerException e){
+            Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
+            this.gameFlowHandler.disconnected();
+            connected = false;
+        }
+        return null;
+    }
+
+    @Override
+    public int askDiceRoundTrack(){
+        JsonObject command;
+        socketSendMessage(createMessage("toolcard-dice-roundtrack"));
+        try{
+            command = socketReadCommand();
+
+            return getJsonPositiveIntValue(command, "choice");
+
+        } catch (NullPointerException e){
+            Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
+            this.gameFlowHandler.disconnected();
+            connected = false;
+        }
+        return -1;
     }
 
     private boolean login() {

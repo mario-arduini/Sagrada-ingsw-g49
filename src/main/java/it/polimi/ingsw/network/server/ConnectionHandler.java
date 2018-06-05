@@ -1,9 +1,6 @@
 package it.polimi.ingsw.network.server;
 
-import it.polimi.ingsw.model.Dice;
-import it.polimi.ingsw.model.Game;
-import it.polimi.ingsw.model.Player;
-import it.polimi.ingsw.model.Schema;
+import it.polimi.ingsw.model.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,4 +18,7 @@ public interface ConnectionHandler{
     void close();
     void setGame(Game game);
 
+    Coordinate askDiceWindow();
+    Dice askDiceDraftPool();
+    int askDiceRoundTrack();
 }
