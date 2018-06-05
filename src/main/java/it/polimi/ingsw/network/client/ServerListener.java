@@ -110,6 +110,27 @@ public class ServerListener implements Runnable {
                             client.printGame();
                         }
                         break;
+
+                    //region TOOLCARD
+
+                    case "toolcard-plus-minus":
+                        client.getPlusMinusOption();
+                        break;
+                    case "toolcard-dice-draftpool":
+                        client.getDiceFromDraftPool();
+                        break;
+                    case "toolcard-dice-roundtrack":
+                        client.getDiceFromRoundTrack();
+                        break;
+                    case "toolcard-dice-window":
+                        client.getDiceFromWindow();
+                        break;
+                    case "toolcard-place-window":
+                        client.getPlacementPosition();
+                        break;
+
+                    //endregion
+
                     default:
                         break;
                 }

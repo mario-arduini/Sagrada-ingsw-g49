@@ -7,4 +7,14 @@ public interface Connection {
     boolean useToolCard(String name);
     void pass();
     void logout();
+
+    //region TOOLCARD
+
+    void sendPlusMinusOption(String choice);
+    void sendDiceFromDraftPool(Dice dice);
+    void sendDiceFromRoundTrack(int index);
+    void sendDiceFromWindow(Coordinate coordinate);
+    void sendPlacementPosition(Coordinate coordinate);
+
+    //endregion
 }

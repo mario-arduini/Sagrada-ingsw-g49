@@ -57,6 +57,14 @@ public class Client {
         return false;
     }
 
+    String getNickname(){
+        return nickname;
+    }
+
+    boolean isLogged(){
+        return logged;
+    }
+
     void setLogged(boolean logged){
         this.logged = logged;
     }
@@ -134,25 +142,16 @@ public class Client {
     }
 
     void addPlayers(List<String> newPlayers){
-
-        players.addAll(newPlayers);
-        if(!logged){
-            ClientLogger.println("Waiting room:");
-            ClientLogger.println(nickname);
-            newPlayers.forEach(ClientLogger::println);
-        }
-        else
-            newPlayers.forEach(name -> ClientLogger.println(name + " is now playing"));
+        cliHandler.printNewPlayers(newPlayers);
     }
 
     void removePlayer(String nickname){
-        players.remove(nickname);
-        ClientLogger.println(nickname + " logged out");
+        cliHandler.printLoggedOutPlayer(nickname);
     }
 
     synchronized void serverDisconnected(){
         if(logged) {
-            ClientLogger.println("\nServer disconnected");
+            cliHandler.notifyServerDisconnected();
             logged = false;
             serverConnected = false;
             synchronized (cliHandler){
@@ -261,13 +260,7 @@ public class Client {
         }
         ClientLogger.println("");
 
-        if(myTurn)
-            if(!diceExtracted)
-                ClientLogger.print("Choose an option:\n- Logout\n- Place dice\n- Toolcard\n- Pass\nYour choice: ");
-            else
-                ClientLogger.print("Choose an option:\n- Logout\n- Toolcard\n- Pass\nYour choice: ");
-        else
-            ClientLogger.println("If you want you can logout");
+        cliHandler.printMenu();
         if(!cliHandler.getPlayingRound()) {
             cliHandler.setPlayingRound(true);
             synchronized (cliHandler) {
@@ -284,6 +277,30 @@ public class Client {
         return gameSnapshot;
 
     }
+
+    //region TOOLCARD
+
+    void getPlusMinusOption(){
+        server.sendPlusMinusOption(cliHandler.askPlusMinusOption());
+    }
+
+    void getDiceFromDraftPool(){
+        server.sendDiceFromDraftPool(cliHandler.askDiceFormDraftPool());
+    }
+
+    void getDiceFromRoundTrack(){
+        server.sendDiceFromRoundTrack(cliHandler.askDiceFormRoundTrack());
+    }
+
+    void getDiceFromWindow(){
+        server.sendDiceFromWindow(cliHandler.askDiceFormWindow());
+    }
+
+    void getPlacementPosition(){
+        server.sendPlacementPosition(cliHandler.askPlacementPosition());
+    }
+
+    //endregion
 
     public static void main(String[] args) {
         Client client = new Client();

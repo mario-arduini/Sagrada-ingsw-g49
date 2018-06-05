@@ -1,8 +1,11 @@
 package it.polimi.ingsw.network.client;
 
+import it.polimi.ingsw.model.Player;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.logging.Logger;
 
 class CLIHandler {
@@ -176,7 +179,7 @@ class CLIHandler {
     }
 
     private String askPassword(){
-        String password = "notapassword";
+        String password = null;
         boolean ok = false;
 
         while (!ok) {
@@ -184,8 +187,8 @@ class CLIHandler {
             try {
                 password = input.readLine();
             } catch (IOException e) {
-                e.printStackTrace();
             }
+
             if (!checkPasswordProperties(password))
                 ClientLogger.println("Invalid password, must be at least 8 character");
             else
@@ -212,6 +215,20 @@ class CLIHandler {
                 wait();
             } catch (InterruptedException e) {
             }
+    }
+
+    void printNewPlayers(List<String> newPlayers){
+        if(!client.isLogged()){
+            ClientLogger.println("Waiting room:");
+            ClientLogger.println(client.getNickname());
+            newPlayers.forEach(ClientLogger::println);
+        }
+        else
+            newPlayers.forEach(name -> ClientLogger.println(name + " is now playing"));
+    }
+
+    void printLoggedOutPlayer(String nickname){
+        ClientLogger.println(nickname + " logged out");
     }
 
     int chooseSchema(){
@@ -284,19 +301,23 @@ class CLIHandler {
         if(client.isMyTurn()){
             int choice = -1;
             printToolCards();
-            while (choice < 1 || choice > 3) {
+            while (choice < 0 || choice > 3) {
                 ClientLogger.print("Your choice: ");
                 try {
                     choice = Integer.parseInt(input.readLine());
                 } catch (IOException | NumberFormatException e) {
                     choice = -1;
                 }
+                if(choice == 0) {
+                    printMenu();
+                    return;
+                }
                 if(choice < 1 || choice > 3)
                     ClientLogger.println("Not a valid choice");
             }
             if(!client.useToolCard( client.getGameSnapshot().getToolCards().get(choice - 1).getName())) {
                 ClientLogger.println("You can't use this card now");
-                return;
+                printMenu();
             }
         }else
             ClientLogger.println("Not your turn! You can only logout");
@@ -311,8 +332,22 @@ class CLIHandler {
         }
     }
 
+    void printMenu(){
+        if(client.isMyTurn())
+            if(!client.diceAlreadyExtracted())
+                ClientLogger.print("Choose an option:\n- Logout\n- Place dice\n- Toolcard\n- Pass\nYour choice: ");
+            else
+                ClientLogger.print("Choose an option:\n- Logout\n- Toolcard\n- Pass\nYour choice: ");
+        else
+            ClientLogger.println("If you want you can logout");
+    }
+
     boolean getPlayingRound(){
         return playindRound;
+    }
+
+    void notifyServerDisconnected(){
+        ClientLogger.println("\nServer disconnected");
     }
 
     private int readInt(){
@@ -329,4 +364,94 @@ class CLIHandler {
         }
         return value;
     }
+
+    //region TOOLCARD
+
+    String askPlusMinusOption(){
+        String choice = "";
+        boolean ask = true;
+        ClientLogger.print("Do you want to add [+] or subtract [-] 1? ");
+
+        while (ask){
+            try {
+                choice = input.readLine();
+            } catch (IOException e) {
+                ClientLogger.print("Not a valid choice, retry: ");
+            }
+
+            if(choice.equals("+") || choice.equals("-"))
+                ask = false;
+            else
+                ClientLogger.print("Not a valid choice, retry: ");
+        }
+        return choice;
+    }
+
+    Dice askDiceFormDraftPool(){
+        ClientLogger.print("Insert dice number from draftpool: ");
+        return client.getGameSnapshot().getDraftPool().get(getIndexChoice(client.getGameSnapshot().getDraftPool().size()) - 1);
+    }
+
+    int askDiceFormRoundTrack(){
+        ClientLogger.print("Insert dice number from roundtrack: ");
+        return getIndexChoice(client.getGameSnapshot().getRoundTrack().size()) - 1;
+    }
+
+    private int getIndexChoice(int maxSize){
+        int index = 0;
+        boolean ask = true;
+
+        while (ask) {
+            index = readInt();
+
+            if (index > maxSize || index <= 0)
+                ClientLogger.print("Invalid choice, retry: ");
+            else
+                ask = false;
+        }
+        return index;
+    }
+
+    Coordinate askDiceFormWindow(){
+        Coordinate coordinate = null;
+        boolean ask = true;
+
+        ClientLogger.print("Choose a dice from your window");
+        while (ask) {
+            coordinate = getPosition();
+
+            if (client.getGameSnapshot().getPlayer().getWindow().getCell(coordinate.getRow(), coordinate.getColumn()) == null)
+                ClientLogger.println("Invalid choice!");
+            else
+                ask = false;
+        }
+        return coordinate;
+    }
+
+    Coordinate askPlacementPosition(){
+        Coordinate coordinate = null;
+        boolean ask = true;
+
+        ClientLogger.print("Choose a free position on your window");
+        while (ask) {
+            coordinate = getPosition();
+
+            if (client.getGameSnapshot().getPlayer().getWindow().getCell(coordinate.getRow(), coordinate.getColumn()) != null)
+                ClientLogger.println("Invalid choice!");
+            else
+                ask = false;
+        }
+        return coordinate;
+    }
+
+    private Coordinate getPosition(){
+        int row, column;
+        ClientLogger.print("Insert dice row: ");
+        row = readInt();
+        ClientLogger.print("Insert dice column: ");
+        column = readInt();
+        return new Coordinate(row, column);
+    }
+
+    //endregion
 }

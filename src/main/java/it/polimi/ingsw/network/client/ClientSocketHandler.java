@@ -26,6 +26,7 @@ public class ClientSocketHandler implements Connection {
     private boolean connected;
     private boolean serverResult;
     private JsonObject jsonObject;
+    private Gson gson;
 
 
     ClientSocketHandler(Client client, String serverAddress, int serverPort) {
@@ -40,6 +41,7 @@ public class ClientSocketHandler implements Connection {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, e.toString(), e);
         }
+        gson = new Gson();
         flagContinue = false;
     }
 
@@ -82,8 +84,6 @@ public class ClientSocketHandler implements Connection {
 
     @Override
     public synchronized boolean placeDice(Dice dice, int row, int column){
-        JsonParser parser = new JsonParser();
-        Gson gson = new Gson();
         createJsonCommand("place-dice");
         jsonObject.addProperty("dice", gson.toJson(dice));
         jsonObject.addProperty("row", row - 1);
@@ -162,4 +162,43 @@ public class ClientSocketHandler implements Connection {
             LOGGER.log(Level.WARNING, e.toString(), e);
         }
     }
+
+    //region TOOLCARD
+
+    @Override
+    public void sendPlusMinusOption(String choice){
+        createJsonCommand("toolcard-plus-minus");
+        jsonObject.addProperty("choice", choice.equals("+") ? 0 : 1);
+        socketPrintLine(jsonObject);
+    }
+
+    @Override
+    public void sendDiceFromDraftPool(Dice dice){
+        createJsonCommand("toolcard-dice-draftpool");
+        jsonObject.addProperty("choice", gson.toJson(dice));
+        socketPrintLine(jsonObject);
+    }
+
+    @Override
+    public void sendDiceFromRoundTrack(int index){
+        createJsonCommand("toolcard-dice-roundtrack");
+        jsonObject.addProperty("choice", index);
+        socketPrintLine(jsonObject);
+    }
+
+    @Override
+    public void sendDiceFromWindow(Coordinate coordinate){
+        createJsonCommand("toolcard-dice-window");
+        jsonObject.addProperty("choice", gson.toJson(coordinate));
+        socketPrintLine(jsonObject);
+    }
+
+    @Override
+    public void sendPlacementPosition(Coordinate coordinate){
+        createJsonCommand("toolcard-place-window");
+        jsonObject.addProperty("choice", gson.toJson(coordinate));
+        socketPrintLine(jsonObject);
+    }
+
+    //endregion
 }
