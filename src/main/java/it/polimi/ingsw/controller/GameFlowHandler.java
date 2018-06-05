@@ -90,6 +90,6 @@ public class GameFlowHandler {
         }
         this.activeToolCard = fetch.get();
         this.activeToolCard.use(game);
-        gamesHandler.notifyAllToolCardUsed(game, player.getNickname(), activeToolCard.getName());
+        gamesHandler.notifyAllToolCardUsed(game, player.getNickname(), activeToolCard.getName(), player.getWindow());
     }
 }

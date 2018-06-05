@@ -69,10 +69,10 @@ public class GamesHandler {
         coplayers.forEach(player -> player.notifyDicePlaced(nickname, row, column, dice));
     }
 
-    public synchronized void notifyAllToolCardUsed(Game game, String nickname, String toolcard){
+    public synchronized void notifyAllToolCardUsed(Game game, String nickname, String toolcard, Window window){
         boolean newRound = false;
         List<User> coplayers = getPlayersByGame(game);
-        coplayers.forEach(player -> player.notifyToolCardUse(nickname, toolcard));
+        coplayers.forEach(player -> player.notifyToolCardUse(nickname, toolcard, window));
     }
 
     public synchronized User login(String nickname, String password, ConnectionHandler connection){

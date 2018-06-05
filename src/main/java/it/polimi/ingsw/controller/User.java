@@ -66,8 +66,8 @@ public class User extends Player {
         connection.notifyDicePlaced(nickname, row, column, dice);
     }
 
-    public void notifyToolCardUse(String player, String toolCard){
-        this.connection.notifyToolCardUse(player, toolCard);
+    public void notifyToolCardUse(String player, String toolCard, Window window){
+        this.connection.notifyToolCardUse(player, toolCard, window);
     }
 
     public Coordinate askDiceWindow(){
@@ -85,4 +85,5 @@ public class User extends Player {
     public boolean askIfPlus() {
         return connection.askIfPlus();
     }
+
 }

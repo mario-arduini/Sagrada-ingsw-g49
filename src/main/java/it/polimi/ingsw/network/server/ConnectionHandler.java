@@ -15,7 +15,7 @@ public interface ConnectionHandler{
     void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound);
     void notifyOthersSchemas(Map<String, Schema> playersSchemas);
     void notifyDicePlaced(String nickname, int row, int column, Dice dice);
-    void notifyToolCardUse(String player, String toolCard);
+    void notifyToolCardUse(String player, String toolCard, Window window);
     void notifyToolCards(List<ToolCard> toolCards);
     String getRemoteAddress();
     void close();

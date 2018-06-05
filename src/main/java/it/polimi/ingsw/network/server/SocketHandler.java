@@ -218,11 +218,12 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public void notifyToolCardUse(String player, String toolcard){
+    public void notifyToolCardUse(String player, String toolcard, Window window){
         JsonObject message;
         message = createMessage("toolcard-used");
         message.addProperty("player", player);
         message.addProperty("toolcard", toolcard);
+        message.addProperty("window", gson.toJson(window));
         socketSendMessage(message);
     }
 
