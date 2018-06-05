@@ -85,7 +85,7 @@ public class GamesHandler {
         return user;
     }
 
-    public synchronized User reconnection(String nickname, String password, ConnectionHandler connection) {
+    private synchronized User reconnection(String nickname, String password, ConnectionHandler connection) {
         Optional<User> playerFetched = findPlayer(nickname);
         User user;
         if (playerFetched.isPresent()){

@@ -36,9 +36,9 @@ public class GameTest {
         assertEquals(players, game.get().getPlayers());
         assertEquals(2, game.get().getPlayers().size());
         assertNotEquals(null, game.get().getPublicGoals());
-        assertEquals(3,game.get().getPublicGoals().length);
+        assertEquals(3,game.get().getPublicGoals().size());
         assertNotEquals(null, game.get().getToolCards());
-        assertEquals(3, game.get().getToolCards().length);
+        assertEquals(3, game.get().getToolCards().size());
         assertFalse(game.get().isGameFinished());
         assertNotEquals(null, game.get().getCurrentRound());
         assertNotEquals(null, game.get().getRoundTrack());

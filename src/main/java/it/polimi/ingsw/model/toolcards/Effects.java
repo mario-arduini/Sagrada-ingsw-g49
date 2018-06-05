@@ -94,16 +94,6 @@ final class Effects {
         }
     }
 
-    static Coordinate askPosition(String message){
-        //ask 2 integer to client
-        return null;
-    }
-
-    static Dice askDice(GetDiceFrom from){
-        // ask dice
-        return  null;
-    }
-
     static void putDice(GetDiceFrom to, Dice dice, Game game) throws RoundTrackFullException{
         switch (to){
             // TODO case BAG
@@ -111,10 +101,11 @@ final class Effects {
                 game.getCurrentRound().setCurrentDiceDrafted(dice);
                 break;
             case ROUND_TRACK:
-                Dice[] roundTrack = game.getRoundTrack();
+                List<Dice> roundTrack = game.getRoundTrack();
                 int i;
-                for(i=0;i<10;i++)  if(roundTrack[i] == null){
-                        roundTrack[i] = dice;
+                for(i=0;i<10;i++)
+                    if(roundTrack.get(i) == null){
+                        roundTrack.set(i, dice);
                         break;
                     }
                 if(i>10) throw new RoundTrackFullException();
@@ -171,5 +162,15 @@ final class Effects {
         } catch (RoundTrackFullException e) {
             e.printStackTrace();
         }
+    }
+
+    private static Coordinate askPosition(String message){
+        //ask 2 integer to client
+        return null;
+    }
+
+    private static Dice askDice(GetDiceFrom from){
+        // ask dice
+        return  null;
     }
 }

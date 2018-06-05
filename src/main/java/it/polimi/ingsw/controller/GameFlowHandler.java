@@ -1,14 +1,17 @@
 package it.polimi.ingsw.controller;
 
+import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.model.toolcards.ToolCard;
 import it.polimi.ingsw.network.server.ConnectionHandler;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GameFlowHandler {
@@ -16,11 +19,13 @@ public class GameFlowHandler {
     private Game game;
     private GamesHandler gamesHandler;
     private List<Schema> initialSchemas;
+    private ToolCard activeToolCard;
 
     public GameFlowHandler(GamesHandler gamesHandler){
         this.player = null;
         this.game = null;
         this.gamesHandler = gamesHandler;
+        this.activeToolCard = null;
     }
 
     public void setGame(Game game) {
@@ -44,13 +49,14 @@ public class GameFlowHandler {
 
     public void pass() throws NotYourTurnException{
         if (!game.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
+        this.activeToolCard = null;
         gamesHandler.goOn(game);
     }
 
     public void checkGameReady(){
         List<Player> inGamePlayers = game.getPlayers();
-        for (Player player: inGamePlayers)
-            if (player.getWindow()==null)
+        for (Player p: inGamePlayers)
+            if (p.getWindow()==null)
                 return;
         gamesHandler.gameReady(game);
     }
@@ -72,5 +78,14 @@ public class GameFlowHandler {
 
     public void logout() {
         gamesHandler.logout(this.player.getNickname());
+    }
+
+    public void useToolCard(String cardName) throws NoSuchToolCardException, InvalidDiceValueException {
+        Optional<ToolCard> fetch = game.getToolCards().stream().filter(card -> card.getName().equalsIgnoreCase(cardName)).findFirst();
+        if (!fetch.isPresent()){
+            throw new NoSuchToolCardException();
+        }
+        this.activeToolCard = fetch.get();
+        this.activeToolCard.use(game.getCurrentRound());
     }
 }

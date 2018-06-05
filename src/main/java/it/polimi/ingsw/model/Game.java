@@ -9,10 +9,10 @@ import java.util.*;
 public class Game {
     private final Factory dealer;
     private final List<Player> players;
-    private Dice[] roundTrack;
+    private List<Dice> roundTrack;
     private int trackIndex;
-    private final ToolCard[] toolCards;
-    private final PublicGoal[] publicGoals;
+    private final List<ToolCard> toolCards;
+    private final List<PublicGoal> publicGoals;
     private int nextFirstPlayer;
     private Round currentRound;
     private static final int schemaPerPlayer = 4;
@@ -20,15 +20,22 @@ public class Game {
 
     public Game(List<Player> playerList) throws NoMorePlayersException { //Fix UML for players
         this.dealer = new Factory();
-        this.roundTrack = new Dice[10];
-        this.toolCards = new ToolCard[3];
+        this.roundTrack = new ArrayList<>();
+        this.toolCards = new ArrayList<>();
         this.trackIndex = 0;
-        this.publicGoals = new PublicGoal[3];
+        this.publicGoals = new ArrayList<>();
         this.players = new ArrayList<>();
         this.players.addAll(playerList);
         for (int j = 0; j<3; j++) {
             try {
-                this.publicGoals[j] = dealer.extractPublicGoal();
+                this.publicGoals.add(dealer.extractPublicGoal());
+            } catch (OutOfCardsException e) {
+                e.printStackTrace();
+            }
+        }
+        for (int j = 0; j<3; j++) {
+            try {
+                this.toolCards.add(dealer.extractToolCard());
             } catch (OutOfCardsException e) {
                 e.printStackTrace();
             }
@@ -53,15 +60,15 @@ public class Game {
         return players;
     }
 
-    public ToolCard[] getToolCards() {
+    public List<ToolCard> getToolCards() {
         return toolCards;
     }
 
-    public PublicGoal[] getPublicGoals() {
+    public List<PublicGoal> getPublicGoals() {
         return publicGoals;
     }
 
-    public Dice[] getRoundTrack() {
+    public List<Dice> getRoundTrack() {
         return roundTrack;
     }
 
@@ -70,7 +77,8 @@ public class Game {
     }
 
     private void addDiceToTracker(Dice dice){
-        this.roundTrack[trackIndex++] = new Dice(dice);
+        this.roundTrack.add(new Dice(dice));
+        trackIndex++;
     }
 
     public Player getPlayerByNick(String nick){
