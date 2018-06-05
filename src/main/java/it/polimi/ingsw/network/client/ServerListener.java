@@ -62,11 +62,11 @@ public class ServerListener implements Runnable {
                         break;
                     case "publicGoal":  //TODO
                         break;
-                    case "toolCard":
+                    case "toolcard":
                         List<ToolCard> toolCards = new ArrayList<>();
-                        toolCards.add(new ToolCard(jsonObject.get("0").getAsJsonObject().get("name").getAsString(),jsonObject.get("0").getAsJsonObject().get("description").getAsString()));
-                        toolCards.add(new ToolCard(jsonObject.get("1").getAsJsonObject().get("name").getAsString(),jsonObject.get("1").getAsJsonObject().get("description").getAsString()));
-                        toolCards.add(new ToolCard(jsonObject.get("2").getAsJsonObject().get("name").getAsString(),jsonObject.get("2").getAsJsonObject().get("description").getAsString()));
+                        toolCards.add(new ToolCard(jsonObject.get("0").getAsJsonObject().get("name").getAsString(),"")); //jsonObject.get("0").getAsJsonObject().get("description").getAsString()));
+                        toolCards.add(new ToolCard(jsonObject.get("1").getAsJsonObject().get("name").getAsString(), "")); //jsonObject.get("1").getAsJsonObject().get("description").getAsString()));
+                        toolCards.add(new ToolCard(jsonObject.get("2").getAsJsonObject().get("name").getAsString(), "")); //jsonObject.get("2").getAsJsonObject().get("description").getAsString()));
                         client.getGameSnapshot().setToolCards(toolCards);
                         break;
                     case "schema-choice":
@@ -116,7 +116,7 @@ public class ServerListener implements Runnable {
                     //region TOOLCARD
 
                     case "toolcard-used":
-                        client.getGameSnapshot().getToolCardByName(jsonObject.get("toolcard").getAsString()).setUsed();
+                        client.getGameSnapshot().getToolCardByName(jsonObject.get("toolcard").getAsString()).setUsed(); //TODO: refresh others' favor token
                         client.notifyUsedToolCard(jsonObject.get("player").getAsString(), jsonObject.get("toolcard").getAsString());
                         break;
 
