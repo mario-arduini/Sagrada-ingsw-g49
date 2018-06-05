@@ -98,8 +98,8 @@ public class Client {
         if(server.placeDice(choice, row, column)){
             gameSnapshot.getPlayer().getWindow().addDice(row - 1, column - 1, choice);
             gameSnapshot.getDraftPool().remove(dice - 1);
-            printGame();
             diceExtracted = true;
+            printGame();
             return true;
         }
         return false;
