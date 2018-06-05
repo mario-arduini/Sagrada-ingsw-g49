@@ -82,4 +82,7 @@ public class User extends Player {
         return connection.askDiceRoundTrack();
     }
 
+    public boolean askIfPlus() {
+        return connection.askIfPlus();
+    }
 }

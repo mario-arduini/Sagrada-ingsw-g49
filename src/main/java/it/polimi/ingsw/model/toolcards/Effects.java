@@ -182,8 +182,12 @@ final class Effects {
         return  null;
     }
 
-    private static int askDiceRoundTrack(Round round){
+    static int askDiceRoundTrack(Round round){
         return  ((User) round.getCurrentPlayer()).askDiceRoundTrack();
+    }
+
+    static boolean askIfPlus(Round round){
+        return  ((User) round.getCurrentPlayer()).askIfPlus();
     }
 
 }

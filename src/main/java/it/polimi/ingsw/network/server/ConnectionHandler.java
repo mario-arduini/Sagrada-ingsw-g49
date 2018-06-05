@@ -24,5 +24,5 @@ public interface ConnectionHandler{
     Coordinate askDiceWindow();
     Dice askDiceDraftPool();
     int askDiceRoundTrack();
-
+    boolean askIfPlus();
 }

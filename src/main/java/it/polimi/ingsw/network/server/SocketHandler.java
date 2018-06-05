@@ -307,6 +307,23 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         return -1;
     }
 
+    @Override
+    public boolean askIfPlus(){
+        JsonObject command;
+        socketSendMessage(createMessage("toolcard-plus-minus"));
+        try{
+            command = socketReadCommand();
+            return command.get("choice").getAsBoolean();
+
+        } catch (NullPointerException e){
+            Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
+            this.gameFlowHandler.disconnected();
+            connected = false;
+            throw new NullPointerException();
+        }
+
+    }
+
     private boolean login() {
         JsonObject command;
         String password;
