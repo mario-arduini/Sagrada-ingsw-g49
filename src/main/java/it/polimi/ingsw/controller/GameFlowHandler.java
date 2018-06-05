@@ -31,6 +31,7 @@ public class GameFlowHandler {
     public void setGame(Game game) {
         this.game = game;
         initialSchemas = game.extractSchemas();
+        player.notifyToolCards(game.getToolCards());
         player.notifySchemas(initialSchemas);
     }
 

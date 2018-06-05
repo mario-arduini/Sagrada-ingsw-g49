@@ -188,7 +188,6 @@ public class GamesHandler {
             for (User player:players) {
                 gameReference.put(player, game);
                 player.setGame(game);
-                player.notifyToolCards(game.getToolCards());
             }
 
             Logger.print(String.format("Game Started: %s", getPlayerNicks().toString()));
