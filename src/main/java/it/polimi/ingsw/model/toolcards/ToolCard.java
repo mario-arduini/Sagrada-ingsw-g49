@@ -19,9 +19,10 @@ public class ToolCard {
     private boolean useAfterDraft;
     private JsonArray effects;
     private List<String> prerequisites;
+    private Gson gson;
 
     public ToolCard(JsonObject toolCard){
-        Gson gson = new Gson();
+        this.gson = new Gson();
         this.cardName = toolCard.get("name").getAsString();
         this.useAfterDraft = toolCard.get("use-after-draft").getAsBoolean();
         this.effects = toolCard.get("effects").getAsJsonArray();
@@ -33,7 +34,7 @@ public class ToolCard {
         return this.cardName;
     }
 
-    public void use(Game game) throws InvalidDiceValueException, NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException {
+    public void use(Game game) throws InvalidDiceValueException, NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException {
         JsonObject effect;
         String command;
         JsonObject arguments;
@@ -66,7 +67,14 @@ public class ToolCard {
                 case "remove-turn":
                     game.getCurrentRound().removeTurn();
                     break;
-
+                case "get-draft-dice":
+                    Effects.getDraftedDice(game.getCurrentRound());
+                    break;
+                case "place-dice":
+                    Effects.addDiceToWindow(game.getCurrentRound());
+                    break;
+                case "move":
+                    break;
             }
         }
     }

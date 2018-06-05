@@ -29,12 +29,8 @@ final class Effects {
         }
     }
 
-    static void changeValue(Dice dice){
-        try {
-            dice.setValue((new Random()).nextInt(7));
-        } catch (InvalidDiceValueException e) {
-            e.printStackTrace();
-        }
+    static void changeValue(Round round){
+        round.getCurrentDiceDrafted().roll();
     }
 
     static void changeValue(List<Dice> dice){
@@ -155,17 +151,24 @@ final class Effects {
         }
     }
 
-    /*
-    static void swap(Game game,GetDiceFrom from,GetDiceFrom to){
-        Dice first = askDice(from);
-        Dice second = askDice(to);
-        try {
-            putDice(to,first,game);
-            putDice(from,second,game);
-        } catch (RoundTrackFullException e) {
-            e.printStackTrace();
-        }
-    }*/
+
+    static void swapRoundTrack(Game game){
+        int position = askDiceRoundTrack(game.getCurrentRound());
+        Dice toSwap = game.getRoundTrack().get(position);
+        game.getRoundTrack().set(position,game.getCurrentRound().getCurrentDiceDrafted());
+        game.getCurrentRound().setCurrentDiceDrafted(toSwap);
+    }
+
+    static void getDraftedDice(Round round){
+        round.setCurrentDiceDrafted(askDiceDraftPool(round));
+    }
+
+    static void addDiceToWindow(Round round) throws BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException {
+        Coordinate coords = askDiceWindow("",round);
+        placeDice(round,coords.getRow(),coords.getColumn(),RuleIgnored.NONE);
+    }
+
+
 
     static Coordinate askDiceWindow(String message, Round round){
         return ((User) round.getCurrentPlayer()).askDiceWindow();
