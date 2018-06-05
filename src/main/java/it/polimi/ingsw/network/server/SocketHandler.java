@@ -160,7 +160,10 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                 InvalidDiceValueException | NoDiceInWindowException |
                 InvalidFavorTokenNumberException | AlreadyDraftedException |
                 NotEnoughFavorTokenException | NotYourSecondTurnException |
-                NoDiceInRoundTrackException | NotYourTurnException e){
+                NoDiceInRoundTrackException | NotYourTurnException |
+                ConstraintViolatedException | NotWantedAdjacentDiceException |
+                FirstDiceMisplacedException |
+                BadAdjacentDiceException | NoAdjacentDiceException e) {
             Logger.print("Toolcard :" + nickname + e);
             socketSendMessage(createMessage("failed"));
         }
