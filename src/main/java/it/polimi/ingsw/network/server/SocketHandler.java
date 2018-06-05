@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.model.*;
-import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
+import it.polimi.ingsw.model.exceptions.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -154,14 +154,12 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         try {
             gameFlowHandler.useToolCard(message.get("name").toString());
             socketSendMessage(createMessage("verified"));
-        } catch (InvalidParameterException e){
-            Logger.print("Toolcard :" + nickname + "InvalidParameterException\n" + e);
-            socketSendMessage(createMessage("failed"));
-        } catch (NoSuchToolCardException e) {
-            Logger.print("Toolcard :" + nickname + "NoSuchToolCardException\n" + e);
-            socketSendMessage(createMessage("failed"));
-        } catch (InvalidDiceValueException e) {
-            Logger.print("Toolcard :" + nickname + "InvalidDiceValueException\n" + e);
+        } catch (InvalidParameterException | NoSuchToolCardException |
+                InvalidDiceValueException | NoDiceInWindowException |
+                InvalidFavorTokenNumberException | AlreadyDraftedException |
+                NotEnoughFavorTokenException | NotYourSecondTurnException |
+                NoDiceInRoundTrackException e){
+            Logger.print("Toolcard :" + nickname + e);
             socketSendMessage(createMessage("failed"));
         }
     }
