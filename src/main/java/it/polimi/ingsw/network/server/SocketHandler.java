@@ -154,7 +154,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
 
     private void useToolCard(JsonObject message){
         try {
-            gameFlowHandler.useToolCard(message.get("name").toString());
+            gameFlowHandler.useToolCard(message.get("name").getAsString());
             socketSendMessage(createMessage("verified"));
         } catch (InvalidParameterException | NoSuchToolCardException |
                 InvalidDiceValueException | NoDiceInWindowException |

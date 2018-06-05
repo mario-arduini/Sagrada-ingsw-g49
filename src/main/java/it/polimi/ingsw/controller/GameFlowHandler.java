@@ -84,7 +84,7 @@ public class GameFlowHandler {
 
     public void useToolCard(String cardName) throws NoSuchToolCardException, InvalidDiceValueException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException {
         if (!game.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
-        Optional<ToolCard> fetch = game.getToolCards().stream().filter(card -> card.getName().equalsIgnoreCase(cardName)).findFirst();
+        Optional<ToolCard> fetch = (game.getToolCards()).stream().filter(card -> card.getName().equalsIgnoreCase(cardName)).findFirst();
         if (!fetch.isPresent()){
             throw new NoSuchToolCardException();
         }

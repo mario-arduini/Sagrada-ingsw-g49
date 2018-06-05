@@ -16,7 +16,6 @@ import java.util.List;
 public class ToolCard {
     private String cardName;
     private boolean used;
-    private boolean useAfterDraft;
     private JsonArray effects;
     private List<String> prerequisites;
     private Gson gson;
@@ -24,7 +23,6 @@ public class ToolCard {
     public ToolCard(JsonObject toolCard){
         this.gson = new Gson();
         this.cardName = toolCard.get("name").getAsString();
-        this.useAfterDraft = toolCard.get("use-after-draft").getAsBoolean();
         this.effects = toolCard.get("effects").getAsJsonArray();
         this.prerequisites = gson.fromJson(toolCard.get("prerequisites"),new TypeToken<List<String>>(){}.getType());
         this.used = false;
