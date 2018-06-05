@@ -62,7 +62,7 @@ public class ServerListener implements Runnable {
                         break;
                     case "publicGoal":  //TODO
                         break;
-                    case "toolcard":
+                    case "toolcards":
                         List<ToolCard> toolCards = new ArrayList<>();
                         toolCards.add(new ToolCard(jsonObject.get("0").getAsJsonObject().get("name").getAsString(),"")); //jsonObject.get("0").getAsJsonObject().get("description").getAsString()));
                         toolCards.add(new ToolCard(jsonObject.get("1").getAsJsonObject().get("name").getAsString(), "")); //jsonObject.get("1").getAsJsonObject().get("description").getAsString()));

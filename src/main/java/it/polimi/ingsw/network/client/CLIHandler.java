@@ -339,8 +339,8 @@ class CLIHandler {
         int i = 0;
         ClientLogger.println("0) Go back");
         for (ToolCard toolcard: client.getGameSnapshot().getToolCards()) {
-            ClientLogger.println(i + ") " + toolcard.getName());
-            ClientLogger.println("   Description: " + toolcard.getDescription());
+            ClientLogger.println(++i + ") " + toolcard.getName());
+            //ClientLogger.println("   Description: " + toolcard.getDescription());
             ClientLogger.println("   Cost: " + (toolcard.getUsed() ? "2" : "1"));
         }
     }
