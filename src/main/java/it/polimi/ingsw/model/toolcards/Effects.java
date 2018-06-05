@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model.toolcards;
 
+import it.polimi.ingsw.controller.User;
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Round;
@@ -93,7 +94,7 @@ final class Effects {
                 break;
         }
     }
-
+/*
     static void putDice(GetDiceFrom to, Dice dice, Game game) throws RoundTrackFullException{
         switch (to){
             // TODO case BAG
@@ -115,6 +116,7 @@ final class Effects {
                 break;
         }
     }
+*/
 
     static void move(Round round,RuleIgnored ruleIgnored){
         Coordinate start = null;
@@ -124,7 +126,7 @@ final class Effects {
         boolean valid = false;
         String message = "Which dice do you want to move?";
         while (!valid){
-            start = askPosition(message);
+            start = askDiceWindow(message, round);
             message = "No dice there! Which dice do you want to move?";
             removedDice = currentPlayerWindow.getCell(start.getRow(),start.getColumn());
             if(removedDice != null) valid = true;
@@ -132,7 +134,7 @@ final class Effects {
         valid = false;
         message = "Where do you want to move it?";
         while (!valid) {
-            end = askPosition(message);
+            end = askDiceWindow(message, round);
             message = "Can't go there! Where do you want to move it?";
             if (start.getRow() == end.getRow() && start.getColumn() == end.getColumn()) continue;
             try {
@@ -153,6 +155,7 @@ final class Effects {
         }
     }
 
+    /*
     static void swap(Game game,GetDiceFrom from,GetDiceFrom to){
         Dice first = askDice(from);
         Dice second = askDice(to);
@@ -162,15 +165,22 @@ final class Effects {
         } catch (RoundTrackFullException e) {
             e.printStackTrace();
         }
+    }*/
+
+    static Coordinate askDiceWindow(String message, Round round){
+        return ((User) round.getCurrentPlayer()).askDiceWindow();
     }
 
-    private static Coordinate askPosition(String message){
-        //ask 2 integer to client
-        return null;
+    static Dice askDiceDraftPool(Round round){
+        return  ((User) round.getCurrentPlayer()).askDiceDraftPool();
     }
 
-    private static Dice askDice(GetDiceFrom from){
-        // ask dice
+    static Dice askDiceBag(Round round){
         return  null;
     }
+
+    private static int askDiceRoundTrack(Round round){
+        return  ((User) round.getCurrentPlayer()).askDiceRoundTrack();
+    }
+
 }

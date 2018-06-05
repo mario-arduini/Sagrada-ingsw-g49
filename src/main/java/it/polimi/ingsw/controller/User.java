@@ -1,9 +1,6 @@
 package it.polimi.ingsw.controller;
 
-import it.polimi.ingsw.model.Dice;
-import it.polimi.ingsw.model.Game;
-import it.polimi.ingsw.model.Player;
-import it.polimi.ingsw.model.Schema;
+import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.network.server.ConnectionHandler;
 
 import java.util.HashMap;
@@ -62,6 +59,18 @@ public class User extends Player {
 
     public void notifyDicePlaced(String nickname, int row, int column, Dice dice){
         connection.notifyDicePlaced(nickname, row, column, dice);
+    }
+
+    public Coordinate askDiceWindow(){
+        return connection.askDiceWindow();
+    }
+
+    public Dice askDiceDraftPool(){
+        return connection.askDiceDraftPool();
+    }
+
+    public int askDiceRoundTrack(){
+        return connection.askDiceRoundTrack();
     }
 
 }
