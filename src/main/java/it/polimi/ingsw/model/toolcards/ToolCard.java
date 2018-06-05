@@ -38,7 +38,6 @@ public class ToolCard {
         JsonObject effect;
         String command;
         JsonObject arguments;
-        Dice dice = null;
         for (String prerequisite : prerequisites) {
             switch (prerequisite) {
                 case "favor-token": Prerequisites.checkFavorToken(game.getCurrentRound().getCurrentPlayer(), used ? 2 : 1); break;
@@ -55,14 +54,13 @@ public class ToolCard {
             arguments = effect.get(command).getAsJsonObject();
             switch (command) {
                 case "change-value":
-
-                    Effects.changeValue(dice, arguments.get("plus").getAsBoolean(), arguments.get("value").getAsInt());
+                    if(arguments.get("plus")!= null)
+                        Effects.changeValue(game.getCurrentRound(), arguments.get("value").getAsInt());
+                    else if(arguments.get("value")!= null) ;
+                    else Effects.changeValue(game.getCurrentRound());
                     break;
                 case "flip":
-                    Effects.flip(dice);
-                    break;
-                case "get-dice-from-round":
-                    dice = game.getCurrentRound().getCurrentDiceDrafted();
+                    Effects.flip(game.getCurrentRound());
                     break;
                 case "remove-turn":
                     game.getCurrentRound().removeTurn();
@@ -73,7 +71,11 @@ public class ToolCard {
                 case "place-dice":
                     Effects.addDiceToWindow(game.getCurrentRound());
                     break;
+                case "swap-round-dice":
+                    Effects.swapRoundTrack(game);
+                    break;
                 case "move":
+                    Effects.move(game.getCurrentRound(),gson.fromJson(arguments.get("ignore"), Effects.RuleIgnored.class));
                     break;
             }
         }

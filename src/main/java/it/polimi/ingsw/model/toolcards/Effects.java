@@ -21,9 +21,9 @@ final class Effects {
         super();
     }
 
-    static void flip(Dice dice){
+    static void flip(Round round){
         try {
-            dice.setValue(7-dice.getValue());
+            round.getCurrentDiceDrafted().setValue(7-round.getCurrentDiceDrafted().getValue());
         } catch (InvalidDiceValueException e) {
             e.printStackTrace(); // it will never happen
         }
@@ -44,9 +44,9 @@ final class Effects {
         });
     }
 
-    static void changeValue(Dice dice,boolean isPlus,int value) throws InvalidDiceValueException {
-        if (isPlus) dice.setValue(dice.getValue()+value);
-        else dice.setValue(dice.getValue()-value);
+    static void changeValue(Round round,int value) throws InvalidDiceValueException {
+        if (askIfPlus(round)) round.getCurrentDiceDrafted().setValue(round.getCurrentDiceDrafted().getValue()+value);
+        else round.getCurrentDiceDrafted().setValue(round.getCurrentDiceDrafted().getValue()-value);
         return;
     }
 

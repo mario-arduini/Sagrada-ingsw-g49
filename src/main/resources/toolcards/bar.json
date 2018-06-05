@@ -1,1 +1,1 @@
-{"name":"bar","effects":[],"use-after-draft":true}
+{"name":"Pinza Sgrossatrice","effects":[{"get-draft-dice":{}},{"change-value":{"plus":true,"value":1}},{"place-dice":{}}],"prerequisites":["before-draft","favor-token"]}
