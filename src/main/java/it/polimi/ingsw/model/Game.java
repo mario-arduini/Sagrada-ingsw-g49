@@ -146,4 +146,12 @@ public class Game {
     public List<Schema> extractSchemas(){
         return this.dealer.extractSchemas(schemaPerPlayer);
     }
+
+    public void putInBag(Dice dice){
+        dealer.putInBag(dice);
+    }
+
+    public Dice getFromBag(){
+        return dealer.getFromBag();
+    }
 }

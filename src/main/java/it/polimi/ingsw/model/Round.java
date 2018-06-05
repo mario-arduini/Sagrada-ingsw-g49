@@ -49,6 +49,10 @@ public class Round {
 
     public Dice getCurrentDiceDrafted() { return currentDiceDrafted; }
 
+    public void setCurrentDiceDrafted(Dice dice) {
+        currentDiceDrafted = dice;
+    }
+
     public void removeTurn() {
         for(int i = currentPlayer + 1; i < players.size(); i++)
             if(players.get(i).getNickname().equals(players.get(currentPlayer).getNickname()))

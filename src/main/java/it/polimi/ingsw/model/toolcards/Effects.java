@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model.toolcards;
 
 import it.polimi.ingsw.model.Dice;
+import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Round;
 import it.polimi.ingsw.model.Window;
 import it.polimi.ingsw.model.exceptions.*;
@@ -11,6 +12,8 @@ import java.util.Random;
 final class Effects {
 
     enum RuleIgnored{ COLOR, NUMBER, ADJACENCIES, NONE }
+
+    enum GetDiceFrom{ DRAFT_POOL, BAG, ROUND_TRACK}
 
     private Effects(){
         super();
@@ -99,12 +102,82 @@ final class Effects {
         roundTrack[roundTrackIndex] = new Dice(dice);
     }
 
-    static void move(Round round){
-        List<Integer> positions = null;
-        // ask positions to client
-        Window currentPlayerWindow = round.getCurrentPlayer().getWindow();
-        Dice rem = currentPlayerWindow.getCell(positions.get(0),positions.get(1));
-        currentPlayerWindow.removeDice(positions.get(0),positions.get(1));
+    static List<Integer> askPosition(String message){
+        //ask 2 integer to client
+        return null;
+    }
 
+    static Dice askDice(GetDiceFrom from){
+        // ask dice
+        return  null;
+    }
+
+    static void putDice(GetDiceFrom to, Dice dice, Game game) throws RoundTrackFullException{
+        switch (to){
+            // TODO case BAG
+            case DRAFT_POOL:
+                game.getCurrentRound().setCurrentDiceDrafted(dice);
+                break;
+            case ROUND_TRACK:
+                Dice[] roundTrack = game.getRoundTrack();
+                int i;
+                for(i=0;i<10;i++)  if(roundTrack[i] == null){
+                        roundTrack[i] = dice;
+                        break;
+                    }
+                if(i>10) throw new RoundTrackFullException();
+                break;
+            case BAG:
+                game.putInBag(dice);
+                break;
+        }
+    }
+
+    static void move(Round round,RuleIgnored ruleIgnored){
+        List<Integer> start = null;
+        List<Integer> end = null;
+        Window currentPlayerWindow = round.getCurrentPlayer().getWindow();
+        Dice removedDice = null;
+        boolean valid = false;
+        String message = "Which dice do you want to move?";
+        while (!valid){
+            start = askPosition(message);
+            message = "No dice there! Which dice do you want to move?";
+            removedDice = currentPlayerWindow.getCell(start.get(0),start.get(1));
+            if(removedDice != null) valid = true;
+        }
+        valid = false;
+        message = "Where do you want to move it?";
+        while (!valid) {
+            end = askPosition(message);
+            message = "Can't go there! Where do you want to move it?";
+            if (start.get(0) == end.get(0) && start.get(1) == end.get(1)) continue;
+            try {
+                round.setCurrentDiceDrafted(removedDice);
+                placeDice(round, end.get(0), end.get(1), ruleIgnored);
+                valid = true;
+            } catch (NotWantedAdjacentDiceException e) {
+                e.printStackTrace();
+            } catch (ConstraintViolatedException e) {
+                e.printStackTrace();
+            } catch (NoAdjacentDiceException e) {
+                e.printStackTrace();
+            } catch (BadAdjacentDiceException e) {
+                e.printStackTrace();
+            } catch (FirstDiceMisplacedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    static void swap(Game game,GetDiceFrom from,GetDiceFrom to){
+        Dice first = askDice(from);
+        Dice second = askDice(to);
+        try {
+            putDice(to,first,game);
+            putDice(from,second,game);
+        } catch (RoundTrackFullException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -145,4 +145,13 @@ public class Factory {
         return extracted;
     }
 
+    public void putInBag(Dice dice){
+        dice.roll();
+        diceBag.add(new Random().nextInt(diceBag.size()),dice);
+    }
+
+    public Dice getFromBag(){
+        return diceBag.remove(diceBag.size()-1);
+    }
+
 }
