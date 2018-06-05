@@ -80,12 +80,12 @@ public class GameFlowHandler {
         gamesHandler.logout(this.player.getNickname());
     }
 
-    public void useToolCard(String cardName) throws NoSuchToolCardException, InvalidDiceValueException {
+    public void useToolCard(String cardName) throws NoSuchToolCardException, InvalidDiceValueException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException {
         Optional<ToolCard> fetch = game.getToolCards().stream().filter(card -> card.getName().equalsIgnoreCase(cardName)).findFirst();
         if (!fetch.isPresent()){
             throw new NoSuchToolCardException();
         }
         this.activeToolCard = fetch.get();
-        this.activeToolCard.use(game.getCurrentRound());
+        this.activeToolCard.use(game);
     }
 }

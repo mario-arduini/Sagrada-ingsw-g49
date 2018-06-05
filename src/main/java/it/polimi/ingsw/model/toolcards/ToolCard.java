@@ -1,14 +1,14 @@
 package it.polimi.ingsw.model.toolcards;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.Round;
-import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
-import it.polimi.ingsw.model.exceptions.InvalidFavorTokenNumberException;
-import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
+import it.polimi.ingsw.model.exceptions.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +18,14 @@ public class ToolCard {
     private boolean used;
     private boolean useAfterDraft;
     private JsonArray effects;
+    private List<String> prerequisites;
 
     public ToolCard(JsonObject toolCard){
+        Gson gson = new Gson();
         this.cardName = toolCard.get("name").getAsString();
         this.useAfterDraft = toolCard.get("use-after-draft").getAsBoolean();
         this.effects = toolCard.get("effects").getAsJsonArray();
+        this.prerequisites = gson.fromJson(toolCard.get("prerequisites"),new TypeToken<List<String>>(){}.getType());
         this.used = false;
     }
 
@@ -30,25 +33,20 @@ public class ToolCard {
         return this.cardName;
     }
 
-    public boolean canBeUsed(Round round){
-        // try to use favorToken
-        try {
-            round.getCurrentPlayer().useFavorToken(used ? 2 : 1);
-            if(!used) used=true;
-            return true;
-        } catch (NotEnoughFavorTokenException e) {
-            return false;
-        } catch (InvalidFavorTokenNumberException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public void use(Round round) throws InvalidDiceValueException {
+    public void use(Game game) throws InvalidDiceValueException, NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException {
         JsonObject effect;
         String command;
         JsonObject arguments;
         Dice dice = null;
+        for (String prerequisite : prerequisites) {
+            switch (prerequisite) {
+                case "favor-token": Prerequisites.checkFavorToken(game.getCurrentRound().getCurrentPlayer(), used ? 2 : 1); break;
+                case "dice-window": Prerequisites.checkDiceInWindow(game.getCurrentRound().getCurrentPlayer()); break;
+                case "dice-round-track": Prerequisites.checkDiceInRoundTrack(game); break;
+                case "second-turn": Prerequisites.checkSecondTurn(game.getCurrentRound()); break;
+                case "before-draft": Prerequisites.checkBeforeDraft(game.getCurrentRound()); break;
+            }
+        }
 
         for (int i = 0; i < effects.size(); i++) {
             effect = effects.get(i).getAsJsonObject();
@@ -63,17 +61,14 @@ public class ToolCard {
                     Effects.flip(dice);
                     break;
                 case "get-dice-from-round":
-                    dice = round.getCurrentDiceDrafted();
+                    dice = game.getCurrentRound().getCurrentDiceDrafted();
                     break;
                 case "remove-turn":
-                    round.removeTurn();
+                    game.getCurrentRound().removeTurn();
                     break;
 
             }
         }
     }
 
-    public boolean isUsedAfterDraft(){
-        return this.useAfterDraft;
-    }
 }
