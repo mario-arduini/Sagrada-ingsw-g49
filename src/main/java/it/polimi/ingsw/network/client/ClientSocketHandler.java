@@ -102,7 +102,7 @@ public class ClientSocketHandler implements Connection {
 
     @Override
     public synchronized boolean useToolCard(String name) {
-        createJsonCommand("toolCard");
+        createJsonCommand("toolcard");
         jsonObject.addProperty("name", name);
         socketPrintLine(jsonObject);
 

@@ -1,5 +1,8 @@
 package it.polimi.ingsw.network.client;
 
+import it.polimi.ingsw.model.exceptions.InvalidFavorTokenNumberException;
+import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -74,7 +77,10 @@ class CLIHandler {
                         ClientLogger.print("Invalid choice, dice already extracted\nRetry: ");
                     break;
                 case "toolcard":
-                    useToolCard();
+                    if(client.getGameSnapshot().getPlayer().getFavorToken() < 1)
+                        ClientLogger.print("Not enough favor token!");
+                    else
+                        useToolCard();
                     break;
                 default:
                     ClientLogger.print("Invalid choice, retry: ");
@@ -245,6 +251,7 @@ class CLIHandler {
                 ClientLogger.print("Invalid choice");
             }
         }
+        ClientLogger.println("Waiting other players' choice");
         return choice - 1;
     }
 
@@ -317,6 +324,13 @@ class CLIHandler {
                 ClientLogger.println("You can't use this card now");
                 printMenu();
             }
+            else {
+                try {
+                    client.getGameSnapshot().getPlayer().useFavorToken((client.getGameSnapshot().getToolCards().get(choice - 1).getUsed() ? 2 : 1));
+                } catch (InvalidFavorTokenNumberException | NotEnoughFavorTokenException e) {
+                }
+                client.getGameSnapshot().getToolCards().get(choice - 1).setUsed();
+            }
         }else
             ClientLogger.println("Not your turn! You can only logout");
     }
@@ -327,6 +341,7 @@ class CLIHandler {
         for (ToolCard toolcard: client.getGameSnapshot().getToolCards()) {
             ClientLogger.println(i + ") " + toolcard.getName());
             ClientLogger.println("   Description: " + toolcard.getDescription());
+            ClientLogger.println("   Cost: " + (toolcard.getUsed() ? "2" : "1"));
         }
     }
 
@@ -369,6 +384,10 @@ class CLIHandler {
     }
 
     //region TOOLCARD
+
+    void notifyUsedToolCard(String player, String toolCard){
+        ClientLogger.println(player + " used the tool card " + toolCard);
+    }
 
     String askPlusMinusOption(){
         String choice = "";

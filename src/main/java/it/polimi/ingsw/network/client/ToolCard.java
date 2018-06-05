@@ -20,4 +20,6 @@ public class ToolCard {
     public String getDescription() { return this.description; }
 
     public void setUsed() { used = true; }
+
+    public boolean getUsed() { return used; }
 }

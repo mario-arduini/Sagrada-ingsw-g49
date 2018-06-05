@@ -20,7 +20,7 @@ public class GameSnapshot {
     private static final int schemaPerPlayer = 4;
 
     public GameSnapshot(String playerNick) { //Fix UML for players
-        this.roundTrack = null;
+        this.roundTrack = new ArrayList<>();
         this.toolCards = null;
         this.trackIndex = 0;
         this.publicGoals = null;
@@ -45,6 +45,14 @@ public class GameSnapshot {
 
     public List<ToolCard> getToolCards() {
         return toolCards;
+    }
+
+    public ToolCard getToolCardByName(String name) {
+
+        for(ToolCard toolCard : toolCards)
+            if(toolCard.getName().equals(name))
+                return toolCard;
+        return null;
     }
 
     public List<PublicGoal> getPublicGoals() {

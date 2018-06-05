@@ -301,6 +301,10 @@ public class Client {
 
     //region TOOLCARD
 
+    void notifyUsedToolCard(String player, String toolCard){
+        cliHandler.notifyUsedToolCard(player, toolCard);
+    }
+
     void getPlusMinusOption(){
         server.sendPlusMinusOption(cliHandler.askPlusMinusOption());
     }

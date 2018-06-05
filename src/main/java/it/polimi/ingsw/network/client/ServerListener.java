@@ -80,8 +80,8 @@ public class ServerListener implements Runnable {
                     case "round":
                         listType = new TypeToken<List<Dice>>(){}.getType();
                         client.notifyNewTurn(jsonObject.get("player").getAsString(), jsonObject.get("new-round").getAsBoolean());
-                        if(jsonObject.get("new-round").getAsBoolean())
-                            client.getGameSnapshot().getRoundTrack().add(gson.fromJson(jsonObject.get("roundtrack-dice").getAsString(),Dice.class));
+                        //if(jsonObject.get("new-round").getAsBoolean())
+                            //client.getGameSnapshot().getRoundTrack().add(gson.fromJson(jsonObject.get("roundtrack-dice").getAsString(),Dice.class));
                         List<Dice> draftPool = gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType);
                         client.getGameSnapshot().setDraftPool(draftPool);
                         client.printGame();
@@ -114,6 +114,11 @@ public class ServerListener implements Runnable {
                         break;
 
                     //region TOOLCARD
+
+                    case "toolcard-used":
+                        client.getGameSnapshot().getToolCardByName(jsonObject.get("toolcard").getAsString()).setUsed();
+                        client.notifyUsedToolCard(jsonObject.get("player").getAsString(), jsonObject.get("toolcard").getAsString());
+                        break;
 
                     case "toolcard-plus-minus":
                         client.getPlusMinusOption();
