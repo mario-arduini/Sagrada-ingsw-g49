@@ -160,7 +160,9 @@ final class Effects {
     }
 
     static void getDraftedDice(Round round){
-        round.setCurrentDiceDrafted(askDiceDraftPool(round));
+        Dice dice = askDiceDraftPool(round);
+        round.getDraftPool().remove(dice);
+        round.setCurrentDiceDrafted(dice);
     }
 
     static void addDiceToWindow(Round round) throws BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException {
