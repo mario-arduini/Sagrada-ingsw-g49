@@ -20,6 +20,10 @@ public class PlayerSnapshot {
         this.suspended = false;
     }
 
+    public void setWindow(Window window){
+        this.window = window;
+    }
+
     public PlayerSnapshot(PlayerSnapshot player){
         this.nickname = player.nickname;
         this.window = new Window(player.window);

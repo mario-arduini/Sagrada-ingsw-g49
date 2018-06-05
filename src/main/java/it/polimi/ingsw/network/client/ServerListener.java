@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import it.polimi.ingsw.model.Player;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -97,6 +98,8 @@ public class ServerListener implements Runnable {
                     case "toolCard-used":
                         List<ToolCard> toolCards1 = client.getGameSnapshot().getToolCards();
                         String name = jsonObject.get("name").getAsString();
+                        client.getGameSnapshot().findPlayer(jsonObject.get("name").getAsString()).get().setWindow(gson.fromJson(jsonObject.get("window").getAsString(),Window.class));
+                        client.printGame();
                         for (ToolCard aToolCards1 : toolCards1)
                             if (aToolCards1.getName().equalsIgnoreCase(name))
                                 aToolCards1.setUsed();
