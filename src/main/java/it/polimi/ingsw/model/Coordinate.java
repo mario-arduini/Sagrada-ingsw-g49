@@ -1,6 +1,6 @@
 package it.polimi.ingsw.model;
 
-class Coordinate {
+public class Coordinate {
     private final int row;
     private final int column;
 
@@ -9,11 +9,11 @@ class Coordinate {
         this.column = column;
     }
 
-    int getRow(){
+    public int getRow(){
         return row;
     }
 
-    int getColumn(){
+    public int getColumn(){
         return column;
     }
 }

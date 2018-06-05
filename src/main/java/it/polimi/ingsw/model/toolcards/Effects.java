@@ -3,6 +3,7 @@ package it.polimi.ingsw.model.toolcards;
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Round;
+import it.polimi.ingsw.model.Coordinate;
 import it.polimi.ingsw.model.Window;
 import it.polimi.ingsw.model.exceptions.*;
 
@@ -93,16 +94,7 @@ final class Effects {
         }
     }
 
-
-
-    static void exchange(List<Dice> draftPool, int draftPoolIndex, Dice[] roundTrack, int roundTrackIndex){
-        Dice dice = draftPool.get(draftPoolIndex);
-        draftPool.remove(draftPoolIndex);
-        draftPool.add(roundTrack[roundTrackIndex]);
-        roundTrack[roundTrackIndex] = new Dice(dice);
-    }
-
-    static List<Integer> askPosition(String message){
+    static Coordinate askPosition(String message){
         //ask 2 integer to client
         return null;
     }
@@ -134,8 +126,8 @@ final class Effects {
     }
 
     static void move(Round round,RuleIgnored ruleIgnored){
-        List<Integer> start = null;
-        List<Integer> end = null;
+        Coordinate start = null;
+        Coordinate end = null;
         Window currentPlayerWindow = round.getCurrentPlayer().getWindow();
         Dice removedDice = null;
         boolean valid = false;
@@ -143,7 +135,7 @@ final class Effects {
         while (!valid){
             start = askPosition(message);
             message = "No dice there! Which dice do you want to move?";
-            removedDice = currentPlayerWindow.getCell(start.get(0),start.get(1));
+            removedDice = currentPlayerWindow.getCell(start.getRow(),start.getColumn());
             if(removedDice != null) valid = true;
         }
         valid = false;
@@ -151,10 +143,10 @@ final class Effects {
         while (!valid) {
             end = askPosition(message);
             message = "Can't go there! Where do you want to move it?";
-            if (start.get(0) == end.get(0) && start.get(1) == end.get(1)) continue;
+            if (start.getRow() == end.getRow() && start.getColumn() == end.getColumn()) continue;
             try {
                 round.setCurrentDiceDrafted(removedDice);
-                placeDice(round, end.get(0), end.get(1), ruleIgnored);
+                placeDice(round, end.getRow(), end.getColumn(), ruleIgnored);
                 valid = true;
             } catch (NotWantedAdjacentDiceException e) {
                 e.printStackTrace();
