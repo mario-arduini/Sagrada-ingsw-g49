@@ -1,6 +1,7 @@
 package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.toolcards.ToolCard;
 import it.polimi.ingsw.network.server.ConnectionHandler;
 
 import java.util.HashMap;
@@ -53,12 +54,20 @@ public class User extends Player {
         connection.notifyRound(currentPlayer, draftPool, newRound);
     }
 
+    public void notifyToolCards(List<ToolCard> toolCards){
+        connection.notifyToolCards(toolCards);
+    }
+
     public void notifyOthersSchemas(HashMap<String, Schema> playersSchemas){
         connection.notifyOthersSchemas(playersSchemas);
     }
 
     public void notifyDicePlaced(String nickname, int row, int column, Dice dice){
         connection.notifyDicePlaced(nickname, row, column, dice);
+    }
+
+    public void notifyToolCardUse(String player, String toolCard){
+        this.connection.notifyToolCardUse(player, toolCard);
     }
 
     public Coordinate askDiceWindow(){

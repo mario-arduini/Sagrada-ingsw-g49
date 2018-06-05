@@ -1,6 +1,7 @@
 package it.polimi.ingsw.network.server;
 
 import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.toolcards.ToolCard;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,8 @@ public interface ConnectionHandler{
     void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound);
     void notifyOthersSchemas(Map<String, Schema> playersSchemas);
     void notifyDicePlaced(String nickname, int row, int column, Dice dice);
+    void notifyToolCardUse(String player, String toolCard);
+    void notifyToolCards(List<ToolCard> toolCards);
     String getRemoteAddress();
     void close();
     void setGame(Game game);
@@ -21,4 +24,5 @@ public interface ConnectionHandler{
     Coordinate askDiceWindow();
     Dice askDiceDraftPool();
     int askDiceRoundTrack();
+
 }

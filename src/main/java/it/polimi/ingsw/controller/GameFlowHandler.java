@@ -34,6 +34,7 @@ public class GameFlowHandler {
         player.notifySchemas(initialSchemas);
     }
 
+    //TODO: Shouldn't be able to choose a schema more than once
     public void chooseSchema(Integer schemaNumber){
         player.setWindow(initialSchemas.get(schemaNumber));
     }
@@ -80,12 +81,14 @@ public class GameFlowHandler {
         gamesHandler.logout(this.player.getNickname());
     }
 
-    public void useToolCard(String cardName) throws NoSuchToolCardException, InvalidDiceValueException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException {
+    public void useToolCard(String cardName) throws NoSuchToolCardException, InvalidDiceValueException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException {
+        if (!game.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
         Optional<ToolCard> fetch = game.getToolCards().stream().filter(card -> card.getName().equalsIgnoreCase(cardName)).findFirst();
         if (!fetch.isPresent()){
             throw new NoSuchToolCardException();
         }
         this.activeToolCard = fetch.get();
         this.activeToolCard.use(game);
+        gamesHandler.notifyAllToolCardUsed(game, player.getNickname(), activeToolCard.getName());
     }
 }

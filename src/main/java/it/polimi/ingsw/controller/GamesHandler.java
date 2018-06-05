@@ -69,6 +69,12 @@ public class GamesHandler {
         coplayers.forEach(player -> player.notifyDicePlaced(nickname, row, column, dice));
     }
 
+    public synchronized void notifyAllToolCardUsed(Game game, String nickname, String toolcard){
+        boolean newRound = false;
+        List<User> coplayers = getPlayersByGame(game);
+        coplayers.forEach(player -> player.notifyToolCardUse(nickname, toolcard));
+    }
+
     public synchronized User login(String nickname, String password, ConnectionHandler connection){
         User user;
         Optional<User> playerFetched = findPlayer(nickname);
@@ -182,6 +188,7 @@ public class GamesHandler {
             for (User player:players) {
                 gameReference.put(player, game);
                 player.setGame(game);
+                player.notifyToolCards(game.getToolCards());
             }
 
             Logger.print(String.format("Game Started: %s", getPlayerNicks().toString()));

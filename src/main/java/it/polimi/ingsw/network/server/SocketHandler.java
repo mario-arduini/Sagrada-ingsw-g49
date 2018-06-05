@@ -5,8 +5,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
+import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.model.toolcards.ToolCard;
 
 import java.io.*;
 import java.net.Socket;
@@ -158,7 +160,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                 InvalidDiceValueException | NoDiceInWindowException |
                 InvalidFavorTokenNumberException | AlreadyDraftedException |
                 NotEnoughFavorTokenException | NotYourSecondTurnException |
-                NoDiceInRoundTrackException e){
+                NoDiceInRoundTrackException | NotYourTurnException e){
             Logger.print("Toolcard :" + nickname + e);
             socketSendMessage(createMessage("failed"));
         }
@@ -199,6 +201,28 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         socketSendMessage(message);
     }
 
+    @Override
+    public void notifyToolCards(List<ToolCard> toolCards){
+        JsonObject message;
+        JsonObject tmp;
+        message = createMessage("toolcards");
+        for (Integer i = 0; i < toolCards.size(); i++) {
+            tmp = new JsonObject();
+            tmp.addProperty("name", toolCards.get(i).getName());
+            message.add(i.toString(), tmp);
+        }
+        socketSendMessage(message);
+    }
+
+    @Override
+    public void notifyToolCardUse(String player, String toolcard){
+        JsonObject message;
+        message = createMessage("toolcard-used");
+        message.addProperty("player", player);
+        message.addProperty("toolcard", toolcard);
+        socketSendMessage(message);
+    }
+    
     @Override
     public void notifyOthersSchemas(Map<String, Schema> playersSchemas){
         JsonObject message;
