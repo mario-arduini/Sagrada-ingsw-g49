@@ -104,11 +104,10 @@ public class Factory {
         ToolCard toolCard;
         JsonParser parser = new JsonParser();
         JsonObject jsonObject;
-        Gson gson = new Gson();
 
 
         jsonObject = parser.parse(new FileReader(file)).getAsJsonObject();
-        toolCard = gson.fromJson(jsonObject, ToolCard.class);
+        toolCard = new ToolCard(jsonObject);
 
         return toolCard;
     }
