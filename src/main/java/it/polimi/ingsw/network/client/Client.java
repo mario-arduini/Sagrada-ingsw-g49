@@ -268,10 +268,17 @@ public class Client {
 
         // print draftpool
         ClientLogger.println("");
-        ClientLogger.println("Draft Pool");
+        ClientLogger.println("Draft Pool                 |  Round Track");
         for(Dice dice : gameSnapshot.getDraftPool()){
             ClientLogger.print(dice+"  ");
         }
+        for(int i=gameSnapshot.getDraftPool().size();i<9;i++) ClientLogger.print("   ");
+        ClientLogger.print("|");
+        for(Dice dice : gameSnapshot.getRoundTrack()){
+            ClientLogger.print("  "+dice);
+        }
+        for(int i=gameSnapshot.getRoundTrack().size();i<9;i++) ClientLogger.print("  \u25A1");
+
         ClientLogger.println("");
 
         cliHandler.printMenu();
