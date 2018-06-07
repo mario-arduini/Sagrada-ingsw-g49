@@ -15,25 +15,25 @@ class ClientLogger {
     private static final String ANSI_HOME = "\u001b[H";
     private static FileHandler fh;
 
-    static synchronized void print(Object object){
-        System.out.print(object);
+    static synchronized void print(String message){
+        System.out.print(message);
         System.out.flush();
     }
 
-    static synchronized void printWithClear(Object object){
+    static synchronized void printWithClear(String message){
         System.out.print(ANSI_CLS + ANSI_HOME);
-        System.out.print(object);
+        System.out.print(message);
         System.out.flush();
     }
 
-    static synchronized void println(Object object){
-        System.out.println(object);
+    static synchronized void println(String message){
+        System.out.println(message);
         System.out.flush();
     }
 
-    static synchronized void printlnWithClear(Object object){
+    static synchronized void printlnWithClear(String message){
         System.out.print(ANSI_CLS + ANSI_HOME);
-        System.out.println(object);
+        System.out.println(message);
         System.out.flush();
     }
 

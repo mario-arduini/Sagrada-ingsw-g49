@@ -102,7 +102,9 @@ public class ServerListener implements Runnable {
                             //client.getGameSnapshot().getRoundTrack().add(gson.fromJson(jsonObject.get("roundtrack-dice").getAsString(),Dice.class));
                         List<Dice> draftPool = gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType);
                         client.getGameSnapshot().setDraftPool(draftPool);
+                        client.clear();
                         client.printGame();
+                        client.printMenu();
                         break;
                     case "schema-chosen":
                         listType = new TypeToken<HashMap<String, Schema>>(){}.getType();
@@ -117,6 +119,7 @@ public class ServerListener implements Runnable {
                         String name = jsonObject.get("name").getAsString();
                         client.getGameSnapshot().findPlayer(jsonObject.get("name").getAsString()).get().setWindow(gson.fromJson(jsonObject.get("window").getAsString(),Window.class));
                         client.printGame();
+                        client.printMenu();
                         for (ToolCard aToolCards1 : toolCards1)
                             if (aToolCards1.getName().equalsIgnoreCase(name))
                                 aToolCards1.setUsed();
@@ -129,7 +132,9 @@ public class ServerListener implements Runnable {
                         if(!nick.equals(client.getGameSnapshot().getPlayer().getNickname())){
                             client.getGameSnapshot().getDraftPool().remove(dicePlaced);
                             client.getGameSnapshot().findPlayer(nick).get().getWindow().addDice(row,col,dicePlaced);
+                            client.clear();
                             client.printGame();
+                            client.printMenu();
                         }
                         break;
 

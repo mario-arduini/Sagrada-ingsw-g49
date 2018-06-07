@@ -31,7 +31,7 @@ public class ClientSocketHandler implements Connection {
     ClientSocketHandler(Client client, String serverAddress, int serverPort) throws SocketException {
         ClientLogger.initLogger(LOGGER);
         try {
-            socket = new Socket(serverAddress, serverPort);     //TODO handle exception if connection not go well
+            socket = new Socket(serverAddress, serverPort);
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new PrintWriter(socket.getOutputStream(), true);
             serverListener = new ServerListener(client, this);

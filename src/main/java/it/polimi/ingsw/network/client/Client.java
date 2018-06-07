@@ -116,7 +116,9 @@ public class Client {
             gameSnapshot.getPlayer().getWindow().addDice(row - 1, column - 1, choice);
             gameSnapshot.getDraftPool().remove(dice - 1);
             diceExtracted = true;
+            ClientLogger.printWithClear("");
             printGame();
+            printMenu();
             verifyEndTurn();
             return true;
         }
@@ -183,6 +185,10 @@ public class Client {
         }
     }
 
+    void clear(){
+        cliHandler.clear();
+    }
+
     void printSchemas(List<Schema> schemas){
         Constraint constraint;
         Schema currentSchema;
@@ -218,6 +224,7 @@ public class Client {
     }
 
     void printGame(){
+        printHeader();
         PlayerSnapshot p = gameSnapshot.getPlayer();
         List<PlayerSnapshot> otherPlayers = gameSnapshot.getOtherPlayers();
         int whiteSpaceNum,opNum=otherPlayers.size();
@@ -292,6 +299,16 @@ public class Client {
 
         ClientLogger.println("");
 
+//        cliHandler.printMenu();
+//        if(!cliHandler.getPlayingRound()) {
+//            cliHandler.setPlayingRound(true);
+//            synchronized (cliHandler) {
+//                cliHandler.notifyAll();
+//            }
+//        }
+    }
+
+    void printMenu(){
         cliHandler.printMenu();
         if(!cliHandler.getPlayingRound()) {
             cliHandler.setPlayingRound(true);

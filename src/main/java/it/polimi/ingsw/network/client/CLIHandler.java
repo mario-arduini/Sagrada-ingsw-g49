@@ -70,7 +70,7 @@ class CLIHandler {
             }
             switch (command){
                 case "logout":
-                    ClientLogger.println("Logged out");
+                    ClientLogger.printlnWithClear("Logged out");
                     client.logout();
                     logout = true;
                     break;
@@ -81,11 +81,11 @@ class CLIHandler {
                     if(!client.diceAlreadyExtracted())
                         placeDice();
                     else
-                        ClientLogger.print("Invalid choice, dice already extracted\nRetry: ");
+                        ClientLogger.print("Invalid choice, dice already extracted\n\nRetry: ");
                     break;
                 case "toolcard":
                     if(client.getGameSnapshot().getPlayer().getFavorToken() < 1)
-                        ClientLogger.print("Not enough favor token!");
+                        ClientLogger.print("Not enough favor token!\n\nRetry: ");
                     else
                         useToolCard();
                     break;
@@ -253,6 +253,7 @@ class CLIHandler {
                 choice = Integer.parseInt(input.readLine());
             }catch (IOException | NumberFormatException e){
                 ClientLogger.println("Invalid choice");
+                continue;
             }
 
             if(choice < 1 || choice > 4 || !client.sendSchema(choice - 1)){
@@ -271,31 +272,33 @@ class CLIHandler {
     void notifyNewTurn(String nickname, boolean newRound){
         if(newRound)
             ClientLogger.printlnWithClear("NEW ROUND STARTED!\n");
-        ClientLogger.println("It's " + nickname  + "'s turn, wait for your turn");
+        ClientLogger.println("It's " + nickname  + "'s turn, wait for your turn\n");
     }
 
     void notifyNewTurn(boolean newRound){
         if(newRound)
             ClientLogger.printlnWithClear("NEW ROUND STARTED!\n");
-        ClientLogger.println("It's your turn");
+        ClientLogger.println("It's your turn\n");
 
     }
 
     private void pass(){
         if(client.isMyTurn()){
-            ClientLogger.println("You passed your turn");
+            //ClientLogger.printlnWithClear("You passed your turn\n");
             client.pass();
         }else
-            ClientLogger.println("Not your turn! You can only logout");
+            ClientLogger.println("\nNot your turn! You can only logout");
     }
 
     private void placeDice(){
         if(client.isMyTurn()){
             int dice, row, column;
             boolean ask = true;
+            ClientLogger.printWithClear("");
+            client.printGame();
 
             while (ask) {
-                ClientLogger.print("Insert dice number: ");
+                ClientLogger.print("\nInsert dice number: ");
                 dice = readInt();
                 ClientLogger.print("Insert row: ");
                 row = readInt();
@@ -314,10 +317,12 @@ class CLIHandler {
     private void useToolCard(){
         if(client.isMyTurn()){
             int choice = -1;
-            ClientLogger.println("0) Go back");
-            printToolCards(client.getGameSnapshot().getToolCards());
+            ClientLogger.printWithClear("");
+            client.printGame();
+            //printToolCards(client.getGameSnapshot().getToolCards());
+            ClientLogger.println("\n[0] to go back");
             while (choice < 0 || choice > 3) {
-                ClientLogger.print("Your choice: ");
+                ClientLogger.print("\nInsert tool card number: ");
                 try {
                     choice = Integer.parseInt(input.readLine());
                 } catch (IOException | NumberFormatException e) {
@@ -330,8 +335,11 @@ class CLIHandler {
                 if(choice < 1 || choice > 3)
                     ClientLogger.println("Not a valid choice");
             }
+            ClientLogger.println("");
             if(!client.useToolCard( client.getGameSnapshot().getToolCards().get(choice - 1).getName())) {
-                ClientLogger.println("You can't use this card now");
+                ClientLogger.printWithClear("");
+                ClientLogger.println("You can't use this card now\n");
+                client.printGame();
                 printMenu();
             }
             else {
@@ -343,7 +351,7 @@ class CLIHandler {
                 client.getGameSnapshot().getToolCards().get(choice - 1).setUsed();
             }
         }else
-            ClientLogger.println("Not your turn! You can only logout");
+            ClientLogger.println("\nNot your turn! You can only logout");
     }
 
     void printToolCards(List<ToolCard> toolCards){
@@ -364,6 +372,10 @@ class CLIHandler {
 
     }
 
+    void clear(){
+        ClientLogger.printWithClear("");
+    }
+
     void printMenu(){
         if(client.isMyTurn())
             ClientLogger.print("\nChoose an option:\n- Logout" + (!client.diceAlreadyExtracted() ? "\n- Place dice" : "") + (!client.cardToolAlreadyUsed() ? "\n- Toolcard" : "") + "\n- Pass\n\nYour choice: ");
@@ -380,7 +392,8 @@ class CLIHandler {
     }
 
     void notifyServerDisconnected(){
-        ClientLogger.println("\nServer disconnected");
+        ClientLogger.printWithClear("");
+        ClientLogger.println("Server disconnected");
     }
 
     private int readInt(){
