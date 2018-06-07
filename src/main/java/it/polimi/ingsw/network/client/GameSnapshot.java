@@ -21,9 +21,9 @@ public class GameSnapshot {
 
     public GameSnapshot(String playerNick) { //Fix UML for players
         this.roundTrack = new ArrayList<>();
-        this.toolCards = null;
+        this.toolCards = new ArrayList<>();
         this.trackIndex = 0;
-        this.publicGoals = null;
+        this.publicGoals = new ArrayList<>();
         this.otherPlayers = new ArrayList<>();
         this.player = new PlayerSnapshot(playerNick);
         this.draftPool = new ArrayList<>();
@@ -53,6 +53,10 @@ public class GameSnapshot {
             if(toolCard.getName().equals(name))
                 return toolCard;
         return null;
+    }
+
+    public void setPublicGoals(List<PublicGoal> publicGoals) {
+        this.publicGoals = publicGoals;
     }
 
     public List<PublicGoal> getPublicGoals() {

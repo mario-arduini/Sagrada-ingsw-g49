@@ -7,10 +7,11 @@ import it.polimi.ingsw.model.exceptions.UnexpectedMatrixSizeException;
 public final class Schema {
     private final int difficulty;
     private final Constraint[][] constraint;
+    private final String name;
     private static final int ROW = 4;
     private static final int COLUMN = 5;
 
-    public Schema(int difficulty, Constraint[][] constraint) throws InvalidDifficultyValueException, UnexpectedMatrixSizeException {
+    public Schema(int difficulty, Constraint[][] constraint, String name) throws InvalidDifficultyValueException, UnexpectedMatrixSizeException {
         if (difficulty < 3 || difficulty > 6)
             throw new InvalidDifficultyValueException();
         if (constraint.length != ROW)
@@ -21,11 +22,16 @@ public final class Schema {
         }
         this.difficulty = difficulty;
         this.constraint = constraint;
+        this.name = name;
     }
 
     public int getDifficulty() {
 
         return difficulty;
+    }
+
+    public String getName(){
+        return name;
     }
 
     public Constraint getConstraint(int row, int column) {

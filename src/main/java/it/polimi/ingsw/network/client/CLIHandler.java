@@ -2,21 +2,25 @@ package it.polimi.ingsw.network.client;
 
 import it.polimi.ingsw.model.exceptions.InvalidFavorTokenNumberException;
 import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
+import it.polimi.ingsw.model.goalcards.PrivateGoal;
+import it.polimi.ingsw.model.goalcards.PublicGoal;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.SocketException;
 import java.util.List;
 import java.util.logging.Logger;
 
 class CLIHandler {
 
-    private static final Logger LOGGER = Logger.getLogger( Client.class.getName() );
+    private static final Logger LOGGER = Logger.getLogger(Client.class.getName() );
     private BufferedReader input;
     private Client client;
     private boolean playindRound;
 
     CLIHandler(Client client){
+        ClientLogger.initLogger(LOGGER);
         input = new BufferedReader(new InputStreamReader(System.in));
         this.client = client;
     }
@@ -27,9 +31,11 @@ class CLIHandler {
         String command = "";
         boolean ok = false;
 
-        client.setServerAddress(askServerAddress());
-        client.setServerPort(askServerPort());
-        client.createConnection(askConnectionType());
+        do {
+            client.setServerAddress(askServerAddress());
+            client.setServerPort(askServerPort());
+        }while (!client.createConnection(askConnectionType()));
+
         waitConnection();
 
         while(!ok) {
@@ -37,29 +43,30 @@ class CLIHandler {
             try {
                 command = input.readLine().toLowerCase();
             } catch (IOException e) {
+                LOGGER.severe(e.toString());
             }
             if(command.equals("logout")) {
-                ClientLogger.println("Logged out");
+                ClientLogger.printlnWithClear("Logged out");
                 return;
             }
             if(command.equals("login")) {
                 if(client.login(askNickname(), askPassword())) {
-                    ClientLogger.println("Login successful");
+                    //ClientLogger.println("Login successful");
                     client.setLogged(true);
                     ok = true;
                 }
                 else
-                    ClientLogger.println("Login failed, password is not correct");
+                    ClientLogger.println("Login failed, password is not correct\n");
             }else
-                ClientLogger.println("Invalid choice!");
+                ClientLogger.println("Invalid choice!\n");
         }
-        ClientLogger.println("Waiting for game to start!");
         waitStartRound();
 
         while (!logout){
             try {
                 command = input.readLine().toLowerCase();
             } catch (IOException e) {
+                LOGGER.severe(e.toString());
             }
             switch (command){
                 case "logout":
@@ -93,10 +100,11 @@ class CLIHandler {
         String address = "localhost";
         boolean ok = false;
         while (!ok) {
-            ClientLogger.print("Insert server address: ");
+            ClientLogger.printWithClear("Insert server address: ");
             try {
                 address = input.readLine();
             } catch (IOException e) {
+                LOGGER.severe(e.toString());
             }
             if (address.equals("") || address.equals(" ") || address.contains(" "))
                 ClientLogger.println("Invalid server address");
@@ -130,7 +138,7 @@ class CLIHandler {
         int choice = -1;
 
         while (choice != 0 && choice != 1) {
-            ClientLogger.println("Connection types:");
+            ClientLogger.println("\nConnection types:");
             ClientLogger.println("[0] Socket");
             ClientLogger.println("[1] RMI");
             ClientLogger.print("Your choice: ");
@@ -143,11 +151,8 @@ class CLIHandler {
             if(choice != 0 && choice != 1)
                 ClientLogger.println("Not a valid choice");
         }
-        if(choice == 1){
-            ClientLogger.println("You chose RMI");
+        if(choice == 1)
             return Client.ConnectionType.RMI;
-        }
-        ClientLogger.println("You chose Socket");
         return Client.ConnectionType.SOCKET;
     }
 
@@ -156,11 +161,12 @@ class CLIHandler {
             try {
                 wait();
             } catch (InterruptedException e) {
+                LOGGER.severe(e.toString());
             }
     }
 
     void welcomePlayer(){
-        ClientLogger.println("Welcome to Sagrada!");
+        ClientLogger.printlnWithClear("Welcome to Sagrada!\n");
     }
 
     private String askNickname(){
@@ -168,11 +174,11 @@ class CLIHandler {
         boolean ok = false;
 
         while (!ok) {
-            ClientLogger.print("Insert your nickname: ");
+            ClientLogger.printWithClear("Insert your nickname: ");
             try {
                 nickname = input.readLine();
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.severe(e.toString());
             }
             if (!checkNicknameProperties(nickname))
                     ClientLogger.println("Invalid nickname");
@@ -191,6 +197,7 @@ class CLIHandler {
             try {
                 password = input.readLine();
             } catch (IOException e) {
+                LOGGER.severe(e.toString());
             }
 
             if (!checkPasswordProperties(password))
@@ -210,7 +217,7 @@ class CLIHandler {
     }
 
     void notifyStartGame(){
-        ClientLogger.println("Game started!");
+        ClientLogger.printlnWithClear("GAME STARTED!\n");
     }
 
     private synchronized void waitStartRound(){
@@ -218,17 +225,19 @@ class CLIHandler {
             try {
                 wait();
             } catch (InterruptedException e) {
+                LOGGER.severe(e.toString());
             }
     }
 
     void printNewPlayers(List<String> newPlayers){
         if(!client.isLogged()){
-            ClientLogger.println("Waiting room:");
+            ClientLogger.printlnWithClear("Waiting for game to start!");
+            ClientLogger.println("\nWaiting room:");
             ClientLogger.println(client.getNickname());
             newPlayers.forEach(ClientLogger::println);
         }
         else
-            newPlayers.forEach(name -> ClientLogger.println(name + " is now playing"));
+            newPlayers.forEach(ClientLogger::println);
     }
 
     void printLoggedOutPlayer(String nickname){
@@ -238,7 +247,7 @@ class CLIHandler {
     int chooseSchema(){
         int choice = 0;
         while (choice == 0) {
-            ClientLogger.print("Insert your choice: ");
+            ClientLogger.print("\nInsert your choice: ");
 
             try {
                 choice = Integer.parseInt(input.readLine());
@@ -248,10 +257,10 @@ class CLIHandler {
 
             if(choice < 1 || choice > 4 || !client.sendSchema(choice - 1)){
                 choice = 0;
-                ClientLogger.print("Invalid choice");
+                ClientLogger.println("Invalid choice");
             }
         }
-        ClientLogger.println("Waiting other players' choice");
+        ClientLogger.println("\nWaiting other players' choice");
         return choice - 1;
     }
 
@@ -261,13 +270,13 @@ class CLIHandler {
 
     void notifyNewTurn(String nickname, boolean newRound){
         if(newRound)
-            ClientLogger.println("New round started");
+            ClientLogger.printlnWithClear("NEW ROUND STARTED!\n");
         ClientLogger.println("It's " + nickname  + "'s turn, wait for your turn");
     }
 
     void notifyNewTurn(boolean newRound){
         if(newRound)
-            ClientLogger.println("New round started");
+            ClientLogger.printlnWithClear("NEW ROUND STARTED!\n");
         ClientLogger.println("It's your turn");
 
     }
@@ -305,7 +314,8 @@ class CLIHandler {
     private void useToolCard(){
         if(client.isMyTurn()){
             int choice = -1;
-            printToolCards();
+            ClientLogger.println("0) Go back");
+            printToolCards(client.getGameSnapshot().getToolCards());
             while (choice < 0 || choice > 3) {
                 ClientLogger.print("Your choice: ");
                 try {
@@ -328,6 +338,7 @@ class CLIHandler {
                 try {
                     client.getGameSnapshot().getPlayer().useFavorToken((client.getGameSnapshot().getToolCards().get(choice - 1).getUsed() ? 2 : 1));
                 } catch (InvalidFavorTokenNumberException | NotEnoughFavorTokenException e) {
+                //TODO: check this
                 }
                 client.getGameSnapshot().getToolCards().get(choice - 1).setUsed();
             }
@@ -335,25 +346,29 @@ class CLIHandler {
             ClientLogger.println("Not your turn! You can only logout");
     }
 
-    private void printToolCards(){
+    void printToolCards(List<ToolCard> toolCards){
         int i = 0;
-        ClientLogger.println("0) Go back");
-        for (ToolCard toolcard: client.getGameSnapshot().getToolCards()) {
+        ClientLogger.println("TOOL CARDS");
+        for (ToolCard toolcard: toolCards) {
             ClientLogger.println(++i + ") " + toolcard.getName());
             //ClientLogger.println("   Description: " + toolcard.getDescription());
             ClientLogger.println("   Cost: " + (toolcard.getUsed() ? "2" : "1"));
         }
     }
 
+    void printPublicGoals(List<PublicGoal> publicGoals){
+
+    }
+
+    void printPrivateGoal(PrivateGoal privateGoal){
+
+    }
+
     void printMenu(){
         if(client.isMyTurn())
-            ClientLogger.print("Choose an option:\n- Logout" + (!client.diceAlreadyExtracted() ? "\n- Place dice" : "") + (!client.cardToolAlreadyUsed() ? "\n- Toolcard" : "") + "\n- Pass\nYour choice: ");
-//            if(!client.diceAlreadyExtracted())
-//                ClientLogger.print("Choose an option:\n- Logout\n- Place dice\n- Toolcard\n- Pass\nYour choice: ");
-//            else
-//                ClientLogger.print("Choose an option:\n- Logout\n- Toolcard\n- Pass\nYour choice: ");
+            ClientLogger.print("\nChoose an option:\n- Logout" + (!client.diceAlreadyExtracted() ? "\n- Place dice" : "") + (!client.cardToolAlreadyUsed() ? "\n- Toolcard" : "") + "\n- Pass\n\nYour choice: ");
         else
-            ClientLogger.println("If you want you can logout");
+            ClientLogger.println("\nIf you want you can logout");
     }
 
     void notifyEndTurn(){

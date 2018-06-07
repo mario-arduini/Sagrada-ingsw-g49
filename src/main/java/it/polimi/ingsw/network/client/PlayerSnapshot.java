@@ -12,12 +12,21 @@ public class PlayerSnapshot {
     private Window window;
     private int favorToken;
     private boolean suspended;
+    private PrivateGoal privateGoal;
 
     public PlayerSnapshot(String nickname){
         this.nickname = nickname;
         this.window = null;
         this.favorToken = 0;
         this.suspended = false;
+    }
+
+    public void setPrivateGoal(PrivateGoal privateGoal){
+        this.privateGoal = privateGoal;
+    }
+
+    public PrivateGoal getPrivateGoal(){
+        return  privateGoal;
     }
 
     public void setWindow(Window window){

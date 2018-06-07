@@ -4,27 +4,32 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import it.polimi.ingsw.model.Player;
+import it.polimi.ingsw.model.goalcards.PrivateGoal;
+import it.polimi.ingsw.model.goalcards.PublicGoal;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class ServerListener implements Runnable {
 
+    private static final Logger LOGGER = Logger.getLogger(Client.class.getName() );
     private Client client;
     private ClientSocketHandler server;
     private boolean connected;
+    private Gson gson;
 
     ServerListener(Client client, ClientSocketHandler server) {
         this.client = client;
         this.server = server;
         connected = true;
+        gson = new Gson();
+        ClientLogger.initLogger(LOGGER);
     }
 
     @Override
     public void run() {
 
-        Gson gson = new Gson();
         JsonObject jsonObject;
         JsonParser parser = new JsonParser();
         Type listType;
@@ -34,6 +39,7 @@ public class ServerListener implements Runnable {
             try {
                 jsonObject = parser.parse(server.socketReadLine()).getAsJsonObject();  //TODO: bring here socketReadLine
             } catch (IllegalStateException e) {
+                LOGGER.severe(e.toString());
             } catch (NullPointerException e)
             {
                 connected = false;
@@ -58,26 +64,37 @@ public class ServerListener implements Runnable {
                     case "failed":
                         server.notifyResult(false);
                         break;
-                    case "privateGoal":
-                        client.setPrivateGoal(null);  //TODO
+                    case "game-init":
+                        extractToolCards(jsonObject.getAsJsonObject("toolcards"));
+                        extractPublicGoals(jsonObject.getAsJsonObject("public-goals"));
+                        client.getGameSnapshot().getPlayer().setPrivateGoal(gson.fromJson(jsonObject.get("private-goal").getAsString(), PrivateGoal.class));
+                        List<Schema> schemas = extractSchemas(jsonObject.getAsJsonObject("schemas"));
+                        client.notifyStartGame();
+                        client.printHeader();
+                        chooseSchema(schemas);
                         break;
-                    case "publicGoal":  //TODO
-                        break;
+
+                    // region OBSOLETE
+
                     case "toolcards":
                         List<ToolCard> toolCards = new ArrayList<>();
-                        toolCards.add(new ToolCard(jsonObject.get("0").getAsJsonObject().get("name").getAsString(),"")); //jsonObject.get("0").getAsJsonObject().get("description").getAsString()));
-                        toolCards.add(new ToolCard(jsonObject.get("1").getAsJsonObject().get("name").getAsString(), "")); //jsonObject.get("1").getAsJsonObject().get("description").getAsString()));
-                        toolCards.add(new ToolCard(jsonObject.get("2").getAsJsonObject().get("name").getAsString(), "")); //jsonObject.get("2").getAsJsonObject().get("description").getAsString()));
+                        for(Integer i = 0; i < 3; i++)
+                            toolCards.add(new ToolCard(jsonObject.get(i.toString()).getAsJsonObject().get("name").getAsString(),"")); //jsonObject.get("0").getAsJsonObject().get("description").getAsString()));
                         client.getGameSnapshot().setToolCards(toolCards);
+                        client.notifyStartGame();
+                        client.printToolCards();
                         break;
                     case "schema-choice":
-                        List<Schema> schemas = new ArrayList<>();
+                        List<Schema> schemas1 = new ArrayList<>();
                         for(Integer i = 0; i < jsonObject.keySet().size() - 1; i++)
-                            schemas.add(gson.fromJson(jsonObject.get(i.toString()).getAsString(), Schema.class));
-                        client.printSchemas(schemas);
-                        Schema choseSchema = schemas.get(client.chooseSchema());
+                            schemas1.add(gson.fromJson(jsonObject.get(i.toString()).getAsString(), Schema.class));
+                        client.printSchemas(schemas1);
+                        Schema choseSchema = schemas1.get(client.chooseSchema());
                         client.getGameSnapshot().getPlayer().setWindow(choseSchema);
                         break;
+
+                    // endregion
+
                     case "round":
                         listType = new TypeToken<List<Dice>>(){}.getType();
                         client.notifyNewTurn(jsonObject.get("player").getAsString(), jsonObject.get("new-round").getAsBoolean());
@@ -145,9 +162,38 @@ public class ServerListener implements Runnable {
                         break;
                 }
             } catch (NullPointerException e) {
+                LOGGER.severe(e.toString());
             }
         }
     }
+
+    private void extractToolCards(JsonObject jsonObject){
+        List<ToolCard> toolCards = new ArrayList<>();
+        for(Integer i = 0; i < 3; i++)
+            toolCards.add(new ToolCard(jsonObject.get(i.toString()).getAsJsonObject().get("name").getAsString(),"")); //jsonObject.get("0").getAsJsonObject().get("description").getAsString()));
+        client.getGameSnapshot().setToolCards(toolCards);
+    }
+
+    private void extractPublicGoals(JsonObject jsonObject){
+        List<PublicGoal> publicGoals = new ArrayList<>();
+        for(Integer i = 0; i < 3; i++)
+            publicGoals.add(gson.fromJson(jsonObject.get(i.toString()).toString(),PublicGoal.class));
+        client.getGameSnapshot().setPublicGoals(publicGoals);
+    }
+
+    private List<Schema> extractSchemas(JsonObject jsonObject){
+        List<Schema> schemas = new ArrayList<>();
+        for(Integer i = 0; i < jsonObject.keySet().size() - 1; i++)
+            schemas.add(gson.fromJson(jsonObject.get(i.toString()).getAsString(), Schema.class));
+        return schemas;
+    }
+
+    private void chooseSchema(List<Schema> schemas){
+        client.printSchemas(schemas);
+        Schema choseSchema = schemas.get(client.chooseSchema());
+        client.getGameSnapshot().getPlayer().setWindow(choseSchema);
+    }
+
     void setConnected(boolean connected){
         this.connected = connected;
     }

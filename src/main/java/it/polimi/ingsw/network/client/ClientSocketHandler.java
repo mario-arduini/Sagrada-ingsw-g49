@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ClientSocketHandler implements Connection {
@@ -29,8 +28,8 @@ public class ClientSocketHandler implements Connection {
     private Gson gson;
 
 
-    ClientSocketHandler(Client client, String serverAddress, int serverPort) {
-
+    ClientSocketHandler(Client client, String serverAddress, int serverPort) throws SocketException {
+        ClientLogger.initLogger(LOGGER);
         try {
             socket = new Socket(serverAddress, serverPort);     //TODO handle exception if connection not go well
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -39,7 +38,8 @@ public class ClientSocketHandler implements Connection {
             thread = new Thread(serverListener);
             thread.start();
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, e.toString(), e);
+            LOGGER.severe("Connection to server failed: " + e.toString());
+            throw new SocketException();
         }
         gson = new Gson();
         flagContinue = false;
@@ -58,7 +58,7 @@ public class ClientSocketHandler implements Connection {
             try {
                 wait();
             } catch (InterruptedException e) {
-                LOGGER.log(Level.WARNING, e.toString(), e);
+                LOGGER.severe(e.toString());
             }
         connected = serverResult;
         flagContinue = false;
@@ -94,7 +94,7 @@ public class ClientSocketHandler implements Connection {
             try {
                 wait();
             } catch (InterruptedException e) {
-                LOGGER.log(Level.WARNING, e.toString(), e);
+                LOGGER.severe(e.toString());
             }
         flagContinue = false;
         return serverResult;
@@ -110,7 +110,7 @@ public class ClientSocketHandler implements Connection {
             try {
                 wait();
             } catch (InterruptedException e) {
-                LOGGER.log(Level.WARNING, e.toString(), e);
+                LOGGER.severe(e.toString());
             }
         flagContinue = false;
         return serverResult;
@@ -149,8 +149,9 @@ public class ClientSocketHandler implements Connection {
         try {
             return input.readLine();
         }  catch(SocketException e){
-            return null;
+            LOGGER.severe(e.toString());
         } catch(IOException e) {
+            LOGGER.severe(e.toString());
         }
         return null;
     }
@@ -159,7 +160,7 @@ public class ClientSocketHandler implements Connection {
         try {
             socket.close();
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, e.toString(), e);
+            LOGGER.severe(e.toString());
         }
     }
 

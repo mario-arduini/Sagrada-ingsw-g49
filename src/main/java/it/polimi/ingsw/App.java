@@ -6,7 +6,11 @@ import it.polimi.ingsw.model.Constraint;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.network.client.Client;
 
+import java.io.IOException;
 import java.util.Random;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class App
 {
@@ -126,5 +130,6 @@ public class App
         command = null;
         jsonObject = parser.parse(command).getAsJsonObject();*/
     }
+
 }
 

@@ -2,6 +2,7 @@ package it.polimi.ingsw.network.client;
 
 import it.polimi.ingsw.model.Color;
 
+import java.net.SocketException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.*;
@@ -76,11 +77,19 @@ public class Client {
         }
     }
 
-    void createConnection(ConnectionType connectionType){
-        if(connectionType == ConnectionType.SOCKET)
-            server = new ClientSocketHandler(this, serverAddress, serverPort);
-        else if(connectionType == ConnectionType.RMI)
+    boolean createConnection(ConnectionType connectionType) {
+        if(connectionType == ConnectionType.SOCKET) {
+            try {
+                server = new ClientSocketHandler(this, serverAddress, serverPort);
+            } catch (SocketException e) {
+                return false;
+            }
+        }
+        else if(connectionType == ConnectionType.RMI) {
             server = null;
+            return false;
+        }
+        return true;
     }
 
     int chooseSchema(){
@@ -177,11 +186,13 @@ public class Client {
     void printSchemas(List<Schema> schemas){
         Constraint constraint;
         Schema currentSchema;
-        cliHandler.notifyStartGame();
-        ClientLogger.println("Choose your schema:");
+        ClientLogger.println("\nSCHEMA CHOICE");
         for(int i=0;i<schemas.size();i+=2){
             ClientLogger.println("");
-            ClientLogger.println("Schema ("+(i+1)+")               Schema ("+(i+2)+")");
+            ClientLogger.print((i + 1) + ") " + schemas.get(i).getName());// + "               " + (i + 2) + ") " + schemas.get(i).getName());
+            for(int s = schemas.get(i).getName().length(); s < 22; s++)
+                ClientLogger.print(" ");
+            ClientLogger.println((i + 2) + ") " + schemas.get(i).getName());
             ClientLogger.println(CLI_SCHEMA_ROW);
             for(int r=0;r<ROWS_NUMBER;r++){
                 currentSchema = schemas.get(i);
@@ -268,12 +279,12 @@ public class Client {
 
         // print draftpool
         ClientLogger.println("");
-        ClientLogger.println("Draft Pool                 |  Round Track");
+        ClientLogger.println("Draft Pool               |  Round Track");
         for(Dice dice : gameSnapshot.getDraftPool()){
             ClientLogger.print(dice+"  ");
         }
-        for(int i=gameSnapshot.getDraftPool().size();i<9;i++) ClientLogger.print("   ");
-        ClientLogger.print("|");
+        for(int i=gameSnapshot.getDraftPool().size();i<8;i++) ClientLogger.print("   ");
+        ClientLogger.print(" |");
         for(Dice dice : gameSnapshot.getRoundTrack()){
             ClientLogger.print("  "+dice);
         }
@@ -301,6 +312,10 @@ public class Client {
 
     //region TOOLCARD
 
+    void printToolCards(){
+        cliHandler.printToolCards(gameSnapshot.getToolCards());
+    }
+
     void notifyUsedToolCard(String player, String toolCard){
         cliHandler.notifyUsedToolCard(player, toolCard);
     }
@@ -327,14 +342,25 @@ public class Client {
 
     //endregion
 
+    void printHeader(){
+        cliHandler.printPublicGoals(gameSnapshot.getPublicGoals());
+        cliHandler.printPrivateGoal(gameSnapshot.getPlayer().getPrivateGoal());
+        cliHandler.printToolCards(gameSnapshot.getToolCards());
+    }
+
+    void notifyStartGame(){
+        cliHandler.notifyStartGame();
+    }
+
     public static void main(String[] args) {
         Client client = new Client();
         CLIHandler cliHandler;
         String mode = "CLI";
         Scanner in = new Scanner(System.in);
+        ClientLogger.LogToFile();
         boolean ok = false;
         while (!ok) {
-            ClientLogger.print("Choose how you want to play:\n- CLI\n- GUI\nYour choice: ");
+            ClientLogger.printWithClear("Choose how you want to play:\n- CLI\n- GUI\nYour choice: ");
             mode = in.nextLine().toUpperCase();
             if (mode.equals("CLI") || mode.equals("GUI"))
                 ok = true;
