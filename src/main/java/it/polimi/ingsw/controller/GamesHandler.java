@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class GamesHandler {
     private List<User> players;
-    private HashMap<User,Game> gameReference;
+    private HashMap<User,GameRoom> gameReference;
     private static final String TIMEOUT_FILE_NAME = "timeout.txt";
     private int secondsTimer;
     private Timer timer;
@@ -26,53 +26,6 @@ public class GamesHandler {
         String filename = getClass().getClassLoader().getResource(TIMEOUT_FILE_NAME).getFile();
         this.secondsTimer = readIntFromFile(filename);
         //TODO: Throw exception if file does not exist
-    }
-
-    public synchronized void gameReady(Game game){
-        if (!game.getPlaying()) {
-            List<User> coplayers = getPlayersByGame(game);
-            String firstPlayer = game.getCurrentRound().getCurrentPlayer().getNickname();
-            List<Dice> draftPool = game.getCurrentRound().getDraftPool();
-            HashMap<String, Schema> playersSchemas = new HashMap<>();
-
-            for (Player player : coplayers)
-                playersSchemas.put(player.getNickname(), player.getWindow().getSchema());
-            coplayers.forEach(player -> player.notifyOthersSchemas(playersSchemas));
-
-            coplayers.forEach(player -> player.notifyRound(firstPlayer, draftPool, true));
-        }
-    }
-
-    public synchronized void goOn(Game game) {
-        boolean newRound = false;
-        List<User> coplayers = getPlayersByGame(game);
-        try {
-            game.getCurrentRound().nextPlayer();
-            //Logger.print("Player playing1: " + game.getCurrentRound().getCurrentPlayer().getNickname());
-        }catch (NoMorePlayersException e){
-            game.nextRound();
-            newRound = true;
-            //Logger.print("Player playing2: " + game.getCurrentRound().getCurrentPlayer().getNickname());
-        }
-        String firstPlayer = game.getCurrentRound().getCurrentPlayer().getNickname();
-
-        List<Dice> draftPool = game.getCurrentRound().getDraftPool();
-
-        //TODO: why does functional require this final values here??
-        boolean finalNewRound = newRound;
-        coplayers.forEach(player -> player.notifyRound(firstPlayer, draftPool, finalNewRound));
-    }
-
-    public synchronized void notifyAllDicePlaced(Game game, String nickname, int row, int column, Dice dice){
-        boolean newRound = false;
-        List<User> coplayers = getPlayersByGame(game);
-        coplayers.forEach(player -> player.notifyDicePlaced(nickname, row, column, dice));
-    }
-
-    public synchronized void notifyAllToolCardUsed(Game game, String nickname, String toolcard, Window window){
-        boolean newRound = false;
-        List<User> coplayers = getPlayersByGame(game);
-        coplayers.forEach(player -> player.notifyToolCardUse(nickname, toolcard, window));
     }
 
     public synchronized User login(String nickname, String password, ConnectionHandler connection){
@@ -123,18 +76,22 @@ public class GamesHandler {
 
     public synchronized void logout(String nickname){
         Optional<User> playerFetched = findPlayer(nickname);
-        User user = playerFetched.get();
-        if (players.contains(user)) {
-            players.remove(user);
-            players.forEach(p -> p.notifyLogout(nickname));
-            waitingRoomLeftPlayer(user);
-        }else{
-            Game game = gameReference.get(user);
-            gameReference.remove(user);
-            List<User> cooplayers = getPlayersByGame(game);
-            cooplayers.forEach(p -> p.notifyLogout(nickname));
+        if (playerFetched.isPresent()) {
+            User user = playerFetched.get();
+            if (players.contains(user)) {
+                players.remove(user);
+                players.forEach(p -> p.notifyLogout(nickname));
+                waitingRoomLeftPlayer(user);
+            } else {
+                Game game = gameReference.get(user);
+                gameReference.remove(user);
+                List<User> cooplayers = getPlayersByGame(game);
+                cooplayers.forEach(p -> p.notifyLogout(nickname));
+            }
+            Logger.print("Logged out: " + user.getNickname() + " " + user.getConnection().getRemoteAddress());
+        }else {
+            Logger.print("Logout failed: " + nickname);
         }
-        Logger.print("Logged out: " + user.getNickname() + " " + user.getConnection().getRemoteAddress());
     }
 
     private int readIntFromFile(String filename){
@@ -181,9 +138,9 @@ public class GamesHandler {
 
     private synchronized void startGame() {
         List<Player> playerList = new ArrayList<>(players);
-        Game game = null;
+        GameRoom game;
         try {
-            game = new Game(playerList);
+            game = new GameRoom(playerList);
 
             for (User player:players) {
                 gameReference.put(player, game);
@@ -213,7 +170,7 @@ public class GamesHandler {
 
     private List<User> getPlayersByGame(Game game) {
         List<User> keys = new ArrayList<>();
-        for (Map.Entry<User, Game> entry : gameReference.entrySet()) {
+        for (Map.Entry<User, GameRoom> entry : gameReference.entrySet()) {
             if (Objects.equals(game, entry.getValue())) {
                 keys.add(entry.getKey());
             }

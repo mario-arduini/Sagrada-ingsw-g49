@@ -24,13 +24,7 @@ public class User extends Player {
         this.connection = connection;
     }
 
-    public void setConnection(ConnectionHandler connection, Game game) {
-        this.connection.close();
-        this.connection = connection;
-        this.connection.setGame(game);
-    }
-
-    public void setGame(Game game){
+    public void setGame(GameRoom game){
         this.connection.setGame(game);
     }
 
@@ -85,5 +79,4 @@ public class User extends Player {
     public boolean askIfPlus() {
         return connection.askIfPlus();
     }
-
 }

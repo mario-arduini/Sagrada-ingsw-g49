@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
+import it.polimi.ingsw.controller.GameRoom;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.*;
@@ -413,7 +414,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public void setGame(Game game){
+    public void setGame(GameRoom game){
         this.gameFlowHandler.setGame(game);
     }
 

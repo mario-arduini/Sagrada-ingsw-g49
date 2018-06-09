@@ -3,7 +3,6 @@ package it.polimi.ingsw.controller;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.Dice;
-import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.model.exceptions.*;
@@ -16,20 +15,20 @@ import java.util.stream.Collectors;
 
 public class GameFlowHandler {
     private User player;
-    private Game game;
+    private GameRoom gameRoom;
     private GamesHandler gamesHandler;
     private List<Schema> initialSchemas;
     private ToolCard activeToolCard;
 
     public GameFlowHandler(GamesHandler gamesHandler){
         this.player = null;
-        this.game = null;
+        this.gameRoom = null;
         this.gamesHandler = gamesHandler;
         this.activeToolCard = null;
     }
 
-    public void setGame(Game game) {
-        this.game = game;
+    public void setGame(GameRoom game) {
+        this.gameRoom = game;
         initialSchemas = game.extractSchemas();
         player.notifyToolCards(game.getToolCards());
         player.notifySchemas(initialSchemas);
@@ -41,36 +40,36 @@ public class GameFlowHandler {
     }
 
     public void placeDice(int row, int column, Dice dice) throws NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException {
-        if (!game.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
-        game.placeDice(row, column, dice);
+        if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
+        gameRoom.placeDice(row, column, dice);
     }
 
     public void notifyDicePlaced(int row, int column, Dice dice){
-        gamesHandler.notifyAllDicePlaced(game, player.getNickname(), row, column, dice);
+        gameRoom.notifyAllDicePlaced(player.getNickname(), row, column, dice);
     }
 
     public void pass() throws NotYourTurnException{
-        if (!game.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
+        if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
         this.activeToolCard = null;
-        gamesHandler.goOn(game);
+        gameRoom.goOn();
     }
 
     public void checkGameReady(){
-        List<Player> inGamePlayers = game.getPlayers();
+        List<Player> inGamePlayers = gameRoom.getPlayers();
         for (Player p: inGamePlayers)
             if (p.getWindow()==null)
                 return;
-        gamesHandler.gameReady(game);
+        gameRoom.gameReady();
     }
 
     public void disconnected(){
-        if (game == null){
+        if (gameRoom == null){
             gamesHandler.waitingRoomDisconnection(player);
         }
     }
 
     public List<String> getPlayers(){
-        return game == null ? gamesHandler.getWaitingPlayers() : game.getPlayers().stream().map(Player::getNickname).collect(Collectors.toList());
+        return gameRoom == null ? gamesHandler.getWaitingPlayers() : gameRoom.getPlayers().stream().map(Player::getNickname).collect(Collectors.toList());
     }
 
     public boolean login(String nickname, String password, ConnectionHandler connection) {
@@ -83,13 +82,13 @@ public class GameFlowHandler {
     }
 
     public void useToolCard(String cardName) throws NoSuchToolCardException, InvalidDiceValueException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException {
-        if (!game.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
-        Optional<ToolCard> fetch = (game.getToolCards()).stream().filter(card -> card.getName().equalsIgnoreCase(cardName)).findFirst();
+        if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
+        Optional<ToolCard> fetch = (gameRoom.getToolCards()).stream().filter(card -> card.getName().equalsIgnoreCase(cardName)).findFirst();
         if (!fetch.isPresent()){
             throw new NoSuchToolCardException();
         }
         this.activeToolCard = fetch.get();
-        this.activeToolCard.use(game);
-        gamesHandler.notifyAllToolCardUsed(game, player.getNickname(), activeToolCard.getName(), player.getWindow());
+        this.activeToolCard.use(gameRoom);
+        gameRoom.notifyAllToolCardUsed(player.getNickname(), activeToolCard.getName(), player.getWindow());
     }
 }

@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.server;
 
+import it.polimi.ingsw.controller.GameRoom;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.toolcards.ToolCard;
 
@@ -19,7 +20,7 @@ public interface ConnectionHandler{
     void notifyToolCards(List<ToolCard> toolCards);
     String getRemoteAddress();
     void close();
-    void setGame(Game game);
+    void setGame(GameRoom game);
 
     Coordinate askDiceWindow();
     Dice askDiceDraftPool();
