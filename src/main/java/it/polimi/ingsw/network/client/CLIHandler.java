@@ -8,7 +8,6 @@ import it.polimi.ingsw.model.goalcards.PublicGoal;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.SocketException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -51,7 +50,6 @@ class CLIHandler {
             }
             if(command.equals("login")) {
                 if(client.login(askNickname(), askPassword())) {
-                    //ClientLogger.println("Login successful");
                     client.setLogged(true);
                     ok = true;
                 }
