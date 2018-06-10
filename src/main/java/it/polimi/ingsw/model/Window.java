@@ -52,7 +52,6 @@ public class Window {
     public void checkPlacementConstraint(int row, int column, Dice dice) throws FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {
         if (!firstDice) {
             checkBorder(row, column);
-            this.firstDice = true;
         }
         else
             checkAdjacencies(row,column, dice);
@@ -64,6 +63,7 @@ public class Window {
 
     public void setDice(int row, int column, Dice dice){
         mosaic[row][column] = new Dice(dice);
+        this.firstDice = true;
     }
 
     public void checkBorder(int row, int column) throws FirstDiceMisplacedException {
@@ -196,5 +196,27 @@ public class Window {
         }
 
         return this.schema.equals(((Window)window).getSchema());
+    }
+
+    public void canBePlaced(Dice dice,int row,int column) throws ConstraintViolatedException, FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {
+        Constraint constraint = schema.getConstraint(row, column);
+        checkColorConstraint(constraint, dice);
+        checkValueConstraint(constraint, dice);
+        checkPlacementConstraint(row, column, dice);
+    }
+
+    public int possiblePlaces(Dice dice){
+        int possiblePlaces = 0;
+        for(int r=0;r<ROW;r++)
+            for(int c=0;c<COLUMN;c++){
+                try{
+                    canBePlaced(dice,r,c);
+                    possiblePlaces++;
+                } catch (NoAdjacentDiceException | BadAdjacentDiceException
+                        | FirstDiceMisplacedException | ConstraintViolatedException e) {
+                    e.printStackTrace();
+                }
+            }
+        return possiblePlaces;
     }
 }

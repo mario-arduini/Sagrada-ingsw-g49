@@ -1,1 +1,1 @@
-{"name":"Martelletto","effects":[{"reroll-draft":{}}],"prerequisites":["before-draft","second-turn","favor-token"]}
+{"name":"Martelletto","effects":[{"reroll-pool":{}}],"prerequisites":["before-draft","second-turn","favor-token"]}

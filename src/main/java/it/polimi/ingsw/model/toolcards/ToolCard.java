@@ -58,32 +58,40 @@ public class ToolCard {
                 Logger.print("ToolCard " + e);
             }
             switch (command) {
-                case "change-value":
-                    if (arguments.get("plus").getAsBoolean())
-                        Effects.changeValue(game.getCurrentRound(), arguments.get("value").getAsInt());
-                    else if(arguments.get("random").getAsBoolean())
-                        Effects.changeValue(game.getCurrentRound());
-                    break;
-                case "flip":
-                    Effects.flip(game.getCurrentRound());
-                    break;
-                case "remove-turn":
-                    game.getCurrentRound().removeTurn();
-                    break;
                 case "get-draft-dice":
                     Effects.getDraftedDice(game.getCurrentRound());
                     break;
                 case "place-dice":
-                    Effects.addDiceToWindow(game.getCurrentRound());
-                    break;
-                case "swap-round-dice":
-                    Effects.swapRoundTrack(game);
+                    Effects.addDiceToWindow(game.getCurrentRound().getCurrentPlayer(),game.getCurrentRound().getCurrentDiceDrafted());
                     break;
                 case "move":
-                    Effects.move(game.getCurrentRound(), gson.fromJson(arguments.get("ignore"), Effects.RuleIgnored.class));
+                    Effects.move(game.getCurrentRound().getCurrentPlayer(), gson.fromJson(arguments.get("ignore"), Effects.RuleIgnored.class));
+                    break;
+                case "change-value":
+                    if (arguments.get("plus").getAsBoolean())
+                        Effects.changeValue(game.getCurrentRound().getCurrentPlayer(),game.getCurrentRound().getCurrentDiceDrafted(), arguments.get("value").getAsInt());
+                    else if(arguments.get("random")!=null&&arguments.get("random").getAsBoolean())
+                        Effects.changeValue(game.getCurrentRound().getCurrentDiceDrafted());
+                    break;
+                case "flip":
+                    Effects.flip(game.getCurrentRound().getCurrentDiceDrafted());
+                    break;
+                case "remove-turn":
+                    game.getCurrentRound().removeTurn();
+                    break;
+                case "reroll-pool":
+                    Effects.rerollPool(game.getCurrentRound().getDraftPool());
+                    break;
+                case "swap-round-dice":
+                    Effects.swapRoundTrack(game.getCurrentRound(),game.getRoundTrack());
+                    break;
+                case "put-in-bag":
+                    break;
+                case "get-from-bag":
                     break;
             }
         }
+        game.getCurrentRound().getCurrentPlayer().useFavorToken(used ? 2 : 1);
         this.used = true;
     }
 
