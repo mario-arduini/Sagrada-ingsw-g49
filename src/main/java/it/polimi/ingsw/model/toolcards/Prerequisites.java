@@ -1,7 +1,6 @@
 package it.polimi.ingsw.model.toolcards;
 
 import it.polimi.ingsw.model.Dice;
-import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.Round;
 import it.polimi.ingsw.model.exceptions.*;
@@ -19,7 +18,7 @@ final class Prerequisites {
     }
 
     static void checkDiceInWindow(Player player) throws NoDiceInWindowException {
-        if(!player.getWindow().isFirstDice()) throw new NoDiceInWindowException();
+        if(!player.getWindow().isFirstDicePlaced()) throw new NoDiceInWindowException();
     }
 
     static void checkDiceInRoundTrack(List<Dice> roundTrack) throws NoDiceInRoundTrackException{

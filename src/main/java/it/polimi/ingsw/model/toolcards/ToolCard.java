@@ -86,8 +86,10 @@ public class ToolCard {
                     Effects.swapRoundTrack(game.getCurrentRound(),game.getRoundTrack());
                     break;
                 case "put-in-bag":
+                    game.putInBag(game.getCurrentRound().getCurrentDiceDrafted());
                     break;
                 case "get-from-bag":
+                    Effects.getDiceFromBag(game.getCurrentRound(),game.getFromBag());
                     break;
             }
         }

@@ -9,14 +9,12 @@ import java.util.Random;
 
 final class Effects {
 
-    enum RuleIgnored{ COLOR, NUMBER, ADJACENCIES, NONE }
-
     private Effects(){
         super();
     }
 
     static void getDraftedDice(Round round){
-        Dice dice = askDiceDraftPool(round);
+        Dice dice = askDiceDraftPool(round.getCurrentPlayer());
         round.getDraftPool().remove(dice);
         round.setCurrentDiceDrafted(dice);
         round.setDiceExtracted(true);
@@ -24,10 +22,10 @@ final class Effects {
 
     static void addDiceToWindow(Player player,Dice dice) throws BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException {
         Coordinate coords = askDiceWindow("",player);
-        placeDice(player,dice,coords.getRow(),coords.getColumn(),RuleIgnored.NONE);
+        placeDice(player,dice,coords.getRow(),coords.getColumn(), Window.RuleIgnored.NONE);
     }
 
-    static void move(Player player,RuleIgnored ruleIgnored){
+    static void move(Player player,Window.RuleIgnored ruleIgnored){
         Coordinate start = null;
         Coordinate end = null;
         Window currentPlayerWindow = player.getWindow();
@@ -46,16 +44,16 @@ final class Effects {
                 currentPlayerWindow.removeDice(start.getRow(),start.getColumn());
                 int expectedMinimumPositions = 2;
                 try{
-                    currentPlayerWindow.canBePlaced(removedDice,start.getRow(),start.getColumn());
+                    currentPlayerWindow.canBePlaced(removedDice,start.getRow(),start.getColumn(),ruleIgnored);
                 } catch (NoAdjacentDiceException | BadAdjacentDiceException
                         | FirstDiceMisplacedException | ConstraintViolatedException e) {
-                    e.printStackTrace();
                     expectedMinimumPositions = 1;
                 }
-                int possilePositions = currentPlayerWindow.possiblePlaces(removedDice);
-                if(possilePositions<expectedMinimumPositions){
+                int possiblePositions = currentPlayerWindow.possiblePlaces(removedDice,ruleIgnored);
+                if(possiblePositions<expectedMinimumPositions){
                     valid = false;
                     message = "move-from-unmovable";
+                    currentPlayerWindow.setDice(start.getRow(),start.getColumn(),removedDice);
                 }
             }
         }
@@ -142,7 +140,22 @@ final class Effects {
         round.setCurrentDiceDrafted(toSwap);
     }
 
-    static void placeDice(Player player,Dice dice, int row, int column, RuleIgnored ruleIgnored) throws NotWantedAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, BadAdjacentDiceException, FirstDiceMisplacedException {
+    static void getDiceFromBag(Round round,Dice dice){
+        int value;
+        boolean valid = false;
+        while (!valid){
+            valid = true;
+            value = askDiceValue(round.getCurrentPlayer());
+            try {
+                dice.setValue(value);
+            } catch (InvalidDiceValueException e) {
+                valid = false;
+            }
+        }
+        round.setCurrentDiceDrafted(dice);
+    }
+
+    static void placeDice(Player player,Dice dice, int row, int column, Window.RuleIgnored ruleIgnored) throws NotWantedAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, BadAdjacentDiceException, FirstDiceMisplacedException {
         switch (ruleIgnored){
             case COLOR:
                 player.getWindow().checkValueConstraint(player.getWindow().getSchema().getConstraint(row, column),dice);
@@ -157,7 +170,7 @@ final class Effects {
             case ADJACENCIES:
                 player.getWindow().checkValueConstraint(player.getWindow().getSchema().getConstraint(row, column), dice);
                 player.getWindow().checkColorConstraint(player.getWindow().getSchema().getConstraint(row, column), dice);
-                if(!player.getWindow().isFirstDice())
+                if(!player.getWindow().isFirstDicePlaced())
                     try {
                         player.getWindow().checkAdjacencies(row, column, dice);
                         throw new NotWantedAdjacentDiceException();
@@ -182,8 +195,8 @@ final class Effects {
         return ((User) player).askDiceWindow();
     }
 
-    static Dice askDiceDraftPool(Round round){
-        return  ((User) round.getCurrentPlayer()).askDiceDraftPool();
+    static Dice askDiceDraftPool(Player player){
+        return  ((User) player).askDiceDraftPool();
     }
 
     static int askDiceRoundTrack(Player player){
@@ -192,6 +205,10 @@ final class Effects {
 
     static boolean askIfPlus(String message,Player player){
         return  ((User) player).askIfPlus();
+    }
+
+    static int askDiceValue(Player player){
+        return ((User) player).askDiceValue();
     }
 
 }
