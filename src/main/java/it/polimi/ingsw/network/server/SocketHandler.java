@@ -327,6 +327,23 @@ public class SocketHandler implements Runnable, ConnectionHandler{
 
     }
 
+    @Override
+    public int askDiceValue(){
+        JsonObject command;
+        socketSendMessage(createMessage("toolcard-dice-value"));
+        try{
+            command = socketReadCommand();
+
+            return getJsonPositiveIntValue(command, "choice");
+
+        } catch (NullPointerException e){
+            Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
+            this.gameFlowHandler.disconnected();
+            connected = false;
+        }
+        return -1;
+    }
+
     private boolean login() {
         JsonObject command;
         String password;

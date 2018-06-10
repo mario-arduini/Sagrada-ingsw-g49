@@ -79,4 +79,8 @@ public class User extends Player {
     public boolean askIfPlus() {
         return connection.askIfPlus();
     }
+
+    public int askDiceValue(){
+        return connection.askDiceValue();
+    }
 }

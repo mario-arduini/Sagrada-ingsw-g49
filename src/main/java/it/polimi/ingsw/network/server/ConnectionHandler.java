@@ -26,4 +26,5 @@ public interface ConnectionHandler{
     Dice askDiceDraftPool();
     int askDiceRoundTrack();
     boolean askIfPlus();
+    int askDiceValue();
 }
