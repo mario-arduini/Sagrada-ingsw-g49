@@ -170,7 +170,7 @@ final class Effects {
             case ADJACENCIES:
                 player.getWindow().checkValueConstraint(player.getWindow().getSchema().getConstraint(row, column), dice);
                 player.getWindow().checkColorConstraint(player.getWindow().getSchema().getConstraint(row, column), dice);
-                if(!player.getWindow().isFirstDicePlaced())
+                if(player.getWindow().isFirstDicePlaced())
                     try {
                         player.getWindow().checkAdjacencies(row, column, dice);
                         throw new NotWantedAdjacentDiceException();

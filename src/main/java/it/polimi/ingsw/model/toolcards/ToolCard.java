@@ -4,10 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import it.polimi.ingsw.model.Dice;
-import it.polimi.ingsw.model.Game;
-import it.polimi.ingsw.model.Player;
-import it.polimi.ingsw.model.Round;
+import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.server.Logger;
 
@@ -65,7 +62,7 @@ public class ToolCard {
                     Effects.addDiceToWindow(game.getCurrentRound().getCurrentPlayer(),game.getCurrentRound().getCurrentDiceDrafted());
                     break;
                 case "move":
-                    Effects.move(game.getCurrentRound().getCurrentPlayer(), gson.fromJson(arguments.get("ignore"), Effects.RuleIgnored.class));
+                    Effects.move(game.getCurrentRound().getCurrentPlayer(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class));
                     break;
                 case "change-value":
                     if (arguments.get("plus").getAsBoolean())
