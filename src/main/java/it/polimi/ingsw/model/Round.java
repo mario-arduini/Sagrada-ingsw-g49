@@ -53,6 +53,10 @@ public class Round {
         currentDiceDrafted = dice;
     }
 
+    public boolean isDiceExtracted(){
+        return diceExtracted;
+    }
+
     public void removeTurn() {
         for(int i = currentPlayer + 1; i < players.size(); i++)
             if(players.get(i).getNickname().equals(players.get(currentPlayer).getNickname()))

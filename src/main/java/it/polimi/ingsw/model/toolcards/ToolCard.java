@@ -33,7 +33,7 @@ public class ToolCard {
         return this.cardName;
     }
 
-    public void use(Game game) throws InvalidDiceValueException, NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException {
+    public void use(Game game) throws InvalidDiceValueException, NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException, NotDraftedYetException, NotYourFirstTurnException {
         JsonObject effect;
         String command;
         JsonObject arguments = null;
@@ -41,9 +41,11 @@ public class ToolCard {
             switch (prerequisite) {
                 case "favor-token": Prerequisites.checkFavorToken(game.getCurrentRound().getCurrentPlayer(), used ? 2 : 1); break;
                 case "dice-window": Prerequisites.checkDiceInWindow(game.getCurrentRound().getCurrentPlayer()); break;
-                case "dice-round-track": Prerequisites.checkDiceInRoundTrack(game); break;
+                case "dice-round-track": Prerequisites.checkDiceInRoundTrack(game.getRoundTrack()); break;
+                case "first-turn": Prerequisites.checkFirstTurn(game.getCurrentRound()); break;
                 case "second-turn": Prerequisites.checkSecondTurn(game.getCurrentRound()); break;
-                case "before-draft": Prerequisites.checkBeforeDraft(game.getCurrentRound()); break;
+                case "before-draft": Prerequisites.checkBeforeDraft(game.getCurrentRound().isDiceExtracted()); break;
+                case "after-draft": Prerequisites.checkAfterDraft(game.getCurrentRound().isDiceExtracted()); break;
             }
         }
 
@@ -57,10 +59,10 @@ public class ToolCard {
             }
             switch (command) {
                 case "change-value":
-                    if (arguments.get("plus") != null)
+                    if (arguments.get("plus").getAsBoolean())
                         Effects.changeValue(game.getCurrentRound(), arguments.get("value").getAsInt());
-                    else if (arguments.get("value") != null) ;
-                    else Effects.changeValue(game.getCurrentRound());
+                    else if(arguments.get("random").getAsBoolean())
+                        Effects.changeValue(game.getCurrentRound());
                     break;
                 case "flip":
                     Effects.flip(game.getCurrentRound());

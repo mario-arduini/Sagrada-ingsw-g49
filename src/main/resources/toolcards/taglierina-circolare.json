@@ -1,0 +1,1 @@
+{"name":"Taglierina Circolare","effects":[{"get-draft-dice":{}},{"swap-round-dice":{}},{"place-dice":{}}],"prerequisites":["dice-round-track","before-draft","favor-token"]}
