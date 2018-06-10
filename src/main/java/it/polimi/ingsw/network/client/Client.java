@@ -233,7 +233,7 @@ public class Client {
         ClientLogger.print(p.getNickname());
         whiteSpaceNum = 25 - p.getNickname().length();
         for(int i=0;i<whiteSpaceNum;i++) ClientLogger.print(" ");
-        ClientLogger.print("|");
+        ClientLogger.print("  |");
         for(PlayerSnapshot op : otherPlayers){
             ClientLogger.print("    "+op.getNickname());
             whiteSpaceNum = 21 - op.getNickname().length();
@@ -241,12 +241,21 @@ public class Client {
         }
         ClientLogger.println("");
 
-        ClientLogger.print(CLI_21_DASH+"    |");
+        ClientLogger.print(" ");
+        for(int i = 0; i < 5; i++)
+            ClientLogger.print("   " + (i + 1));
+        ClientLogger.print("      |      ");
+        for(int i = 0; i < 5; i++)
+            ClientLogger.print("  " + (i + 1) + " ");
+        ClientLogger.println("");
+
+        ClientLogger.print("  " + CLI_21_DASH+"    |");
         for(int i=0;i<opNum;i++)
-            ClientLogger.print("    "+CLI_21_DASH);
+            ClientLogger.print("      "+CLI_21_DASH);
         ClientLogger.println("");
 
         for(int r=0;r<ROWS_NUMBER;r++){
+            ClientLogger.print((r + 1) + " ");
             currentWindow = p.getWindow();
             for(int c=0;c<COLUMNS_NUMBER;c++){
                 if(currentWindow.getCell(r,c)!=null) ClientLogger.print("| "+currentWindow.getCell(r,c)+" ");
@@ -261,7 +270,7 @@ public class Client {
 
             for(PlayerSnapshot op : otherPlayers){
                 currentWindow = op.getWindow();
-                ClientLogger.print("    ");
+                ClientLogger.print("    " + (r + 1) + " ");
                 for(int c=0;c<COLUMNS_NUMBER;c++){
                     if(currentWindow.getCell(r,c)!=null) ClientLogger.print("| "+currentWindow.getCell(r,c)+" ");
                     else {
@@ -276,20 +285,20 @@ public class Client {
             ClientLogger.println("");
 
 
-            ClientLogger.print(CLI_21_DASH+"    |");
+            ClientLogger.print("  " + CLI_21_DASH+"    |");
             for(int i=0;i<opNum;i++)
-                ClientLogger.print("    "+CLI_21_DASH);
+                ClientLogger.print("      "+CLI_21_DASH);
             ClientLogger.println("");
         }
 
         // print draftpool
         ClientLogger.println("");
-        ClientLogger.println("Draft Pool               |    Round Track");
+        ClientLogger.println("Draft Pool                 |    Round Track");
         for(Dice dice : gameSnapshot.getDraftPool()){
             ClientLogger.print(dice+"  ");
         }
         for(int i=gameSnapshot.getDraftPool().size();i<8;i++) ClientLogger.print("   ");
-        ClientLogger.print(" |  ");
+        ClientLogger.print("   |  ");
         for(Dice dice : gameSnapshot.getRoundTrack()){
             ClientLogger.print("  "+dice);
         }
