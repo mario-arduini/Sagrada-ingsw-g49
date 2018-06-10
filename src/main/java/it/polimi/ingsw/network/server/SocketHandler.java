@@ -164,8 +164,9 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                 NoDiceInRoundTrackException | NotYourTurnException |
                 ConstraintViolatedException | NotWantedAdjacentDiceException |
                 FirstDiceMisplacedException |
-                BadAdjacentDiceException | NoAdjacentDiceException e) {
-            Logger.print("Toolcard :" + nickname + e);
+                BadAdjacentDiceException | NoAdjacentDiceException |
+                NotDraftedYetException | NotYourFirstTurnException e) {
+            Logger.print("Toolcard : " + nickname + " " + e);
             socketSendMessage(createMessage("failed"));
         }
     }
