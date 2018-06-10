@@ -19,7 +19,7 @@ final class Prerequisites {
     }
 
     static void checkDiceInWindow(Player player) throws NoDiceInWindowException {
-        if(player.getWindow().isFirstDice()) throw new NoDiceInWindowException();
+        if(!player.getWindow().isFirstDice()) throw new NoDiceInWindowException();
     }
 
     static void checkDiceInRoundTrack(List<Dice> roundTrack) throws NoDiceInRoundTrackException{
