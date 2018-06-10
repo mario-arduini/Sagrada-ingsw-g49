@@ -2,7 +2,6 @@ package it.polimi.ingsw.network.client;
 
 import it.polimi.ingsw.model.exceptions.InvalidFavorTokenNumberException;
 import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
-import it.polimi.ingsw.model.goalcards.PrivateGoal;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 
 import java.io.BufferedReader;
@@ -16,7 +15,7 @@ class CLIHandler {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName() );
     private BufferedReader input;
     private Client client;
-    private boolean playindRound;
+    private boolean playingRound;
 
     CLIHandler(Client client){
         ClientLogger.initLogger(LOGGER);
@@ -219,7 +218,7 @@ class CLIHandler {
     }
 
     private synchronized void waitStartRound(){
-        while(!playindRound)
+        while(!playingRound)
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -264,7 +263,7 @@ class CLIHandler {
     }
 
     void setPlayingRound(boolean playindRound){
-        this.playindRound = playindRound;
+        this.playingRound = playindRound;
     }
 
     void notifyNewTurn(String nickname, boolean newRound){
@@ -386,7 +385,7 @@ class CLIHandler {
     }
 
     boolean getPlayingRound(){
-        return playindRound;
+        return playingRound;
     }
 
     void notifyServerDisconnected(){

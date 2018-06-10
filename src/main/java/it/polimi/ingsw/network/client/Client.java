@@ -1,7 +1,6 @@
 package it.polimi.ingsw.network.client;
 
 import it.polimi.ingsw.model.Color;
-
 import java.net.SocketException;
 import java.util.List;
 import java.util.logging.*;
@@ -15,17 +14,17 @@ public class Client {
     private static final int COLUMNS_NUMBER = 5;
 
     private String nickname;
-    private String serverAddress;
-    private int serverPort;
-    private Connection server;
-    enum ConnectionType{ RMI, SOCKET }
-    private boolean logged;
-    private boolean serverConnected;
-    private GameSnapshot gameSnapshot;
-    private boolean myTurn;
-    private boolean diceExtracted;
-    private boolean usedToolCard;
-    private CLIHandler cliHandler;
+    private String serverAddress;       //*
+    private int serverPort;             //*
+    private CLIHandler cliHandler;      //*
+    private Connection server;          //*
+    enum ConnectionType{ RMI, SOCKET }  //*
+    private boolean logged;             //*
+    private boolean serverConnected;    //* is it useful?
+    private GameSnapshot gameSnapshot;  //*
+    private boolean myTurn;             //move into PlayerSnapshot?
+    private boolean diceExtracted;      //move into PlayerSnapshot?
+    private boolean usedToolCard;       //move into PlayerSnapshot?
 
     private Client(){
         super();
@@ -197,7 +196,7 @@ public class Client {
             ClientLogger.print((i + 1) + ") " + schemas.get(i).getName());// + "               " + (i + 2) + ") " + schemas.get(i).getName());
             for(int s = schemas.get(i).getName().length(); s < 22; s++)
                 ClientLogger.print(" ");
-            ClientLogger.println((i + 2) + ") " + schemas.get(i).getName());
+            ClientLogger.println((i + 2) + ") " + schemas.get(i + 1).getName());
             ClientLogger.println(CLI_SCHEMA_ROW);
             for(int r=0;r<ROWS_NUMBER;r++){
                 currentSchema = schemas.get(i);
