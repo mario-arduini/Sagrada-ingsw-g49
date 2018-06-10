@@ -1,11 +1,7 @@
 package it.polimi.ingsw.network.client;
 
-import it.polimi.ingsw.network.client.Schema;
-import it.polimi.ingsw.network.client.Window;
 import it.polimi.ingsw.model.exceptions.InvalidFavorTokenNumberException;
 import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
-import it.polimi.ingsw.model.exceptions.PrivateGoalAlreadySetException;
-import it.polimi.ingsw.model.goalcards.PrivateGoal;
 
 public class PlayerSnapshot {
     private final String nickname;
@@ -14,18 +10,18 @@ public class PlayerSnapshot {
     private boolean suspended;
     private PrivateGoal privateGoal;
 
-    public PlayerSnapshot(String nickname){
+    PlayerSnapshot(String nickname){
         this.nickname = nickname;
         this.window = null;
         this.favorToken = 0;
         this.suspended = false;
     }
 
-    public void setPrivateGoal(PrivateGoal privateGoal){
+    void setPrivateGoal(PrivateGoal privateGoal){
         this.privateGoal = privateGoal;
     }
 
-    public PrivateGoal getPrivateGoal(){
+    PrivateGoal getPrivateGoal(){
         return  privateGoal;
     }
 
@@ -71,7 +67,7 @@ public class PlayerSnapshot {
         return window;
     }
 
-    public int getFavorToken() {
+    int getFavorToken() {
 
         return favorToken;
     }
@@ -86,7 +82,7 @@ public class PlayerSnapshot {
     }
 
 
-    public void useFavorToken(int number) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException {
+    void useFavorToken(int number) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException {
         if (number < 0) throw new InvalidFavorTokenNumberException();
         if(this.favorToken >= number)
             this.favorToken -= number;
