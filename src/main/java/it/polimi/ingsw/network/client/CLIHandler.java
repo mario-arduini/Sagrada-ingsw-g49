@@ -289,7 +289,7 @@ class CLIHandler {
 
     private void placeDice(){
         if(client.isMyTurn()){
-            int dice, row, column;
+            int dice = -1, row = -1, column = -1;
             boolean ask = true;
             ClientLogger.printWithClear("");
             client.printGame();
@@ -302,10 +302,16 @@ class CLIHandler {
                 ClientLogger.print("Insert column: ");
                 column = readInt();
 
-                if (dice > client.getGameSnapshot().getDraftPool().size() || dice <= 0 || !client.placeDice(dice, row, column))
-                    ClientLogger.println("Invalid move!");
+                if (dice > client.getGameSnapshot().getDraftPool().size())
+                    ClientLogger.println("Invalid choice!");
                 else
                     ask = false;
+            }
+            if(!client.placeDice(dice, row, column)) {
+                ClientLogger.printWithClear("");
+                client.printGame();
+                ClientLogger.println("\nConstraint violated!");
+                client.printMenu();
             }
         }else
             ClientLogger.println("Not your turn! You can only logout");
