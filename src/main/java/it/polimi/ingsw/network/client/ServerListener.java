@@ -114,10 +114,11 @@ public class ServerListener implements Runnable {
                                 client.getGameSnapshot().addOtherPlayer(entry.getKey(), entry.getValue());
                         }
                         break;
-                    case "toolCard-used":
+                    case "toolcard-used":
                         List<ToolCard> toolCards1 = client.getGameSnapshot().getToolCards();
-                        String name = jsonObject.get("name").getAsString();
-                        client.getGameSnapshot().findPlayer(jsonObject.get("name").getAsString()).get().setWindow(gson.fromJson(jsonObject.get("window").getAsString(),Window.class));
+                        String name = jsonObject.get("player").getAsString();
+                        client.getGameSnapshot().getToolCardByName(jsonObject.get("toolcard").getAsString()).setUsed();
+                        client.getGameSnapshot().findPlayer(name).get().setWindow(gson.fromJson(jsonObject.get("window").getAsString(),Window.class));
                         client.printGame();
                         client.printMenu();
                         for (ToolCard aToolCards1 : toolCards1)
@@ -139,12 +140,6 @@ public class ServerListener implements Runnable {
                         break;
 
                     //region TOOLCARD
-
-                    case "toolcard-used":
-                        client.getGameSnapshot().getToolCardByName(jsonObject.get("toolcard").getAsString()).setUsed(); //TODO: refresh others' favor token
-                        client.notifyUsedToolCard(jsonObject.get("player").getAsString(), jsonObject.get("toolcard").getAsString());
-                        break;
-
                     case "toolcard-plus-minus":
                         client.getPlusMinusOption();
                         break;
@@ -182,7 +177,7 @@ public class ServerListener implements Runnable {
     private void extractPublicGoals(JsonObject jsonObject){
         List<PublicGoal> publicGoals = new ArrayList<>();
         for(Integer i = 0; i < 3; i++)
-            publicGoals.add(gson.fromJson(jsonObject.get(i.toString()).toString(),PublicGoal.class));
+            publicGoals.add(gson.fromJson(jsonObject.get(i.toString()).getAsString(),PublicGoal.class));
         client.getGameSnapshot().setPublicGoals(publicGoals);
     }
 
