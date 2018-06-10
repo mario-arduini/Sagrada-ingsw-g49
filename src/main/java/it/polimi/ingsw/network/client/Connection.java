@@ -15,6 +15,7 @@ public interface Connection {
     void sendDiceFromRoundTrack(int index);
     void sendDiceFromWindow(Coordinate coordinate);
     void sendPlacementPosition(Coordinate coordinate);
+    void sendDiceValue(int value);
 
     //endregion
 }

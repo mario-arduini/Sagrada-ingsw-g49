@@ -155,6 +155,10 @@ public class ServerListener implements Runnable {
                         client.getPlacementPosition();
                         break;
 
+                    case "toolcard-dice-value":
+                        client.getDiceValue();
+                        break;
+
                     //endregion
 
                     default:

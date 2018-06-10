@@ -198,7 +198,7 @@ class CLIHandler {
             }
 
             if (!checkPasswordProperties(password))
-                ClientLogger.println("Invalid password, must be at least 8 character");
+                ClientLogger.println("Invalid password, must be at least 4 character");
             else
                 ok = true;
         }
@@ -210,7 +210,7 @@ class CLIHandler {
     }
 
     private boolean checkPasswordProperties(String password){
-        return password != null && !password.equals("") && password.length() >= 8;
+        return password != null && !password.equals("") && password.length() >= 4;
     }
 
     void notifyStartGame(){
@@ -489,6 +489,11 @@ class CLIHandler {
                 ask = false;
         }
         return coordinate;
+    }
+
+    int askDiceValue(){
+        ClientLogger.print("Insert dice number: ");
+        return getIndexChoice(6);
     }
 
     private Coordinate getPosition(){

@@ -201,5 +201,12 @@ public class ClientSocketHandler implements Connection {
         socketPrintLine(jsonObject);
     }
 
+    @Override
+    public void sendDiceValue(int value) {
+        createJsonCommand("toolcard-dice-value");
+        jsonObject.addProperty("choice", value);
+        socketPrintLine(jsonObject);
+    }
+
     //endregion
 }

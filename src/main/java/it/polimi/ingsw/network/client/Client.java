@@ -284,12 +284,12 @@ public class Client {
 
         // print draftpool
         ClientLogger.println("");
-        ClientLogger.println("Draft Pool               |  Round Track");
+        ClientLogger.println("Draft Pool               |    Round Track");
         for(Dice dice : gameSnapshot.getDraftPool()){
             ClientLogger.print(dice+"  ");
         }
         for(int i=gameSnapshot.getDraftPool().size();i<8;i++) ClientLogger.print("   ");
-        ClientLogger.print(" |");
+        ClientLogger.print(" |  ");
         for(Dice dice : gameSnapshot.getRoundTrack()){
             ClientLogger.print("  "+dice);
         }
@@ -353,6 +353,10 @@ public class Client {
 
     void getPlacementPosition(){
         server.sendPlacementPosition(cliHandler.askPlacementPosition());
+    }
+
+    void getDiceValue(){
+        server.sendDiceValue(cliHandler.askDiceValue());
     }
 
     //endregion
