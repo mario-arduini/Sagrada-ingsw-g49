@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
+import it.polimi.ingsw.network.client.model.*;
 
 import java.lang.reflect.Type;
 import java.util.*;

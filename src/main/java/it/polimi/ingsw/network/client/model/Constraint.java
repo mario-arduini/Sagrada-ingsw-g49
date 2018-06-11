@@ -1,7 +1,6 @@
-package it.polimi.ingsw.network.client;
+package it.polimi.ingsw.network.client.model;
 
-import it.polimi.ingsw.model.Color;
-import it.polimi.ingsw.model.exceptions.InvalidConstraintValueException;
+import it.polimi.ingsw.network.client.model.exception.InvalidConstraintValueException;
 
 public final class Constraint {
     private final Color color;
@@ -21,12 +20,10 @@ public final class Constraint {
     }
 
     public Color getColor(){
-
         return color;
     }
 
     public int getNumber(){
-
         return number;
     }
 

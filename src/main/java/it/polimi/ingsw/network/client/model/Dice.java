@@ -1,9 +1,6 @@
-package it.polimi.ingsw.network.client;
+package it.polimi.ingsw.network.client.model;
 
-import it.polimi.ingsw.model.Color;
-import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
-
-import java.util.Random;
+import it.polimi.ingsw.network.client.model.exception.InvalidDiceValueException;
 
 public class Dice {
     private final Color color;
@@ -37,11 +34,6 @@ public class Dice {
         if(value < 1 || value > 6)
             throw  new InvalidDiceValueException();
         this.value = value;
-    }
-
-    public void roll(){
-        Random diceRoller = new Random();
-        this.value = diceRoller.nextInt(6) + 1;
     }
 
     @Override

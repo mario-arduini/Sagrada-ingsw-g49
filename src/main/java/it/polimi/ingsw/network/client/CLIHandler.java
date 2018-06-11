@@ -1,8 +1,12 @@
 package it.polimi.ingsw.network.client;
 
-import it.polimi.ingsw.model.exceptions.InvalidFavorTokenNumberException;
-import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
+import it.polimi.ingsw.network.client.model.Coordinate;
+import it.polimi.ingsw.network.client.model.Dice;
+import it.polimi.ingsw.network.client.model.PrivateGoal;
+import it.polimi.ingsw.network.client.model.ToolCard;
+import it.polimi.ingsw.network.client.model.exception.InvalidFavorTokenNumberException;
+import it.polimi.ingsw.network.client.model.exception.NotEnoughFavorTokenException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +26,6 @@ class CLIHandler {
         input = new BufferedReader(new InputStreamReader(System.in));
         this.client = client;
     }
-
 
     synchronized void start() {
         boolean logout = false;

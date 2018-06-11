@@ -1,6 +1,7 @@
 package it.polimi.ingsw.network.client;
 
-import it.polimi.ingsw.model.Color;
+import it.polimi.ingsw.network.client.model.*;
+
 import java.net.SocketException;
 import java.util.List;
 import java.util.logging.*;
@@ -123,7 +124,9 @@ public class Client {
         return false;
     }
 
-    void setPrivateGoal(String[] privateGoal){}
+    void setPrivateGoal(PrivateGoal privateGoal){
+        gameSnapshot.getPlayer().setPrivateGoal(privateGoal);
+    }
 
     synchronized void logout(){
         if(serverConnected)

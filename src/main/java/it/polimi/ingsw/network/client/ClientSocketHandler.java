@@ -3,6 +3,8 @@ package it.polimi.ingsw.network.client;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import it.polimi.ingsw.network.client.model.Coordinate;
+import it.polimi.ingsw.network.client.model.Dice;
 
 import java.io.BufferedReader;
 import java.io.IOException;

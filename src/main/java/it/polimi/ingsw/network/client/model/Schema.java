@@ -1,8 +1,8 @@
-package it.polimi.ingsw.network.client;
+package it.polimi.ingsw.network.client.model;
 
-import it.polimi.ingsw.network.client.Constraint;
-import it.polimi.ingsw.model.exceptions.InvalidDifficultyValueException;
-import it.polimi.ingsw.model.exceptions.UnexpectedMatrixSizeException;
+
+import it.polimi.ingsw.network.client.model.exception.InvalidDifficultyValueException;
+import it.polimi.ingsw.network.client.model.exception.UnexpectedMatrixSizeException;
 
 public final class Schema {
     private final int difficulty;
@@ -26,7 +26,6 @@ public final class Schema {
     }
 
     public int getDifficulty() {
-
         return difficulty;
     }
 
@@ -35,7 +34,6 @@ public final class Schema {
     }
 
     public Constraint getConstraint(int row, int column) {
-
         return constraint[row][column];
     }
 

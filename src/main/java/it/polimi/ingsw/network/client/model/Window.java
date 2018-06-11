@@ -1,42 +1,27 @@
-package it.polimi.ingsw.network.client;
-
-import it.polimi.ingsw.model.Color;
-import it.polimi.ingsw.network.client.Constraint;
-import it.polimi.ingsw.network.client.Dice;
-import it.polimi.ingsw.network.client.Schema;
-import it.polimi.ingsw.model.exceptions.BadAdjacentDiceException;
-import it.polimi.ingsw.model.exceptions.ConstraintViolatedException;
-import it.polimi.ingsw.model.exceptions.FirstDiceMisplacedException;
-import it.polimi.ingsw.model.exceptions.NoAdjacentDiceException;
+package it.polimi.ingsw.network.client.model;
 
 public class Window {
-    public static final int ROW = 4;
-    public static final int COLUMN = 5;
+    private static final int ROW = 4;
+    private static final int COLUMN = 5;
     private final Schema schema;
     private Dice[][] mosaic;
-    private boolean firstDice;
 
     public Window(Window window){
         this.schema = window.schema;
         this.mosaic = new Dice[ROW][COLUMN];
-        this.firstDice = false;
 
         for(int i = 0; i < ROW; i++)
             for(int j = 0; j < COLUMN; j++)
-                if(window.getCell(i, j) != null){
-                    firstDice = true;
+                if(window.getCell(i, j) != null)
                     this.mosaic[i][j] = new Dice(window.getCell(i, j));
-                }
     }
 
     public Window(Schema schema){
         this.schema = schema;
         this.mosaic = new Dice[ROW][COLUMN];
-        this.firstDice = false;
     }
 
     public Schema getSchema(){
-
         return this.schema;
     }
 

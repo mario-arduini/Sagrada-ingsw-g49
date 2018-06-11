@@ -1,6 +1,4 @@
-package it.polimi.ingsw.network.client;
-
-import it.polimi.ingsw.model.Color;
+package it.polimi.ingsw.network.client.model;
 
 public class PrivateGoal{
     private Color color;

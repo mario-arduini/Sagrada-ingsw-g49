@@ -1,6 +1,4 @@
-package it.polimi.ingsw.network.client;
-
-import com.google.gson.JsonObject;
+package it.polimi.ingsw.network.client.model;
 
 public class ToolCard {
     private String cardName;

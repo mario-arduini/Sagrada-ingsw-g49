@@ -1,5 +1,8 @@
 package it.polimi.ingsw.network.client;
 
+import it.polimi.ingsw.network.client.model.Coordinate;
+import it.polimi.ingsw.network.client.model.Dice;
+
 public interface Connection {
     boolean login(String nickname, String password);
     boolean sendSchema(int schema);
