@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -197,6 +198,12 @@ public class WindowTest {
             } catch (ConstraintViolatedException e) {
                 assertTrue(false);
             }
+
+            window.removeDice(0,0);
+            assertTrue(window.isFirstDicePlaced());
+            window.removeDice(1,1);
+            window.removeDice(1,0);
+            assertFalse(window.isFirstDicePlaced());
 
         } catch (InvalidDifficultyValueException e) {
             assertTrue(false);

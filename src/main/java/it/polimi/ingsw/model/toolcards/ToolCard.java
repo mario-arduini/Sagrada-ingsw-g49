@@ -30,15 +30,17 @@ public class ToolCard {
         return this.cardName;
     }
 
-    public void use(Game game) throws InvalidDiceValueException, NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException, NotDraftedYetException, NotYourFirstTurnException {
+    public void use(Game game) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException {
         JsonObject effect;
         String command;
         JsonObject arguments = null;
+        Dice multipurposeDice = null;
         for (String prerequisite : prerequisites) {
             switch (prerequisite) {
                 case "favor-token": Prerequisites.checkFavorToken(game.getCurrentRound().getCurrentPlayer(), used ? 2 : 1); break;
                 case "dice-window": Prerequisites.checkDiceInWindow(game.getCurrentRound().getCurrentPlayer()); break;
                 case "dice-round-track": Prerequisites.checkDiceInRoundTrack(game.getRoundTrack()); break;
+                case "same-color-window-track": Prerequisites.checkSameColorInWindowAndRoundTrack(game.getCurrentRound().getCurrentPlayer(),game.getRoundTrack()); break;
                 case "first-turn": Prerequisites.checkFirstTurn(game.getCurrentRound()); break;
                 case "second-turn": Prerequisites.checkSecondTurn(game.getCurrentRound()); break;
                 case "before-draft": Prerequisites.checkBeforeDraft(game.getCurrentRound().isDiceExtracted()); break;
@@ -54,6 +56,7 @@ public class ToolCard {
             }catch (NullPointerException e) {
                 Logger.print("ToolCard " + e);
             }
+            Boolean optional = arguments.get("optional")!=null ? arguments.get("optional").getAsBoolean() : false;
             switch (command) {
                 case "get-draft-dice":
                     Effects.getDraftedDice(game.getCurrentRound());
@@ -62,7 +65,10 @@ public class ToolCard {
                     Effects.addDiceToWindow(game.getCurrentRound().getCurrentPlayer(),game.getCurrentRound().getCurrentDiceDrafted());
                     break;
                 case "move":
-                    Effects.move(game.getCurrentRound().getCurrentPlayer(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class));
+                    if(arguments.get("color-in-track")!=null&&arguments.get("color-in-track").getAsBoolean()){
+                        multipurposeDice = Effects.move(game.getCurrentRound().getCurrentPlayer(),game.getRoundTrack(),multipurposeDice, gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class),optional);
+                    }
+                    Effects.move(game.getCurrentRound().getCurrentPlayer(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class),optional);
                     break;
                 case "change-value":
                     if (arguments.get("plus").getAsBoolean())

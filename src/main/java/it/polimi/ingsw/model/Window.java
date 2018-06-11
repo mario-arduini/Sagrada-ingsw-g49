@@ -1,6 +1,8 @@
 package it.polimi.ingsw.model;
 import it.polimi.ingsw.model.exceptions.*;
 
+import java.util.Arrays;
+
 public class Window {
     public static final int ROW = 4;
     public static final int COLUMN = 5;
@@ -40,6 +42,9 @@ public class Window {
 
     public void removeDice(int row,int column){
         mosaic[row][column] = null;
+        if (Arrays.stream(mosaic).flatMap(Arrays::stream).noneMatch(dice -> dice!=null)) {
+            firstDicePlaced = false;
+        }
     }
 
     public void addDice(int row, int column, Dice dice) throws ConstraintViolatedException, FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {

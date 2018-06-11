@@ -25,7 +25,8 @@ final class Effects {
         placeDice(player,dice,coords.getRow(),coords.getColumn(), Window.RuleIgnored.NONE);
     }
 
-    static void move(Player player,Window.RuleIgnored ruleIgnored){
+    static void move(Player player,Window.RuleIgnored ruleIgnored,boolean optional){
+        if(optional&&!askIfPlus("want-move",player)) return;
         Coordinate start = null;
         Coordinate end = null;
         Window currentPlayerWindow = player.getWindow();
@@ -73,6 +74,75 @@ final class Effects {
                 message = "move-to-invalid";
             }
         }
+        notifyWindow(player);
+    }
+
+    public static Dice move(Player player, List<Dice> roundTrack, Dice old, Window.RuleIgnored ruleIgnored,boolean optional) {
+        if(optional&&!askIfPlus("want-move",player)) return null;
+        Coordinate start = null;
+        Coordinate end = null;
+        Window currentPlayerWindow = player.getWindow();
+        Dice removedDice = null;
+        boolean valid = false;
+        String message = "move-from";
+        while (!valid){
+            valid = true;
+            start = askDiceWindow(message, player);
+            removedDice = currentPlayerWindow.getCell(start.getRow(),start.getColumn());
+            if(removedDice == null){
+                valid = false;
+                message = "move-from-empty";
+            }
+            else{
+                currentPlayerWindow.removeDice(start.getRow(),start.getColumn());
+                int expectedMinimumPositions = 2;
+                try{
+                    currentPlayerWindow.canBePlaced(removedDice,start.getRow(),start.getColumn(),ruleIgnored);
+                } catch (NoAdjacentDiceException | BadAdjacentDiceException
+                        | FirstDiceMisplacedException | ConstraintViolatedException e) {
+                    expectedMinimumPositions = 1;
+                }
+                int possiblePositions = currentPlayerWindow.possiblePlaces(removedDice,ruleIgnored);
+                if(possiblePositions<expectedMinimumPositions){
+                    valid = false;
+                    message = "move-from-unmovable";
+                    currentPlayerWindow.setDice(start.getRow(),start.getColumn(),removedDice);
+                }
+                else if(old!=null&&old.getColor()!=removedDice.getColor()){
+                    valid = false;
+                    message = "move-from-different-color";
+                    currentPlayerWindow.setDice(start.getRow(),start.getColumn(),removedDice);
+                } else {
+                    valid = false;
+                    for(Dice dice : roundTrack)
+                        if(dice.getColor()==removedDice.getColor()){
+                            valid=true;
+                        }
+                    if(!valid){
+                        message = "move-from-not-round-color";
+                        currentPlayerWindow.setDice(start.getRow(),start.getColumn(),removedDice);
+                    }
+                }
+            }
+        }
+        valid = false;
+        message = "move-to";
+        while (!valid) {
+            valid = true;
+            end = askDiceWindow(message, player);
+            if (start.getRow() == end.getRow() && start.getColumn() == end.getColumn()){
+                valid = false;
+                message = "move-to-same";
+            } else try {
+                placeDice(player,removedDice, end.getRow(), end.getColumn(), ruleIgnored);
+            } catch (NoAdjacentDiceException | BadAdjacentDiceException
+                    | FirstDiceMisplacedException | ConstraintViolatedException | NotWantedAdjacentDiceException e) {
+                valid = false;
+                message = "move-to-invalid";
+            }
+        }
+        notifyWindow(player);
+        return removedDice;
     }
 
     static void changeValue(Dice dice){
@@ -211,4 +281,7 @@ final class Effects {
         return ((User) player).askDiceValue();
     }
 
+    static int notifyWindow(Player player){
+        return ((User) player).notifyWindow();
+    }
 }
