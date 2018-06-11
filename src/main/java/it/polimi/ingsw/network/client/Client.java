@@ -382,52 +382,28 @@ public class Client {
     }
 
     public static void main(String[] args) {
-        if(args.length != 1){
-            ClientLogger.printWithClear((args.length < 1 ? "Not enough" : "Too many") + " parameters");
+        if(args.length != 2){
+            ClientLogger.printlnWithClear((args.length < 2 ? "Not enough" : "Too many") + " parameters");
             return;
         }
 
         Client client = new Client();
         CLIHandler cliHandler;
         ClientLogger.LogToFile();
-        switch (args[0].toLowerCase()){
-            case "cli":
-                cliHandler = new CLIHandler(client);
-                client.setCLIHandler(cliHandler);
-                cliHandler.start();
-                break;
-            case "gui":
-                break;
-            default:
-                ClientLogger.printWithClear("Invalid parameters");
-                return;
-        }
-        client.logout();
 
-//        String mode = "CLI";
-//        Scanner in = new Scanner(System.in);
-//        ClientLogger.LogToFile();
-//        boolean ok = false;
-//        while (!ok) {
-//            ClientLogger.printWithClear("Choose how you want to play:\n- CLI\n- GUI\nYour choice: ");
-//            ClientLogger.println(Integer.toString(args.length));
-//            mode = in.nextLine().toUpperCase();
-//            if (mode.equals("CLI") || mode.equals("GUI"))
-//                ok = true;
-//            else
-//                ClientLogger.println("Invalid choice!\n");
-//        }
-//
-//        switch (mode){
-//            case "CLI":
-//                cliHandler = new CLIHandler(client);
-//                client.setCLIHandler(cliHandler);
-//                cliHandler.start();
-//                break;
-//            case "GUI":
-//                break;
-//            default:
-//                break;
-//        }
+        if(args[0].equalsIgnoreCase("-g"))
+            switch (args[1].toLowerCase()){
+                case "cli":
+                    cliHandler = new CLIHandler(client);
+                    client.setCLIHandler(cliHandler);
+                    cliHandler.start();
+                    break;
+                case "gui":
+                    break;
+                default:
+                    ClientLogger.printlnWithClear("Invalid graphic choice");
+                    return;
+            }
+        client.logout();
     }
 }
