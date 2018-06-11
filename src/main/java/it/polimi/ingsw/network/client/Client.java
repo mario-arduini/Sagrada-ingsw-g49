@@ -304,7 +304,8 @@ public class Client {
         }
         for(int i=gameSnapshot.getRoundTrack().size();i<9;i++) ClientLogger.print("  \u25A1");
 
-        ClientLogger.println("");
+        ClientLogger.println("\n\nYou have " + gameSnapshot.getPlayer().getFavorToken() + " favour token" + (gameSnapshot.getPlayer().getFavorToken() > 1 ? "s" : ""));
+
 
 //        cliHandler.printMenu();
 //        if(!cliHandler.getPlayingRound()) {
