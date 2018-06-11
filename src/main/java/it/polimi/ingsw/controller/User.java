@@ -83,4 +83,8 @@ public class User extends Player {
     public int askDiceValue(){
         return connection.askDiceValue();
     }
+
+    public void notifyMove(Coordinate from,Coordinate to){
+
+    }
 }
