@@ -163,7 +163,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                 NotEnoughFavorTokenException | NotYourSecondTurnException |
                 NoDiceInRoundTrackException | NotYourTurnException |
                 ConstraintViolatedException | NotWantedAdjacentDiceException |
-                FirstDiceMisplacedException |
+                FirstDiceMisplacedException | NoSameColorDicesException |
                 BadAdjacentDiceException | NoAdjacentDiceException |
                 NotDraftedYetException | NotYourFirstTurnException e) {
             Logger.print("Toolcard : " + nickname + " " + e);

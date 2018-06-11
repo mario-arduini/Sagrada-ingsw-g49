@@ -12,7 +12,7 @@ public class FlowHandler extends GameFlowHandler implements FlowHandlerInterface
     }
 
     @Override
-    public void placeDice(int row, int column, Dice dice) throws NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException{
+    public void placeDice(int row, int column, Dice dice) throws NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException, NoSameColorDicesException{
         super.placeDice(row, column, dice);
         super.notifyDicePlaced(row, column, dice);
     }
