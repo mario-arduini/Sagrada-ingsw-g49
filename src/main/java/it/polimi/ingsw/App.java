@@ -4,6 +4,7 @@ import com.google.gson.*;
 import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.Constraint;
 import it.polimi.ingsw.model.Schema;
+import it.polimi.ingsw.model.goalcards.FullShadeVariety;
 import it.polimi.ingsw.network.client.Client;
 
 import java.io.IOException;
@@ -14,10 +15,10 @@ import java.util.logging.SimpleFormatter;
 
 public class App
 {
+
     public static void main(String[] args) {
 
         Gson gson = new Gson();
-
 
 
         /*

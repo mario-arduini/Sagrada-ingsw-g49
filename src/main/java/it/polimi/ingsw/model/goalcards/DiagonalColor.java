@@ -4,10 +4,6 @@ import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.Window;
 
 public class DiagonalColor extends PublicGoal {
-    @Override
-    public String getName() {
-        return this.getClass().getName();
-    }
 
     @Override
     public int computeScore(Window window) {

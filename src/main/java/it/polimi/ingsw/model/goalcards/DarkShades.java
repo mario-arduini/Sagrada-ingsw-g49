@@ -8,10 +8,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class DarkShades extends PublicGoal {
-    @Override
-    public String getName() {
-        return this.getClass().getName();
-    }
 
     @Override
     public int computeScore(Window window) {

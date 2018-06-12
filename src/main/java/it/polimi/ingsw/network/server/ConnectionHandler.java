@@ -2,6 +2,8 @@ package it.polimi.ingsw.network.server;
 
 import it.polimi.ingsw.controller.GameRoom;
 import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.goalcards.PrivateGoal;
+import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
 
 import java.util.HashMap;
@@ -18,7 +20,10 @@ public interface ConnectionHandler{
     void notifyDicePlaced(String nickname, int row, int column, Dice dice);
     void notifyToolCardUse(String player, String toolCard, Window window);
     void notifyToolCards(List<ToolCard> toolCards);
-    String getRemoteAddress();
+    void notifyGameInfo(List<ToolCard> toolCards, List<PublicGoal> publicGoals, PrivateGoal privateGoal);
+    void notifyWindows(HashMap<String, Window> windows);
+
+        String getRemoteAddress();
     void close();
     void setGame(GameRoom game);
 

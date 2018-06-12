@@ -9,6 +9,8 @@ import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.model.goalcards.PrivateGoal;
+import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
 
 import java.io.*;
@@ -16,6 +18,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -142,7 +145,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
             gameFlowHandler.chooseSchema(getJsonPositiveIntValue(message, "id"));
             socketSendMessage(createMessage("verified"));
             gameFlowHandler.checkGameReady();
-        } catch (IndexOutOfBoundsException | InvalidParameterException e){
+        } catch (IndexOutOfBoundsException | InvalidParameterException | WindowAlreadySetException e){
             socketSendMessage(createMessage("failed"));
         }
     }
@@ -158,7 +161,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
             gameFlowHandler.useToolCard(message.get("name").getAsString());
             socketSendMessage(createMessage("verified"));
         } catch (InvalidParameterException | NoSuchToolCardException |
-                InvalidDiceValueException | NoDiceInWindowException |
+                NoDiceInWindowException |
                 InvalidFavorTokenNumberException | AlreadyDraftedException |
                 NotEnoughFavorTokenException | NotYourSecondTurnException |
                 NoDiceInRoundTrackException | NotYourTurnException |
@@ -207,6 +210,31 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
+    public void notifyGameInfo(List<ToolCard> toolCards, List<PublicGoal> publicGoals, PrivateGoal privateGoal){
+        JsonObject message;
+        JsonObject tmp;
+        message = createMessage("game-info");
+        JsonObject toolCardsJson = new JsonObject();
+        for (Integer i = 0; i < toolCards.size(); i++) {
+            tmp = new JsonObject();
+            tmp.addProperty("name", toolCards.get(i).getName());
+            toolCardsJson.add(i.toString(), tmp);
+        }
+        message.add("toolcards", toolCardsJson);
+        JsonObject publicGoalsJson = new JsonObject();
+        for (Integer i = 0; i < toolCards.size(); i++) {
+            tmp = new JsonObject();
+            tmp.addProperty("name", publicGoals.get(i).getName());
+            publicGoalsJson.add(i.toString(), tmp);
+        }
+        message.add("publicgoals", publicGoalsJson);
+
+        message.addProperty("private-goal", privateGoal.getName());
+
+        socketSendMessage(message);
+    }
+
+    @Override
     public void notifyToolCards(List<ToolCard> toolCards){
         JsonObject message;
         JsonObject tmp;
@@ -216,6 +244,14 @@ public class SocketHandler implements Runnable, ConnectionHandler{
             tmp.addProperty("name", toolCards.get(i).getName());
             message.add(i.toString(), tmp);
         }
+        socketSendMessage(message);
+    }
+
+    @Override
+    public void notifyWindows(HashMap<String, Window> windows){
+        JsonObject message;
+        message = createMessage("windows");
+        message.addProperty("content", gson.toJson(windows));
         socketSendMessage(message);
     }
 
@@ -364,6 +400,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                 }
             }catch (NullPointerException e){
                 this.nickname = null;
+                e.printStackTrace();
                 socketSendMessage(createMessage("Invalid option"));
             }
         }catch (NullPointerException e){
@@ -420,6 +457,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         }
     }
 
+    @Override
     public void close(){
         if (this.connected){
             this.connected = false;
@@ -427,6 +465,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         }
     }
 
+    @Override
     public String getRemoteAddress(){
         return socket.getRemoteSocketAddress().toString();
     }

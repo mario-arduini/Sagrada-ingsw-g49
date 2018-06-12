@@ -36,7 +36,7 @@ class RoundTest {
 
         assertDoesNotThrow(() ->  schema.getAndSet(new Schema(MIN_DIFFICULTY, constraint, SchemaTest.name)));
 
-        player1.setWindow(schema.get());
+        assertDoesNotThrow(() ->  player1.setWindow(schema.get()));
         players.add(player1);
         players.add(player2);
         players.add(player3);

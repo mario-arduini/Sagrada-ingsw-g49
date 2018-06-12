@@ -81,7 +81,7 @@ public class GamesHandler {
             if (players.contains(user)) {
                 players.remove(user);
                 players.forEach(p -> p.notifyLogout(nickname));
-                waitingRoomLeftPlayer(user);
+                waitingRoomDisconnection(user);
             } else {
                 Game game = gameReference.get(user);
                 gameReference.remove(user);
@@ -125,15 +125,11 @@ public class GamesHandler {
             startGame();
     }
 
-    private synchronized void waitingRoomLeftPlayer(User player){
+    public synchronized void waitingRoomDisconnection(User player){
         players.remove(player);
         if(players.size() < 2 && timer != null) {
             timer.cancel();
         }
-    }
-
-    public synchronized void waitingRoomDisconnection(User player){
-        players.remove(player);
     }
 
     private synchronized void startGame() {

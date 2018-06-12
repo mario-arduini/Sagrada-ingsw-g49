@@ -7,9 +7,7 @@ import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
 import it.polimi.ingsw.model.exceptions.UnexpectedMatrixSizeException;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class PlayerTest {
@@ -52,7 +50,7 @@ public class PlayerTest {
             player = new Player(NICKNAME, AUTH_TOKEN);
 
             //Set window and favor tokens
-            player.setWindow(schema);
+            assertDoesNotThrow(() -> player.setWindow(schema));
             assertEquals(schema, player.getWindow().getSchema());
             assertEquals(schema.getDifficulty(), player.getFavorToken());
 

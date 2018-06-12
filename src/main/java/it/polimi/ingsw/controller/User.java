@@ -1,6 +1,8 @@
 package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.model.goalcards.PrivateGoal;
+import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
 import it.polimi.ingsw.network.server.ConnectionHandler;
 
@@ -62,6 +64,14 @@ public class User extends Player {
 
     public void notifyToolCardUse(String player, String toolCard, Window window){
         this.connection.notifyToolCardUse(player, toolCard, window);
+    }
+
+    public void notifyGameInfo(List<ToolCard> toolCards, List<PublicGoal> publicGoals, PrivateGoal privateGoal){
+        connection.notifyGameInfo(toolCards, publicGoals, privateGoal);
+    }
+
+    public void notifyWindows(HashMap<String, Window> windows){
+        connection.notifyWindows(windows);
     }
 
     public Coordinate askDiceWindow(){

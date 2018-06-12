@@ -10,11 +10,6 @@ import java.util.Objects;
 public class LightShades extends PublicGoal {
 
     @Override
-    public String getName() {
-        return this.getClass().getName();
-    }
-
-    @Override
     public int computeScore(Window window) {
         List<Dice> mosaic = new ArrayList<Dice>();
         for(int i=0;i<Window.ROW;i++)

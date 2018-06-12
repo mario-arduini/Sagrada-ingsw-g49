@@ -3,6 +3,7 @@ package it.polimi.ingsw.model;
 import it.polimi.ingsw.model.exceptions.InvalidFavorTokenNumberException;
 import it.polimi.ingsw.model.exceptions.NotEnoughFavorTokenException;
 import it.polimi.ingsw.model.exceptions.PrivateGoalAlreadySetException;
+import it.polimi.ingsw.model.exceptions.WindowAlreadySetException;
 import it.polimi.ingsw.model.goalcards.PrivateGoal;
 
 public class Player {
@@ -51,7 +52,9 @@ public class Player {
                 && this.suspended == player.suspended;
     }
 
-    public void setWindow(Schema schema){
+    public void setWindow(Schema schema) throws WindowAlreadySetException {
+        if (this.window != null)
+            throw new WindowAlreadySetException();
         this.window = new Window(schema);
         setFavorToken();
     }
@@ -91,7 +94,7 @@ public class Player {
     }
 
     public void setPrivateGoal(PrivateGoal privateGoal) throws PrivateGoalAlreadySetException{
-        if (privateGoal != null)
+        if (privateGoal == null)
             throw new PrivateGoalAlreadySetException();
         this.privateGoal = privateGoal;
     }

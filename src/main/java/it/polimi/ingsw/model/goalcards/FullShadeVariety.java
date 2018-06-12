@@ -3,10 +3,6 @@ package it.polimi.ingsw.model.goalcards;
 import it.polimi.ingsw.model.Window;
 
 public class FullShadeVariety extends PublicGoal {
-    @Override
-    public String getName() {
-        return this.getClass().getName();
-    }
 
     @Override
     public int computeScore(Window window) {

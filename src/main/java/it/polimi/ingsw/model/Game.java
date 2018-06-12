@@ -42,6 +42,16 @@ public class Game {
         }
         nextFirstPlayer = (new Random()).nextInt(players.size());
 
+        playerList.forEach(player -> {
+            try {
+                player.setPrivateGoal(dealer.extractPrivateGoal());
+            } catch (PrivateGoalAlreadySetException e) {
+                e.printStackTrace();
+            } catch (OutOfCardsException e) {
+                e.printStackTrace();
+            }
+        });
+
         int size = players.size();
         currentRound = new Round(dealer.extractPool(2*(size) + 1),createRoundPlayers(size));
         currentRound.nextPlayer();
