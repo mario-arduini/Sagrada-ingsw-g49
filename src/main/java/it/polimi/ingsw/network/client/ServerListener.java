@@ -79,10 +79,10 @@ public class ServerListener implements Runnable {
                         extractToolCards(jsonObject.getAsJsonObject("toolcards"));
                         extractPublicGoals(jsonObject.getAsJsonObject("public-goals"));
                         client.getGameSnapshot().getPlayer().setPrivateGoal(gson.fromJson(jsonObject.get("private-goal").getAsString(), PrivateGoal.class));
-//                        List<Schema> schemas = extractSchemas(jsonObject.getAsJsonObject("schemas"));
-//                        client.notifyStartGame();
-//                        client.printHeader();
-//                        chooseSchema(schemas);
+                        List<Schema> schemas = extractSchemas(jsonObject.getAsJsonObject("schemas"));
+                        client.notifyStartGame();
+                        client.printFooter();
+                        chooseSchema(schemas);
                         break;
 
                     // region DEPRECATED

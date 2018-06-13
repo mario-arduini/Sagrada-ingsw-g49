@@ -20,9 +20,20 @@ final class Effects {
         round.setDiceExtracted(true);
     }
 
-    static void addDiceToWindow(Player player,Dice dice) throws BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException {
-        Coordinate coords = askDiceWindow("",player);
-        placeDice(player,dice,coords.getRow(),coords.getColumn(), Window.RuleIgnored.NONE);
+    static boolean addDiceToWindow(Player player,Dice dice) {
+        if(player.getWindow().possiblePlaces(dice, Window.RuleIgnored.NONE)==0) return false;
+        boolean valid = false;
+        Coordinate coords;
+        while (!valid){
+            coords = askDiceWindow("",player);
+            try{
+                placeDice(player,dice,coords.getRow(),coords.getColumn(), Window.RuleIgnored.NONE);
+                valid = true;
+            } catch (ConstraintViolatedException | NotWantedAdjacentDiceException
+                    |FirstDiceMisplacedException | BadAdjacentDiceException | NoAdjacentDiceException e) {
+            }
+        }
+        return true;
     }
 
     static void move(Player player,Window.RuleIgnored ruleIgnored,boolean optional){

@@ -13,6 +13,7 @@ public class Client {
     private static final String CLI_21_DASH = "---------------------";
     private static final int ROWS_NUMBER = 4;
     private static final int COLUMNS_NUMBER = 5;
+    private static final int WINDOW_WIDTH = 27;
 
     private String serverAddress;
     private int serverPort;
@@ -217,24 +218,13 @@ public class Client {
     }
 
     void printGame(){
-        printHeader();
         PlayerSnapshot p = gameSnapshot.getPlayer();
         List<PlayerSnapshot> otherPlayers = gameSnapshot.getOtherPlayers();
         int whiteSpaceNum,opNum=otherPlayers.size();
         Window currentWindow;
         Constraint constraint;
 
-        ClientLogger.println("");
-        ClientLogger.print(p.getNickname());
-        whiteSpaceNum = 25 - p.getNickname().length();
-        for(int i=0;i<whiteSpaceNum;i++) ClientLogger.print(" ");
-        ClientLogger.print("  |");
-        for(PlayerSnapshot op : otherPlayers){
-            ClientLogger.print("    "+op.getNickname());
-            whiteSpaceNum = 21 - op.getNickname().length();
-            for(int i=0;i<whiteSpaceNum;i++) ClientLogger.print(" ");
-        }
-        ClientLogger.println("");
+        printPlayers();
 
         ClientLogger.print(" ");
         for(int i = 0; i < 5; i++)
@@ -288,9 +278,9 @@ public class Client {
 
         // print draftpool
         ClientLogger.println("");
-        ClientLogger.println("Draft Pool                 |    Round Track");
+        ClientLogger.println("  Draft Pool               |    Round Track");
         for(Dice dice : gameSnapshot.getDraftPool()){
-            ClientLogger.print(dice+"  ");
+            ClientLogger.print("  "+dice);
         }
         for(int i=gameSnapshot.getDraftPool().size();i<8;i++) ClientLogger.print("   ");
         ClientLogger.print("   |  ");
@@ -299,7 +289,10 @@ public class Client {
         }
         for(int i=gameSnapshot.getRoundTrack().size();i<9;i++) ClientLogger.print("  \u25A1");
 
-        ClientLogger.println("\n\nYou have " + gameSnapshot.getPlayer().getFavorToken() + " favour token" + (gameSnapshot.getPlayer().getFavorToken() > 1 ? "s" : ""));
+        ClientLogger.println("\n");
+        printFooter();
+
+        //ClientLogger.println("\n\nYou have " + gameSnapshot.getPlayer().getFavorToken() + " favour token" + (gameSnapshot.getPlayer().getFavorToken() > 1 ? "s" : ""));
 
 
 //        cliHandler.printMenu();
@@ -309,6 +302,40 @@ public class Client {
 //                cliHandler.notifyAll();
 //            }
 //        }
+    }
+
+    void printPlayers(){
+        PlayerSnapshot p = gameSnapshot.getPlayer();
+        List<PlayerSnapshot> otherPlayers = gameSnapshot.getOtherPlayers();
+        int opNum=otherPlayers.size();
+        ClientLogger.println("");
+
+        printPlayer(p);
+
+        ClientLogger.print("|");
+        for(PlayerSnapshot op : otherPlayers){
+            printPlayer(op);
+        }
+        ClientLogger.println("");
+        for (int i = 0;i<WINDOW_WIDTH;i++) ClientLogger.print(" ");
+        ClientLogger.println("|");
+
+    }
+
+    void printPlayer(PlayerSnapshot p){
+        int i,whiteSpaceHalf,whiteSpaceNum;
+
+        whiteSpaceNum = WINDOW_WIDTH - p.getNickname().length() - 1 - p.getWindow().getSchema().getDifficulty();
+        whiteSpaceHalf = whiteSpaceNum/2;
+
+        for(i=0;i<whiteSpaceHalf;i++) ClientLogger.print(" ");
+
+        ClientLogger.print(p.getNickname()+" ");
+        for(i=0;i<p.getFavorToken();i++) ClientLogger.print("\u26AB");
+        for(;i<p.getWindow().getSchema().getDifficulty();i++) ClientLogger.print("\u26AA");
+
+        if(whiteSpaceNum%2 == 1) whiteSpaceHalf++;
+        for(i=0;i<whiteSpaceHalf;i++) ClientLogger.print(" ");
     }
 
     void printMenu(){
@@ -362,7 +389,7 @@ public class Client {
 
     //endregion
 
-    void printHeader(){
+    void printFooter(){
         cliHandler.printPublicGoals(gameSnapshot.getPublicGoals());
         cliHandler.printPrivateGoal(gameSnapshot.getPlayer().getPrivateGoal());
         cliHandler.printToolCards(gameSnapshot.getToolCards());
