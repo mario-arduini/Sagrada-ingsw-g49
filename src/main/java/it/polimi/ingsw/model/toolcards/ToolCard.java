@@ -62,7 +62,10 @@ public class ToolCard {
                     Effects.getDraftedDice(game.getCurrentRound());
                     break;
                 case "place-dice":
-                    Effects.addDiceToWindow(game.getCurrentRound().getCurrentPlayer(),game.getCurrentRound().getCurrentDiceDrafted());
+                    if(!Effects.addDiceToWindow(game.getCurrentRound().getCurrentPlayer(),game.getCurrentRound().getCurrentDiceDrafted())){
+                        game.getCurrentRound().getDraftPool().add(game.getCurrentRound().getCurrentDiceDrafted());
+                        game.getCurrentRound().setCurrentDiceDrafted(null);
+                    }
                     break;
                 case "move":
                     if(arguments.get("color-in-track")!=null&&arguments.get("color-in-track").getAsBoolean()){

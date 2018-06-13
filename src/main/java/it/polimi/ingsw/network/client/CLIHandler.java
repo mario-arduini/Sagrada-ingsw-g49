@@ -364,9 +364,10 @@ class CLIHandler {
         int i = 0;
         ClientLogger.println("TOOL CARDS");
         for (ToolCard toolcard: toolCards) {
-            ClientLogger.println(++i + ") " + toolcard.getName());
+            ClientLogger.print(++i + ") " + toolcard.getName());
+            for(int j = toolcard.getName().length();j<31;j++) ClientLogger.print(" ");
             //ClientLogger.println("   Description: " + toolcard.getDescription());
-            ClientLogger.println("   Cost: " + (toolcard.getUsed() ? "2" : "1"));
+            ClientLogger.println("|  Cost: " + (toolcard.getUsed() ? "2" : "1"));
         }
     }
 

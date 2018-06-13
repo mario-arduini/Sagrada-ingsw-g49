@@ -70,7 +70,7 @@ public class ServerListener implements Runnable {
                         client.getGameSnapshot().getPlayer().setPrivateGoal(gson.fromJson(jsonObject.get("private-goal").getAsString(), PrivateGoal.class));
                         List<Schema> schemas = extractSchemas(jsonObject.getAsJsonObject("schemas"));
                         client.notifyStartGame();
-                        client.printHeader();
+                        client.printFooter();
                         chooseSchema(schemas);
                         break;
 
