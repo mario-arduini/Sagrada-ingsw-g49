@@ -14,21 +14,18 @@ public class Client {
     private static final int ROWS_NUMBER = 4;
     private static final int COLUMNS_NUMBER = 5;
 
-    private String nickname;
-    private String serverAddress;       //*
-    private int serverPort;             //*
-    private CLIHandler cliHandler;      //*
-    private Connection server;          //*
-    enum ConnectionType{ RMI, SOCKET }  //*
-    private boolean logged;             //*
+    private String serverAddress;
+    private int serverPort;
+    private CLIHandler cliHandler;
+    private Connection server;
+    enum ConnectionType{ RMI, SOCKET }
+    private boolean logged;
     private boolean serverConnected;    //* is it useful?
-    private GameSnapshot gameSnapshot;  //*
-    private boolean myTurn;             //move into PlayerSnapshot?
-    private boolean diceExtracted;      //move into PlayerSnapshot?
-    private boolean usedToolCard;       //move into PlayerSnapshot?
+    private GameSnapshot gameSnapshot;
 
     private Client(){
         super();
+        this.gameSnapshot = new GameSnapshot();
     }
 
     private void setCLIHandler(CLIHandler cliHandler){
@@ -48,16 +45,11 @@ public class Client {
     }
 
     boolean login(String nickname, String password){
-        this.nickname = nickname;
+        gameSnapshot.setPlayer(nickname);
         if(server.login(nickname, password)){
-            initGameSnapshot();
             return true;
         }
         return false;
-    }
-
-    String getNickname(){
-        return nickname;
     }
 
     boolean isLogged(){
@@ -100,10 +92,10 @@ public class Client {
     }
 
     void notifyNewTurn(String nickname, boolean newRound){
-        myTurn = nickname.equals(this.nickname);
-        diceExtracted = false;
-        usedToolCard = false;
-        if(myTurn)
+        getGameSnapshot().getPlayer().setMyTurn(nickname.equals(gameSnapshot.getPlayer().getNickname()));
+        getGameSnapshot().getPlayer().setDiceExtracted(false);
+        getGameSnapshot().getPlayer().setUsedToolCard(false);
+        if(gameSnapshot.getPlayer().isMyTurn())
             cliHandler.notifyNewTurn(newRound);
         else
             cliHandler.notifyNewTurn(nickname, newRound);
@@ -114,7 +106,7 @@ public class Client {
         if(server.placeDice(choice, row, column)){
             gameSnapshot.getPlayer().getWindow().addDice(row - 1, column - 1, choice);
             gameSnapshot.getDraftPool().remove(dice - 1);
-            diceExtracted = true;
+            gameSnapshot.getPlayer().setDiceExtracted(true);
             ClientLogger.printWithClear("");
             printGame();
             printMenu();
@@ -138,26 +130,14 @@ public class Client {
         }
     }
 
-    boolean isMyTurn(){
-        return myTurn;
-    }
-
-    boolean diceAlreadyExtracted(){
-        return diceExtracted;
-    }
-
-    boolean cardToolAlreadyUsed(){
-        return usedToolCard;
-    }
-
     boolean useToolCard(String name){
-        usedToolCard =  server.useToolCard(name);
+        gameSnapshot.getPlayer().setUsedToolCard(server.useToolCard(name));
         verifyEndTurn();
-        return usedToolCard;
+        return getGameSnapshot().getPlayer().isToolCardAlreadyUsed();
     }
 
     private void verifyEndTurn(){
-        if(diceExtracted && usedToolCard){
+        if(getGameSnapshot().getPlayer().isDiceAlreadyExtracted() && getGameSnapshot().getPlayer().isToolCardAlreadyUsed()){
             cliHandler.notifyEndTurn();
             pass();
         }
@@ -167,6 +147,17 @@ public class Client {
         server.pass();
     }
 
+    void updateWaitingRoom(List<String> nicknames, boolean newUsers){
+        for(String nickname : nicknames)
+            if (newUsers)
+                gameSnapshot.addOtherPlayer(nickname);
+            else
+                gameSnapshot.removeOtherPlayer(nickname);
+
+        cliHandler.printWaitingRoom();
+    }
+
+    //region DEPRECATED
     void addPlayers(List<String> newPlayers){
         cliHandler.printNewPlayers(newPlayers);
     }
@@ -174,6 +165,7 @@ public class Client {
     void removePlayer(String nickname){
         cliHandler.printLoggedOutPlayer(nickname);
     }
+    //endregion
 
     synchronized void serverDisconnected(){
         if(logged) {
@@ -327,10 +319,6 @@ public class Client {
                 cliHandler.notifyAll();
             }
         }
-    }
-
-    private void initGameSnapshot(){
-        this.gameSnapshot = new GameSnapshot(this.nickname);
     }
 
     GameSnapshot getGameSnapshot(){

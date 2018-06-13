@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.network.client.model.*;
 
 import java.lang.reflect.Type;
@@ -17,13 +16,12 @@ public class ServerListener implements Runnable {
     private Client client;
     private ClientSocketHandler server;
     private boolean connected;
-    private Gson gson;
+    private static Gson gson = new Gson();
 
     ServerListener(Client client, ClientSocketHandler server) {
         this.client = client;
         this.server = server;
         connected = true;
-        gson = new Gson();
         ClientLogger.initLogger(LOGGER);
     }
 
@@ -35,11 +33,12 @@ public class ServerListener implements Runnable {
         Type listType;
 
         while (connected){
-            jsonObject = null;
+            jsonObject = new JsonObject();
             try {
                 jsonObject = parser.parse(server.socketReadLine()).getAsJsonObject();  //TODO: bring here socketReadLine
             } catch (IllegalStateException e) {
-                LOGGER.severe(e.toString());
+                LOGGER.warning(e.toString());
+                continue;
             } catch (NullPointerException e)
             {
                 connected = false;
@@ -51,12 +50,24 @@ public class ServerListener implements Runnable {
                     case "welcome":
                         client.welcomePlayer();
                         break;
+
+                    //region DEPRECATED
+                    case "waiting-room":
+                        listType = new TypeToken<List<String>>(){}.getType();
+                        client.updateWaitingRoom(gson.fromJson(jsonObject.get("nicknames").getAsString(), listType), jsonObject.get("new").getAsBoolean());
+                        break;
+                    //endregion
+
                     case "new_player":
                         listType = new TypeToken<List<String>>(){}.getType();
-                        client.addPlayers(gson.fromJson(jsonObject.get("nicknames").getAsString(), listType));
+                        client.updateWaitingRoom(gson.fromJson(jsonObject.get("nicknames").getAsString(), listType), true);
+                        //client.addPlayers(gson.fromJson(jsonObject.get("nicknames").getAsString(), listType));
                         break;
                     case "quit":
-                        client.removePlayer(jsonObject.get("nickname").getAsString());
+                        //client.removePlayer(jsonObject.get("nickname").getAsString());
+                        List<String> loggedOutUser = new ArrayList<>();
+                        loggedOutUser.add(jsonObject.get("nicknames").getAsString());
+                        client.updateWaitingRoom(loggedOutUser, false);
                         break;
                     case "verified":
                         server.notifyResult(true);
@@ -64,18 +75,17 @@ public class ServerListener implements Runnable {
                     case "failed":
                         server.notifyResult(false);
                         break;
-                    case "game-init":
+                    case "game-info":
                         extractToolCards(jsonObject.getAsJsonObject("toolcards"));
                         extractPublicGoals(jsonObject.getAsJsonObject("public-goals"));
                         client.getGameSnapshot().getPlayer().setPrivateGoal(gson.fromJson(jsonObject.get("private-goal").getAsString(), PrivateGoal.class));
-                        List<Schema> schemas = extractSchemas(jsonObject.getAsJsonObject("schemas"));
-                        client.notifyStartGame();
-                        client.printHeader();
-                        chooseSchema(schemas);
+//                        List<Schema> schemas = extractSchemas(jsonObject.getAsJsonObject("schemas"));
+//                        client.notifyStartGame();
+//                        client.printHeader();
+//                        chooseSchema(schemas);
                         break;
 
-                    // region OBSOLETE
-
+                    // region DEPRECATED
                     case "toolcards":
                         List<ToolCard> toolCards = new ArrayList<>();
                         for(Integer i = 0; i < 3; i++)
@@ -92,7 +102,6 @@ public class ServerListener implements Runnable {
                         Schema choseSchema = schemas1.get(client.chooseSchema());
                         client.getGameSnapshot().getPlayer().setWindow(choseSchema);
                         break;
-
                     // endregion
 
                     case "round":
@@ -111,7 +120,8 @@ public class ServerListener implements Runnable {
                         HashMap<String, Schema> windows = gson.fromJson(jsonObject.get("content").getAsString(), listType);
                         for (Map.Entry<String, Schema> entry : windows.entrySet()) {
                             if(!entry.getKey().equals(client.getGameSnapshot().getPlayer().getNickname()))
-                                client.getGameSnapshot().addOtherPlayer(entry.getKey(), entry.getValue());
+                                //client.getGameSnapshot().addOtherPlayer(entry.getKey(), entry.getValue());
+                                client.getGameSnapshot().findPlayer(entry.getKey()).get().setWindow(entry.getValue());
                         }
                         break;
                     case "toolcard-used":
@@ -166,7 +176,7 @@ public class ServerListener implements Runnable {
                         break;
                 }
             } catch (NullPointerException e) {
-                LOGGER.severe(e.toString());
+                LOGGER.warning(e.toString());
             }
         }
     }
@@ -179,9 +189,9 @@ public class ServerListener implements Runnable {
     }
 
     private void extractPublicGoals(JsonObject jsonObject){
-        List<PublicGoal> publicGoals = new ArrayList<>();
+        List<String> publicGoals = new ArrayList<>();
         for(Integer i = 0; i < 3; i++)
-            publicGoals.add(gson.fromJson(jsonObject.get(i.toString()).getAsString(),PublicGoal.class));
+            publicGoals.add(jsonObject.get(i.toString()).getAsJsonObject().get("name").getAsString());
         client.getGameSnapshot().setPublicGoals(publicGoals);
     }
 

@@ -40,7 +40,7 @@ public class ClientSocketHandler implements Connection {
             thread = new Thread(serverListener);
             thread.start();
         } catch (Exception e) {
-            LOGGER.severe("Connection to server failed: " + e.toString());
+            LOGGER.warning("Connection to server failed: " + e.toString());
             throw new SocketException();
         }
         gson = new Gson();

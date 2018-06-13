@@ -9,11 +9,17 @@ public class PlayerSnapshot {
     private int favorToken;
     private boolean suspended;
     private PrivateGoal privateGoal;
+    private boolean myTurn;
+    private boolean diceExtracted;
+    private boolean usedToolCard;
 
-    public PlayerSnapshot(String nickname){
+    PlayerSnapshot(String nickname){
         this.nickname = nickname;
         this.favorToken = 0;
         this.suspended = false;
+        myTurn = false;
+        diceExtracted = false;
+        usedToolCard = false;
     }
 
     public PlayerSnapshot(PlayerSnapshot player){
@@ -73,6 +79,30 @@ public class PlayerSnapshot {
 
     public void setPrivateGoal(PrivateGoal privateGoal){
         this.privateGoal = privateGoal;
+    }
+
+    public boolean isMyTurn() {
+        return myTurn;
+    }
+
+    public void setMyTurn(boolean myTurn) {
+        this.myTurn = myTurn;
+    }
+
+    public boolean isDiceAlreadyExtracted() {
+        return diceExtracted;
+    }
+
+    public void setDiceExtracted(boolean diceExtracted) {
+        this.diceExtracted = diceExtracted;
+    }
+
+    public boolean isToolCardAlreadyUsed() {
+        return usedToolCard;
+    }
+
+    public void setUsedToolCard(boolean usedToolCard) {
+        this.usedToolCard = usedToolCard;
     }
 
     @Override

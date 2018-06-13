@@ -1,7 +1,5 @@
 package it.polimi.ingsw.network.client.model;
 
-import it.polimi.ingsw.model.goalcards.PublicGoal;
-
 import java.util.*;
 
 public class GameSnapshot {
@@ -9,15 +7,14 @@ public class GameSnapshot {
     private final List<PlayerSnapshot> otherPlayers;
     private List<Dice> roundTrack;
     private List<ToolCard> toolCards;
-    private List<PublicGoal> publicGoals;
+    private List<String> publicGoals;
     private List<Dice> draftPool;
 
-    public GameSnapshot(String playerNick) {
+    public GameSnapshot() {
         this.roundTrack = new ArrayList<>();
         this.toolCards = new ArrayList<>();
         this.publicGoals = new ArrayList<>();
         this.otherPlayers = new ArrayList<>();
-        this.player = new PlayerSnapshot(playerNick);
         this.draftPool = new ArrayList<>();
     }
 
@@ -25,13 +22,23 @@ public class GameSnapshot {
         return player;
     }
 
-    public void addOtherPlayer(String nick,Schema schema){
-        PlayerSnapshot newPlayer = new PlayerSnapshot(nick);
-        newPlayer.setWindow(schema);
-        otherPlayers.add(newPlayer);
+    public void setPlayer(String nickname) {
+        this.player = new PlayerSnapshot(nickname);
     }
 
-    void removeOtherPlayer(String nick){
+    //region DEPRECATED
+//    public void addOtherPlayer(String nick, Schema schema){
+//        PlayerSnapshot newPlayer = new PlayerSnapshot(nick);
+//        newPlayer.setWindow(schema);
+//        otherPlayers.add(newPlayer);
+//    }
+    //endregion
+
+    public void addOtherPlayer(String nick){
+        otherPlayers.add(new PlayerSnapshot(nick));
+    }
+
+    public void removeOtherPlayer(String nick){
         for(PlayerSnapshot user : otherPlayers)
             if(user.getNickname().equals(nick))
                 otherPlayers.remove(user);
@@ -68,11 +75,11 @@ public class GameSnapshot {
         toolCards = extractedToolCards;
     }
 
-    public List<PublicGoal> getPublicGoals() {
+    public List<String> getPublicGoals() {
         return publicGoals;
     }
 
-    public void setPublicGoals(List<PublicGoal> publicGoals) {
+    public void setPublicGoals(List<String> publicGoals) {
         this.publicGoals = publicGoals;
     }
 
