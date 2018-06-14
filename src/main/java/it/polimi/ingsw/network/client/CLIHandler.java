@@ -1,9 +1,6 @@
 package it.polimi.ingsw.network.client;
 
-import it.polimi.ingsw.network.client.model.Coordinate;
-import it.polimi.ingsw.network.client.model.Dice;
-import it.polimi.ingsw.network.client.model.PrivateGoal;
-import it.polimi.ingsw.network.client.model.ToolCard;
+import it.polimi.ingsw.network.client.model.*;
 import it.polimi.ingsw.network.client.model.exception.InvalidFavorTokenNumberException;
 import it.polimi.ingsw.network.client.model.exception.NotEnoughFavorTokenException;
 
@@ -14,6 +11,12 @@ import java.util.List;
 import java.util.logging.Logger;
 
 class CLIHandler {
+
+    private static final String CLI_SCHEMA_ROW = "---------------------    ---------------------";
+    private static final String CLI_21_DASH = "---------------------";
+    private static final int ROWS_NUMBER = 4;
+    private static final int COLUMNS_NUMBER = 5;
+    private static final int WINDOW_WIDTH = 27;
 
     private static final int ROW  = 4;
     private static final int COLUMN  = 5;
@@ -30,7 +33,7 @@ class CLIHandler {
 
     synchronized void start() {
         boolean logout = false;
-        String command = "";
+        int command;
         boolean ok = false;
 
         do {
@@ -41,57 +44,55 @@ class CLIHandler {
         waitConnection();
 
         while(!ok) {
-            ClientLogger.print("Choose an option:\n- Logout\n- Login\nYour choice: ");
-            try {
-                command = input.readLine().toLowerCase();
-            } catch (IOException e) {
-                LOGGER.warning(e.toString());
-            }
-            if(command.equals("logout")) {
+            ClientLogger.print("Choose an option:\n0) Logout\n1) Login\nYour choice: ");
+                command = readInt(0, 1);
+
+            if(command == 0) {
                 ClientLogger.printlnWithClear("Logged out");
                 return;
             }
-            if(command.equals("login")) {
-                if(client.login(askNickname(), askPassword())) {
-                    client.setLogged(true);
-                    ok = true;
-                }
-                else
-                    ClientLogger.println("Login failed, password is not correct\n");
-            }else
-                ClientLogger.println("Invalid choice!\n");
+
+            if(client.login(askNickname(), askPassword())) {
+                client.setLogged(true);
+                ok = true;
+            }
+            else
+                ClientLogger.println("Login failed, password is not correct\n");
         }
         waitStartRound();
 
         while (!logout){
-            try {
-                command = input.readLine().toLowerCase();
-            } catch (IOException e) {
-                LOGGER.severe(e.toString());
-            }
-            switch (command){
-                case "logout":
-                    ClientLogger.printlnWithClear("Logged out");
-                    client.logout();
-                    logout = true;
-                    break;
-                case "pass":
-                    pass();
-                    break;
-                case "place dice":
-                    if(!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted())
-                        placeDice();
-                    else
-                        ClientLogger.print("Invalid choice, dice already extracted\n\nRetry: ");
-                    break;
-                case "toolcard":
-                    if(client.getGameSnapshot().getPlayer().getFavorToken() < 1)
-                        ClientLogger.print("Not enough favor token!\n\nRetry: ");
-                    else
-                        useToolCard();
-                    break;
-                default:
-                    ClientLogger.print("Invalid choice, retry: ");
+
+            command = readInt(0, 3);
+            if(command > 0 && !client.getGameSnapshot().getPlayer().isMyTurn())
+                ClientLogger.print("Invalid choice, retry: ");
+            else
+                switch (command){
+                    case 0:
+                        ClientLogger.printlnWithClear("Logged out");
+                        client.logout();
+                        logout = true;
+                        break;
+                    case 1:
+                        if(!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted())
+                            placeDice();
+                        else
+                            useToolCard();
+                        break;
+                    case 2:
+                        if(client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed() || client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted())
+                            pass();
+                        else
+                            useToolCard();
+                        break;
+                    case 3:
+                        if(!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted() && !client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed())
+                            pass();
+                        else
+                            ClientLogger.print("Invalid choice, retry: ");
+                        break;
+                    default:
+                        ClientLogger.print("Invalid choice, retry: ");
             }
         }
     }
@@ -276,8 +277,8 @@ class CLIHandler {
         return choice - 1;
     }
 
-    void setPlayingRound(boolean playindRound){
-        this.playingRound = playindRound;
+    void setPlayingRound(boolean playingRound){
+        this.playingRound = playingRound;
     }
 
     void notifyNewTurn(String nickname, boolean newRound){
@@ -295,7 +296,6 @@ class CLIHandler {
 
     private void pass(){
         if(client.getGameSnapshot().getPlayer().isMyTurn()){
-            //ClientLogger.printlnWithClear("You passed your turn\n");
             client.pass();
         }else
             ClientLogger.println("\nNot your turn! You can only logout");
@@ -306,7 +306,7 @@ class CLIHandler {
             int dice = -1, row = -1, column = -1;
             boolean ask = true;
             ClientLogger.printWithClear("");
-            client.printGame();
+            printGame(client.getGameSnapshot());
 
             while (ask) {
                 ClientLogger.print("\nInsert dice number: ");
@@ -323,86 +323,85 @@ class CLIHandler {
             }
             if(!client.placeDice(dice, row, column)) {
                 ClientLogger.printWithClear("");
-                client.printGame();
+                printGame(client.getGameSnapshot());
                 ClientLogger.println("\nConstraint violated!");
                 client.printMenu();
-            }
+            }else
+                verifyEndTurn();
+
         }else
             ClientLogger.println("Not your turn! You can only logout");
     }
 
-    private void useToolCard(){
-        if(client.getGameSnapshot().getPlayer().isMyTurn()){
-            int choice = -1;
+    private void verifyEndTurn(){
+        if(client.verifyEndTurn())
+            client.pass();
+        else {
             ClientLogger.printWithClear("");
-            client.printGame();
-            //printToolCards(client.getGameSnapshot().getToolCards());
-            ClientLogger.println("\n[0] to go back");
-            while (choice < 0 || choice > 3) {
-                ClientLogger.print("\nInsert tool card number: ");
-                try {
-                    choice = Integer.parseInt(input.readLine());
-                } catch (IOException | NumberFormatException e) {
-                    choice = -1;
-                }
-                if(choice == 0) {
-                    printMenu();
-                    return;
-                }
-                if(choice < 1 || choice > 3)
-                    ClientLogger.println("Not a valid choice");
-            }
-            ClientLogger.println("");
-            if(!client.useToolCard( client.getGameSnapshot().getToolCards().get(choice - 1).getName())) {
-                ClientLogger.printWithClear("");
-                ClientLogger.println("You can't use this card now\n");
-                client.printGame();
-                printMenu();
-            }
-            else {
-                try {
-                    client.getGameSnapshot().getPlayer().useFavorToken((client.getGameSnapshot().getToolCards().get(choice - 1).getUsed() ? 2 : 1));
-                } catch (InvalidFavorTokenNumberException | NotEnoughFavorTokenException e) {
-                //TODO: check this
-                }
-                client.getGameSnapshot().getToolCards().get(choice - 1).setUsed();
-            }
-        }else
-            ClientLogger.println("\nNot your turn! You can only logout");
-    }
-
-    void printToolCards(List<ToolCard> toolCards){
-        int i = 0;
-        ClientLogger.println("TOOL CARDS");
-        for (ToolCard toolcard: toolCards) {
-            ClientLogger.print(++i + ") " + toolcard.getName());
-            for(int j = toolcard.getName().length();j<31;j++) ClientLogger.print(" ");
-            //ClientLogger.println("   Description: " + toolcard.getDescription());
-            ClientLogger.println("|  Cost: " + (toolcard.getUsed() ? "2" : "1"));
+            printGame(client.getGameSnapshot());
+            client.printMenu();
         }
     }
 
-    void printPublicGoals(List<String> publicGoals){
+    private void useToolCard(){
+        if(client.getGameSnapshot().getPlayer().getFavorToken() < 1) {
+            ClientLogger.print("Not enough favor token!\n\nRetry: ");
+            return;
+        }
 
-    }
-
-    void printPrivateGoal(PrivateGoal privateGoal){
-
-    }
-
-    void clear(){
+        int choice = -1;
         ClientLogger.printWithClear("");
+        printGame(client.getGameSnapshot());
+        ClientLogger.println("\nTo go back insert 0");
+        while (choice < 0 || choice > 3) {
+            ClientLogger.print("\nInsert tool card number: ");
+            try {
+                choice = Integer.parseInt(input.readLine());
+            } catch (IOException | NumberFormatException e) {
+                choice = -1;
+            }
+            if(choice == 0) {
+                ClientLogger.printWithClear("");
+                printGame(client.getGameSnapshot());
+                printMenu();
+                return;
+            }
+            if(choice < 1 || choice > 3)
+                ClientLogger.println("Not a valid choice");
+        }
+        ClientLogger.println("");
+        if(!client.useToolCard( client.getGameSnapshot().getToolCards().get(choice - 1).getName())) {
+            ClientLogger.printWithClear("");
+            ClientLogger.println("You can't use this card now\n");
+            printGame(client.getGameSnapshot());
+            printMenu();
+        }
+        else {
+            try {
+                client.getGameSnapshot().getPlayer().useFavorToken((client.getGameSnapshot().getToolCards().get(choice - 1).getUsed() ? 2 : 1));
+            } catch (InvalidFavorTokenNumberException | NotEnoughFavorTokenException e) {
+            //TODO: check this
+            }
+            client.getGameSnapshot().getToolCards().get(choice - 1).setUsed();
+        }
+
     }
 
     void printMenu(){
-        if(client.getGameSnapshot().getPlayer().isMyTurn())
-            ClientLogger.print("\nChoose an option:\n- Logout" + (!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted() ? "\n- Place dice" : "") + (!client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed() ? "\n- Toolcard" : "") + "\n- Pass\n\nYour choice: ");
+        if(client.getGameSnapshot().getPlayer().isMyTurn()) {
+            ClientLogger.print("\nChoose an option:\n0) Logout");
+            if (!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted()) {
+                ClientLogger.print("\n1) Place dice");
+                if(!client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed())
+                    ClientLogger.print("\n2) Tool Card\n3) Pass\n\nYour choice: ");
+                else
+                    ClientLogger.print("\n2) Pass\n\nYour choice: ");
+            }
+            else
+                ClientLogger.print("\n1) Tool Card\n2) Pass\n\nYour choice: ");
+        }
         else
-            ClientLogger.println("\nIf you want you can logout");
-    }
-
-    void notifyEndTurn(){
-        ClientLogger.println("Your turn is finished!");
+            ClientLogger.println("\nTo logout insert 0");
     }
 
     boolean getPlayingRound(){
@@ -414,20 +413,26 @@ class CLIHandler {
         ClientLogger.println("Server disconnected");
     }
 
-//    private int readInt(){
-//        boolean ok = false;
-//        int value = 0;
-//        while (!ok){
-//            try{
-//                value = Integer.parseInt(input.readLine());
-//                ok = true;
-//            }
-//            catch (IOException | NumberFormatException e){
-//                ClientLogger.print("Must be a number, retry: ");
-//            }
-//        }
-//        return value;
-//    }
+    private int readInt(int minValue, int maxValue){
+        int value = -1;
+        boolean ask = true;
+
+        while (ask) {
+            try{
+                value = Integer.parseInt(input.readLine());
+            }
+            catch (IOException | NumberFormatException e){
+                ClientLogger.print("Must be a number, retry: ");
+                continue;
+            }
+
+            if (value < minValue || value > maxValue)
+                ClientLogger.print("Invalid choice, retry: ");
+            else
+                ask = false;
+        }
+        return value;
+    }
 
     //region TOOLCARD
 
@@ -465,27 +470,6 @@ class CLIHandler {
         return readInt(1, client.getGameSnapshot().getRoundTrack().size()) - 1;
     }
 
-    private int readInt(int minValue, int maxValue){
-        int value = -1;
-        boolean ask = true;
-
-        while (ask) {
-            try{
-                value = Integer.parseInt(input.readLine());
-            }
-            catch (IOException | NumberFormatException e){
-                ClientLogger.print("Must be a number, retry: ");
-                continue;
-            }
-
-            if (value < minValue || value > maxValue)
-                ClientLogger.print("Invalid choice, retry: ");
-            else
-                ask = false;
-        }
-        return value;
-    }
-
     Coordinate askDiceFormWindow(){
         Coordinate coordinate = null;
         boolean ask = true;
@@ -509,10 +493,6 @@ class CLIHandler {
         ClientLogger.println("Choose a free position on your window");
         while (ask) {
             coordinate = getPosition();
-
-//            if (client.getGameSnapshot().getPlayer().getWindow().getCell(coordinate.getRow(), coordinate.getColumn()) != null)
-//                ClientLogger.println("Invalid choice!");
-//            else
                 ask = false;
         }
         return coordinate;
@@ -524,13 +504,170 @@ class CLIHandler {
     }
 
     private Coordinate getPosition(){
-        int row, column;
         ClientLogger.print("Insert dice row: ");
-        row = readInt(1, ROW);
+        int row = readInt(1, ROW);
         ClientLogger.print("Insert dice column: ");
-        column = readInt(1, COLUMN);
+        int column = readInt(1, COLUMN);
         return new Coordinate(row, column);
     }
 
     //endregion
+
+    static void printFooter(GameSnapshot gameSnapshot){
+        printPublicGoals(gameSnapshot.getPublicGoals());
+        printPrivateGoal(gameSnapshot.getPlayer().getPrivateGoal());
+        printToolCards(gameSnapshot.getToolCards());
+    }
+
+    static void printSchemas(List<Schema> schemas){
+        ClientLogger.println("\nSCHEMA CHOICE");
+        for(int i=0;i<schemas.size();i+=2){
+            ClientLogger.println("");
+            ClientLogger.print((i + 1) + ") " + schemas.get(i).getName());
+            for(int s = schemas.get(i).getName().length(); s < 22; s++)
+                ClientLogger.print(" ");
+            ClientLogger.println((i + 2) + ") " + schemas.get(i + 1).getName());
+            ClientLogger.println(CLI_SCHEMA_ROW);
+            for(int r=0;r<ROWS_NUMBER;r++){
+                printSchemaRow(new Window(schemas.get(i)), r);
+                ClientLogger.print("|    ");
+                printSchemaRow(new Window(schemas.get(i + 1)), r);
+                ClientLogger.println("|");
+                ClientLogger.println(CLI_SCHEMA_ROW);
+            }
+            ClientLogger.println("Difficulty: "+schemas.get(i).getDifficulty()+"            Difficulty: "+schemas.get(i+1).getDifficulty());
+        }
+    }
+
+    static void printGame(GameSnapshot gameSnapshot){
+        PlayerSnapshot p = gameSnapshot.getPlayer();
+        List<PlayerSnapshot> otherPlayers = gameSnapshot.getOtherPlayers();
+        int opNum=otherPlayers.size();
+        Window currentWindow;
+
+        printPlayers(gameSnapshot);
+
+        ClientLogger.print(" ");
+        for(int i = 0; i < 5; i++)
+            ClientLogger.print("   " + (i + 1));
+        ClientLogger.print("      |      ");
+        for(int i = 0; i < 5; i++)
+            ClientLogger.print("  " + (i + 1) + " ");
+        ClientLogger.println("");
+
+        ClientLogger.print("  " + CLI_21_DASH+"    |");
+        for(int i=0;i<opNum;i++)
+            ClientLogger.print("      "+CLI_21_DASH);
+        ClientLogger.println("");
+
+        for(int r=0;r<ROWS_NUMBER;r++){
+            ClientLogger.print((r + 1) + " ");
+            currentWindow = p.getWindow();
+            printSchemaRow(currentWindow, r);
+            ClientLogger.print("|    |");
+
+            for(PlayerSnapshot op : otherPlayers){
+                currentWindow = op.getWindow();
+                ClientLogger.print("    " + (r + 1) + " ");
+                printSchemaRow(currentWindow, r);
+                ClientLogger.print("|");
+            }
+            ClientLogger.println("");
+
+
+            ClientLogger.print("  " + CLI_21_DASH+"    |");
+            for(int i=0;i<opNum;i++)
+                ClientLogger.print("      "+CLI_21_DASH);
+            ClientLogger.println("");
+        }
+
+        // print draft pool
+        ClientLogger.println("");
+        ClientLogger.println("  Draft Pool               |    Round Track");
+        for(Dice dice : gameSnapshot.getDraftPool()){
+            ClientLogger.print("  "+dice);
+        }
+        for(int i=gameSnapshot.getDraftPool().size();i<8;i++) ClientLogger.print("   ");
+        ClientLogger.print("   |  ");
+        for(Dice dice : gameSnapshot.getRoundTrack()){
+            ClientLogger.print("  "+dice);
+        }
+        for(int i=gameSnapshot.getRoundTrack().size();i<9;i++) ClientLogger.print("  \u25A1");
+
+        ClientLogger.println("\n");
+        printFooter(gameSnapshot);
+    }
+
+    private static void printSchemaRow(Window currentWindow, int row) {
+        Constraint constraint;
+        for(int column = 0; column<COLUMNS_NUMBER; column++){
+            if(currentWindow.getCell(row,column)!=null) ClientLogger.print("| "+currentWindow.getCell(row,column)+" ");
+            else {
+                constraint = currentWindow.getSchema().getConstraint(row,column);
+                if(constraint==null) ClientLogger.print("|   ");
+                else if(constraint.getColor()!=null) ClientLogger.print("| "+ constraint.getColor().escape() +"■ "+Color.RESET);
+                else if(constraint.getNumber()!=0) ClientLogger.print("| "+constraint.getNumber()+" ");
+            }
+        }
+    }
+
+    private static void printPlayers(GameSnapshot gameSnapshot){
+        PlayerSnapshot p = gameSnapshot.getPlayer();
+        List<PlayerSnapshot> otherPlayers = gameSnapshot.getOtherPlayers();
+        ClientLogger.println("");
+
+        printPlayer(p);
+
+        ClientLogger.print("|");
+        for(PlayerSnapshot op : otherPlayers){
+            printPlayer(op);
+        }
+        ClientLogger.println("");
+        for (int i = 0;i<WINDOW_WIDTH;i++) ClientLogger.print(" ");
+        ClientLogger.println("|");
+
+    }
+
+    private static void printPlayer(PlayerSnapshot p){
+        int i;
+        int whiteSpaceHalf;
+        int whiteSpaceNum;
+
+        whiteSpaceNum = WINDOW_WIDTH - p.getNickname().length() - 1 - p.getWindow().getSchema().getDifficulty();
+        whiteSpaceHalf = whiteSpaceNum/2;
+
+        for(i=0;i<whiteSpaceHalf;i++) ClientLogger.print(" ");
+
+        ClientLogger.print(p.getNickname()+" ");
+        for(i=0;i<p.getFavorToken();i++) ClientLogger.print("\u26AB");
+        for(;i<p.getWindow().getSchema().getDifficulty();i++) ClientLogger.print("\u26AA");
+
+        if(whiteSpaceNum%2 == 1) whiteSpaceHalf++;
+        for(i=0;i<whiteSpaceHalf;i++) ClientLogger.print(" ");
+    }
+
+    private static void printPublicGoals(List<String> publicGoals){
+
+    }
+
+    private static void printPrivateGoal(PrivateGoal privateGoal){
+
+    }
+
+    static void printToolCards(List<ToolCard> toolCards){
+        int i = 0;
+        ClientLogger.println("TOOL CARDS");
+        for (ToolCard toolcard: toolCards) {
+            ClientLogger.print(++i + ") " + toolcard.getName());
+            for(int j = toolcard.getName().length();j<31;j++) ClientLogger.print(" ");
+            //ClientLogger.println("   Description: " + toolcard.getDescription());
+            ClientLogger.println("|  Cost: " + (toolcard.getUsed() ? "2" : "1"));
+        }
+    }
+
+
+
+    void clear(){
+        ClientLogger.printWithClear("");
+    }
 }

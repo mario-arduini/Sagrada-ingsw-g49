@@ -9,11 +9,6 @@ import java.util.logging.*;
 public class Client {
 
     private static final Logger LOGGER = Logger.getLogger( Client.class.getName() );
-    private static final String CLI_SCHEMA_ROW = "---------------------    ---------------------";
-    private static final String CLI_21_DASH = "---------------------";
-    private static final int ROWS_NUMBER = 4;
-    private static final int COLUMNS_NUMBER = 5;
-    private static final int WINDOW_WIDTH = 27;
 
     private String serverAddress;
     private int serverPort;
@@ -47,10 +42,7 @@ public class Client {
 
     boolean login(String nickname, String password){
         gameSnapshot.setPlayer(nickname);
-        if(server.login(nickname, password)){
-            return true;
-        }
-        return false;
+        return server.login(nickname, password);
     }
 
     boolean isLogged(){
@@ -102,16 +94,16 @@ public class Client {
             cliHandler.notifyNewTurn(nickname, newRound);
     }
 
-    boolean placeDice(int dice, int row, int column){
-        Dice choice = gameSnapshot.getDraftPool().get(dice - 1);
-        if(server.placeDice(choice, row, column)){
-            gameSnapshot.getPlayer().getWindow().addDice(row - 1, column - 1, choice);
-            gameSnapshot.getDraftPool().remove(dice - 1);
+    boolean placeDice(int diceNumber, int row, int column){
+        Dice dice = gameSnapshot.getDraftPool().get(diceNumber - 1);
+        if(server.placeDice(dice, row, column)){
+            gameSnapshot.getPlayer().getWindow().addDice(row - 1, column - 1, dice);
+            gameSnapshot.getDraftPool().remove(diceNumber - 1);
             gameSnapshot.getPlayer().setDiceExtracted(true);
-            ClientLogger.printWithClear("");
-            printGame();
-            printMenu();
-            verifyEndTurn();
+//            ClientLogger.printWithClear("");
+//            printGame();
+//            printMenu();
+//            verifyEndTurn();
             return true;
         }
         return false;
@@ -133,15 +125,13 @@ public class Client {
 
     boolean useToolCard(String name){
         gameSnapshot.getPlayer().setUsedToolCard(server.useToolCard(name));
-        verifyEndTurn();
+        if(verifyEndTurn())
+            pass();
         return getGameSnapshot().getPlayer().isToolCardAlreadyUsed();
     }
 
-    private void verifyEndTurn(){
-        if(getGameSnapshot().getPlayer().isDiceAlreadyExtracted() && getGameSnapshot().getPlayer().isToolCardAlreadyUsed()){
-            cliHandler.notifyEndTurn();
-            pass();
-        }
+    boolean verifyEndTurn(){
+        return getGameSnapshot().getPlayer().isDiceAlreadyExtracted() && getGameSnapshot().getPlayer().isToolCardAlreadyUsed();
     }
 
     void pass(){
@@ -179,164 +169,7 @@ public class Client {
         }
     }
 
-    void clear(){
-        cliHandler.clear();
-    }
 
-    void printSchemas(List<Schema> schemas){
-        Constraint constraint;
-        Schema currentSchema;
-        ClientLogger.println("\nSCHEMA CHOICE");
-        for(int i=0;i<schemas.size();i+=2){
-            ClientLogger.println("");
-            ClientLogger.print((i + 1) + ") " + schemas.get(i).getName());// + "               " + (i + 2) + ") " + schemas.get(i).getName());
-            for(int s = schemas.get(i).getName().length(); s < 22; s++)
-                ClientLogger.print(" ");
-            ClientLogger.println((i + 2) + ") " + schemas.get(i + 1).getName());
-            ClientLogger.println(CLI_SCHEMA_ROW);
-            for(int r=0;r<ROWS_NUMBER;r++){
-                currentSchema = schemas.get(i);
-                for(int c=0;c<COLUMNS_NUMBER;c++){
-                    constraint = currentSchema.getConstraint(r,c);
-                    if(constraint==null) ClientLogger.print("|   ");
-                    else if(constraint.getColor()!=null) ClientLogger.print("| "+ constraint.getColor().escape() +"■ "+Color.RESET);
-                    else if(constraint.getNumber()!=0) ClientLogger.print("| "+constraint.getNumber()+" ");
-                }
-                ClientLogger.print("|    ");
-                currentSchema = schemas.get(i+1);
-                for(int c=0;c<COLUMNS_NUMBER;c++){
-                    constraint = currentSchema.getConstraint(r,c);
-                    if(constraint==null) ClientLogger.print("|   ");
-                    else if(constraint.getColor()!=null) ClientLogger.print("| "+ constraint.getColor().escape() +"■ "+Color.RESET);
-                    else if(constraint.getNumber()!=0) ClientLogger.print("| "+constraint.getNumber()+" ");
-                }
-                ClientLogger.println("|");
-                ClientLogger.println(CLI_SCHEMA_ROW);
-            }
-            ClientLogger.println("Difficulty: "+schemas.get(i).getDifficulty()+"            Difficulty: "+schemas.get(i+1).getDifficulty());
-        }
-    }
-
-    void printGame(){
-        PlayerSnapshot p = gameSnapshot.getPlayer();
-        List<PlayerSnapshot> otherPlayers = gameSnapshot.getOtherPlayers();
-        int whiteSpaceNum,opNum=otherPlayers.size();
-        Window currentWindow;
-        Constraint constraint;
-
-        printPlayers();
-
-        ClientLogger.print(" ");
-        for(int i = 0; i < 5; i++)
-            ClientLogger.print("   " + (i + 1));
-        ClientLogger.print("      |      ");
-        for(int i = 0; i < 5; i++)
-            ClientLogger.print("  " + (i + 1) + " ");
-        ClientLogger.println("");
-
-        ClientLogger.print("  " + CLI_21_DASH+"    |");
-        for(int i=0;i<opNum;i++)
-            ClientLogger.print("      "+CLI_21_DASH);
-        ClientLogger.println("");
-
-        for(int r=0;r<ROWS_NUMBER;r++){
-            ClientLogger.print((r + 1) + " ");
-            currentWindow = p.getWindow();
-            for(int c=0;c<COLUMNS_NUMBER;c++){
-                if(currentWindow.getCell(r,c)!=null) ClientLogger.print("| "+currentWindow.getCell(r,c)+" ");
-                else {
-                    constraint = currentWindow.getSchema().getConstraint(r,c);
-                    if(constraint==null) ClientLogger.print("|   ");
-                    else if(constraint.getColor()!=null) ClientLogger.print("| "+ constraint.getColor().escape() +"■ "+Color.RESET);
-                    else if(constraint.getNumber()!=0) ClientLogger.print("| "+constraint.getNumber()+" ");
-                }
-            }
-            ClientLogger.print("|    |");
-
-            for(PlayerSnapshot op : otherPlayers){
-                currentWindow = op.getWindow();
-                ClientLogger.print("    " + (r + 1) + " ");
-                for(int c=0;c<COLUMNS_NUMBER;c++){
-                    if(currentWindow.getCell(r,c)!=null) ClientLogger.print("| "+currentWindow.getCell(r,c)+" ");
-                    else {
-                        constraint = currentWindow.getSchema().getConstraint(r,c);
-                        if(constraint==null) ClientLogger.print("|   ");
-                        else if(constraint.getColor()!=null) ClientLogger.print("| "+ constraint.getColor().escape() +"■ "+Color.RESET);
-                        else if(constraint.getNumber()!=0) ClientLogger.print("| "+constraint.getNumber()+" ");
-                    }
-                }
-                ClientLogger.print("|");
-            }
-            ClientLogger.println("");
-
-
-            ClientLogger.print("  " + CLI_21_DASH+"    |");
-            for(int i=0;i<opNum;i++)
-                ClientLogger.print("      "+CLI_21_DASH);
-            ClientLogger.println("");
-        }
-
-        // print draftpool
-        ClientLogger.println("");
-        ClientLogger.println("  Draft Pool               |    Round Track");
-        for(Dice dice : gameSnapshot.getDraftPool()){
-            ClientLogger.print("  "+dice);
-        }
-        for(int i=gameSnapshot.getDraftPool().size();i<8;i++) ClientLogger.print("   ");
-        ClientLogger.print("   |  ");
-        for(Dice dice : gameSnapshot.getRoundTrack()){
-            ClientLogger.print("  "+dice);
-        }
-        for(int i=gameSnapshot.getRoundTrack().size();i<9;i++) ClientLogger.print("  \u25A1");
-
-        ClientLogger.println("\n");
-        printFooter();
-
-        //ClientLogger.println("\n\nYou have " + gameSnapshot.getPlayer().getFavorToken() + " favour token" + (gameSnapshot.getPlayer().getFavorToken() > 1 ? "s" : ""));
-
-
-//        cliHandler.printMenu();
-//        if(!cliHandler.getPlayingRound()) {
-//            cliHandler.setPlayingRound(true);
-//            synchronized (cliHandler) {
-//                cliHandler.notifyAll();
-//            }
-//        }
-    }
-
-    void printPlayers(){
-        PlayerSnapshot p = gameSnapshot.getPlayer();
-        List<PlayerSnapshot> otherPlayers = gameSnapshot.getOtherPlayers();
-        int opNum=otherPlayers.size();
-        ClientLogger.println("");
-
-        printPlayer(p);
-
-        ClientLogger.print("|");
-        for(PlayerSnapshot op : otherPlayers){
-            printPlayer(op);
-        }
-        ClientLogger.println("");
-        for (int i = 0;i<WINDOW_WIDTH;i++) ClientLogger.print(" ");
-        ClientLogger.println("|");
-
-    }
-
-    void printPlayer(PlayerSnapshot p){
-        int i,whiteSpaceHalf,whiteSpaceNum;
-
-        whiteSpaceNum = WINDOW_WIDTH - p.getNickname().length() - 1 - p.getWindow().getSchema().getDifficulty();
-        whiteSpaceHalf = whiteSpaceNum/2;
-
-        for(i=0;i<whiteSpaceHalf;i++) ClientLogger.print(" ");
-
-        ClientLogger.print(p.getNickname()+" ");
-        for(i=0;i<p.getFavorToken();i++) ClientLogger.print("\u26AB");
-        for(;i<p.getWindow().getSchema().getDifficulty();i++) ClientLogger.print("\u26AA");
-
-        if(whiteSpaceNum%2 == 1) whiteSpaceHalf++;
-        for(i=0;i<whiteSpaceHalf;i++) ClientLogger.print(" ");
-    }
 
     void printMenu(){
         cliHandler.printMenu();
@@ -389,14 +222,26 @@ public class Client {
 
     //endregion
 
-    void printFooter(){
-        cliHandler.printPublicGoals(gameSnapshot.getPublicGoals());
-        cliHandler.printPrivateGoal(gameSnapshot.getPlayer().getPrivateGoal());
-        cliHandler.printToolCards(gameSnapshot.getToolCards());
-    }
-
     void notifyStartGame(){
         cliHandler.notifyStartGame();
+    }
+
+
+
+    void printSchemas(List<Schema> schemas){
+        CLIHandler.printSchemas(schemas);
+    }
+
+    void printGame(){
+        CLIHandler.printGame(gameSnapshot);
+    }
+
+    void printFooter(){
+        CLIHandler.printFooter(gameSnapshot);
+    }
+
+    void clear(){
+        cliHandler.clear();
     }
 
     public static void main(String[] args) {
