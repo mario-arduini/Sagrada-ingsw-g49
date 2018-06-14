@@ -56,9 +56,8 @@ class CLIHandler {
         waitStartRound();
 
         while (!logout){
-
             command = readInt(0, 3);
-            if(command > 0 && !client.getGameSnapshot().getPlayer().isMyTurn())
+            if(command > 0 && (!playingRound || !client.getGameSnapshot().getPlayer().isMyTurn()))
                 ClientLogger.print(ERROR);
             else
                 switch (command){
@@ -219,7 +218,7 @@ class CLIHandler {
     }
 
     void printWaitingRoom(){
-        ClientLogger.printlnWithClear("Waiting for game to start!");
+        ClientLogger.printlnWithClear("Waiting for game to start, insert 0 to logout");
         ClientLogger.println("\nWaiting room:");
         ClientLogger.println(client.getGameSnapshot().getPlayer().getNickname());
         client.getGameSnapshot().getOtherPlayers().forEach(nick -> ClientLogger.println(nick.getNickname()));

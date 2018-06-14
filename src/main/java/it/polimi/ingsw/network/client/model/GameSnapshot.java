@@ -32,9 +32,8 @@ public class GameSnapshot {
     }
 
     public void removeOtherPlayer(String nick){
-        for(PlayerSnapshot user : otherPlayers)
-            if(user.getNickname().equals(nick))
-                otherPlayers.remove(user);
+        Optional<PlayerSnapshot> LoggedOutPlayer = otherPlayers.stream().filter(user -> user.getNickname().equals(nick)).findFirst();
+        LoggedOutPlayer.ifPresent(otherPlayers::remove);
     }
 
     public List<PlayerSnapshot> getOtherPlayers() {

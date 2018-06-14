@@ -64,7 +64,7 @@ public class ServerListener implements Runnable {
                         break;
                     case "quit":
                         List<String> loggedOutUser = new ArrayList<>();
-                        loggedOutUser.add(jsonObject.get("nicknames").getAsString());
+                        loggedOutUser.add(jsonObject.get("nickname").getAsString());
                         client.updateWaitingRoom(loggedOutUser, false);
                         break;
                     case "verified":
