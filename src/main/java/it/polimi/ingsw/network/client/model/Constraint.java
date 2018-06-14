@@ -1,7 +1,5 @@
 package it.polimi.ingsw.network.client.model;
 
-import it.polimi.ingsw.network.client.model.exception.InvalidConstraintValueException;
-
 public final class Constraint {
     private final Color color;
     private final int number;
@@ -11,10 +9,7 @@ public final class Constraint {
         this.number = 0;
     }
 
-    public Constraint(int number) throws InvalidConstraintValueException {
-        if(number < 1 || number > 6)
-            throw  new InvalidConstraintValueException();
-
+    public Constraint(int number) {
         this.color = null;
         this.number = number;
     }

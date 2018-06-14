@@ -54,7 +54,6 @@ public class Client {
     }
 
     void welcomePlayer(){
-        cliHandler.welcomePlayer();
         serverConnected = true;
         synchronized (cliHandler) {
             cliHandler.notifyAll();
@@ -76,8 +75,8 @@ public class Client {
         return true;
     }
 
-    int chooseSchema(){
-        return cliHandler.chooseSchema();
+    int chooseSchema(List<Schema> schemas){
+        return cliHandler.chooseSchema(gameSnapshot, schemas);
     }
 
     boolean sendSchema(int choice){
@@ -88,10 +87,7 @@ public class Client {
         getGameSnapshot().getPlayer().setMyTurn(nickname.equals(gameSnapshot.getPlayer().getNickname()));
         getGameSnapshot().getPlayer().setDiceExtracted(false);
         getGameSnapshot().getPlayer().setUsedToolCard(false);
-        if(gameSnapshot.getPlayer().isMyTurn())
-            cliHandler.notifyNewTurn(newRound);
-        else
-            cliHandler.notifyNewTurn(nickname, newRound);
+        gameSnapshot.setCurrentPlayer(nickname);
     }
 
     boolean placeDice(int diceNumber, int row, int column){
@@ -100,17 +96,9 @@ public class Client {
             gameSnapshot.getPlayer().getWindow().addDice(row - 1, column - 1, dice);
             gameSnapshot.getDraftPool().remove(diceNumber - 1);
             gameSnapshot.getPlayer().setDiceExtracted(true);
-//            ClientLogger.printWithClear("");
-//            printGame();
-//            printMenu();
-//            verifyEndTurn();
             return true;
         }
         return false;
-    }
-
-    void setPrivateGoal(PrivateGoal privateGoal){
-        gameSnapshot.getPlayer().setPrivateGoal(privateGoal);
     }
 
     synchronized void logout(){
@@ -148,16 +136,6 @@ public class Client {
         cliHandler.printWaitingRoom();
     }
 
-    //region DEPRECATED
-    void addPlayers(List<String> newPlayers){
-        cliHandler.printNewPlayers(newPlayers);
-    }
-
-    void removePlayer(String nickname){
-        cliHandler.printLoggedOutPlayer(nickname);
-    }
-    //endregion
-
     synchronized void serverDisconnected(){
         if(logged) {
             cliHandler.notifyServerDisconnected();
@@ -169,7 +147,9 @@ public class Client {
         }
     }
 
-
+    void printGame(){
+        CLIHandler.printGame(gameSnapshot);
+    }
 
     void printMenu(){
         cliHandler.printMenu();
@@ -187,10 +167,6 @@ public class Client {
     }
 
     //region TOOLCARD
-
-    void printToolCards(){
-        cliHandler.printToolCards(gameSnapshot.getToolCards());
-    }
 
     void notifyUsedToolCard(String player, String toolCard){
         cliHandler.notifyUsedToolCard(player, toolCard);
@@ -221,28 +197,6 @@ public class Client {
     }
 
     //endregion
-
-    void notifyStartGame(){
-        cliHandler.notifyStartGame();
-    }
-
-
-
-    void printSchemas(List<Schema> schemas){
-        CLIHandler.printSchemas(schemas);
-    }
-
-    void printGame(){
-        CLIHandler.printGame(gameSnapshot);
-    }
-
-    void printFooter(){
-        CLIHandler.printFooter(gameSnapshot);
-    }
-
-    void clear(){
-        cliHandler.clear();
-    }
 
     public static void main(String[] args) {
         if(args.length != 2){

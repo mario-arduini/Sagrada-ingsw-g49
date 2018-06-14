@@ -1,9 +1,5 @@
 package it.polimi.ingsw.network.client.model;
 
-
-import it.polimi.ingsw.network.client.model.exception.InvalidDifficultyValueException;
-import it.polimi.ingsw.network.client.model.exception.UnexpectedMatrixSizeException;
-
 public final class Schema {
     private final int difficulty;
     private final Constraint[][] constraint;
@@ -11,15 +7,7 @@ public final class Schema {
     private static final int ROW = 4;
     private static final int COLUMN = 5;
 
-    public Schema(int difficulty, Constraint[][] constraint, String name) throws InvalidDifficultyValueException, UnexpectedMatrixSizeException {
-        if (difficulty < 3 || difficulty > 6)
-            throw new InvalidDifficultyValueException();
-        if (constraint.length != ROW)
-            throw new UnexpectedMatrixSizeException();
-        for (Constraint[] aConstraint : constraint) {
-            if (aConstraint.length != COLUMN)
-                throw new UnexpectedMatrixSizeException();
-        }
+    public Schema(int difficulty, Constraint[][] constraint, String name) {
         this.difficulty = difficulty;
         this.constraint = constraint;
         this.name = name;

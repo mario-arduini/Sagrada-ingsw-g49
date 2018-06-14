@@ -1,7 +1,5 @@
 package it.polimi.ingsw.network.client.model;
 
-import it.polimi.ingsw.network.client.model.exception.InvalidDiceValueException;
-
 public class Dice {
     private final Color color;
     private int value;
@@ -10,9 +8,7 @@ public class Dice {
         this.color = color;
     }
 
-    public Dice(Color color, int value) throws InvalidDiceValueException {
-        if(value < 1 || value > 6)
-            throw  new InvalidDiceValueException();
+    public Dice(Color color, int value) {
         this.color = color;
         this.value = value;
     }
@@ -30,9 +26,7 @@ public class Dice {
         return value;
     }
 
-    public void setValue(int value) throws InvalidDiceValueException {
-        if(value < 1 || value > 6)
-            throw  new InvalidDiceValueException();
+    public void setValue(int value) {
         this.value = value;
     }
 

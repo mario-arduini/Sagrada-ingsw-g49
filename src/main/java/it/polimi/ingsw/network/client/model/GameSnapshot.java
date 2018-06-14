@@ -9,6 +9,7 @@ public class GameSnapshot {
     private List<ToolCard> toolCards;
     private List<String> publicGoals;
     private List<Dice> draftPool;
+    private String currentPlayer;
 
     public GameSnapshot() {
         this.roundTrack = new ArrayList<>();
@@ -25,14 +26,6 @@ public class GameSnapshot {
     public void setPlayer(String nickname) {
         this.player = new PlayerSnapshot(nickname);
     }
-
-    //region DEPRECATED
-//    public void addOtherPlayer(String nick, Schema schema){
-//        PlayerSnapshot newPlayer = new PlayerSnapshot(nick);
-//        newPlayer.setWindow(schema);
-//        otherPlayers.add(newPlayer);
-//    }
-    //endregion
 
     public void addOtherPlayer(String nick){
         otherPlayers.add(new PlayerSnapshot(nick));
@@ -89,5 +82,13 @@ public class GameSnapshot {
 
     public void setDraftPool(List<Dice> draftPool){
         this.draftPool = new ArrayList<>(draftPool);
+    }
+
+    public String getCurrentPlayer(){
+        return currentPlayer;
+    }
+
+    public void setCurrentPlayer(String currentPlayer) {
+        this.currentPlayer = currentPlayer;
     }
 }

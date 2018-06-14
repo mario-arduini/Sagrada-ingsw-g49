@@ -24,7 +24,6 @@ public class ClientSocketHandler implements Connection {
     private ServerListener serverListener;
     private Thread thread;
     private boolean flagContinue;
-    private boolean connected;
     private boolean serverResult;
     private JsonObject jsonObject;
     private Gson gson;
@@ -60,11 +59,11 @@ public class ClientSocketHandler implements Connection {
             try {
                 wait();
             } catch (InterruptedException e) {
-                LOGGER.severe(e.toString());
+                LOGGER.warning(e.toString());
             }
-        connected = serverResult;
+
         flagContinue = false;
-        return connected;
+        return serverResult;
     }
 
     synchronized void notifyResult(boolean result){
@@ -96,7 +95,7 @@ public class ClientSocketHandler implements Connection {
             try {
                 wait();
             } catch (InterruptedException e) {
-                LOGGER.severe(e.toString());
+                LOGGER.warning(e.toString());
             }
         flagContinue = false;
         return serverResult;
@@ -112,7 +111,7 @@ public class ClientSocketHandler implements Connection {
             try {
                 wait();
             } catch (InterruptedException e) {
-                LOGGER.severe(e.toString());
+                LOGGER.warning(e.toString());
             }
         flagContinue = false;
         return serverResult;
@@ -150,10 +149,8 @@ public class ClientSocketHandler implements Connection {
     String socketReadLine(){
         try {
             return input.readLine();
-        }  catch(SocketException e){
-            LOGGER.severe(e.toString());
-        } catch(IOException e) {
-            LOGGER.severe(e.toString());
+        } catch(Exception e) {
+            LOGGER.warning(e.toString());
         }
         return null;
     }
@@ -162,7 +159,7 @@ public class ClientSocketHandler implements Connection {
         try {
             socket.close();
         } catch (IOException e) {
-            LOGGER.severe(e.toString());
+            LOGGER.warning(e.toString());
         }
     }
 

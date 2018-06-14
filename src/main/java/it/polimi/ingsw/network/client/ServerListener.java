@@ -61,10 +61,8 @@ public class ServerListener implements Runnable {
                     case "new_player":
                         listType = new TypeToken<List<String>>(){}.getType();
                         client.updateWaitingRoom(gson.fromJson(jsonObject.get("nicknames").getAsString(), listType), true);
-                        //client.addPlayers(gson.fromJson(jsonObject.get("nicknames").getAsString(), listType));
                         break;
                     case "quit":
-                        //client.removePlayer(jsonObject.get("nickname").getAsString());
                         List<String> loggedOutUser = new ArrayList<>();
                         loggedOutUser.add(jsonObject.get("nicknames").getAsString());
                         client.updateWaitingRoom(loggedOutUser, false);
@@ -78,32 +76,14 @@ public class ServerListener implements Runnable {
                     case "game-info":
                         extractToolCards(jsonObject.getAsJsonObject("toolcards"));
                         extractPublicGoals(jsonObject.getAsJsonObject("public-goals"));
-                        client.getGameSnapshot().getPlayer().setPrivateGoal(gson.fromJson(jsonObject.get("private-goal").getAsString(), PrivateGoal.class));
-                        List<Schema> schemas = extractSchemas(jsonObject.getAsJsonObject("schemas"));
-                        client.notifyStartGame();
-                        client.printFooter();
-                        chooseSchema(schemas);
-                        break;
-
-                    // region DEPRECATED
-                    case "toolcards":
-                        List<ToolCard> toolCards = new ArrayList<>();
-                        for(Integer i = 0; i < 3; i++)
-                            toolCards.add(new ToolCard(jsonObject.get(i.toString()).getAsJsonObject().get("name").getAsString(),"")); //jsonObject.get("0").getAsJsonObject().get("description").getAsString()));
-                        client.getGameSnapshot().setToolCards(toolCards);
-                        client.notifyStartGame();
-                        client.printToolCards();
+                        client.getGameSnapshot().getPlayer().setPrivateGoal(gson.fromJson(jsonObject.get("private-goal").getAsString(), PrivateGoal.class)); //TODO: change this to only string?
                         break;
                     case "schema-choice":
-                        List<Schema> schemas1 = new ArrayList<>();
+                        List<Schema> schemas = new ArrayList<>();
                         for(Integer i = 0; i < jsonObject.keySet().size() - 1; i++)
-                            schemas1.add(gson.fromJson(jsonObject.get(i.toString()).getAsString(), Schema.class));
-                        client.printSchemas(schemas1);
-                        Schema choseSchema = schemas1.get(client.chooseSchema());
-                        client.getGameSnapshot().getPlayer().setWindow(choseSchema);
+                            schemas.add(gson.fromJson(jsonObject.get(i.toString()).getAsString(), Schema.class));
+                        client.getGameSnapshot().getPlayer().setWindow(schemas.get(client.chooseSchema(schemas)));
                         break;
-                    // endregion
-
                     case "round":
                         listType = new TypeToken<List<Dice>>(){}.getType();
                         client.notifyNewTurn(jsonObject.get("player").getAsString(), jsonObject.get("new-round").getAsBoolean());
@@ -111,7 +91,6 @@ public class ServerListener implements Runnable {
                             //client.getGameSnapshot().getRoundTrack().add(gson.fromJson(jsonObject.get("roundtrack-dice").getAsString(),Dice.class));
                         List<Dice> draftPool = gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType);
                         client.getGameSnapshot().setDraftPool(draftPool);
-                        client.clear();
                         client.printGame();
                         client.printMenu();
                         break;
@@ -120,7 +99,6 @@ public class ServerListener implements Runnable {
                         HashMap<String, Schema> windows = gson.fromJson(jsonObject.get("content").getAsString(), listType);
                         for (Map.Entry<String, Schema> entry : windows.entrySet()) {
                             if(!entry.getKey().equals(client.getGameSnapshot().getPlayer().getNickname()))
-                                //client.getGameSnapshot().addOtherPlayer(entry.getKey(), entry.getValue());
                                 client.getGameSnapshot().findPlayer(entry.getKey()).get().setWindow(entry.getValue());
                         }
                         break;
@@ -143,7 +121,6 @@ public class ServerListener implements Runnable {
                         if(!nick.equals(client.getGameSnapshot().getPlayer().getNickname())){
                             client.getGameSnapshot().getDraftPool().remove(dicePlaced);
                             client.getGameSnapshot().findPlayer(nick).get().getWindow().addDice(row,col,dicePlaced);
-                            client.clear();
                             client.printGame();
                             client.printMenu();
                         }
@@ -165,7 +142,6 @@ public class ServerListener implements Runnable {
                     case "toolcard-place-window":
                         client.getPlacementPosition();
                         break;
-
                     case "toolcard-dice-value":
                         client.getDiceValue();
                         break;
@@ -193,19 +169,6 @@ public class ServerListener implements Runnable {
         for(Integer i = 0; i < 3; i++)
             publicGoals.add(jsonObject.get(i.toString()).getAsJsonObject().get("name").getAsString());
         client.getGameSnapshot().setPublicGoals(publicGoals);
-    }
-
-    private List<Schema> extractSchemas(JsonObject jsonObject){
-        List<Schema> schemas = new ArrayList<>();
-        for(Integer i = 0; i < jsonObject.keySet().size() - 1; i++)
-            schemas.add(gson.fromJson(jsonObject.get(i.toString()).getAsString(), Schema.class));
-        return schemas;
-    }
-
-    private void chooseSchema(List<Schema> schemas){
-        client.printSchemas(schemas);
-        Schema choseSchema = schemas.get(client.chooseSchema());
-        client.getGameSnapshot().getPlayer().setWindow(choseSchema);
     }
 
     void setConnected(boolean connected){

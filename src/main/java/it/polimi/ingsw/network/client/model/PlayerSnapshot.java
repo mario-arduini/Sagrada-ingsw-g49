@@ -1,8 +1,5 @@
 package it.polimi.ingsw.network.client.model;
 
-import it.polimi.ingsw.network.client.model.exception.InvalidFavorTokenNumberException;
-import it.polimi.ingsw.network.client.model.exception.NotEnoughFavorTokenException;
-
 public class PlayerSnapshot {
     private final String nickname;
     private Window window;
@@ -52,12 +49,8 @@ public class PlayerSnapshot {
         return favorToken;
     }
 
-    public void useFavorToken(int number) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException {
-        if (number < 0) throw new InvalidFavorTokenNumberException();
-        if(this.favorToken >= number)
-            this.favorToken -= number;
-        else
-            throw new NotEnoughFavorTokenException();
+    public void useFavorToken(int number) {
+        this.favorToken -= number;
     }
 
     private void setFavorToken(){
