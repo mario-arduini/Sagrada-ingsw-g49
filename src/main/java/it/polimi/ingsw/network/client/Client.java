@@ -16,6 +16,7 @@ public class Client {
     private Connection server;
     enum ConnectionType{ RMI, SOCKET }
     private boolean logged;
+    private boolean playingRound;
     private boolean serverConnected;    //* is it useful?
     private GameSnapshot gameSnapshot;
 
@@ -88,17 +89,7 @@ public class Client {
 
     boolean placeDice(int diceNumber, int row, int column){
         gameSnapshot.getPlayer().setDiceExtracted(server.placeDice(gameSnapshot.getDraftPool().get(diceNumber - 1), row, column));
-//        if(verifyEndTurn())
-//            pass();
         return getGameSnapshot().getPlayer().isDiceAlreadyExtracted();
-
-//        if(server.placeDice(dice, row, column)){
-////            gameSnapshot.getPlayer().getWindow().addDice(row - 1, column - 1, dice);
-////            gameSnapshot.getDraftPool().remove(diceNumber - 1);
-//            gameSnapshot.getPlayer().setDiceExtracted(true);
-//            return true;
-//        }
-//        return false;
     }
 
     synchronized void logout(){
@@ -113,13 +104,12 @@ public class Client {
 
     boolean useToolCard(String name){
         gameSnapshot.getPlayer().setUsedToolCard(server.useToolCard(name));
-//        if(verifyEndTurn())
-//            pass();
         return getGameSnapshot().getPlayer().isToolCardAlreadyUsed();
     }
 
-    boolean verifyEndTurn(){
-        return getGameSnapshot().getPlayer().isDiceAlreadyExtracted() && getGameSnapshot().getPlayer().isToolCardAlreadyUsed();
+    void verifyEndTurn(){
+        if(gameSnapshot.getPlayer().isDiceAlreadyExtracted() && gameSnapshot.getPlayer().isToolCardAlreadyUsed())
+            pass();
     }
 
     void pass(){

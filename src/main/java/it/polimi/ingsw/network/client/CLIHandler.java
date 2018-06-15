@@ -256,7 +256,6 @@ class CLIHandler {
         if(client.getGameSnapshot().getPlayer().isMyTurn()){
             int dice = -1, row = -1, column = -1;
             boolean ask = true;
-            ClientLogger.printWithClear("");
             printGame(client.getGameSnapshot());
 
             while (ask) {
@@ -273,7 +272,6 @@ class CLIHandler {
                     ask = false;
             }
             if(!client.placeDice(dice, row, column)) {
-                ClientLogger.printWithClear("");
                 printGame(client.getGameSnapshot());
                 ClientLogger.println("\nConstraint violated!");
                 client.printMenu();
@@ -284,16 +282,6 @@ class CLIHandler {
             ClientLogger.println("Not your turn! You can only logout");
     }
 
-    private void verifyEndTurn(){
-        if(client.verifyEndTurn())
-            client.pass();
-        else {
-            ClientLogger.printWithClear("");
-            printGame(client.getGameSnapshot());
-            client.printMenu();
-        }
-    }
-
     private void useToolCard(){
         if(client.getGameSnapshot().getPlayer().getFavorToken() < 1) {
             ClientLogger.print("Not enough favor token!\n\nRetry: ");
@@ -301,7 +289,6 @@ class CLIHandler {
         }
 
         int choice = -1;
-        ClientLogger.printWithClear("");
         printGame(client.getGameSnapshot());
         ClientLogger.println("\nTo go back insert 0");
         while (choice < 0 || choice > 3) {
@@ -312,7 +299,6 @@ class CLIHandler {
                 choice = -1;
             }
             if(choice == 0) {
-                ClientLogger.printWithClear("");
                 printGame(client.getGameSnapshot());
                 printMenu();
                 return;
@@ -320,7 +306,6 @@ class CLIHandler {
             if(choice < 1 || choice > 3)
                 ClientLogger.println("Not a valid choice");
         }
-        ClientLogger.println("");
         if(!client.useToolCard( client.getGameSnapshot().getToolCards().get(choice - 1).getName())) {
             printGame(client.getGameSnapshot());
             ClientLogger.println("\nYou can't use this card now");
