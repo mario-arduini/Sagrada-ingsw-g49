@@ -382,10 +382,10 @@ class CLIHandler {
         ClientLogger.println(player + " used the tool card " + toolCard);
     }
 
-    String askPlusMinusOption(){
+    String askPlusMinusOption(String prompt){
         String choice = "";
         boolean ask = true;
-        ClientLogger.print("Do you want to add [+] or subtract [-] 1? ");
+        ClientLogger.print(MessageHandler.get(prompt));
 
         while (ask){
             try {
@@ -394,7 +394,7 @@ class CLIHandler {
                 ClientLogger.print("Not a valid choice, retry: ");
             }
 
-            if(choice.equals("+") || choice.equals("-"))
+            if(choice.equals("+") || choice.equals("-") || choice.equals("y") || choice.equals("n"))
                 ask = false;
             else
                 ClientLogger.print("Not a valid choice, retry: ");
@@ -402,18 +402,18 @@ class CLIHandler {
         return choice;
     }
 
-    Dice askDiceFormDraftPool(){
-        ClientLogger.print("Insert dice number from draftpool: ");
+    Dice askDiceFormDraftPool(String prompt){
+        ClientLogger.print(MessageHandler.get(prompt));
         return client.getGameSnapshot().getDraftPool().get(readInt(1, client.getGameSnapshot().getDraftPool().size()) - 1);
     }
 
-    int askDiceFormRoundTrack(){
-        ClientLogger.print("Insert dice number from round track: ");
+    int askDiceFormRoundTrack(String prompt){
+        ClientLogger.print(MessageHandler.get(prompt));
         return readInt(1, 10) - 1;
     }
 
-    Coordinate askDiceFormWindow(){
-        ClientLogger.println("Choose a cell from your window");
+    Coordinate askDiceFormWindow(String prompt){
+        ClientLogger.println(MessageHandler.get(prompt));
         return getPosition();
     }
 
@@ -422,8 +422,8 @@ class CLIHandler {
         return getPosition();
     }
 
-    int askDiceValue(){
-        ClientLogger.print("Insert dice number: ");
+    int askDiceValue(String prompt){
+        ClientLogger.print(MessageHandler.get(prompt));
         return readInt(1, 6);
     }
 

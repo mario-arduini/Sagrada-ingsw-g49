@@ -289,9 +289,13 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public Coordinate askDiceWindow() {
+    public Coordinate askDiceWindow(String prompt) {
         JsonObject command;
-        socketSendMessage(createMessage("toolcard-dice-window"));
+
+        JsonObject toSend = createMessage("toolcard-dice-window");
+        toSend.addProperty("prompt",prompt);
+        socketSendMessage(toSend);
+
         try{
             command = socketReadCommand();
 
@@ -307,9 +311,12 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public Dice askDiceDraftPool(){
+    public Dice askDiceDraftPool(String prompt){
         JsonObject command;
-        socketSendMessage(createMessage("toolcard-dice-draftpool"));
+
+        JsonObject toSend = createMessage("toolcard-dice-draftpool");
+        toSend.addProperty("prompt",prompt);
+        socketSendMessage(toSend);
         try{
             command = socketReadCommand();
 
@@ -324,9 +331,12 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public int askDiceRoundTrack(){
+    public int askDiceRoundTrack(String prompt){
         JsonObject command;
-        socketSendMessage(createMessage("toolcard-dice-roundtrack"));
+
+        JsonObject toSend = createMessage("toolcard-dice-roundtrack");
+        toSend.addProperty("prompt",prompt);
+        socketSendMessage(toSend);
         try{
             command = socketReadCommand();
 
@@ -341,9 +351,12 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public boolean askIfPlus(){
+    public boolean askIfPlus(String prompt){
         JsonObject command;
-        socketSendMessage(createMessage("toolcard-plus-minus"));
+
+        JsonObject toSend = createMessage("toolcard-plus-minus");
+        toSend.addProperty("prompt",prompt);
+        socketSendMessage(toSend);
         try{
             command = socketReadCommand();
             return command.get("choice").getAsBoolean();
@@ -358,9 +371,12 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public int askDiceValue(){
+    public int askDiceValue(String prompt){
         JsonObject command;
-        socketSendMessage(createMessage("toolcard-dice-value"));
+
+        JsonObject toSend = createMessage("toolcard-dice-value");
+        toSend.addProperty("prompt",prompt);
+        socketSendMessage(toSend);
         try{
             command = socketReadCommand();
 

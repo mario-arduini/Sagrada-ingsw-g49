@@ -27,9 +27,9 @@ public interface ConnectionHandler{
     void close();
     void setGame(GameRoom game);
 
-    Coordinate askDiceWindow();
-    Dice askDiceDraftPool();
-    int askDiceRoundTrack();
-    boolean askIfPlus();
-    int askDiceValue();
+    Coordinate askDiceWindow(String prompt);
+    Dice askDiceDraftPool(String prompt);
+    int askDiceRoundTrack(String prompt);
+    boolean askIfPlus(String prompt);
+    int askDiceValue(String prompt);
 }

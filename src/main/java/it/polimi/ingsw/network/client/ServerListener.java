@@ -135,22 +135,22 @@ public class ServerListener implements Runnable {
 
                     //region TOOLCARD
                     case "toolcard-plus-minus":
-                        client.getPlusMinusOption();
+                        client.getPlusMinusOption(jsonObject.get("prompt").getAsString());
                         break;
                     case "toolcard-dice-draftpool":
-                        client.getDiceFromDraftPool();
+                        client.getDiceFromDraftPool(jsonObject.get("prompt").getAsString());
                         break;
                     case "toolcard-dice-roundtrack":
-                        client.getDiceFromRoundTrack();
+                        client.getDiceFromRoundTrack(jsonObject.get("prompt").getAsString());
                         break;
                     case "toolcard-dice-window":
-                        client.getDiceFromWindow();
+                        client.getDiceFromWindow(jsonObject.get("prompt").getAsString());
                         break;
                     case "toolcard-place-window":
                         client.getPlacementPosition();
                         break;
                     case "toolcard-dice-value":
-                        client.getDiceValue();
+                        client.getDiceValue(jsonObject.get("prompt").getAsString());
                         break;
 
                     //endregion
