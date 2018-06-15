@@ -1,1 +1,0 @@
-{"name":"Tenaglia a rotelle","effects":[{"get-draft-dice":{}},{"place-dice":{}},{"remove-turn":{}}],"prerequisites":["after-draft","first-turn","favor-token"]}

@@ -90,7 +90,7 @@ public class Client {
         gameSnapshot.getPlayer().setDiceExtracted(server.placeDice(gameSnapshot.getDraftPool().get(diceNumber - 1), row, column));
 //        if(verifyEndTurn())
 //            pass();
-        return getGameSnapshot().getPlayer().isToolCardAlreadyUsed();
+        return getGameSnapshot().getPlayer().isDiceAlreadyExtracted();
 
 //        if(server.placeDice(dice, row, column)){
 ////            gameSnapshot.getPlayer().getWindow().addDice(row - 1, column - 1, dice);

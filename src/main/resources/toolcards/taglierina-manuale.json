@@ -1,1 +1,0 @@
-{"name":"Taglierina Manuale","effects":[{"move":{"ignore":"NONE","color-in-track":true}},{"move":{"ignore":"NUMBER","color-in-track":true,"optional":true}}],"prerequisites":["same-color-window-track","favor-token"]}

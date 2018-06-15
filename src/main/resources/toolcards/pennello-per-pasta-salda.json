@@ -1,1 +1,0 @@
-{"name":"Pennello per pasta salda","effects":[{"get-draft-dice":{}},{"change-value":{"random":true}},{"place-dice":{}}],"prerequisites":["before-draft","favor-token"]}
