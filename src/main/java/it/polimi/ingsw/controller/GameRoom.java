@@ -19,7 +19,7 @@ public class GameRoom extends Game{
     }
 
     public synchronized void notifyAllToolCardUsed(String nickname, String toolcard, Window window){
-        users.forEach(user -> user.notifyToolCardUse(nickname, toolcard, window));
+        users.forEach(user -> user.notifyToolCardUse(nickname, toolcard, window, getCurrentRound().getDraftPool(), getRoundTrack()));
     }
 
     public synchronized void notifyAllDicePlaced(String nickname, int row, int column, Dice dice){

@@ -235,19 +235,6 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public void notifyToolCards(List<ToolCard> toolCards){
-        JsonObject message;
-        JsonObject tmp;
-        message = createMessage("toolcards");
-        for (Integer i = 0; i < toolCards.size(); i++) {
-            tmp = new JsonObject();
-            tmp.addProperty("name", toolCards.get(i).getName());
-            message.add(i.toString(), tmp);
-        }
-        socketSendMessage(message);
-    }
-
-    @Override
     public void notifyWindows(HashMap<String, Window> windows){
         JsonObject message;
         message = createMessage("windows");
@@ -256,12 +243,14 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public void notifyToolCardUse(String player, String toolcard, Window window){
+    public void notifyToolCardUse(String player, String toolcard, Window window, List<Dice> draftPool, List<Dice> roundTrack){
         JsonObject message;
         message = createMessage("toolcard-used");
         message.addProperty("player", player);
         message.addProperty("toolcard", toolcard);
         message.addProperty("window", gson.toJson(window));
+        message.addProperty("draft-pool", gson.toJson(draftPool));
+        message.addProperty("round-track", gson.toJson(roundTrack));
         socketSendMessage(message);
     }
 

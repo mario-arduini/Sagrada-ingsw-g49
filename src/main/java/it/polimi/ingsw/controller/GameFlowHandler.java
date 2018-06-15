@@ -34,7 +34,6 @@ public class GameFlowHandler {
         initialSchemas = game.extractSchemas();
         //No player set if reconnection
         if (player != null) {
-            player.notifyToolCards(game.getToolCards());
             player.notifyGameInfo(game.getToolCards(), game.getPublicGoals(), player.getPrivateGoal());
             player.notifySchemas(initialSchemas);
         }
@@ -85,7 +84,7 @@ public class GameFlowHandler {
             this.player.notifyGameInfo(gameRoom.getToolCards(), gameRoom.getPublicGoals(), player.getPrivateGoal());
             this.player.notifyRound(gameRoom.getCurrentRound().getCurrentPlayer().getNickname(), gameRoom.getCurrentRound().getDraftPool(), false);
             HashMap<String, Window> windows = new HashMap<>();
-            gameRoom.getPlayers().forEach(player -> windows.put(player.getNickname(), player.getWindow()));
+            gameRoom.getPlayers().forEach(p -> windows.put(p.getNickname(), p.getWindow()));
             this.player.notifyWindows(windows);
         }
         return this.player != null;

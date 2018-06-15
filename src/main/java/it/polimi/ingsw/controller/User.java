@@ -50,10 +50,6 @@ public class User extends Player {
         connection.notifyRound(currentPlayer, draftPool, newRound);
     }
 
-    public void notifyToolCards(List<ToolCard> toolCards){
-        connection.notifyToolCards(toolCards);
-    }
-
     public void notifyOthersSchemas(HashMap<String, Schema> playersSchemas){
         connection.notifyOthersSchemas(playersSchemas);
     }
@@ -62,7 +58,7 @@ public class User extends Player {
         connection.notifyDicePlaced(nickname, row, column, dice);
     }
 
-    public void notifyToolCardUse(String player, String toolCard, Window window){
+    public void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack){
         this.connection.notifyToolCardUse(player, toolCard, window);
     }
 

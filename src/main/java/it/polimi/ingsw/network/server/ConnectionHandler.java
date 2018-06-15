@@ -18,8 +18,7 @@ public interface ConnectionHandler{
     void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound);
     void notifyOthersSchemas(Map<String, Schema> playersSchemas);
     void notifyDicePlaced(String nickname, int row, int column, Dice dice);
-    void notifyToolCardUse(String player, String toolCard, Window window);
-    void notifyToolCards(List<ToolCard> toolCards);
+    void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack);
     void notifyGameInfo(List<ToolCard> toolCards, List<PublicGoal> publicGoals, PrivateGoal privateGoal);
     void notifyWindows(HashMap<String, Window> windows);
 
