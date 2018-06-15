@@ -322,9 +322,8 @@ class CLIHandler {
         }
         ClientLogger.println("");
         if(!client.useToolCard( client.getGameSnapshot().getToolCards().get(choice - 1).getName())) {
-            ClientLogger.printWithClear("");
-            ClientLogger.println("You can't use this card now\n");
             printGame(client.getGameSnapshot());
+            ClientLogger.println("\nYou can't use this card now");
             printMenu();
         }
         else {

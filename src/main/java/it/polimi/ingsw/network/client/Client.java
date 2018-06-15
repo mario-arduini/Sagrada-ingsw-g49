@@ -153,11 +153,11 @@ public class Client {
 
     void printMenu(){
         cliHandler.printMenu();
-        cliHandler.setPlayingRound(true);
+
 
         //TODO remove all below
         if(!cliHandler.getPlayingRound()) {
-
+            cliHandler.setPlayingRound(true);
             synchronized (cliHandler) {
                 cliHandler.notifyAll();
             }
