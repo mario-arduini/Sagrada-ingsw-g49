@@ -235,10 +235,12 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public void notifyWindows(HashMap<String, Window> windows){
+    public void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack){
         JsonObject message;
-        message = createMessage("windows");
-        message.addProperty("content", gson.toJson(windows));
+        message = createMessage("reconnect-info");
+        message.addProperty("windows", gson.toJson(windows));
+        message.addProperty("round-track", gson.toJson(roundTrack));
+        message.addProperty("favor-token", gson.toJson(favorToken));
         socketSendMessage(message);
     }
 
@@ -262,13 +264,16 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         socketSendMessage(message);
     }
 
+    //TODO: as in gameRoom, maybe overload..??
     @Override
-    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound){
+    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundtrack){
         JsonObject message;
         message = createMessage("round");
         message.addProperty("player", currentPlayer);
         message.addProperty("draft-pool", gson.toJson(draftPool));
         message.addProperty("new-round", newRound);
+        if (newRound)
+            message.addProperty("round-track", gson.toJson(roundtrack));
         socketSendMessage(message);
     }
 

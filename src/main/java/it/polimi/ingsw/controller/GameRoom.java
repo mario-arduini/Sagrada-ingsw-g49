@@ -40,9 +40,9 @@ public class GameRoom extends Game{
 
         List<Dice> draftPool = getCurrentRound().getDraftPool();
 
-        //TODO: why does functional require this final values here??
-        boolean finalNewRound = newRound;
-        users.forEach(player -> player.notifyRound(firstPlayer, draftPool, finalNewRound));
+        if (newRound == true)
+            users.forEach(player -> player.notifyRound(firstPlayer, draftPool, true, getRoundTrack()));
+        users.forEach(player -> player.notifyRound(firstPlayer, draftPool, false, null));
     }
 
     public synchronized void gameReady(){
@@ -55,7 +55,7 @@ public class GameRoom extends Game{
                 playersSchemas.put(player.getNickname(), player.getWindow().getSchema());
             users.forEach(user -> user.notifyOthersSchemas(playersSchemas));
 
-            users.forEach(user -> user.notifyRound(firstPlayer, draftPool, true));
+            users.forEach(user -> user.notifyRound(firstPlayer, draftPool, true, getRoundTrack()));
         }
     }
 }

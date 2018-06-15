@@ -46,8 +46,8 @@ public class User extends Player {
         this.connection.notifySchemas(schemas);
     }
 
-    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound){
-        connection.notifyRound(currentPlayer, draftPool, newRound);
+    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack){
+        connection.notifyRound(currentPlayer, draftPool, newRound, roundTrack);
     }
 
     public void notifyOthersSchemas(HashMap<String, Schema> playersSchemas){
@@ -66,8 +66,8 @@ public class User extends Player {
         connection.notifyGameInfo(toolCards, publicGoals, privateGoal);
     }
 
-    public void notifyWindows(HashMap<String, Window> windows){
-        connection.notifyWindows(windows);
+    public void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken,List<Dice> roundTrack){
+        connection.notifyReconInfo(windows, favorToken, roundTrack);
     }
 
     public Coordinate askDiceWindow(){
@@ -90,7 +90,4 @@ public class User extends Player {
         return connection.askDiceValue();
     }
 
-    public void notifyMove(Coordinate from,Coordinate to){
-
-    }
 }

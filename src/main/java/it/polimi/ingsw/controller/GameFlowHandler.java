@@ -82,10 +82,13 @@ public class GameFlowHandler {
         this.player = gamesHandler.login(nickname, password, connection);
         if (gameRoom != null) {
             this.player.notifyGameInfo(gameRoom.getToolCards(), gameRoom.getPublicGoals(), player.getPrivateGoal());
-            this.player.notifyRound(gameRoom.getCurrentRound().getCurrentPlayer().getNickname(), gameRoom.getCurrentRound().getDraftPool(), false);
             HashMap<String, Window> windows = new HashMap<>();
+            HashMap<String, Integer> favorToken = new HashMap<>();
             gameRoom.getPlayers().forEach(p -> windows.put(p.getNickname(), p.getWindow()));
-            this.player.notifyWindows(windows);
+            gameRoom.getPlayers().forEach(p -> favorToken.put(p.getNickname(), p.getFavorToken()));
+            this.player.notifyReconInfo(windows, favorToken, gameRoom.getRoundTrack());
+            //TODO: maybe overload notifyRound..?
+            this.player.notifyRound(gameRoom.getCurrentRound().getCurrentPlayer().getNickname(), gameRoom.getCurrentRound().getDraftPool(), false, null);
         }
         return this.player != null;
     }

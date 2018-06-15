@@ -85,7 +85,6 @@ final class Effects {
                 message = "move-to-invalid";
             }
         }
-        notifyMove(player,start,end);
     }
 
     public static Dice move(Player player, List<Dice> roundTrack, Dice old, Window.RuleIgnored ruleIgnored,boolean optional) {
@@ -152,7 +151,6 @@ final class Effects {
                 message = "move-to-invalid";
             }
         }
-        notifyMove(player,start,end);
         return removedDice;
     }
 
@@ -292,7 +290,4 @@ final class Effects {
         return ((User) player).askDiceValue();
     }
 
-    static void notifyMove(Player player,Coordinate from,Coordinate to){
-        ((User) player).notifyMove(from,to);
-    }
 }
