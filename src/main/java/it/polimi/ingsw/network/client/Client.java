@@ -198,10 +198,10 @@ public class Client {
     //endregion
 
     public static void main(String[] args) {
-        final String ERROR = "USAGE sagrada -g [cli | gui].";
+        final String ERROR = "usage:  sagrada  -g  [cli | gui]";
 
         if(args.length != 2){
-            ClientLogger.printlnWithClear(ERROR);
+            ClientLogger.println(ERROR);
             return;
         }
 
@@ -219,12 +219,12 @@ public class Client {
                 case "gui":
                     break;
                 default:
-                    ClientLogger.printlnWithClear(ERROR);
+                    ClientLogger.println(ERROR);
                     return;
             }
             client.logout();
         }
         else
-            ClientLogger.printlnWithClear(ERROR);
+            ClientLogger.println(ERROR);
     }
 }
