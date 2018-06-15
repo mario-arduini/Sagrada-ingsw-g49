@@ -16,7 +16,7 @@ public class PrivateGoal implements Goal{
     }
 
     public String getName() {
-        return "ShadesOf" + color.toString(); //control the use of toString()
+        return "Shades of " + color.toString();
     }
 
     public int computeScore(Window window) {
