@@ -76,7 +76,7 @@ public class ServerListener implements Runnable {
                     case "game-info":
                         extractToolCards(jsonObject.getAsJsonObject("toolcards"));
                         extractPublicGoals(jsonObject.getAsJsonObject("public-goals"));
-                        client.getGameSnapshot().getPlayer().setPrivateGoal(gson.fromJson(jsonObject.get("private-goal").getAsString(), PrivateGoal.class)); //TODO: change this to only string?
+                        client.getGameSnapshot().getPlayer().setPrivateGoal(jsonObject.get("private-goal").getAsString()); //TODO: change this to only string?
                         break;
                     case "schema-choice":
                         List<Schema> schemas = new ArrayList<>();
@@ -86,7 +86,7 @@ public class ServerListener implements Runnable {
                         break;
                     case "round":
                         listType = new TypeToken<List<Dice>>(){}.getType();
-                        client.notifyNewTurn(jsonObject.get("player").getAsString(), jsonObject.get("new-round").getAsBoolean());
+                        client.notifyNewTurn(jsonObject.get("player").getAsString());
                         //if(jsonObject.get("new-round").getAsBoolean())
                             //client.getGameSnapshot().getRoundTrack().add(gson.fromJson(jsonObject.get("roundtrack-dice").getAsString(),Dice.class));
                         List<Dice> draftPool = gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType);

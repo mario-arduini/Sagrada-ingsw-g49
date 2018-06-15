@@ -45,10 +45,6 @@ public class Client {
         return server.login(nickname, password);
     }
 
-    boolean isLogged(){
-        return logged;
-    }
-
     void setLogged(boolean logged){
         this.logged = logged;
     }
@@ -83,7 +79,7 @@ public class Client {
         return server.sendSchema(choice);
     }
 
-    void notifyNewTurn(String nickname, boolean newRound){
+    void notifyNewTurn(String nickname){
         getGameSnapshot().getPlayer().setMyTurn(nickname.equals(gameSnapshot.getPlayer().getNickname()));
         getGameSnapshot().getPlayer().setDiceExtracted(false);
         getGameSnapshot().getPlayer().setUsedToolCard(false);
@@ -202,8 +198,10 @@ public class Client {
     //endregion
 
     public static void main(String[] args) {
+        final String ERROR = "USAGE sagrada -g [cli | gui].";
+
         if(args.length != 2){
-            ClientLogger.printlnWithClear((args.length < 2 ? "Not enough" : "Too many") + " parameters");
+            ClientLogger.printlnWithClear(ERROR);
             return;
         }
 
@@ -211,8 +209,8 @@ public class Client {
         CLIHandler cliHandler;
         ClientLogger.LogToFile();
 
-        if(args[0].equalsIgnoreCase("-g"))
-            switch (args[1].toLowerCase()){
+        if(args[0].equalsIgnoreCase("-g")) {
+            switch (args[1].toLowerCase()) {
                 case "cli":
                     cliHandler = new CLIHandler(client);
                     client.setCLIHandler(cliHandler);
@@ -221,9 +219,12 @@ public class Client {
                 case "gui":
                     break;
                 default:
-                    ClientLogger.printlnWithClear("Invalid graphic choice");
+                    ClientLogger.printlnWithClear(ERROR);
                     return;
             }
-        client.logout();
+            client.logout();
+        }
+        else
+            ClientLogger.printlnWithClear(ERROR);
     }
 }

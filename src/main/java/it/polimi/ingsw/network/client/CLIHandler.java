@@ -14,7 +14,7 @@ class CLIHandler {
     private static final int ROWS = 4;
     private static final int COLUMNS = 5;
     private static final String ERROR = "Invalid choice, retry: ";
-    private static final Logger LOGGER = Logger.getLogger(Client.class.getName() );
+    private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
     private BufferedReader input;
     private Client client;
     private boolean playingRound;
@@ -580,7 +580,7 @@ class CLIHandler {
 
     }
 
-    private static void printPrivateGoal(PrivateGoal privateGoal){
+    private static void printPrivateGoal(String privateGoal){
 
     }
 

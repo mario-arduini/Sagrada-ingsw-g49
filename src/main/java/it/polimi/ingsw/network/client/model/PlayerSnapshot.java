@@ -5,7 +5,7 @@ public class PlayerSnapshot {
     private Window window;
     private int favorToken;
     private boolean suspended;
-    private PrivateGoal privateGoal;
+    private String privateGoal;
     private boolean myTurn;
     private boolean diceExtracted;
     private boolean usedToolCard;
@@ -66,11 +66,11 @@ public class PlayerSnapshot {
         this.suspended = true;
     }
 
-    public PrivateGoal getPrivateGoal(){
+    public String getPrivateGoal(){
         return  privateGoal;
     }
 
-    public void setPrivateGoal(PrivateGoal privateGoal){
+    public void setPrivateGoal(String privateGoal){
         this.privateGoal = privateGoal;
     }
 
