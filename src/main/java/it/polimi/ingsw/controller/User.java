@@ -59,7 +59,7 @@ public class User extends Player {
     }
 
     public void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack){
-        this.connection.notifyToolCardUse(player, toolCard, window);
+        this.connection.notifyToolCardUse(player, toolCard, window, draftPool, roundTrack);
     }
 
     public void notifyGameInfo(List<ToolCard> toolCards, List<PublicGoal> publicGoals, PrivateGoal privateGoal){
