@@ -27,6 +27,9 @@ public interface ConnectionHandler{
     void close();
     void setGame(GameRoom game);
 
+    //TODO: nasty hack
+    void setReconnection();
+
     Coordinate askDiceWindow(String prompt);
     Dice askDiceDraftPool(String prompt);
     int askDiceRoundTrack(String prompt);

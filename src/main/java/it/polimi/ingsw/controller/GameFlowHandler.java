@@ -21,6 +21,7 @@ public class GameFlowHandler {
     private GamesHandler gamesHandler;
     private List<Schema> initialSchemas = null;
     private ToolCard activeToolCard;
+    private boolean reconnection = false;
 
     public GameFlowHandler(GamesHandler gamesHandler){
         this.player = null;
@@ -32,7 +33,7 @@ public class GameFlowHandler {
     public void setGame(GameRoom game) {
         this.gameRoom = game;
         initialSchemas = game.extractSchemas();
-        //No player set if reconnection
+        //TODO: big problem here, player will be null if game starts for 4th player... need a refactor
         if (player != null) {
             player.notifyGameInfo(game.getToolCards(), game.getPublicGoals(), player.getPrivateGoal());
             player.notifySchemas(initialSchemas);
@@ -80,7 +81,7 @@ public class GameFlowHandler {
     //TODO: Destroy game if players quit before choosing schema, here just as a reminder.
     public boolean login(String nickname, String password, ConnectionHandler connection) {
         this.player = gamesHandler.login(nickname, password, connection);
-        if (gameRoom != null) {
+        if (reconnection) {
             this.player.notifyGameInfo(gameRoom.getToolCards(), gameRoom.getPublicGoals(), player.getPrivateGoal());
             HashMap<String, Window> windows = new HashMap<>();
             HashMap<String, Integer> favorToken = new HashMap<>();
@@ -90,7 +91,13 @@ public class GameFlowHandler {
             //TODO: maybe overload notifyRound..?
             this.player.notifyRound(gameRoom.getCurrentRound().getCurrentPlayer().getNickname(), gameRoom.getCurrentRound().getDraftPool(), false, null);
         }
+        reconnection = false;
         return this.player != null;
+    }
+
+    //TODO: bit of a hack, have to find a better way....
+    public void setReconnection(){
+        this.reconnection = true;
     }
 
     public void logout() {

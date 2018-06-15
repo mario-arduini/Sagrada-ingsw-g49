@@ -289,6 +289,11 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
+    public void setReconnection(){
+        gameFlowHandler.setReconnection();
+    }
+
+    @Override
     public Coordinate askDiceWindow(String prompt) {
         JsonObject command;
 
