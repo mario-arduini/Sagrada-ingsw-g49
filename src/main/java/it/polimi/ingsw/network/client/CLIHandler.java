@@ -326,11 +326,6 @@ class CLIHandler {
             ClientLogger.println("\nYou can't use this card now");
             printMenu();
         }
-        else {
-            client.getGameSnapshot().getPlayer().useFavorToken((client.getGameSnapshot().getToolCards().get(choice - 1).getUsed() ? 2 : 1));
-            client.getGameSnapshot().getToolCards().get(choice - 1).setUsed();
-        }
-
     }
 
     void printMenu(){
@@ -412,7 +407,7 @@ class CLIHandler {
 
     int askDiceFormRoundTrack(){
         ClientLogger.print("Insert dice number from round track: ");
-        return readInt(1, client.getGameSnapshot().getRoundTrack().size()) - 1;
+        return readInt(1, 10) - 1;
     }
 
     Coordinate askDiceFormWindow(){
@@ -569,8 +564,8 @@ class CLIHandler {
         for(i=0;i<whiteSpaceHalf;i++) ClientLogger.print(" ");
 
         ClientLogger.print(p.getNickname()+" ");
-        for(i=0;i<p.getFavorToken();i++) ClientLogger.print("\u26AB");
-        for(;i<p.getWindow().getSchema().getDifficulty();i++) ClientLogger.print("\u26AA");
+        for(i=0;i<p.getFavorToken();i++) ClientLogger.print("\u25CF");
+        for(;i<p.getWindow().getSchema().getDifficulty();i++) ClientLogger.print("\u25CB");
 
         if(whiteSpaceNum%2 == 1) whiteSpaceHalf++;
         for(i=0;i<whiteSpaceHalf;i++) ClientLogger.print(" ");

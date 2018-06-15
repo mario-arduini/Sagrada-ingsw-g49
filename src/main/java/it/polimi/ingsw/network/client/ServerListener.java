@@ -87,8 +87,8 @@ public class ServerListener implements Runnable {
                     case "round":
                         listType = new TypeToken<List<Dice>>(){}.getType();
                         client.notifyNewTurn(jsonObject.get("player").getAsString(), jsonObject.get("new-round").getAsBoolean());
-                        //if(jsonObject.get("new-round").getAsBoolean())
-                            //client.getGameSnapshot().getRoundTrack().add(gson.fromJson(jsonObject.get("roundtrack-dice").getAsString(),Dice.class));
+                        if(jsonObject.get("new-round").getAsBoolean())
+                            client.getGameSnapshot().setRoundTrack(gson.fromJson(jsonObject.get("round-track").getAsString(),listType));
                         List<Dice> draftPool = gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType);
                         client.getGameSnapshot().setDraftPool(draftPool);
                         client.printGame();
@@ -103,15 +103,15 @@ public class ServerListener implements Runnable {
                         }
                         break;
                     case "toolcard-used":
-                        List<ToolCard> toolCards1 = client.getGameSnapshot().getToolCards();
-                        String name = jsonObject.get("player").getAsString();
-                        client.getGameSnapshot().getToolCardByName(jsonObject.get("toolcard").getAsString()).setUsed();
-                        client.getGameSnapshot().findPlayer(name).get().setWindow(gson.fromJson(jsonObject.get("window").getAsString(),Window.class));
+                        ToolCard toolcardUsed = client.getGameSnapshot().getToolCardByName(jsonObject.get("toolcard").getAsString());
+                        PlayerSnapshot activePlayer = client.getGameSnapshot().findPlayer(jsonObject.get("player").getAsString()).get();
+                        activePlayer.useFavorToken(toolcardUsed.getUsed() ? 2 : 1);
+                        toolcardUsed.setUsed();
+                        activePlayer.setWindow(gson.fromJson(jsonObject.get("window").getAsString(),Window.class));
+                        client.getGameSnapshot().setRoundTrack(gson.fromJson(jsonObject.get("round-track").getAsString(),new TypeToken<List<Dice>>(){}.getType()));
+                        client.getGameSnapshot().setDraftPool(gson.fromJson(jsonObject.get("draft-pool").getAsString(),new TypeToken<List<Dice>>(){}.getType()));
                         client.printGame();
                         client.printMenu();
-                        for (ToolCard aToolCards1 : toolCards1)
-                            if (aToolCards1.getName().equalsIgnoreCase(name))
-                                aToolCards1.setUsed();
                         break;
                     case "update-window":
                         Dice dicePlaced = gson.fromJson(jsonObject.get("dice").getAsString(),Dice.class);
@@ -124,6 +124,11 @@ public class ServerListener implements Runnable {
                             client.printGame();
                             client.printMenu();
                         }
+                        break;
+                    case "reconnect-info":
+                        HashMap<String,Window> playersWindow = gson.fromJson(jsonObject.get("windows").getAsString(),new TypeToken<HashMap<String,Window>>(){}.getType());
+                        HashMap<String,Integer> favorMap = gson.fromJson(jsonObject.get("favor-token").getAsString(),new TypeToken<HashMap<String,Integer>>(){}.getType());
+                        client.getGameSnapshot().setRoundTrack(gson.fromJson(jsonObject.get("round-track").getAsString(),new TypeToken<List<Dice>>(){}.getType()));
                         break;
 
                     //region TOOLCARD

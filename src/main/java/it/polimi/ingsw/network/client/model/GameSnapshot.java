@@ -51,6 +51,8 @@ public class GameSnapshot {
         return roundTrack;
     }
 
+    public void setRoundTrack(List<Dice> roundTrack){ this.roundTrack = roundTrack; }
+
     public List<ToolCard> getToolCards() {
         return toolCards;
     }
