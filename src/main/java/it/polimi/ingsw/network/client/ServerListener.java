@@ -110,6 +110,7 @@ public class ServerListener implements Runnable {
                         activePlayer.setWindow(gson.fromJson(jsonObject.get("window").getAsString(),Window.class));
                         client.getGameSnapshot().setRoundTrack(gson.fromJson(jsonObject.get("round-track").getAsString(),new TypeToken<List<Dice>>(){}.getType()));
                         client.getGameSnapshot().setDraftPool(gson.fromJson(jsonObject.get("draft-pool").getAsString(),new TypeToken<List<Dice>>(){}.getType()));
+                        client.getGameSnapshot().getPlayer().setUsedToolCard(activePlayer.getNickname().equalsIgnoreCase(client.getGameSnapshot().getPlayer().getNickname()));
                         client.printGame();
                         client.printMenu();
                         break;
@@ -118,12 +119,13 @@ public class ServerListener implements Runnable {
                         int row = jsonObject.get("row").getAsInt();
                         int col = jsonObject.get("column").getAsInt();
                         String nick = jsonObject.get("nickname").getAsString();
-                        if(!nick.equals(client.getGameSnapshot().getPlayer().getNickname())){
-                            client.getGameSnapshot().getDraftPool().remove(dicePlaced);
+                        client.getGameSnapshot().getDraftPool().remove(dicePlaced);
+                        if(!nick.equals(client.getGameSnapshot().getPlayer().getNickname()))
                             client.getGameSnapshot().findPlayer(nick).get().getWindow().addDice(row,col,dicePlaced);
-                            client.printGame();
-                            client.printMenu();
-                        }
+                        else
+                            client.getGameSnapshot().getPlayer().getWindow().addDice(row,col,dicePlaced);
+                        client.printGame();
+                        client.printMenu();
                         break;
                     case "reconnect-info":
                         HashMap<String,Window> playersWindow = gson.fromJson(jsonObject.get("windows").getAsString(),new TypeToken<HashMap<String,Window>>(){}.getType());

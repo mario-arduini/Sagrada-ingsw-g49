@@ -277,8 +277,8 @@ class CLIHandler {
                 printGame(client.getGameSnapshot());
                 ClientLogger.println("\nConstraint violated!");
                 client.printMenu();
-            }else
-                verifyEndTurn();
+            } else
+                client.verifyEndTurn();
 
         }else
             ClientLogger.println("Not your turn! You can only logout");
@@ -326,6 +326,8 @@ class CLIHandler {
             ClientLogger.println("\nYou can't use this card now");
             printMenu();
         }
+        else
+            client.verifyEndTurn();
     }
 
     void printMenu(){

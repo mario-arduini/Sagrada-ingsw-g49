@@ -87,14 +87,18 @@ public class Client {
     }
 
     boolean placeDice(int diceNumber, int row, int column){
-        Dice dice = gameSnapshot.getDraftPool().get(diceNumber - 1);
-        if(server.placeDice(dice, row, column)){
-            gameSnapshot.getPlayer().getWindow().addDice(row - 1, column - 1, dice);
-            gameSnapshot.getDraftPool().remove(diceNumber - 1);
-            gameSnapshot.getPlayer().setDiceExtracted(true);
-            return true;
-        }
-        return false;
+        gameSnapshot.getPlayer().setDiceExtracted(server.placeDice(gameSnapshot.getDraftPool().get(diceNumber - 1), row, column));
+//        if(verifyEndTurn())
+//            pass();
+        return getGameSnapshot().getPlayer().isToolCardAlreadyUsed();
+
+//        if(server.placeDice(dice, row, column)){
+////            gameSnapshot.getPlayer().getWindow().addDice(row - 1, column - 1, dice);
+////            gameSnapshot.getDraftPool().remove(diceNumber - 1);
+//            gameSnapshot.getPlayer().setDiceExtracted(true);
+//            return true;
+//        }
+//        return false;
     }
 
     synchronized void logout(){
@@ -109,8 +113,8 @@ public class Client {
 
     boolean useToolCard(String name){
         gameSnapshot.getPlayer().setUsedToolCard(server.useToolCard(name));
-        if(verifyEndTurn())
-            pass();
+//        if(verifyEndTurn())
+//            pass();
         return getGameSnapshot().getPlayer().isToolCardAlreadyUsed();
     }
 
