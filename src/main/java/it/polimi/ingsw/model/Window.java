@@ -241,4 +241,8 @@ public class Window {
             }
         return possiblePlaces;
     }
+
+    public int getEmptySpaces(){
+        return Arrays.stream(mosaic).flatMap(Arrays::stream).filter(cell -> !(cell==null)).map(d -> 1).reduce(0, (n1, n2) -> n1 + n2);
+    }
 }

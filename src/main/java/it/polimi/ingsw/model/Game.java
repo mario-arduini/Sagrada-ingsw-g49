@@ -118,14 +118,17 @@ public class Game {
         currentRound.suspendPlayer();
     }
 
-    //public Hash
+    //public 
 
+    //TODO: compute final score for each player and handle draws
     public int computeFinalScore(Player player){
         BinaryOperator<Integer> adder = (n1, n2) -> n1 + n2;
+        BinaryOperator<Integer> negAdder = (n1, n2) -> n1 - n2;
         AtomicReference<Integer> score = new AtomicReference<>();
         score.getAndSet(player.getPrivateGoal().computeScore(player.getWindow()));
         publicGoals.forEach(goal -> score.getAndAccumulate(goal.computeScore(player.getWindow()), adder));
-        //TODO
+        score.getAndAccumulate(player.getFavorToken(), adder);
+        score.getAndAccumulate(player.getWindow().getEmptySpaces(), negAdder);
         return score.get();
     }
 
