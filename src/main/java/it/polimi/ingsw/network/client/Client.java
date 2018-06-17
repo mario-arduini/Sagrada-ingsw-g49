@@ -1,7 +1,11 @@
 package it.polimi.ingsw.network.client;
 
 import it.polimi.ingsw.network.client.model.*;
+import it.polimi.ingsw.network.server.rmi.LoginInterface;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.net.SocketException;
 import java.util.List;
 import java.util.logging.*;
@@ -19,6 +23,7 @@ public class Client {
     private boolean playingRound;
     private boolean serverConnected;    //* is it useful?
     private GameSnapshot gameSnapshot;
+    private LoginInterface serverInterface;
 
     private Client(){
         super();
@@ -66,10 +71,20 @@ public class Client {
             }
         }
         else if(connectionType == ConnectionType.RMI) {
-            server = null;
-            return false;
+            try {
+                startRMI();
+            } catch (NamingException e) {
+                e.printStackTrace();
+            }
         }
         return true;
+    }
+
+    private void startRMI() throws  NamingException{
+
+        Context namingContext = new InitialContext();
+        String url = "rmi://" + serverAddress + "/logger";
+        serverInterface = (LoginInterface) namingContext.lookup(url);
     }
 
     int chooseSchema(List<Schema> schemas){
