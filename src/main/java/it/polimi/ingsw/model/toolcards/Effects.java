@@ -14,7 +14,14 @@ final class Effects {
     }
 
     static void getDraftedDice(Round round){
-        Dice dice = askDiceDraftPool(round.getCurrentPlayer());
+        boolean valid = false;
+        Dice dice = null;
+        String prompt = "choose-drafted";
+        while (!valid){
+            dice = askDiceDraftPool(prompt,round.getCurrentPlayer());
+            prompt = "choose-drafted-invalid";
+            if(round.getDraftPool().contains(dice)) valid=true;
+        }
         round.getDraftPool().remove(dice);
         round.setCurrentDiceDrafted(dice);
         round.setDiceExtracted(true);
@@ -205,8 +212,10 @@ final class Effects {
     static void swapRoundTrack(Round round,List<Dice> roundTrack){
         boolean valid = false;
         int position=0;
+        String prompt = "choose-round-swap";
         while(!valid){
-            position = askDiceRoundTrack(round.getCurrentPlayer());
+            position = askDiceRoundTrack(prompt,round.getCurrentPlayer());
+            prompt = "choose-round-swap-invalid";
             valid = true;
             try{
                 roundTrack.get(position);
@@ -222,9 +231,11 @@ final class Effects {
     static void getDiceFromBag(Round round,Dice dice){
         int value;
         boolean valid = false;
+        String prompt = "choose-value";
         while (!valid){
             valid = true;
-            value = askDiceValue(round.getCurrentPlayer());
+            value = askDiceValue(prompt,round.getCurrentPlayer());
+            prompt = "choose-value-invalid";
             try {
                 dice.setValue(value);
             } catch (InvalidDiceValueException e) {
@@ -270,24 +281,24 @@ final class Effects {
         }
     }
 
-    static Coordinate askDiceWindow(String message, Player player){
-        return ((User) player).askDiceWindow();
+    static Coordinate askDiceWindow(String prompt, Player player){
+        return ((User) player).askDiceWindow(prompt);
     }
 
-    static Dice askDiceDraftPool(Player player){
-        return  ((User) player).askDiceDraftPool();
+    static Dice askDiceDraftPool(String prompt,Player player){
+        return  ((User) player).askDiceDraftPool(prompt);
     }
 
-    static int askDiceRoundTrack(Player player){
-        return  ((User) player).askDiceRoundTrack();
+    static int askDiceRoundTrack(String prompt,Player player){
+        return  ((User) player).askDiceRoundTrack(prompt);
     }
 
-    static boolean askIfPlus(String message,Player player){
-        return  ((User) player).askIfPlus();
+    static boolean askIfPlus(String prompt,Player player){
+        return  ((User) player).askIfPlus(prompt);
     }
 
-    static int askDiceValue(Player player){
-        return ((User) player).askDiceValue();
+    static int askDiceValue(String prompt, Player player){
+        return ((User) player).askDiceValue(prompt);
     }
 
 }

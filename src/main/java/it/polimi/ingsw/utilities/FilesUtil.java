@@ -18,6 +18,7 @@ public class FilesUtil {
     public static final String SCHEMA_FOLDER = "schemas";
     public static final String TOOLCARD_FOLDER = "toolcards";
     public static final String LOG_FOLDER = "log";
+    public static final String LANGUAGES_FOLDER = "languages";
 
     public static List<File> listFiles(String directoryName) {
         File directory = new File(FilesUtil.class.getClassLoader().getResource(directoryName).getPath());

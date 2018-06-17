@@ -51,11 +51,12 @@ public class GamesHandler {
             user = playerFetched.get();
             if (gameReference.containsKey(user) && user.verifyAuthToken(password)){
                 user.setConnection(connection);
+                //TODO: nasty hack
+                connection.setReconnection();
                 user.setGame(gameReference.get(user));
                 Logger.print("Reconnected: " + nickname + " " + connection.getRemoteAddress());
                 List<String> users = getPlayerNicks();
                 List<String> loggedUsers = users.stream().filter(nick -> !nick.equalsIgnoreCase(nickname)).collect(Collectors.toList());
-
                 user.notifyLogin(loggedUsers);
                 return user;
             }

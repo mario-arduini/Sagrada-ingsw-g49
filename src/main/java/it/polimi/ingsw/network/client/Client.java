@@ -180,28 +180,28 @@ public class Client {
         cliHandler.notifyUsedToolCard(player, toolCard);
     }
 
-    void getPlusMinusOption(){
-        server.sendPlusMinusOption(cliHandler.askPlusMinusOption());
+    void getPlusMinusOption(String prompt){
+        server.sendPlusMinusOption(cliHandler.askPlusMinusOption(prompt));
     }
 
-    void getDiceFromDraftPool(){
-        server.sendDiceFromDraftPool(cliHandler.askDiceFormDraftPool());
+    void getDiceFromDraftPool(String prompt){
+        server.sendDiceFromDraftPool(cliHandler.askDiceFormDraftPool(prompt));
     }
 
-    void getDiceFromRoundTrack(){
-        server.sendDiceFromRoundTrack(cliHandler.askDiceFormRoundTrack());
+    void getDiceFromRoundTrack(String prompt){
+        server.sendDiceFromRoundTrack(cliHandler.askDiceFormRoundTrack(prompt));
     }
 
-    void getDiceFromWindow(){
-        server.sendDiceFromWindow(cliHandler.askDiceFormWindow());
+    void getDiceFromWindow(String prompt){
+        server.sendDiceFromWindow(cliHandler.askDiceFormWindow(prompt));
     }
 
     void getPlacementPosition(){
         server.sendPlacementPosition(cliHandler.askPlacementPosition());
     }
 
-    void getDiceValue(){
-        server.sendDiceValue(cliHandler.askDiceValue());
+    void getDiceValue(String prompt){
+        server.sendDiceValue(cliHandler.askDiceValue(prompt));
     }
 
     //endregion

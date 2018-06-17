@@ -8,6 +8,7 @@ import it.polimi.ingsw.model.goalcards.FullShadeVariety;
 import it.polimi.ingsw.network.client.Client;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -19,7 +20,6 @@ public class App
     public static void main(String[] args) {
 
         Gson gson = new Gson();
-
 
         /*
         String name = "Ripples of Light";

@@ -5,6 +5,8 @@ import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BinaryOperator;
 
 public class Game {
     private final Factory dealer;
@@ -116,9 +118,18 @@ public class Game {
         currentRound.suspendPlayer();
     }
 
+    //public 
+
+    //TODO: compute final score for each player and handle draws
     public int computeFinalScore(Player player){
-        //TODO
-        return 0;
+        BinaryOperator<Integer> adder = (n1, n2) -> n1 + n2;
+        BinaryOperator<Integer> negAdder = (n1, n2) -> n1 - n2;
+        AtomicReference<Integer> score = new AtomicReference<>();
+        score.getAndSet(player.getPrivateGoal().computeScore(player.getWindow()));
+        publicGoals.forEach(goal -> score.getAndAccumulate(goal.computeScore(player.getWindow()), adder));
+        score.getAndAccumulate(player.getFavorToken(), adder);
+        score.getAndAccumulate(player.getWindow().getEmptySpaces(), negAdder);
+        return score.get();
     }
 
     public boolean isGameFinished(){

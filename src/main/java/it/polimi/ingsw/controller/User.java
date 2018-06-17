@@ -70,24 +70,24 @@ public class User extends Player {
         connection.notifyReconInfo(windows, favorToken, roundTrack);
     }
 
-    public Coordinate askDiceWindow(){
-        return connection.askDiceWindow();
+    public Coordinate askDiceWindow(String prompt){
+        return connection.askDiceWindow(prompt);
     }
 
-    public Dice askDiceDraftPool(){
-        return connection.askDiceDraftPool();
+    public Dice askDiceDraftPool(String prompt){
+        return connection.askDiceDraftPool(prompt);
     }
 
-    public int askDiceRoundTrack(){
-        return connection.askDiceRoundTrack();
+    public int askDiceRoundTrack(String prompt){
+        return connection.askDiceRoundTrack(prompt);
     }
 
-    public boolean askIfPlus() {
-        return connection.askIfPlus();
+    public boolean askIfPlus(String prompt) {
+        return connection.askIfPlus(prompt);
     }
 
-    public int askDiceValue(){
-        return connection.askDiceValue();
+    public int askDiceValue(String prompt){
+        return connection.askDiceValue(prompt);
     }
 
 }
