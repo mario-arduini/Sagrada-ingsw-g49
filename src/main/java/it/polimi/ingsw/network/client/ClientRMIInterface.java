@@ -1,5 +1,8 @@
 package it.polimi.ingsw.network.client;
 
-public interface ClientRMIInterface {
+import java.io.Serializable;
+import java.rmi.Remote;
+
+public interface ClientRMIInterface{
     void salute(String message);
 }

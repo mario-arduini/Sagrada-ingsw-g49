@@ -6,7 +6,11 @@ import it.polimi.ingsw.network.server.rmi.LoginInterface;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.net.MalformedURLException;
 import java.net.SocketException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.List;
 import java.util.logging.*;
 
@@ -75,16 +79,33 @@ public class Client {
                 startRMI();
             } catch (NamingException e) {
                 e.printStackTrace();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (NotBoundException e) {
+                e.printStackTrace();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
             }
         }
         return true;
     }
 
-    private void startRMI() throws  NamingException{
+    private void startRMI() throws NamingException, RemoteException, NotBoundException, MalformedURLException {
 
         Context namingContext = new InitialContext();
         String url = "rmi://" + serverAddress + "/logger";
         serverInterface = (LoginInterface) namingContext.lookup(url);
+        ClientRMIInterface cliente = null;
+        try {
+            cliente = new ClientRMIHandler();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        try {
+            serverInterface.hello("It's me, Luigi!");
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     int chooseSchema(List<Schema> schemas){

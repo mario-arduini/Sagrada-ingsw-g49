@@ -118,7 +118,7 @@ public class Game {
         currentRound.suspendPlayer();
     }
 
-    //public 
+    //public
 
     //TODO: compute final score for each player and handle draws
     public int computeFinalScore(Player player){
