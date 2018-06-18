@@ -27,8 +27,16 @@ public class GameSnapshot {
         this.player = new PlayerSnapshot(nickname);
     }
 
+    public void setPlayer(PlayerSnapshot playerSnapshot) {
+        this.player = new PlayerSnapshot(playerSnapshot);
+    }
+
     public void addOtherPlayer(String nick){
         otherPlayers.add(new PlayerSnapshot(nick));
+    }
+
+    public void addOtherPlayer(PlayerSnapshot playerSnapshot){
+        otherPlayers.add(new PlayerSnapshot(playerSnapshot));
     }
 
     public void removeOtherPlayer(String nick){

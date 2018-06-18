@@ -10,7 +10,7 @@ public class PlayerSnapshot {
     private boolean diceExtracted;
     private boolean usedToolCard;
 
-    PlayerSnapshot(String nickname){
+    public PlayerSnapshot(String nickname){
         this.nickname = nickname;
         this.favorToken = 0;
         this.suspended = false;
@@ -47,6 +47,10 @@ public class PlayerSnapshot {
 
     public int getFavorToken() {
         return favorToken;
+    }
+
+    public void setFavorToken(int favorToken) {
+        this.favorToken = favorToken;
     }
 
     public void useFavorToken(int number) {

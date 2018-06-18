@@ -131,6 +131,18 @@ public class ServerListener implements Runnable {
                         HashMap<String,Window> playersWindow = gson.fromJson(jsonObject.get("windows").getAsString(),new TypeToken<HashMap<String,Window>>(){}.getType());
                         HashMap<String,Integer> favorMap = gson.fromJson(jsonObject.get("favor-token").getAsString(),new TypeToken<HashMap<String,Integer>>(){}.getType());
                         client.getGameSnapshot().setRoundTrack(gson.fromJson(jsonObject.get("round-track").getAsString(),new TypeToken<List<Dice>>(){}.getType()));
+
+                        PlayerSnapshot playerSnapshot;
+                        for(String user : playersWindow.keySet()){
+                            playerSnapshot = new PlayerSnapshot(user);
+                            playerSnapshot.setWindow(playersWindow.get(user));
+                            playerSnapshot.setFavorToken(favorMap.get(user));
+                            if(user.equals(client.getGameSnapshot().getPlayer().getNickname()))
+                                client.getGameSnapshot().setPlayer(playerSnapshot);
+                            else
+                                client.getGameSnapshot().addOtherPlayer(playerSnapshot);
+                        }
+
                         break;
 
                     //region TOOLCARD

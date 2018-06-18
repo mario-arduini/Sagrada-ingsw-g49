@@ -24,8 +24,9 @@ public class Login extends UnicastRemoteObject implements LoginInterface{
     }
 */
     @Override
-    public void hello(String message) throws RemoteException{
+    public void hello(String message, ClientRMIInterface client) throws RemoteException{
         Logger.print("Someone's knocking at the door.");
         Logger.print(message);
+        client.salute(message);
     }
 }

@@ -33,7 +33,7 @@ public class Server {
         Socket clientSocket;
         LoginInterface rmiLogger = new Login(gamesHandler);
 
-        Registry registry = LocateRegistry.getRegistry();
+        Registry registry = LocateRegistry.createRegistry(1099);
         registry.rebind("logger", rmiLogger);
 
         serverSocket = new ServerSocket(port);

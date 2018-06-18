@@ -1,8 +1,8 @@
 package it.polimi.ingsw.network.client;
 
-import java.io.Serializable;
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 
-public interface ClientRMIInterface{
-    void salute(String message);
+public interface ClientRMIInterface extends Remote{
+    void salute(String message) throws RemoteException;
 }
