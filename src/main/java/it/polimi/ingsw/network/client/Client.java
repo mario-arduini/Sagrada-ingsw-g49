@@ -185,15 +185,15 @@ public class Client {
     }
 
     void getDiceFromDraftPool(String prompt){
-        server.sendDiceFromDraftPool(cliHandler.askDiceFormDraftPool(prompt));
+        server.sendDiceFromDraftPool(cliHandler.askDiceFromDraftPool(prompt));
     }
 
     void getDiceFromRoundTrack(String prompt){
-        server.sendDiceFromRoundTrack(cliHandler.askDiceFormRoundTrack(prompt));
+        server.sendDiceFromRoundTrack(cliHandler.askDiceFromRoundTrack(prompt));
     }
 
     void getDiceFromWindow(String prompt){
-        server.sendDiceFromWindow(cliHandler.askDiceFormWindow(prompt));
+        server.sendDiceFromWindow(cliHandler.askDiceFromWindow(prompt));
     }
 
     void getPlacementPosition(){

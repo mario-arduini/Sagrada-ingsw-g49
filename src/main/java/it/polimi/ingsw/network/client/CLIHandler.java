@@ -387,17 +387,17 @@ class CLIHandler {
         return choice;
     }
 
-    Dice askDiceFormDraftPool(String prompt){
+    Dice askDiceFromDraftPool(String prompt){
         ClientLogger.print(MessageHandler.get(prompt));
         return client.getGameSnapshot().getDraftPool().get(readInt(1, client.getGameSnapshot().getDraftPool().size()) - 1);
     }
 
-    int askDiceFormRoundTrack(String prompt){
+    int askDiceFromRoundTrack(String prompt){
         ClientLogger.print(MessageHandler.get(prompt));
         return readInt(1, 10) - 1;
     }
 
-    Coordinate askDiceFormWindow(String prompt){
+    Coordinate askDiceFromWindow(String prompt){
         ClientLogger.println(MessageHandler.get(prompt));
         return getPosition();
     }
