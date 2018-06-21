@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.network.server.ConnectionHandler;
 import it.polimi.ingsw.network.server.Logger;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class ToolCard {
         return this.cardName;
     }
 
-    public void use(Game game) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException {
+    public void use(Game game, ConnectionHandler connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException {
         JsonObject effect;
         String command;
         JsonObject arguments = null;
@@ -59,23 +60,23 @@ public class ToolCard {
             Boolean optional = arguments.get("optional")!=null ? arguments.get("optional").getAsBoolean() : false;
             switch (command) {
                 case "get-draft-dice":
-                    Effects.getDraftedDice(game.getCurrentRound());
+                    Effects.getDraftedDice(game.getCurrentRound(), connection);
                     break;
                 case "place-dice":
-                    if(!Effects.addDiceToWindow(game.getCurrentRound().getCurrentPlayer(),game.getCurrentRound().getCurrentDiceDrafted())){
+                    if(!Effects.addDiceToWindow(game.getCurrentRound().getCurrentPlayer(),game.getCurrentRound().getCurrentDiceDrafted(), connection)){
                         game.getCurrentRound().getDraftPool().add(game.getCurrentRound().getCurrentDiceDrafted());
                         game.getCurrentRound().setCurrentDiceDrafted(null);
                     }
                     break;
                 case "move":
                     if(arguments.get("color-in-track")!=null&&arguments.get("color-in-track").getAsBoolean()){
-                        multipurposeDice = Effects.move(game.getCurrentRound().getCurrentPlayer(),game.getRoundTrack(),multipurposeDice, gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class),optional);
+                        multipurposeDice = Effects.move(game.getCurrentRound().getCurrentPlayer(),game.getRoundTrack(),multipurposeDice, gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class),optional, connection);
                     }
-                    Effects.move(game.getCurrentRound().getCurrentPlayer(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class),optional);
+                    Effects.move(game.getCurrentRound().getCurrentPlayer(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class),optional, connection);
                     break;
                 case "change-value":
                     if (arguments.get("plus").getAsBoolean())
-                        Effects.changeValue(game.getCurrentRound().getCurrentPlayer(),game.getCurrentRound().getCurrentDiceDrafted(), arguments.get("value").getAsInt());
+                        Effects.changeValue(game.getCurrentRound().getCurrentDiceDrafted(), arguments.get("value").getAsInt(), connection);
                     else if(arguments.get("random")!=null&&arguments.get("random").getAsBoolean())
                         Effects.changeValue(game.getCurrentRound().getCurrentDiceDrafted());
                     break;
@@ -89,13 +90,13 @@ public class ToolCard {
                     Effects.rerollPool(game.getCurrentRound().getDraftPool());
                     break;
                 case "swap-round-dice":
-                    Effects.swapRoundTrack(game.getCurrentRound(),game.getRoundTrack());
+                    Effects.swapRoundTrack(game.getCurrentRound(),game.getRoundTrack(), connection);
                     break;
                 case "put-in-bag":
                     game.putInBag(game.getCurrentRound().getCurrentDiceDrafted());
                     break;
                 case "get-from-bag":
-                    Effects.getDiceFromBag(game.getCurrentRound(),game.getFromBag());
+                    Effects.getDiceFromBag(game.getCurrentRound(),game.getFromBag(), connection);
                     break;
             }
         }

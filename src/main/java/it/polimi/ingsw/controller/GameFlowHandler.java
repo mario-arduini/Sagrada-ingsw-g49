@@ -122,7 +122,7 @@ public class GameFlowHandler {
             throw new NoSuchToolCardException();
         }
         this.activeToolCard = fetch.get();
-        this.activeToolCard.use(gameRoom);
+        this.activeToolCard.use(gameRoom, connection);
         gameRoom.notifyAllToolCardUsed(player.getNickname(), activeToolCard.getName(), player.getWindow());
     }
 }

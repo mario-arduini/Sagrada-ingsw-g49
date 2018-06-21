@@ -3,6 +3,7 @@ package it.polimi.ingsw.model.toolcards;
 import it.polimi.ingsw.controller.User;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.network.server.ConnectionHandler;
 
 import java.util.List;
 import java.util.Random;
@@ -13,12 +14,12 @@ final class Effects {
         super();
     }
 
-    static void getDraftedDice(Round round){
+    static void getDraftedDice(Round round, ConnectionHandler connection){
         boolean valid = false;
         Dice dice = null;
         String prompt = "choose-drafted";
         while (!valid){
-            dice = askDiceDraftPool(prompt,round.getCurrentPlayer());
+            dice = connection.askDiceDraftPool(prompt);
             prompt = "choose-drafted-invalid";
             if(round.getDraftPool().contains(dice)) valid=true;
         }
@@ -27,12 +28,13 @@ final class Effects {
         round.setDiceExtracted(true);
     }
 
-    static boolean addDiceToWindow(Player player,Dice dice) {
+    static boolean addDiceToWindow(Player player, Dice dice, ConnectionHandler connection) {
         if(player.getWindow().possiblePlaces(dice, Window.RuleIgnored.NONE)==0) return false;
         boolean valid = false;
         Coordinate coords;
         while (!valid){
-            coords = askDiceWindow("",player);
+            //TODO:Why is that message empty?
+            coords = connection.askDiceWindow("");
             try{
                 placeDice(player,dice,coords.getRow(),coords.getColumn(), Window.RuleIgnored.NONE);
                 valid = true;
@@ -43,8 +45,8 @@ final class Effects {
         return true;
     }
 
-    static void move(Player player,Window.RuleIgnored ruleIgnored,boolean optional){
-        if(optional&&!askIfPlus("want-move",player)) return;
+    static void move(Player player,Window.RuleIgnored ruleIgnored,boolean optional, ConnectionHandler connection){
+        if(optional && !connection.askIfPlus("want-move")) return;
         Coordinate start = null;
         Coordinate end = null;
         Window currentPlayerWindow = player.getWindow();
@@ -53,7 +55,7 @@ final class Effects {
         String message = "move-from";
         while (!valid){
             valid = true;
-            start = askDiceWindow(message, player);
+            start = connection.askDiceWindow(message);
             removedDice = currentPlayerWindow.getCell(start.getRow(),start.getColumn());
             if(removedDice == null){
                 valid = false;
@@ -80,7 +82,7 @@ final class Effects {
         message = "move-to";
         while (!valid) {
             valid = true;
-            end = askDiceWindow(message, player);
+            end = connection.askDiceWindow(message);
             if (start.getRow() == end.getRow() && start.getColumn() == end.getColumn()){
                 valid = false;
                 message = "move-to-same";
@@ -94,8 +96,8 @@ final class Effects {
         }
     }
 
-    public static Dice move(Player player, List<Dice> roundTrack, Dice old, Window.RuleIgnored ruleIgnored,boolean optional) {
-        if(optional&&!askIfPlus("want-move",player)) return null;
+    public static Dice move(Player player, List<Dice> roundTrack, Dice old, Window.RuleIgnored ruleIgnored,boolean optional, ConnectionHandler connection) {
+        if(optional && !connection.askIfPlus("want-move")) return null;
         Coordinate start = null;
         Coordinate end = null;
         Window currentPlayerWindow = player.getWindow();
@@ -104,7 +106,7 @@ final class Effects {
         String message = "move-from";
         while (!valid){
             valid = true;
-            start = askDiceWindow(message, player);
+            start = connection.askDiceWindow(message);
             removedDice = currentPlayerWindow.getCell(start.getRow(),start.getColumn());
             if(removedDice == null){
                 valid = false;
@@ -146,7 +148,7 @@ final class Effects {
         message = "move-to";
         while (!valid) {
             valid = true;
-            end = askDiceWindow(message, player);
+            end = connection.askDiceWindow(message);
             if (start.getRow() == end.getRow() && start.getColumn() == end.getColumn()){
                 valid = false;
                 message = "move-to-same";
@@ -165,12 +167,12 @@ final class Effects {
         dice.roll();
     }
 
-    static void changeValue(Player player,Dice dice,int value) {
+    static void changeValue(Dice dice, int value, ConnectionHandler connection) {
         String message = "ask-plus";
         boolean valid=false;
         while (!valid){
             valid = true;
-            if (askIfPlus(message,player)){
+            if (connection.askIfPlus(message)){
                 try {
                     dice.setValue(dice.getValue()+value);
                 } catch (InvalidDiceValueException e) {
@@ -186,8 +188,6 @@ final class Effects {
                 }
             }
         }
-
-        return;
     }
 
     static void flip(Dice dice){
@@ -209,12 +209,12 @@ final class Effects {
         });
     }
 
-    static void swapRoundTrack(Round round,List<Dice> roundTrack){
+    static void swapRoundTrack(Round round,List<Dice> roundTrack, ConnectionHandler connection){
         boolean valid = false;
         int position=0;
         String prompt = "choose-round-swap";
         while(!valid){
-            position = askDiceRoundTrack(prompt,round.getCurrentPlayer());
+            position = connection.askDiceRoundTrack(prompt);
             prompt = "choose-round-swap-invalid";
             valid = true;
             try{
@@ -228,13 +228,13 @@ final class Effects {
         round.setCurrentDiceDrafted(toSwap);
     }
 
-    static void getDiceFromBag(Round round,Dice dice){
+    static void getDiceFromBag(Round round, Dice dice, ConnectionHandler connection){
         int value;
         boolean valid = false;
         String prompt = "choose-value";
         while (!valid){
             valid = true;
-            value = askDiceValue(prompt,round.getCurrentPlayer());
+            value = connection.askDiceValue(prompt);
             prompt = "choose-value-invalid";
             try {
                 dice.setValue(value);
@@ -245,7 +245,7 @@ final class Effects {
         round.setCurrentDiceDrafted(dice);
     }
 
-    static void placeDice(Player player,Dice dice, int row, int column, Window.RuleIgnored ruleIgnored) throws NotWantedAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, BadAdjacentDiceException, FirstDiceMisplacedException {
+    private static void placeDice(Player player,Dice dice, int row, int column, Window.RuleIgnored ruleIgnored) throws NotWantedAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, BadAdjacentDiceException, FirstDiceMisplacedException {
         switch (ruleIgnored){
             case COLOR:
                 player.getWindow().checkValueConstraint(player.getWindow().getSchema().getConstraint(row, column),dice);
@@ -279,26 +279,6 @@ final class Effects {
                 player.getWindow().addDice(row, column, dice);
                 break;
         }
-    }
-
-    static Coordinate askDiceWindow(String prompt, Player player){
-        return ((User) player).askDiceWindow(prompt);
-    }
-
-    static Dice askDiceDraftPool(String prompt,Player player){
-        return  ((User) player).askDiceDraftPool(prompt);
-    }
-
-    static int askDiceRoundTrack(String prompt,Player player){
-        return  ((User) player).askDiceRoundTrack(prompt);
-    }
-
-    static boolean askIfPlus(String prompt,Player player){
-        return  ((User) player).askIfPlus(prompt);
-    }
-
-    static int askDiceValue(String prompt, Player player){
-        return ((User) player).askDiceValue(prompt);
     }
 
 }
