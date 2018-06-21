@@ -44,7 +44,7 @@ public class Server {
             try {
                 clientSocket = serverSocket.accept();
                 Logger.print("Connection over socket: " + clientSocket.getRemoteSocketAddress().toString());
-                executor.submit(new SocketHandler(clientSocket, new GameFlowHandler(gamesHandler)));
+                executor.submit(new SocketHandler(clientSocket, gamesHandler));
             } catch (IOException e) {
                 e.printStackTrace();
             }

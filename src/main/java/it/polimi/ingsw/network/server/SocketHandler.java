@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
 import it.polimi.ingsw.controller.GameRoom;
+import it.polimi.ingsw.controller.GamesHandler;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.*;
@@ -12,6 +13,7 @@ import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PrivateGoal;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
+import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
 import java.io.*;
 import java.net.Socket;
@@ -29,13 +31,15 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     private String nickname;
     private boolean connected;
     private GameFlowHandler gameFlowHandler;
+    private GamesHandler gamesHandler;
     private Gson gson;
     private JsonParser parser;
     private static final String NICKNAME_STRING = "nickname";
 
-    SocketHandler(Socket socket, GameFlowHandler gameFlowHandler) {
+    SocketHandler(Socket socket, GamesHandler gamesHandler) {
         this.socket = socket;
-        this.gameFlowHandler = gameFlowHandler;
+        this.gameFlowHandler = null;
+        this.gamesHandler = gamesHandler;
         this.parser = new JsonParser();
         this.gson = new Gson();
         this.connected = true;
@@ -289,11 +293,6 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     }
 
     @Override
-    public void setReconnection(){
-        gameFlowHandler.setReconnection();
-    }
-
-    @Override
     public Coordinate askDiceWindow(String prompt) {
         JsonObject command;
 
@@ -405,17 +404,18 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                 if (command.get("command").getAsString().equals("login")){
                     this.nickname = command.get(SocketHandler.NICKNAME_STRING).getAsString();
                     password = command.get("password").getAsString();
-                    if (gameFlowHandler.login(this.nickname, password, this)){
+                    try{
+                        gameFlowHandler = gamesHandler.login(nickname, password, this);
                         socketSendMessage(createMessage("verified"));
                         return true;
-                    }else{
+                    }catch (LoginFailedException e){
                         socketSendMessage(createMessage("failed"));
                         return false;
                     }
                 }
             }catch (NullPointerException e){
                 this.nickname = null;
-                e.printStackTrace();
+                Logger.print("Invalid option: " + socket.getRemoteSocketAddress().toString() + " " + e.getMessage());
                 socketSendMessage(createMessage("Invalid option"));
             }
         }catch (NullPointerException e){
@@ -483,11 +483,6 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     @Override
     public String getRemoteAddress(){
         return socket.getRemoteSocketAddress().toString();
-    }
-
-    @Override
-    public void setGame(GameRoom game){
-        this.gameFlowHandler.setGame(game);
     }
 
     private static JsonObject createErrorMessage(String description){

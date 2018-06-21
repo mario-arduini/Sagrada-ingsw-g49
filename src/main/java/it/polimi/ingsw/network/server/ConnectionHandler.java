@@ -25,10 +25,6 @@ public interface ConnectionHandler{
 
     String getRemoteAddress();
     void close();
-    void setGame(GameRoom game);
-
-    //TODO: nasty hack
-    void setReconnection();
 
     Coordinate askDiceWindow(String prompt);
     Dice askDiceDraftPool(String prompt);

@@ -1,5 +1,6 @@
 package it.polimi.ingsw.controller;
 
+import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.Dice;
@@ -13,39 +14,53 @@ import it.polimi.ingsw.network.server.ConnectionHandler;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class GameFlowHandler {
-    private User player;
+    private Player player;
     private GameRoom gameRoom;
     private GamesHandler gamesHandler;
     private List<Schema> initialSchemas = null;
     private ToolCard activeToolCard;
-    private boolean reconnection = false;
+    private ConnectionHandler connection;
 
-    public GameFlowHandler(GamesHandler gamesHandler){
-        this.player = null;
+    GameFlowHandler(GamesHandler gamesHandler, ConnectionHandler connection, Player player){
+        this.player = player;
         this.gameRoom = null;
         this.gamesHandler = gamesHandler;
         this.activeToolCard = null;
+        this.connection = connection;
+    }
+
+    public GameFlowHandler(GameFlowHandler gameFlow){
+        this.player = gameFlow.player;
+        this.gameRoom = gameFlow.gameRoom;
+        this.gamesHandler = gameFlow.gamesHandler;
+        this.initialSchemas = gameFlow.initialSchemas;
+        this.activeToolCard = gameFlow.activeToolCard;
+        this.connection = gameFlow.connection;
+    }
+
+    public Player getPlayer(){
+        return this.player;
+    }
+
+    protected ConnectionHandler getConnection(){
+        return this.connection;
     }
 
     public void setGame(GameRoom game) {
         this.gameRoom = game;
         initialSchemas = game.extractSchemas();
-        //TODO: big problem here, player will be null if game starts for 4th player... need a refactor
-        if (player != null) {
-            player.notifyGameInfo(game.getToolCards(), game.getPublicGoals(), player.getPrivateGoal());
-            player.notifySchemas(initialSchemas);
-        }
+        connection.notifyGameInfo(game.getToolCards(), game.getPublicGoals(), player.getPrivateGoal());
+        connection.notifySchemas(initialSchemas);
     }
 
-    //TODO: Shouldn't be able to choose a schema more than once
     public void chooseSchema(Integer schemaNumber) throws WindowAlreadySetException{
         player.setWindow(initialSchemas.get(schemaNumber));
     }
 
-    public void placeDice(int row, int column, Dice dice) throws NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException {
+    public void placeDice(int row, int column, Dice dice) throws GameNotStartedException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException {
+        if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
         gameRoom.placeDice(row, column, dice);
     }
@@ -60,6 +75,7 @@ public class GameFlowHandler {
         gameRoom.goOn();
     }
 
+    //TODO: REMOVE, remove message verified, make the method private and let it be called by choose-schema
     public void checkGameReady(){
         List<Player> inGamePlayers = gameRoom.getPlayers();
         for (Player p: inGamePlayers)
@@ -70,38 +86,33 @@ public class GameFlowHandler {
 
     public void disconnected(){
         if (gameRoom == null){
-            gamesHandler.waitingRoomDisconnection(player);
+            gamesHandler.waitingRoomDisconnection(this);
         }
     }
 
     public List<String> getPlayers(){
-        return gameRoom == null ? gamesHandler.getWaitingPlayers() : gameRoom.getPlayers().stream().map(Player::getNickname).collect(Collectors.toList());
+        return gameRoom == null ? gamesHandler.getWaitingPlayers() : gameRoom.getPlayersNick();
     }
 
-    //TODO: Destroy game if players quit before choosing schema, here just as a reminder.
-    public boolean login(String nickname, String password, ConnectionHandler connection) {
-        this.player = gamesHandler.login(nickname, password, connection);
-        if (reconnection) {
-            this.player.notifyGameInfo(gameRoom.getToolCards(), gameRoom.getPublicGoals(), player.getPrivateGoal());
-            HashMap<String, Window> windows = new HashMap<>();
-            HashMap<String, Integer> favorToken = new HashMap<>();
-            gameRoom.getPlayers().forEach(p -> windows.put(p.getNickname(), p.getWindow()));
-            gameRoom.getPlayers().forEach(p -> favorToken.put(p.getNickname(), p.getFavorToken()));
-            this.player.notifyReconInfo(windows, favorToken, gameRoom.getRoundTrack());
-            //TODO: maybe overload notifyRound..?
-            this.player.notifyRound(gameRoom.getCurrentRound().getCurrentPlayer().getNickname(), gameRoom.getCurrentRound().getDraftPool(), false, null);
-        }
-        reconnection = false;
-        return this.player != null;
-    }
+    public void reconnection(ConnectionHandler connection){
+        gameRoom.replaceConnection(this.connection, connection);
+        this.connection = connection;
 
-    //TODO: bit of a hack, have to find a better way....
-    public void setReconnection(){
-        this.reconnection = true;
+        HashMap<String, Window> windows = new HashMap<>();
+        HashMap<String, Integer> favorToken = new HashMap<>();
+        gameRoom.getPlayers().forEach(p -> windows.put(p.getNickname(), p.getWindow()));
+        gameRoom.getPlayers().forEach(p -> favorToken.put(p.getNickname(), p.getFavorToken()));
+
+        connection.notifyGameInfo(gameRoom.getToolCards(), gameRoom.getPublicGoals(), player.getPrivateGoal());
+        connection.notifyReconInfo(windows, favorToken, gameRoom.getRoundTrack());
+        //TODO: maybe overload notifyRound..? Find better way? Will see it with RMI
+        connection.notifyRound(gameRoom.getCurrentRound().getCurrentPlayer().getNickname(), gameRoom.getCurrentRound().getDraftPool(), false, null);
+
     }
 
     public void logout() {
         gamesHandler.logout(this.player.getNickname());
+        gameRoom.logout(player.getNickname(), connection);
     }
 
     public void useToolCard(String cardName) throws NoSuchToolCardException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException {

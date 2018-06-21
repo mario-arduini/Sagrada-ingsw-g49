@@ -8,6 +8,6 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface LoginInterface extends Remote {
-    //void login(String name, String password, ConnectionHandler connectionHandler) throws RemoteException, LoginFailedException;
+    FlowHandlerInterface login(String name, String password, ConnectionHandler connectionHandler) throws RemoteException, LoginFailedException;
     void hello(String message, ClientRMIInterface client) throws RemoteException;
 }

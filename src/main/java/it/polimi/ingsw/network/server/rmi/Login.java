@@ -6,7 +6,6 @@ import it.polimi.ingsw.network.server.ConnectionHandler;
 import it.polimi.ingsw.network.server.Logger;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
-import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
@@ -16,13 +15,12 @@ public class Login extends UnicastRemoteObject implements LoginInterface{
     public Login (GamesHandler gamesHandler) throws RemoteException{
         this.gamesHandler = gamesHandler;
     }
-/*
+
     @Override
-    public void login(String name, String password, ConnectionHandler connectionHandler) throws LoginFailedException {
-        if (this.gamesHandler.login(name, password, connectionHandler) == null)
-            throw new LoginFailedException();
+    public FlowHandlerInterface login(String name, String password, ConnectionHandler connectionHandler) throws LoginFailedException {
+        return new FlowHandler(this.gamesHandler.login(name, password, connectionHandler));
     }
-*/
+
     @Override
     public void hello(String message, ClientRMIInterface client) throws RemoteException{
         Logger.print("Someone's knocking at the door.");
