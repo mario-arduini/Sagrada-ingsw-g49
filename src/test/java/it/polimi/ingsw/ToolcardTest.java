@@ -169,13 +169,14 @@ public class ToolcardTest {
             fakeDraftPool.add(new Dice(Color.RED, 1));
             fakeDraftPool.add(new Dice(Color.GREEN, 2));
             fakeDraftPool.add(new Dice(Color.PURPLE, 6));
+            fakeDraftPool.add(new Dice(Color.YELLOW,5));
         } catch (InvalidDiceValueException e) {
 
         }
         return fakeDraftPool;
     }
 
-    private Game initGame(){
+    private Game initGame(int schema){
 
         List<Player> players = new ArrayList<>();
         players.add(new Player("lucas", "bWFsYW5kcmlubwo="));
@@ -188,7 +189,7 @@ public class ToolcardTest {
 
         File file = null;
         for(File f : files){
-            if(f.getName().equals("1.json")){
+            if(f.getName().equals(schema+".json")){
                 file = f; break;
             }
         }
@@ -246,7 +247,7 @@ public class ToolcardTest {
     @Test
     public void tc1Test(){
         ToolCard tool = getToolCard("pinza-sgrossatrice.json");
-        Game game = initGame();
+        Game game = initGame(1);
 
         assertNotNull(tool);
         assertNotNull(game);
@@ -370,7 +371,7 @@ public class ToolcardTest {
     @Test
     public void tc2Test(){
         ToolCard tool = getToolCard("pennello-per-eglomise.json");
-        Game game = initGame();
+        Game game = initGame(1);
 
         assertNotNull(tool);
         assertNotNull(game);
@@ -426,5 +427,70 @@ public class ToolcardTest {
         assertEquals(null,game.getCurrentRound().getCurrentPlayer().getWindow().getCell(0,0));
 
         assertThrows(NotEnoughFavorTokenException.class,()->tool.use(game,connectionHandlerStub));
+    }
+
+    @Test
+    public void tc11Test(){
+        ToolCard tool = getToolCard("diluente-per-pasta-salda.json");
+        Game game = initGame(4);
+
+        assertNotNull(tool);
+        assertNotNull(game);
+
+        game.getCurrentRound().fakeDraftPool(setDraft());
+
+        List<Dice> dices = new ArrayList<>();
+        dices.add(game.getCurrentRound().getDraftPool().get(1));
+        dices.add(game.getCurrentRound().getDraftPool().get(1));
+        dices.add(game.getCurrentRound().getDraftPool().get(1));
+        dices.add(game.getCurrentRound().getDraftPool().get(2));
+        dices.add(game.getCurrentRound().getDraftPool().get(3));
+        dices.add(game.getCurrentRound().getDraftPool().get(4));
+
+        List<Coordinate> windowPositions = new ArrayList<>();
+        windowPositions.add(new Coordinate(0,0));
+        windowPositions.add(new Coordinate(1,1));
+        windowPositions.add(new Coordinate(0,2));
+        windowPositions.add(new Coordinate(2,2));
+
+        List<Integer> diceValues = new ArrayList<>();
+        diceValues.add(-4);
+        diceValues.add(8);
+        diceValues.add(5);
+        diceValues.add(3);
+        diceValues.add(5);
+
+        ConnectionHandlerStub connectionHandlerStub = new ConnectionHandlerStub(dices,windowPositions,null,null,diceValues);
+
+        assertDoesNotThrow(()->game.placeDice(3,0, new Dice(Color.YELLOW,5)));
+        assertThrows(AlreadyDraftedException.class,()->tool.use(game,connectionHandlerStub));
+
+        try {
+            game.getCurrentRound().nextPlayer();
+            game.getCurrentRound().nextPlayer();
+            game.getCurrentRound().nextPlayer();
+        } catch (NoMorePlayersException e) {
+            assertTrue(false);
+        }
+
+        Dice expected = null;
+        try {
+            expected = new Dice(Color.YELLOW,5);
+        } catch (InvalidDiceValueException e) { }
+        assertEquals(expected,game.getCurrentRound().getCurrentPlayer().getWindow().getCell(3,0));
+        for(int r = 0;r<Window.ROW;r++)
+            for(int c = 0;c<Window.COLUMN;c++)
+                if(c!=0||r!=3) assertEquals(null,game.getCurrentRound().getCurrentPlayer().getWindow().getCell(r,c));
+
+
+        assertDoesNotThrow(()->tool.use(game,connectionHandlerStub));
+        assertEquals(4,game.getCurrentRound().getCurrentPlayer().getFavorToken());
+        assertEquals(1,connectionHandlerStub.getIdxDraftPoolDices());
+        assertEquals(3,connectionHandlerStub.getIdxDiceValues());
+        assertEquals(0,connectionHandlerStub.getIdxWindowPositions());
+        assertEquals(null,game.getCurrentRound().getCurrentPlayer().getWindow().getCell(2,1));
+        assertEquals(null,game.getCurrentRound().getCurrentDiceDrafted());
+        assertEquals(5,game.getCurrentRound().getDraftPool().get(game.getCurrentRound().getDraftPool().size()-1).getValue());
+
     }
 }
