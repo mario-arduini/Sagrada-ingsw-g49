@@ -41,6 +41,8 @@ public class Round {
         return draftPool;
     }
 
+    public void fakeDraftPool(List <Dice> fake) { draftPool = fake; }
+
     public int getCurrentPlayerIndex() { return currentPlayer; }
 
     public Player getCurrentPlayer() { return players.get(currentPlayer); }
@@ -113,13 +115,9 @@ public class Round {
         if (!draftPool.contains(dice))
             throw new DiceNotInDraftPoolException();
 
+        players.get(currentPlayer).getWindow().addDice(row, column, dice);
 
-        //TODO: fix for toolcards
         currentDiceDrafted = dice;
-
-
-        players.get(currentPlayer).getWindow().addDice(row, column, currentDiceDrafted);
-
         draftPool.remove(dice);
         diceExtracted = true;
     }

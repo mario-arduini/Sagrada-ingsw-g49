@@ -15,5 +15,7 @@
   "choose-round-swap":"Select the dice from the round track to swap ",
   "choose-round-swap-invalid":"Not valid number, insert the number of the position of the desired dice ",
   "choose-drafted":"Choose a dice from the draft pool ",
-  "choose-drafted-invalid":"Dice not present in the draft pool furbacchione, choose another one "
+  "choose-drafted-invalid":"Dice not present in the draft pool furbacchione, choose another one ",
+  "place-dice":"Choose where to place the dice",
+  "place-dice-invalid":"There you cannot, choose another cell"
 }
