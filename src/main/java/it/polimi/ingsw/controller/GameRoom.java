@@ -72,10 +72,10 @@ public class GameRoom extends Game{
         this.connections.add(newConnection);
     }
 
-    //TODO: Remove things from model game
     public synchronized void logout(String nickname, ConnectionHandler connection){
         connections.remove(connection);
         connections.forEach(conn -> conn.notifyLogout(nickname));
+        suspendPlayer(nickname);
     }
 
     protected synchronized List<String> getPlayersNick(){

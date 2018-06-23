@@ -110,8 +110,12 @@ public class Game {
         currentRound.useDice(row, column, dice);
     }
 
-    public void suspendPlayer(){
+    protected void suspendCurrentPlayer(){
         currentRound.suspendPlayer();
+    }
+
+    protected void suspendPlayer(String nickname){
+         getPlayerByNick(nickname).suspend();
     }
 
     protected List<Score> computeFinalScores(){
@@ -130,7 +134,7 @@ public class Game {
     }
 
     public boolean isGameFinished(){
-        return trackIndex == 11;
+        return trackIndex == 11 || players.stream().filter(p -> !p.isSuspended()).count()<2;
     }
 
     //TODO: consider moving this method to GameRoom
