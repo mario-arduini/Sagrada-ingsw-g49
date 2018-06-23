@@ -97,6 +97,9 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                             break;
                         case "toolcard":
                             useToolCard(message);
+                            break;
+                        case "new-game":
+                            gameFlowHandler.newGame();
                     }
             }catch (NullPointerException e){
                 Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());

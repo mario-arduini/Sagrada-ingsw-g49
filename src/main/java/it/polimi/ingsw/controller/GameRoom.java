@@ -88,6 +88,7 @@ public class GameRoom extends Game{
         connections.remove(connection);
         connections.forEach(conn -> conn.notifyLogout(nickname));
         suspendPlayer(nickname);
+        if (nickname.equalsIgnoreCase(getCurrentRound().getCurrentPlayer().getNickname())) goOn();
     }
 
     protected synchronized List<String> getPlayersNick(){
