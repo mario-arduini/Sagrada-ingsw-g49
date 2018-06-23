@@ -31,7 +31,7 @@ public class ToolCard {
         return this.cardName;
     }
 
-    public void use(Game game, ConnectionHandler connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException {
+    public void use(Game game, ConnectionHandler connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException {
         JsonObject effect;
         String command;
         JsonObject arguments = null;
@@ -46,6 +46,9 @@ public class ToolCard {
                 case "second-turn": Prerequisites.checkSecondTurn(game.getCurrentRound()); break;
                 case "before-draft": Prerequisites.checkBeforeDraft(game.getCurrentRound().isDiceExtracted()); break;
                 case "after-draft": Prerequisites.checkAfterDraft(game.getCurrentRound().isDiceExtracted()); break;
+                case "movable-color" : Prerequisites.checkMovable(game.getCurrentRound().getCurrentPlayer(), Window.RuleIgnored.COLOR); break;
+                case "movable-value" : Prerequisites.checkMovable(game.getCurrentRound().getCurrentPlayer(), Window.RuleIgnored.NUMBER); break;
+                case "movable" : Prerequisites.checkMovable(game.getCurrentRound().getCurrentPlayer(), Window.RuleIgnored.NONE); break;
             }
         }
 

@@ -166,7 +166,7 @@ public class SocketHandler implements Runnable, ConnectionHandler{
             gameFlowHandler.useToolCard(message.get("name").getAsString());
             socketSendMessage(createMessage("verified"));
         } catch (InvalidParameterException | NoSuchToolCardException |
-                NoDiceInWindowException |
+                NoDiceInWindowException | NothingCanBeMovedException |
                 InvalidFavorTokenNumberException | AlreadyDraftedException |
                 NotEnoughFavorTokenException | NotYourSecondTurnException |
                 NoDiceInRoundTrackException | NotYourTurnException |

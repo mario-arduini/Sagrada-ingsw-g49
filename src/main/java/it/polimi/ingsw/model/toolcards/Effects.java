@@ -31,9 +31,10 @@ final class Effects {
         if(player.getWindow().possiblePlaces(dice, Window.RuleIgnored.NONE)==0) return false;
         boolean valid = false;
         Coordinate coords;
+        String prompt = "place-dice";
         while (!valid){
-            //TODO:Why is that message empty?
-            coords = connection.askDiceWindow("");
+            coords = connection.askDiceWindow(prompt);
+            prompt = "place-dice-invalid";
             try{
                 placeDice(player,dice,coords.getRow(),coords.getColumn(), Window.RuleIgnored.NONE);
                 valid = true;

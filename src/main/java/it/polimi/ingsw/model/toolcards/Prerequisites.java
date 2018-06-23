@@ -54,4 +54,30 @@ final class Prerequisites {
     static void checkAfterDraft(boolean diceExtracted) throws NotDraftedYetException {
         if(!diceExtracted) throw new NotDraftedYetException();
     }
+
+    static void checkMovable(Player player, Window.RuleIgnored ruleIgnored) throws NothingCanBeMovedException {
+        Window window = player.getWindow();
+        boolean valid = false;
+        Dice dice = null;
+        for(int r = 0;r<Window.ROW; r++)
+            for(int c = 0;c<Window.COLUMN; c++){
+                dice = window.getCell(r,c);
+                if(dice != null){
+                    window.removeDice(r,c);
+                    int expectedMinimumPositions = 2;
+                    try{
+                        window.canBePlaced(dice,r,c,ruleIgnored);
+                    } catch (NoAdjacentDiceException | BadAdjacentDiceException
+                            | FirstDiceMisplacedException | ConstraintViolatedException e) {
+                        expectedMinimumPositions = 1;
+                    }
+                    int possiblePositions = window.possiblePlaces(dice,ruleIgnored);
+                    if(possiblePositions>=expectedMinimumPositions){
+                        valid = true;
+                    }
+                    window.setDice(r,c,dice);
+                }
+            }
+        if(!valid) throw new NothingCanBeMovedException();
+    }
 }
