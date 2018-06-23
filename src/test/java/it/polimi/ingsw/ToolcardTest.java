@@ -157,6 +157,10 @@ class ConnectionHandlerStub implements ConnectionHandler {
     public int askDiceValue(String prompt) {
         return diceValues.get(idxDiceValues++);
     }
+
+    @Override
+    public void notifyEndGame(List<Score> scores){
+    }
 }
 
 public class ToolcardTest {
