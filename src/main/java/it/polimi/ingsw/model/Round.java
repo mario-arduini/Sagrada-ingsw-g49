@@ -88,6 +88,9 @@ public class Round {
         return currentPlayer == players.size() - 1;
     }
 
+    public int getPlayerPosition(Player player){
+        return this.players.indexOf(player);
+    }
 
     /* TODO CONSIDER THIS FUNCTION
     public void chooseFromDraft(Dice dice) throws DiceNotInDraftPoolException, DiceAlreadyExtractedException {
@@ -131,9 +134,7 @@ public class Round {
     @Override
     public boolean equals(Object round) {
 
-        if(!(round instanceof Round))
-            return false;
+        return round instanceof Round && this.draftPool.equals(((Round) round).draftPool) && this.players.equals(((Round) round).players) && this.diceExtracted == ((Round) round).diceExtracted;
 
-        return this.draftPool.equals(((Round) round).draftPool) && this.players.equals(((Round) round).players) && this.diceExtracted == ((Round) round).diceExtracted;
     }
 }

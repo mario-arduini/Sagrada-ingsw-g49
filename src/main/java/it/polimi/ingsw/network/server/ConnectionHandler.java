@@ -22,6 +22,7 @@ public interface ConnectionHandler{
     void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack);
     void notifyGameInfo(List<ToolCard> toolCards, List<PublicGoal> publicGoals, PrivateGoal privateGoal);
     void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack);
+    void notifyEndGame(List<Score> scores);
 
     String getRemoteAddress();
     void close();

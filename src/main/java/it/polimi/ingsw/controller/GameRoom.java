@@ -1,5 +1,6 @@
 package it.polimi.ingsw.controller;
 
+import it.polimi.ingsw.controller.exceptions.GameOverException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
 import it.polimi.ingsw.network.server.ConnectionHandler;
@@ -10,10 +11,12 @@ import java.util.stream.Collectors;
 
 public class GameRoom extends Game{
     private List<ConnectionHandler> connections;
+    private boolean notifyEndGame;
 
     GameRoom(List<Player> playerList, List<ConnectionHandler> connections) throws NoMorePlayersException {
         super(playerList);
         this.connections = connections;
+        this.notifyEndGame = true;
     }
 
     public synchronized void notifyAllToolCardUsed(String nickname, String toolcard, Window window){
@@ -24,16 +27,24 @@ public class GameRoom extends Game{
         connections.forEach(user -> user.notifyDicePlaced(nickname, row, column, dice));
     }
 
-    public synchronized void goOn() {
+    public synchronized void goOn(){
         boolean newRound = false;
         try {
             getCurrentRound().nextPlayer();
-        }catch (NoMorePlayersException e){
+        } catch (NoMorePlayersException e) {
             nextRound();
             newRound = true;
         }
-        String firstPlayer = getCurrentRound().getCurrentPlayer().getNickname();
+        if (!isGameFinished()) {
+            notifyRound(newRound);
+        }else if(notifyEndGame) {
+            connections.forEach(user -> user.notifyEndGame(computeFinalScores()));
+            notifyEndGame = false;
+        }
+    }
 
+    private void notifyRound(boolean newRound){
+        String firstPlayer = getCurrentRound().getCurrentPlayer().getNickname();
         List<Dice> draftPool = getCurrentRound().getDraftPool();
 
         if (newRound)

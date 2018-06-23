@@ -6,6 +6,8 @@ import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
 import it.polimi.ingsw.controller.GameRoom;
 import it.polimi.ingsw.controller.GamesHandler;
+import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
+import it.polimi.ingsw.controller.exceptions.GameOverException;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.*;
@@ -147,10 +149,9 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     private void chooseSchema(JsonObject message){
         try {
             gameFlowHandler.chooseSchema(getJsonPositiveIntValue(message, "id"));
-            socketSendMessage(createMessage("verified"));
-            gameFlowHandler.checkGameReady();
-        } catch (IndexOutOfBoundsException | InvalidParameterException | WindowAlreadySetException e){
-            socketSendMessage(createMessage("failed"));
+        } catch (IndexOutOfBoundsException | InvalidParameterException |
+                WindowAlreadySetException | GameNotStartedException | GameOverException e){
+            notifySchemas(gameFlowHandler.getInitialSchemas());
         }
     }
 
@@ -172,7 +173,8 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                 ConstraintViolatedException | NotWantedAdjacentDiceException |
                 FirstDiceMisplacedException | NoSameColorDicesException |
                 BadAdjacentDiceException | NoAdjacentDiceException |
-                NotDraftedYetException | NotYourFirstTurnException e) {
+                NotDraftedYetException | NotYourFirstTurnException |
+                GameNotStartedException | GameOverException e) {
             Logger.print("Toolcard : " + nickname + " " + e);
             socketSendMessage(createMessage("failed"));
         }
@@ -289,6 +291,14 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         message.addProperty("row", row);
         message.addProperty("column", column);
         message.addProperty("dice", gson.toJson(dice));
+        socketSendMessage(message);
+    }
+
+    @Override
+    public void notifyEndGame(List<Score> scores){
+        JsonObject message;
+        message = createMessage("game-over");
+        message.addProperty("scores", gson.toJson(scores));
         socketSendMessage(message);
     }
 

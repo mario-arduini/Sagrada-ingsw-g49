@@ -1,6 +1,7 @@
 package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
+import it.polimi.ingsw.controller.exceptions.GameOverException;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.Dice;
@@ -55,28 +56,34 @@ public class GameFlowHandler {
         connection.notifySchemas(initialSchemas);
     }
 
-    public void chooseSchema(Integer schemaNumber) throws WindowAlreadySetException{
+    public void chooseSchema(Integer schemaNumber) throws GameNotStartedException, GameOverException, WindowAlreadySetException{
+        if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
+        if (gameRoom.isGameFinished()) throw new GameOverException();
         player.setWindow(initialSchemas.get(schemaNumber));
+        checkGameReady();
     }
 
-    public void placeDice(int row, int column, Dice dice) throws GameNotStartedException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException {
+    public void placeDice(int row, int column, Dice dice) throws GameNotStartedException, GameOverException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException {
         if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
+        if (gameRoom.isGameFinished()) throw new GameOverException();
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
         gameRoom.placeDice(row, column, dice);
     }
 
+    //TODO: REMOVE, copy the line inside into placeDice
     public void notifyDicePlaced(int row, int column, Dice dice){
         gameRoom.notifyAllDicePlaced(player.getNickname(), row, column, dice);
     }
 
-    public void pass() throws NotYourTurnException{
+    public void pass() throws GameOverException, GameNotStartedException, NotYourTurnException{
+        if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
+        if (gameRoom.isGameFinished()) throw new GameOverException();
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
         this.activeToolCard = null;
         gameRoom.goOn();
     }
 
-    //TODO: REMOVE, remove message verified, make the method private and let it be called by choose-schema
-    public void checkGameReady(){
+    private void checkGameReady(){
         List<Player> inGamePlayers = gameRoom.getPlayers();
         for (Player p: inGamePlayers)
             if (p.getWindow()==null)
@@ -88,6 +95,11 @@ public class GameFlowHandler {
         if (gameRoom == null){
             gamesHandler.waitingRoomDisconnection(this);
         }
+    }
+
+    //TODO: REMOVE, send schema automatically, as in Choose-Schema -> connection.notify(...)
+    public List<Schema> getInitialSchemas(){
+        return this.initialSchemas;
     }
 
     public List<String> getPlayers(){
@@ -115,7 +127,9 @@ public class GameFlowHandler {
         gameRoom.logout(player.getNickname(), connection);
     }
 
-    public void useToolCard(String cardName) throws NoSuchToolCardException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException {
+    public void useToolCard(String cardName) throws GameNotStartedException, GameOverException, NoSuchToolCardException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException {
+        if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
+        if (gameRoom.isGameFinished()) throw new GameOverException();
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
         Optional<ToolCard> fetch = (gameRoom.getToolCards()).stream().filter(card -> card.getName().equalsIgnoreCase(cardName)).findFirst();
         if (!fetch.isPresent()){

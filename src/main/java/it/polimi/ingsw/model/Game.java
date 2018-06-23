@@ -7,6 +7,7 @@ import it.polimi.ingsw.model.toolcards.ToolCard;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
 
 public class Game {
     private final Factory dealer;
@@ -60,7 +61,7 @@ public class Game {
         this.playing = false;
     }
 
-    public void setPlaying(boolean playing){
+    protected void setPlaying(boolean playing){
         this.playing = playing;
     }
 
@@ -109,34 +110,32 @@ public class Game {
         currentRound.useDice(row, column, dice);
     }
 
-    //TODO: Throws Exception
-    public void tryToolCard(){
-        //TODO
-    }
-
     public void suspendPlayer(){
         currentRound.suspendPlayer();
     }
 
-    //public
-
-    //TODO: compute final score for each player and handle draws
-    public int computeFinalScore(Player player){
+    protected List<Score> computeFinalScores(){
+        List <Score> scores = new ArrayList<>();
         BinaryOperator<Integer> adder = (n1, n2) -> n1 + n2;
-        BinaryOperator<Integer> negAdder = (n1, n2) -> n1 - n2;
-        AtomicReference<Integer> score = new AtomicReference<>();
-        score.getAndSet(player.getPrivateGoal().computeScore(player.getWindow()));
-        publicGoals.forEach(goal -> score.getAndAccumulate(goal.computeScore(player.getWindow()), adder));
-        score.getAndAccumulate(player.getFavorToken(), adder);
-        score.getAndAccumulate(player.getWindow().getEmptySpaces(), negAdder);
-        return score.get();
+        int privateScore;
+        for(Player player: this.players){
+            AtomicReference<Integer> publicScore = new AtomicReference<>();
+
+            privateScore = player.getPrivateGoal().computeScore(player.getWindow());
+            publicGoals.forEach(goal -> publicScore.getAndAccumulate(goal.computeScore(player.getWindow()), adder));
+
+            scores.add(new Score(player.getNickname(), publicScore.get(), privateScore, player.getFavorToken(), player.getWindow().getEmptySpaces(), currentRound.getPlayerPosition(player)));
+        }
+        return Score.sort(scores);
     }
 
     public boolean isGameFinished(){
         return trackIndex == 11;
     }
 
+    //TODO: consider moving this method to GameRoom
     public void nextRound(){
+        Round round = new Round(currentRound);
         List<Player> roundPlayers;
         List<Dice> draftPool;
 
@@ -150,6 +149,9 @@ public class Game {
             currentRound.nextPlayer();
         } catch (NoMorePlayersException e) {
             e.printStackTrace();
+        }
+        if (isGameFinished()){
+            currentRound = round;
         }
     }
 

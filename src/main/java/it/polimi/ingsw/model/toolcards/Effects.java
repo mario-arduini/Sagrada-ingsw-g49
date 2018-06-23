@@ -1,6 +1,5 @@
 package it.polimi.ingsw.model.toolcards;
 
-import it.polimi.ingsw.controller.User;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.server.ConnectionHandler;
