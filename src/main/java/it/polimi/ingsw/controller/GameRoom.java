@@ -1,17 +1,20 @@
 package it.polimi.ingsw.controller;
 
-import it.polimi.ingsw.controller.exceptions.GameOverException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
 import it.polimi.ingsw.network.server.ConnectionHandler;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 public class GameRoom extends Game{
     private List<ConnectionHandler> connections;
     private boolean notifyEndGame;
+    private Timer timer;
+    private int secondsTimer = 30; //TODO: read value from file.
 
     GameRoom(List<Player> playerList, List<ConnectionHandler> connections) throws NoMorePlayersException {
         super(playerList);
@@ -28,6 +31,8 @@ public class GameRoom extends Game{
     }
 
     public synchronized void goOn(){
+        if (timer != null)
+            timer.cancel();
         boolean newRound = false;
         try {
             getCurrentRound().nextPlayer();
@@ -37,6 +42,7 @@ public class GameRoom extends Game{
         }
         if (!isGameFinished()) {
             notifyRound(newRound);
+            startTimer();
         }else if(notifyEndGame) {
             connections.forEach(user -> user.notifyEndGame(computeFinalScores()));
             notifyEndGame = false;
@@ -64,7 +70,13 @@ public class GameRoom extends Game{
             connections.forEach(user -> user.notifyRound(firstPlayer, draftPool, true, getRoundTrack()));
 
             setPlaying(true);
+            startTimer();
         }
+    }
+
+    private void startTimer(){
+        timer = new Timer();
+        timer.schedule(new GameRoom.TimerExpired(), (long) secondsTimer * 1000);
     }
 
     public synchronized void replaceConnection(ConnectionHandler oldConnection, ConnectionHandler newConnection){
@@ -80,5 +92,11 @@ public class GameRoom extends Game{
 
     protected synchronized List<String> getPlayersNick(){
         return super.getPlayers().stream().map(Player::getNickname).collect(Collectors.toList());
+    }
+
+    class TimerExpired extends TimerTask {
+        public void run() {
+            suspendCurrentPlayer(); goOn();
+        }
     }
 }

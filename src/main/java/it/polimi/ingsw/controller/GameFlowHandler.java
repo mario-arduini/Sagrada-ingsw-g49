@@ -116,6 +116,13 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         gameRoom.logout(player.getNickname(), connection);
     }
 
+    public void newGame(){
+        if (gameRoom != null && !gameRoom.isGameFinished())
+            gameRoom.logout(player.getNickname(), connection);
+        this.gameRoom = null;
+        gamesHandler.goToWaitingRoom(this);
+    }
+
     public void useToolCard(String cardName) throws GameNotStartedException, GameOverException, NoSuchToolCardException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException {
         if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
         if (gameRoom.isGameFinished()) throw new GameOverException();

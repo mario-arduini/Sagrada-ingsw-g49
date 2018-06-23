@@ -16,6 +16,6 @@ public interface FlowHandlerInterface extends java.io.Serializable{
     void placeDice(int row, int column, Dice dice) throws GameOverException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException, NoSameColorDicesException, GameNotStartedException;
     void useToolCard(String cardName) throws GameNotStartedException, GameOverException, NoSuchToolCardException, InvalidDiceValueException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException, NotDraftedYetException, NotYourFirstTurnException, NothingCanBeMovedException, NoSameColorDicesException;
     void pass() throws GameNotStartedException, GameOverException, NotYourTurnException;
-
     void logout();
+    void newGame();
 }

@@ -31,7 +31,6 @@ public class GamesHandler {
         //TODO: Throw exception if file does not exist
     }
 
-    //TODO: DONE
     public synchronized GameFlowHandler login(String nickname, String password, ConnectionHandler connection) throws LoginFailedException, RemoteException {
         Player user;
         GameFlowHandler newGameFlow;
@@ -49,7 +48,6 @@ public class GamesHandler {
         return newGameFlow;
     }
 
-    //TODO: DONE
     private synchronized Optional<GameFlowHandler> findGameFlow(String nickname){
         List <GameFlowHandler> allGameFlows = new ArrayList<>();
         allGameFlows.addAll(this.waitingRoom);
@@ -57,7 +55,6 @@ public class GamesHandler {
         return allGameFlows.stream().filter(gameFlow -> gameFlow.getPlayer().getNickname().equalsIgnoreCase(nickname)).findFirst();
     }
 
-    //TODO: DONE, have a look at setReconnection
     private synchronized GameFlowHandler reconnection(String nickname, String password, ConnectionHandler connection) throws LoginFailedException {
         Optional<GameFlowHandler> gameFlowFetched = findGameFlow(nickname);
         GameFlowHandler gameFlow;
@@ -76,7 +73,6 @@ public class GamesHandler {
         throw new LoginFailedException();
     }
 
-    //TODO: DONE
     public synchronized void logout(String nickname){
         Optional<GameFlowHandler> gameFlowFetched = findGameFlow(nickname);
         GameFlowHandler gameFlow;
@@ -118,7 +114,6 @@ public class GamesHandler {
         return -1;
     }
 
-    //TODO: DONE
     private synchronized void waitingRoomNewPlayer(){
         if(waitingRoom.size() == 2) {
             timer = new Timer();
@@ -128,7 +123,6 @@ public class GamesHandler {
             startGame();
     }
 
-    //TODO: DONE
     public synchronized void waitingRoomDisconnection(GameFlowHandler gameFlow){
         waitingRoom.remove(gameFlow);
         if(waitingRoom.size() < 2 && timer != null) {
@@ -136,7 +130,6 @@ public class GamesHandler {
         }
     }
 
-    //TODO: DONE
     private synchronized void startGame() {
         List<Player> playerList;
         List<ConnectionHandler> connections;
@@ -158,7 +151,6 @@ public class GamesHandler {
         }
     }
 
-    //TODO: DONE
     public synchronized List<String> getWaitingPlayers() {
         return waitingRoom.stream().map(GameFlowHandler::getPlayer).map(Player::getNickname).collect(Collectors.toList());
     }
@@ -167,6 +159,13 @@ public class GamesHandler {
         public void run() {
             startGame();
         }
+    }
+
+    public synchronized void goToWaitingRoom(GameFlowHandler gameFlow){
+        if (waitingRoom.contains(gameFlow)) return;
+        playingUsers.remove(gameFlow);
+        waitingRoom.add(gameFlow);
+        waitingRoomNewPlayer();
     }
 
 }
