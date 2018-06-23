@@ -20,6 +20,7 @@ import it.polimi.ingsw.network.server.exception.LoginFailedException;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.rmi.RemoteException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -416,8 +417,8 @@ public class SocketHandler implements Runnable, ConnectionHandler{
                         gameFlowHandler = gamesHandler.login(nickname, password, this);
                         socketSendMessage(createMessage("verified"));
                         return true;
-                    }catch (LoginFailedException e){
-                        socketSendMessage(createMessage("failed"));
+                    }catch (LoginFailedException | RemoteException e){
+                        socketSendMessage(createErrorMessage(e.toString()));
                         return false;
                     }
                 }

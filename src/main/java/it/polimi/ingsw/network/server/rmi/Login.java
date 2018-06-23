@@ -17,8 +17,8 @@ public class Login extends UnicastRemoteObject implements LoginInterface{
     }
 
     @Override
-    public FlowHandlerInterface login(String name, String password, ConnectionHandler connectionHandler) throws LoginFailedException {
-        return new FlowHandler(this.gamesHandler.login(name, password, connectionHandler));
+    public FlowHandlerInterface login(String name, String password, ConnectionHandler connectionHandler) throws LoginFailedException, RemoteException {
+        return this.gamesHandler.login(name, password, connectionHandler);
     }
 
     @Override

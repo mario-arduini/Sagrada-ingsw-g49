@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,7 +32,7 @@ public class GamesHandler {
     }
 
     //TODO: DONE
-    public synchronized GameFlowHandler login(String nickname, String password, ConnectionHandler connection) throws LoginFailedException{
+    public synchronized GameFlowHandler login(String nickname, String password, ConnectionHandler connection) throws LoginFailedException, RemoteException {
         Player user;
         GameFlowHandler newGameFlow;
         if (this.findGameFlow(nickname).isPresent())

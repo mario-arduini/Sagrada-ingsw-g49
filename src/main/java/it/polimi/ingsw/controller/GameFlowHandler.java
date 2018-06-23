@@ -11,12 +11,15 @@ import it.polimi.ingsw.model.Window;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.toolcards.ToolCard;
 import it.polimi.ingsw.network.server.ConnectionHandler;
+import it.polimi.ingsw.network.server.rmi.FlowHandlerInterface;
 
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-public class GameFlowHandler {
+public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerInterface{
     private Player player;
     private GameRoom gameRoom;
     private GamesHandler gamesHandler;
@@ -24,21 +27,12 @@ public class GameFlowHandler {
     private ToolCard activeToolCard;
     private ConnectionHandler connection;
 
-    GameFlowHandler(GamesHandler gamesHandler, ConnectionHandler connection, Player player){
+    GameFlowHandler(GamesHandler gamesHandler, ConnectionHandler connection, Player player) throws RemoteException{
         this.player = player;
         this.gameRoom = null;
         this.gamesHandler = gamesHandler;
         this.activeToolCard = null;
         this.connection = connection;
-    }
-
-    public GameFlowHandler(GameFlowHandler gameFlow){
-        this.player = gameFlow.player;
-        this.gameRoom = gameFlow.gameRoom;
-        this.gamesHandler = gameFlow.gamesHandler;
-        this.initialSchemas = gameFlow.initialSchemas;
-        this.activeToolCard = gameFlow.activeToolCard;
-        this.connection = gameFlow.connection;
     }
 
     public Player getPlayer(){
