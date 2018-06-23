@@ -129,12 +129,10 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     private void placeDice(JsonObject message){
         try{
             gameFlowHandler.placeDice(getJsonPositiveIntValue(message, "row"), getJsonPositiveIntValue(message, "column"), gson.fromJson(message.get("dice").getAsString(), Dice.class));
-            socketSendMessage(createMessage("verified"));
-            gameFlowHandler.notifyDicePlaced(getJsonPositiveIntValue(message, "row"), getJsonPositiveIntValue(message, "column"), gson.fromJson(message.get("dice").getAsString(), Dice.class));
-            //TODO: separe Exceptions and send appropriate failure message
+        //TODO: check Exception repr on network level
         } catch (Exception e){
             Logger.print(e);
-            socketSendMessage(createMessage("failed"));
+            socketSendMessage(createErrorMessage(e.toString()));
         }
     }
 

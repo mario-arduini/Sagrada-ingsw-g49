@@ -68,10 +68,6 @@ public class GameFlowHandler {
         if (gameRoom.isGameFinished()) throw new GameOverException();
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
         gameRoom.placeDice(row, column, dice);
-    }
-
-    //TODO: REMOVE, copy the line inside into placeDice
-    public void notifyDicePlaced(int row, int column, Dice dice){
         gameRoom.notifyAllDicePlaced(player.getNickname(), row, column, dice);
     }
 
@@ -97,7 +93,6 @@ public class GameFlowHandler {
         }
     }
 
-    //TODO: REMOVE, send schema automatically, as in Choose-Schema -> connection.notify(...)
     public List<Schema> getInitialSchemas(){
         return this.initialSchemas;
     }
