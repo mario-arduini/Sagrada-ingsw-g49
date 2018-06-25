@@ -214,32 +214,19 @@ public class SocketHandler implements Runnable, ConnectionHandler{
     public void notifySchemas(List<Schema> schemas){
         JsonObject message;
         message = createMessage("schema-choice");
-        for (Integer i = 0; i < schemas.size(); i++)
-            message.addProperty(i.toString(), gson.toJson(schemas.get(i)));
+        message.addProperty("schemas", gson.toJson(schemas));
         socketSendMessage(message);
     }
 
     @Override
-    public void notifyGameInfo(List<ToolCard> toolCards, List<PublicGoal> publicGoals, PrivateGoal privateGoal){
+    public void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal){
         JsonObject message;
         JsonObject tmp;
         message = createMessage("game-info");
-        JsonObject toolCardsJson = new JsonObject();
-        for (Integer i = 0; i < toolCards.size(); i++) {
-            tmp = new JsonObject();
-            tmp.addProperty("name", toolCards.get(i).getName());
-            toolCardsJson.add(i.toString(), tmp);
-        }
-        message.add("toolcards", toolCardsJson);
-        JsonObject publicGoalsJson = new JsonObject();
-        for (Integer i = 0; i < toolCards.size(); i++) {
-            tmp = new JsonObject();
-            tmp.addProperty("name", publicGoals.get(i).getName());
-            publicGoalsJson.add(i.toString(), tmp);
-        }
-        message.add("publicgoals", publicGoalsJson);
 
-        message.addProperty("private-goal", privateGoal.getName());
+        message.addProperty("toolcards", gson.toJson(toolCards));
+        message.addProperty("public-goals", gson.toJson(publicGoals));
+        message.addProperty("private-goal", privateGoal);
 
         socketSendMessage(message);
     }

@@ -117,7 +117,7 @@ class ConnectionHandlerStub implements ConnectionHandler {
     }
 
     @Override
-    public void notifyGameInfo(List<ToolCard> toolCards, List<PublicGoal> publicGoals, PrivateGoal privateGoal) {
+    public void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal) {
     }
 
     @Override

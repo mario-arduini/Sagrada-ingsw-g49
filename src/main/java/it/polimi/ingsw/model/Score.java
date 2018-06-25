@@ -1,5 +1,7 @@
 package it.polimi.ingsw.model;
 
+import it.polimi.ingsw.network.server.Logger;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -61,21 +63,24 @@ public class Score {
 
         //Sort by Total Score
         sortedScores.sort(Comparator.comparingInt(Score::getTotalScore).reversed());
+        Logger.print("Total Score: " + sortedScores.stream().map(Score::getPlayer).collect(Collectors.toList()));
+
         //Sort by Private Goal
         sortedScores = Score.partialSort(sortedScores, Comparator.comparing(Score::getPrivateScore).reversed());
+        Logger.print("Private Score: " + sortedScores.stream().map(Score::getPlayer).collect(Collectors.toList()));
         //Sort by Favor Token
         sortedScores = Score.partialSort(sortedScores, Comparator.comparing(Score::getFavorToken).reversed());
+        Logger.print("Favor Score: " + sortedScores.stream().map(Score::getPlayer).collect(Collectors.toList()));
         //Sort by Round position
         sortedScores = Score.partialSort(sortedScores, Comparator.comparing(Score::getRoundPosition).reversed());
-
+        Logger.print("Round Score" + sortedScores.stream().map(Score::getPlayer).collect(Collectors.toList()));
         return sortedScores;
     }
 
     private static List<Score> partialSort(List<Score> scores, Comparator<Score> comparator){
-        List<Score> tmpScores = new ArrayList<>();
-        tmpScores.addAll(scores);
-        tmpScores.addAll(scores.stream().filter(score -> score.getTotalScore()==scores.get(0).getTotalScore()).sorted(comparator).collect(Collectors.toList()));
-        tmpScores.addAll(tmpScores.subList(tmpScores.size(), scores.size()));
+        List<Score> tmpScores = new ArrayList<>(scores.stream().filter(score -> score.getTotalScore() == scores.get(0).getTotalScore()).sorted(comparator).collect(Collectors.toList()));
+        if (tmpScores.size()!=scores.size())
+            tmpScores.addAll(scores.subList(tmpScores.size(), scores.size()));
         return tmpScores;
     }
 

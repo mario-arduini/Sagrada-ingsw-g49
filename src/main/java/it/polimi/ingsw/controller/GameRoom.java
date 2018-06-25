@@ -1,8 +1,10 @@
 package it.polimi.ingsw.controller;
 
+import com.sun.java.swing.plaf.windows.WindowsTreeUI;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
 import it.polimi.ingsw.network.server.ConnectionHandler;
+import it.polimi.ingsw.network.server.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +16,7 @@ public class GameRoom extends Game{
     private List<ConnectionHandler> connections;
     private boolean notifyEndGame;
     private Timer timer;
-    private int secondsTimer = 30; //TODO: read value from file.
+    private int secondsTimer = 3; //TODO: read value from file.
 
     GameRoom(List<Player> playerList, List<ConnectionHandler> connections) throws NoMorePlayersException {
         super(playerList);
@@ -46,6 +48,7 @@ public class GameRoom extends Game{
         }else if(notifyEndGame) {
             connections.forEach(user -> user.notifyEndGame(computeFinalScores()));
             notifyEndGame = false;
+            Logger.print("Game Over: " + getPlayers().stream().map(Player::getNickname).collect(Collectors.toList()));
         }
     }
 

@@ -1,11 +1,13 @@
 package it.polimi.ingsw.model;
 
+import com.sun.java.swing.plaf.windows.WindowsTreeUI;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
 import it.polimi.ingsw.network.server.Logger;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
@@ -57,6 +59,8 @@ public class Game {
         });
 
         int size = players.size();
+        Logger.print(players.stream().map(Player::getNickname).collect(Collectors.toList()));
+        Logger.print("Size Players: " + size);
         currentRound = new Round(dealer.extractPool(2*(size) + 1),createRoundPlayers(size));
         currentRound.nextPlayer();
         this.playing = false;
@@ -123,11 +127,12 @@ public class Game {
         List <Score> scores = new ArrayList<>();
         BinaryOperator<Integer> adder = (n1, n2) -> n1 + n2;
         int privateScore;
+        Logger.print(players);
         for(Player player: this.players){
-            AtomicReference<Integer> publicScore = new AtomicReference<>();
+            AtomicInteger publicScore = new AtomicInteger();
 
             privateScore = player.getPrivateGoal().computeScore(player.getWindow());
-            publicGoals.forEach(goal -> publicScore.getAndAccumulate(goal.computeScore(player.getWindow()), adder));
+            publicGoals.forEach(goal -> publicScore.getAndAdd(goal.computeScore(player.getWindow())));
             Logger.print(player.getNickname());
             scores.add(new Score(player.getNickname(), publicScore.get(), privateScore, player.getFavorToken(), player.getWindow().getEmptySpaces(), currentRound.getPlayerPosition(player)));
         }
@@ -153,7 +158,6 @@ public class Game {
         try {
             currentRound.nextPlayer();
         } catch (NoMorePlayersException e) {
-            e.printStackTrace();
         }
         if (isGameFinished()){
             currentRound = round;
@@ -174,7 +178,7 @@ public class Game {
         for (j = Math.abs(nextFirstPlayer-1)%size; j == nextFirstPlayer; j = Math.abs(j-1)%size)
             roundPlayers.add(players.get(j));
         roundPlayers.add(players.get(nextFirstPlayer));
-
+        Logger.print("New Round: " + roundPlayers.stream().map(Player::getNickname).collect(Collectors.toList()));
         return roundPlayers;
 
     }

@@ -20,7 +20,7 @@ public interface ConnectionHandler{
     void notifyOthersSchemas(Map<String, Schema> playersSchemas);
     void notifyDicePlaced(String nickname, int row, int column, Dice dice);
     void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack);
-    void notifyGameInfo(List<ToolCard> toolCards, List<PublicGoal> publicGoals, PrivateGoal privateGoal);
+    void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal);
     void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack);
     void notifyEndGame(List<Score> scores);
 

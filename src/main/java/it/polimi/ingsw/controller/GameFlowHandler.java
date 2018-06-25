@@ -9,6 +9,7 @@ import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.model.Window;
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
 import it.polimi.ingsw.network.server.ConnectionHandler;
 import it.polimi.ingsw.network.server.rmi.FlowHandlerInterface;
@@ -18,6 +19,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerInterface{
     private Player player;
@@ -46,7 +48,9 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     public void setGame(GameRoom game) {
         this.gameRoom = game;
         initialSchemas = game.extractSchemas();
-        connection.notifyGameInfo(game.getToolCards(), game.getPublicGoals(), player.getPrivateGoal());
+        List<String> toolCards = game.getToolCards().stream().map(ToolCard::getName).collect(Collectors.toList());
+        List<String> publicGoals = game.getPublicGoals().stream().map(PublicGoal::getName).collect(Collectors.toList());
+        connection.notifyGameInfo(toolCards, publicGoals, player.getPrivateGoal().getName());
         connection.notifySchemas(initialSchemas);
     }
 
@@ -104,7 +108,9 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         gameRoom.getPlayers().forEach(p -> windows.put(p.getNickname(), p.getWindow()));
         gameRoom.getPlayers().forEach(p -> favorToken.put(p.getNickname(), p.getFavorToken()));
 
-        connection.notifyGameInfo(gameRoom.getToolCards(), gameRoom.getPublicGoals(), player.getPrivateGoal());
+        List<String> toolCards = gameRoom.getToolCards().stream().map(ToolCard::getName).collect(Collectors.toList());
+        List<String> publicGoals = gameRoom.getPublicGoals().stream().map(PublicGoal::getName).collect(Collectors.toList());
+        connection.notifyGameInfo(toolCards, publicGoals, player.getPrivateGoal().getName());
         connection.notifyReconInfo(windows, favorToken, gameRoom.getRoundTrack());
         //TODO: maybe overload notifyRound..? Find better way? Will see it with RMI
         connection.notifyRound(gameRoom.getCurrentRound().getCurrentPlayer().getNickname(), gameRoom.getCurrentRound().getDraftPool(), false, null);
