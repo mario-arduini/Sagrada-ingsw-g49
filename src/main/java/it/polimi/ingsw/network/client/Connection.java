@@ -6,7 +6,7 @@ import it.polimi.ingsw.network.client.model.Dice;
 public interface Connection {
     boolean login(String nickname, String password);
     void sendSchema(int schema);
-    boolean placeDice(Dice dice, int row, int column);
+    void placeDice(Dice dice, int row, int column);
     boolean useToolCard(String name);
     void pass();
     void logout();

@@ -30,13 +30,13 @@ public class ClientSocketHandler implements Connection {
     private Gson gson;
 
 
-    ClientSocketHandler(Client client, String serverAddress, int serverPort, GameSnapshot gameSnapshot) throws SocketException {
+    ClientSocketHandler(Client client, String serverAddress, int serverPort) throws SocketException {
         ClientLogger.initLogger(LOGGER);
         try {
             socket = new Socket(serverAddress, serverPort);
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new PrintWriter(socket.getOutputStream(), true);
-            serverListener = new ServerListener(client, this, gameSnapshot);
+            serverListener = new ServerListener(client, this);
             thread = new Thread(serverListener);
             thread.start();
         } catch (Exception e) {
@@ -74,32 +74,19 @@ public class ClientSocketHandler implements Connection {
     }
 
     @Override
-    public synchronized void sendSchema(int schema){
-        //JsonParser parser = new JsonParser();
+    public void sendSchema(int schema){
         createJsonCommand("schema");
         jsonObject.addProperty("id", schema);
         socketPrintLine(jsonObject);
-
-        //jsonObject = parser.parse(socketReadLine()).getAsJsonObject();
-        //return jsonObject.get("message").getAsString().equals("verified");
     }
 
     @Override
-    public synchronized boolean placeDice(Dice dice, int row, int column){
+    public void placeDice(Dice dice, int row, int column){
         createJsonCommand("place-dice");
         jsonObject.addProperty("dice", gson.toJson(dice));
         jsonObject.addProperty("row", row - 1);
         jsonObject.addProperty("column", column - 1);
         socketPrintLine(jsonObject);
-
-        while (!flagContinue)
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                LOGGER.warning(e.toString());
-            }
-        flagContinue = false;
-        return serverResult;
     }
 
     @Override

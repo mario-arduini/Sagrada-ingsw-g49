@@ -5,7 +5,10 @@ import it.polimi.ingsw.network.server.rmi.LoginInterface;
 import java.net.SocketException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.*;
 
 public class Client {
@@ -22,11 +25,14 @@ public class Client {
     private boolean serverConnected;    //* is it useful?
     private GameSnapshot gameSnapshot;
     private LoginInterface serverInterface;
+    private boolean flagContinue;
+    private boolean serverResult;
 
     private Client(){
         super();
         this.gameSnapshot = new GameSnapshot();
         gameStarted = false;
+        flagContinue = false;
     }
 
     private void setCLIHandler(CLIHandler cliHandler){
@@ -61,10 +67,10 @@ public class Client {
         }
     }
 
-    boolean createConnection(ConnectionType connectionType, GameSnapshot gameSnapshot) {
+    boolean createConnection(ConnectionType connectionType) {
         if(connectionType == ConnectionType.SOCKET) {
             try {
-                server = new ClientSocketHandler(this, serverAddress, serverPort, gameSnapshot);
+                server = new ClientSocketHandler(this, serverAddress, serverPort);
             } catch (SocketException e) {
                 return false;
             }
@@ -83,21 +89,12 @@ public class Client {
             new ClientRMIHandler(serverAddress);
     }
 
-    void chooseSchema(List<Schema> schemas){
-        gameStarted = true;
-        server.sendSchema(cliHandler.chooseSchema(gameSnapshot, schemas));
+    void placeDice(int diceNumber, int row, int column){
+        server.placeDice(gameSnapshot.getDraftPool().get(diceNumber - 1), row, column);
     }
 
-    void notifyNewTurn(String nickname){
-        getGameSnapshot().getPlayer().setMyTurn(nickname.equals(gameSnapshot.getPlayer().getNickname()));
-        getGameSnapshot().getPlayer().setDiceExtracted(false);
-        getGameSnapshot().getPlayer().setUsedToolCard(false);
-        gameSnapshot.setCurrentPlayer(nickname);
-    }
-
-    boolean placeDice(int diceNumber, int row, int column){
-        gameSnapshot.getPlayer().setDiceExtracted(server.placeDice(gameSnapshot.getDraftPool().get(diceNumber - 1), row, column));
-        return getGameSnapshot().getPlayer().isDiceAlreadyExtracted();
+    void useToolCard(String name){
+        server.useToolCard(name);
     }
 
     synchronized void logout(){
@@ -110,11 +107,6 @@ public class Client {
         }
     }
 
-    boolean useToolCard(String name){
-        gameSnapshot.getPlayer().setUsedToolCard(server.useToolCard(name));
-        return getGameSnapshot().getPlayer().isToolCardAlreadyUsed();
-    }
-
     void verifyEndTurn(){
         if(gameSnapshot.getPlayer().isDiceAlreadyExtracted() && gameSnapshot.getPlayer().isToolCardAlreadyUsed())
             pass();
@@ -124,15 +116,110 @@ public class Client {
         server.pass();
     }
 
-    void updateWaitingRoom(List<String> nicknames, boolean newUsers){
-        for(String nickname : nicknames)
-            if (newUsers)
-                gameSnapshot.addOtherPlayer(nickname);
-            else
-                gameSnapshot.removeOtherPlayer(nickname);
 
+
+
+
+
+
+    void notifyLogin(List<String> nicknames){
+        for(String nickname : nicknames)
+            gameSnapshot.addOtherPlayer(nickname);
         cliHandler.printWaitingRoom();
     }
+
+    void notifyLogin(String nickname){
+        gameSnapshot.addOtherPlayer(nickname);
+        cliHandler.printWaitingRoom();
+    }
+
+    void notifyLogout(String nickname){
+        gameSnapshot.removeOtherPlayer(nickname);
+        cliHandler.printWaitingRoom();
+    }
+
+    void notifySchemas(List<Schema> schemas){
+        gameStarted = true;
+        server.sendSchema(cliHandler.chooseSchema(gameSnapshot, schemas));
+    }
+
+    void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack){
+        gameSnapshot.getPlayer().setMyTurn(currentPlayer.equals(gameSnapshot.getPlayer().getNickname()));
+        gameSnapshot.getPlayer().setDiceExtracted(false);
+        gameSnapshot.getPlayer().setUsedToolCard(false);
+        gameSnapshot.setCurrentPlayer(currentPlayer);
+        gameSnapshot.setDraftPool(draftPool);
+        if(newRound)
+            gameSnapshot.setRoundTrack(roundTrack);
+
+        CLIHandler.printGame(gameSnapshot);
+        CLIHandler.printMenu(gameSnapshot);
+    }
+
+    void notifyOthersSchemas(Map<String, Schema> playersSchemas){
+        for (Map.Entry<String, Schema> entry : playersSchemas.entrySet()) {
+            if(!entry.getKey().equals(gameSnapshot.getPlayer().getNickname()))
+                gameSnapshot.findPlayer(entry.getKey()).get().setWindow(entry.getValue());
+            else
+                gameSnapshot.getPlayer().setWindow(entry.getValue());
+        }
+    }
+
+    void notifyDicePlaced(String nickname, int row, int column, Dice dice){
+        gameSnapshot.getDraftPool().remove(dice);
+        if(!nickname.equals(gameSnapshot.getPlayer().getNickname()))
+            gameSnapshot.findPlayer(nickname).get().getWindow().addDice(row, column, dice);
+        else {
+            gameSnapshot.getPlayer().getWindow().addDice(row, column, dice);
+            gameSnapshot.getPlayer().setDiceExtracted(true);
+            setServerResult(true);
+        }
+        CLIHandler.printGame(gameSnapshot);
+        CLIHandler.printMenu(gameSnapshot);
+    }
+
+    void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack){
+        Optional<PlayerSnapshot> playerSnapshot = gameSnapshot.findPlayer(player);
+        ToolCard toolCardUsed = gameSnapshot.getToolCardByName(toolCard);
+        if(playerSnapshot.isPresent()){
+            playerSnapshot.get().useFavorToken(toolCardUsed.getUsed() ? 2 : 1);
+            toolCardUsed.setUsed();
+            playerSnapshot.get().setWindow(window);
+            gameSnapshot.setRoundTrack(roundTrack);
+            gameSnapshot.setDraftPool(draftPool);
+
+            if(player.equalsIgnoreCase(gameSnapshot.getPlayer().getNickname())) {
+                gameSnapshot.getPlayer().setUsedToolCard(true);
+                serverResult = true;
+                setServerResult(true);
+            }
+            CLIHandler.printGame(gameSnapshot);
+            CLIHandler.printMenu(gameSnapshot);
+        }
+    }
+
+    void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal){
+        List<ToolCard> toolCardsClass = new ArrayList<>();
+        for(String name : toolCards)
+            toolCardsClass.add(new ToolCard(name, ""));
+        gameSnapshot.setToolCards(toolCardsClass);
+
+        gameSnapshot.setPublicGoals(publicGoals);
+        gameSnapshot.getPlayer().setPrivateGoal(privateGoal);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     synchronized void serverDisconnected(){
         if(logged) {
@@ -145,12 +232,8 @@ public class Client {
         }
     }
 
-    void printGame(){
-        CLIHandler.printGame(gameSnapshot);
-    }
-
     void printMenu(){
-        cliHandler.printMenu();
+        CLIHandler.printMenu(gameSnapshot);
 
 
         //TODO remove all below
@@ -172,6 +255,26 @@ public class Client {
 
     void gameOver(List<Score> scores){
         cliHandler.gameOver(scores);
+    }
+
+    boolean getFlagContinue(){
+        return flagContinue;
+    }
+
+    void setFlagContinue(boolean flagContinue){
+        this.flagContinue = flagContinue;
+    }
+
+    boolean getServerResult(){
+        return serverResult;
+    }
+
+    void setServerResult(boolean serverResult){
+        this.serverResult = serverResult;
+        flagContinue = true;
+        synchronized (cliHandler){
+            cliHandler.notifyAll();
+        }
     }
 
     //region TOOLCARD

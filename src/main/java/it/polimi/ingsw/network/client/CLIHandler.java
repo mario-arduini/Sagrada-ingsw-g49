@@ -17,14 +17,12 @@ class CLIHandler {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
     private BufferedReader input;
     private Client client;
-    private GameSnapshot gameSnapshot;
     private boolean playingRound;
 
     CLIHandler(Client client){
         ClientLogger.initLogger(LOGGER);
         input = new BufferedReader(new InputStreamReader(System.in));
         this.client = client;
-        gameSnapshot = new GameSnapshot();
     }
 
     synchronized void start() {
@@ -35,7 +33,7 @@ class CLIHandler {
         do {
             client.setServerAddress(askServerAddress());
             client.setServerPort(askServerPort());
-        }while (!client.createConnection(askConnectionType(), gameSnapshot));
+        }while (!client.createConnection(askConnectionType()));
 
         waitConnection();
 
@@ -273,7 +271,8 @@ class CLIHandler {
                 else
                     ask = false;
             }
-            if(!client.placeDice(dice, row, column)) {
+            client.placeDice(dice, row, column);
+            if(!waitResult()) {
                 printGame(client.getGameSnapshot());
                 ClientLogger.println("\nConstraint violated!");
                 client.printMenu();
@@ -301,27 +300,40 @@ class CLIHandler {
             }
             if(choice == 0) {
                 printGame(client.getGameSnapshot());
-                printMenu();
+                printMenu(client.getGameSnapshot());
                 return;
             }
             if(choice < 1 || choice > 3)
                 ClientLogger.println("Not a valid choice");
         }
-        if(!client.useToolCard( client.getGameSnapshot().getToolCards().get(choice - 1).getName())) {
+
+        client.useToolCard( client.getGameSnapshot().getToolCards().get(choice - 1).getName());
+        if(!waitResult()) {
             printGame(client.getGameSnapshot());
             ClientLogger.println("\nYou can't use this card now");
-            printMenu();
+            printMenu(client.getGameSnapshot());
         }
         else
             client.verifyEndTurn();
     }
 
-    void printMenu(){
-        if(client.getGameSnapshot().getPlayer().isMyTurn()) {
+    boolean waitResult(){
+        while (!client.getFlagContinue())
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                LOGGER.warning(e.toString());
+            }
+        client.setFlagContinue(false);
+        return client.getServerResult();
+    }
+
+    static void printMenu(GameSnapshot gameSnapshot){
+        if(gameSnapshot.getPlayer().isMyTurn()) {
             ClientLogger.print("\nIt's your turn\n\nChoose an option:\n0) Logout");
-            if (!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted()) {
+            if (!gameSnapshot.getPlayer().isDiceAlreadyExtracted()) {
                 ClientLogger.print("\n1) Place dice");
-                if(!client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed())
+                if(!gameSnapshot.getPlayer().isToolCardAlreadyUsed())
                     ClientLogger.print("\n2) Tool Card\n3) Pass\n\nYour choice: ");
                 else
                     ClientLogger.print("\n2) Pass\n\nYour choice: ");
@@ -330,7 +342,7 @@ class CLIHandler {
                 ClientLogger.print("\n1) Tool Card\n2) Pass\n\nYour choice: ");
         }
         else
-            ClientLogger.println("\nIt's " + client.getGameSnapshot().getCurrentPlayer() + "'s turn, wait for your turn\n\nTo logout insert 0");
+            ClientLogger.println("\nIt's " + gameSnapshot.getCurrentPlayer() + "'s turn, wait for your turn\n\nTo logout insert 0");
     }
 
     boolean getPlayingRound(){
