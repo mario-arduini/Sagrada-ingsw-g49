@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.polimi.ingsw.network.client.model.Coordinate;
 import it.polimi.ingsw.network.client.model.Dice;
+import it.polimi.ingsw.network.client.model.GameSnapshot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,13 +30,13 @@ public class ClientSocketHandler implements Connection {
     private Gson gson;
 
 
-    ClientSocketHandler(Client client, String serverAddress, int serverPort) throws SocketException {
+    ClientSocketHandler(Client client, String serverAddress, int serverPort, GameSnapshot gameSnapshot) throws SocketException {
         ClientLogger.initLogger(LOGGER);
         try {
             socket = new Socket(serverAddress, serverPort);
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new PrintWriter(socket.getOutputStream(), true);
-            serverListener = new ServerListener(client, this);
+            serverListener = new ServerListener(client, this, gameSnapshot);
             thread = new Thread(serverListener);
             thread.start();
         } catch (Exception e) {
@@ -73,14 +74,14 @@ public class ClientSocketHandler implements Connection {
     }
 
     @Override
-    public synchronized boolean sendSchema(int schema){
-        JsonParser parser = new JsonParser();
+    public synchronized void sendSchema(int schema){
+        //JsonParser parser = new JsonParser();
         createJsonCommand("schema");
         jsonObject.addProperty("id", schema);
         socketPrintLine(jsonObject);
 
-        jsonObject = parser.parse(socketReadLine()).getAsJsonObject();
-        return jsonObject.get("message").getAsString().equals("verified");
+        //jsonObject = parser.parse(socketReadLine()).getAsJsonObject();
+        //return jsonObject.get("message").getAsString().equals("verified");
     }
 
     @Override
@@ -165,43 +166,37 @@ public class ClientSocketHandler implements Connection {
 
     //region TOOLCARD
 
-    @Override
-    public void sendPlusMinusOption(String choice){
+    void sendPlusMinusOption(String choice){
         createJsonCommand("toolcard-plus-minus");
         jsonObject.addProperty("choice", choice.equals("+")||choice.equals("y"));
         socketPrintLine(jsonObject);
     }
 
-    @Override
-    public void sendDiceFromDraftPool(Dice dice){
+    void sendDiceFromDraftPool(Dice dice){
         createJsonCommand("toolcard-dice-draftpool");
         jsonObject.addProperty("choice", gson.toJson(dice));
         socketPrintLine(jsonObject);
     }
 
-    @Override
-    public void sendDiceFromRoundTrack(int index){
+    void sendDiceFromRoundTrack(int index){
         createJsonCommand("toolcard-dice-roundtrack");
         jsonObject.addProperty("choice", index);
         socketPrintLine(jsonObject);
     }
 
-    @Override
-    public void sendDiceFromWindow(Coordinate coordinate){
+    void sendDiceFromWindow(Coordinate coordinate){
         createJsonCommand("toolcard-dice-window");
         jsonObject.addProperty("choice", gson.toJson(coordinate));
         socketPrintLine(jsonObject);
     }
 
-    @Override
-    public void sendPlacementPosition(Coordinate coordinate){
+    void sendPlacementPosition(Coordinate coordinate){
         createJsonCommand("toolcard-place-window");
         jsonObject.addProperty("choice", gson.toJson(coordinate));
         socketPrintLine(jsonObject);
     }
 
-    @Override
-    public void sendDiceValue(int value) {
+    void sendDiceValue(int value) {
         createJsonCommand("toolcard-dice-value");
         jsonObject.addProperty("choice", value);
         socketPrintLine(jsonObject);

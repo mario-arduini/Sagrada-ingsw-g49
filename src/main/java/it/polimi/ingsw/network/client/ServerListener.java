@@ -16,9 +16,11 @@ public class ServerListener implements Runnable {
     private Client client;
     private ClientSocketHandler server;
     private boolean connected;
+    private GameSnapshot gameSnapshot;
     private static Gson gson = new Gson();
 
-    ServerListener(Client client, ClientSocketHandler server) {
+    ServerListener(Client client, ClientSocketHandler server, GameSnapshot gameSnapshot) {
+        this.gameSnapshot = gameSnapshot;
         this.client = client;
         this.server = server;
         connected = true;
@@ -59,13 +61,14 @@ public class ServerListener implements Runnable {
                     //endregion
 
                     case "new_player":
-                        listType = new TypeToken<List<String>>(){}.getType();
-                        client.updateWaitingRoom(gson.fromJson(jsonObject.get("nicknames").getAsString(), listType), true);
+                        client.updateWaitingRoom(gson.fromJson(jsonObject.get("nicknames").getAsString(), new TypeToken<List<String>>(){}.getType()), true);
                         break;
                     case "quit":
-                        List<String> loggedOutUser = new ArrayList<>();
-                        loggedOutUser.add(jsonObject.get("nickname").getAsString());
-                        client.updateWaitingRoom(loggedOutUser, false);
+                        if(!client.isGameStarted()) {
+                            List<String> loggedOutUser = new ArrayList<>();
+                            loggedOutUser.add(jsonObject.get("nickname").getAsString());
+                            client.updateWaitingRoom(loggedOutUser, false);
+                        }
                         break;
                     case "verified":
                         server.notifyResult(true);
@@ -76,13 +79,13 @@ public class ServerListener implements Runnable {
                     case "game-info":
                         extractToolCards(jsonObject.getAsJsonObject("toolcards"));
                         extractPublicGoals(jsonObject.getAsJsonObject("public-goals"));
-                        client.getGameSnapshot().getPlayer().setPrivateGoal(jsonObject.get("private-goal").getAsString()); //TODO: change this to only string?
+                        gameSnapshot.setPrivateGoal(jsonObject.get("private-goal").getAsString()); //TODO: change this to only string?
                         break;
                     case "schema-choice":
                         List<Schema> schemas = new ArrayList<>();
                         for(Integer i = 0; i < jsonObject.keySet().size() - 1; i++)
                             schemas.add(gson.fromJson(jsonObject.get(i.toString()).getAsString(), Schema.class));
-                        client.getGameSnapshot().getPlayer().setWindow(schemas.get(client.chooseSchema(schemas)));
+                        client.chooseSchema(schemas);
                         break;
                     case "round":
                         listType = new TypeToken<List<Dice>>(){}.getType();
@@ -95,11 +98,12 @@ public class ServerListener implements Runnable {
                         client.printMenu();
                         break;
                     case "schema-chosen":
-                        listType = new TypeToken<HashMap<String, Schema>>(){}.getType();
-                        HashMap<String, Schema> windows = gson.fromJson(jsonObject.get("content").getAsString(), listType);
+                        HashMap<String, Schema> windows = gson.fromJson(jsonObject.get("content").getAsString(), new TypeToken<HashMap<String, Schema>>(){}.getType());
                         for (Map.Entry<String, Schema> entry : windows.entrySet()) {
                             if(!entry.getKey().equals(client.getGameSnapshot().getPlayer().getNickname()))
                                 client.getGameSnapshot().findPlayer(entry.getKey()).get().setWindow(entry.getValue());
+                            else
+                                client.getGameSnapshot().getPlayer().setWindow(entry.getValue());
                         }
                         break;
                     case "toolcard-used":
@@ -122,8 +126,10 @@ public class ServerListener implements Runnable {
                         client.getGameSnapshot().getDraftPool().remove(dicePlaced);
                         if(!nick.equals(client.getGameSnapshot().getPlayer().getNickname()))
                             client.getGameSnapshot().findPlayer(nick).get().getWindow().addDice(row,col,dicePlaced);
-                        else
-                            client.getGameSnapshot().getPlayer().getWindow().addDice(row,col,dicePlaced);
+                        else {
+                            client.getGameSnapshot().getPlayer().getWindow().addDice(row, col, dicePlaced);
+                            server.notifyResult(true);
+                        }
                         client.printGame();
                         client.printMenu();
                         break;
@@ -142,27 +148,29 @@ public class ServerListener implements Runnable {
                             else
                                 client.getGameSnapshot().addOtherPlayer(playerSnapshot);
                         }
-
+                        break;
+                    case "game-over":
+                        client.gameOver(gson.fromJson(jsonObject.get("scores").getAsString(), new TypeToken<List<Score>>(){}.getType()));
                         break;
 
                     //region TOOLCARD
                     case "toolcard-plus-minus":
-                        client.getPlusMinusOption(jsonObject.get("prompt").getAsString());
+                        server.sendPlusMinusOption(client.getPlusMinusOption(jsonObject.get("prompt").getAsString()));
                         break;
                     case "toolcard-dice-draftpool":
-                        client.getDiceFromDraftPool(jsonObject.get("prompt").getAsString());
+                        server.sendDiceFromDraftPool(client.getDiceFromDraftPool(jsonObject.get("prompt").getAsString()));
                         break;
                     case "toolcard-dice-roundtrack":
-                        client.getDiceFromRoundTrack(jsonObject.get("prompt").getAsString());
+                        server.sendDiceFromRoundTrack(client.getDiceFromRoundTrack(jsonObject.get("prompt").getAsString()));
                         break;
                     case "toolcard-dice-window":
-                        client.getDiceFromWindow(jsonObject.get("prompt").getAsString());
+                        server.sendDiceFromWindow(client.getDiceFromWindow(jsonObject.get("prompt").getAsString()));
                         break;
                     case "toolcard-place-window":
-                        client.getPlacementPosition();
+                        server.sendPlacementPosition(client.getPlacementPosition());
                         break;
                     case "toolcard-dice-value":
-                        client.getDiceValue(jsonObject.get("prompt").getAsString());
+                        server.sendDiceValue(client.getDiceValue(jsonObject.get("prompt").getAsString()));
                         break;
 
                     //endregion
@@ -180,14 +188,14 @@ public class ServerListener implements Runnable {
         List<ToolCard> toolCards = new ArrayList<>();
         for(Integer i = 0; i < 3; i++)
             toolCards.add(new ToolCard(jsonObject.get(i.toString()).getAsJsonObject().get("name").getAsString(),"")); //jsonObject.get("0").getAsJsonObject().get("description").getAsString()));
-        client.getGameSnapshot().setToolCards(toolCards);
+        gameSnapshot.setToolCards(toolCards);
     }
 
     private void extractPublicGoals(JsonObject jsonObject){
         List<String> publicGoals = new ArrayList<>();
         for(Integer i = 0; i < 3; i++)
             publicGoals.add(jsonObject.get(i.toString()).getAsJsonObject().get("name").getAsString());
-        client.getGameSnapshot().setPublicGoals(publicGoals);
+        gameSnapshot.setPublicGoals(publicGoals);
     }
 
     void setConnected(boolean connected){

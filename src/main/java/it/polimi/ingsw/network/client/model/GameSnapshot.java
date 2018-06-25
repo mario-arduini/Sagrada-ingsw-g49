@@ -31,6 +31,10 @@ public class GameSnapshot {
         this.player = new PlayerSnapshot(playerSnapshot);
     }
 
+    public void setPrivateGoal(String privateGoal){
+        player.setPrivateGoal(privateGoal);
+    }
+
     public void addOtherPlayer(String nick){
         otherPlayers.add(new PlayerSnapshot(nick));
     }

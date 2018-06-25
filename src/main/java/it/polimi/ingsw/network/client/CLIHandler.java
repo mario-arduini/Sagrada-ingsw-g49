@@ -17,12 +17,14 @@ class CLIHandler {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
     private BufferedReader input;
     private Client client;
+    private GameSnapshot gameSnapshot;
     private boolean playingRound;
 
     CLIHandler(Client client){
         ClientLogger.initLogger(LOGGER);
         input = new BufferedReader(new InputStreamReader(System.in));
         this.client = client;
+        gameSnapshot = new GameSnapshot();
     }
 
     synchronized void start() {
@@ -33,7 +35,7 @@ class CLIHandler {
         do {
             client.setServerAddress(askServerAddress());
             client.setServerPort(askServerPort());
-        }while (!client.createConnection(askConnectionType()));
+        }while (!client.createConnection(askConnectionType(), gameSnapshot));
 
         waitConnection();
 
@@ -239,7 +241,7 @@ class CLIHandler {
                 continue;
             }
 
-            if(choice < 1 || choice > 4 || !client.sendSchema(choice - 1)){
+            if(choice < 1 || choice > 4){
                 choice = 0;
                 ClientLogger.println("Invalid choice");
             }
@@ -277,7 +279,6 @@ class CLIHandler {
                 client.printMenu();
             } else
                 client.verifyEndTurn();
-
         }else
             ClientLogger.println("Not your turn! You can only logout");
     }
@@ -575,5 +576,11 @@ class CLIHandler {
             //ClientLogger.println("   Description: " + toolcard.getDescription());
             ClientLogger.println("|  Cost: " + (toolcard.getUsed() ? "2" : "1"));
         }
+    }
+
+    void gameOver(List<Score> scores){
+        ClientLogger.printlnWithClear("GAME FINISHED\n");
+        for(Score score : scores)
+            ClientLogger.println(score.getPlayer() + "   " + score.getTotalScore());
     }
 }

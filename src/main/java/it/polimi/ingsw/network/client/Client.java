@@ -2,13 +2,7 @@ package it.polimi.ingsw.network.client;
 
 import it.polimi.ingsw.network.client.model.*;
 import it.polimi.ingsw.network.server.rmi.LoginInterface;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import java.net.MalformedURLException;
 import java.net.SocketException;
-import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -24,7 +18,7 @@ public class Client {
     private Connection server;
     enum ConnectionType{ RMI, SOCKET }
     private boolean logged;
-    private boolean playingRound;
+    private boolean gameStarted;
     private boolean serverConnected;    //* is it useful?
     private GameSnapshot gameSnapshot;
     private LoginInterface serverInterface;
@@ -32,6 +26,7 @@ public class Client {
     private Client(){
         super();
         this.gameSnapshot = new GameSnapshot();
+        gameStarted = false;
     }
 
     private void setCLIHandler(CLIHandler cliHandler){
@@ -66,10 +61,10 @@ public class Client {
         }
     }
 
-    boolean createConnection(ConnectionType connectionType) {
+    boolean createConnection(ConnectionType connectionType, GameSnapshot gameSnapshot) {
         if(connectionType == ConnectionType.SOCKET) {
             try {
-                server = new ClientSocketHandler(this, serverAddress, serverPort);
+                server = new ClientSocketHandler(this, serverAddress, serverPort, gameSnapshot);
             } catch (SocketException e) {
                 return false;
             }
@@ -78,7 +73,7 @@ public class Client {
             try {
                 startRMI();
             }  catch (NotBoundException | RemoteException e) {
-                e.printStackTrace();
+                return false;
             }
         }
         return true;
@@ -88,12 +83,9 @@ public class Client {
             new ClientRMIHandler(serverAddress);
     }
 
-    int chooseSchema(List<Schema> schemas){
-        return cliHandler.chooseSchema(gameSnapshot, schemas);
-    }
-
-    boolean sendSchema(int choice){
-        return server.sendSchema(choice);
+    void chooseSchema(List<Schema> schemas){
+        gameStarted = true;
+        server.sendSchema(cliHandler.chooseSchema(gameSnapshot, schemas));
     }
 
     void notifyNewTurn(String nickname){
@@ -172,7 +164,14 @@ public class Client {
 
     GameSnapshot getGameSnapshot(){
         return gameSnapshot;
+    }
 
+    boolean isGameStarted() {
+        return gameStarted;
+    }
+
+    void gameOver(List<Score> scores){
+        cliHandler.gameOver(scores);
     }
 
     //region TOOLCARD
@@ -181,28 +180,28 @@ public class Client {
         cliHandler.notifyUsedToolCard(player, toolCard);
     }
 
-    void getPlusMinusOption(String prompt){
-        server.sendPlusMinusOption(cliHandler.askPlusMinusOption(prompt));
+    String getPlusMinusOption(String prompt){
+        return cliHandler.askPlusMinusOption(prompt);
     }
 
-    void getDiceFromDraftPool(String prompt){
-        server.sendDiceFromDraftPool(cliHandler.askDiceFromDraftPool(prompt));
+    Dice getDiceFromDraftPool(String prompt){
+        return cliHandler.askDiceFromDraftPool(prompt);
     }
 
-    void getDiceFromRoundTrack(String prompt){
-        server.sendDiceFromRoundTrack(cliHandler.askDiceFromRoundTrack(prompt));
+    int getDiceFromRoundTrack(String prompt){
+        return cliHandler.askDiceFromRoundTrack(prompt);
     }
 
-    void getDiceFromWindow(String prompt){
-        server.sendDiceFromWindow(cliHandler.askDiceFromWindow(prompt));
+    Coordinate getDiceFromWindow(String prompt){
+        return cliHandler.askDiceFromWindow(prompt);
     }
 
-    void getPlacementPosition(){
-        server.sendPlacementPosition(cliHandler.askPlacementPosition());
+    Coordinate getPlacementPosition(){
+        return cliHandler.askPlacementPosition();
     }
 
-    void getDiceValue(String prompt){
-        server.sendDiceValue(cliHandler.askDiceValue(prompt));
+    int getDiceValue(String prompt){
+        return cliHandler.askDiceValue(prompt);
     }
 
     //endregion
