@@ -139,7 +139,7 @@ public class GamesHandler {
             connections = waitingRoom.stream().map(GameFlowHandler::getConnection).collect(Collectors.toList());
             game = new GameRoom(playerList, connections);
             waitingRoom.forEach(user -> user.setGame(game));
-
+            playingUsers.addAll(waitingRoom);
             Logger.print(String.format("Game Started: %s", getWaitingPlayers().toString()));
 
         } catch (NoMorePlayersException e) {

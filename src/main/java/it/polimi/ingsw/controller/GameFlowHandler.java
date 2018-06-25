@@ -51,7 +51,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     }
 
     public void chooseSchema(Integer schemaNumber) throws GameNotStartedException, GameOverException, WindowAlreadySetException{
-        if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
+        if (gameRoom == null) throw new GameNotStartedException();
         if (gameRoom.isGameFinished()) throw new GameOverException();
         player.setWindow(initialSchemas.get(schemaNumber));
         checkGameReady();

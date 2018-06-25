@@ -3,6 +3,7 @@ package it.polimi.ingsw.model;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
+import it.polimi.ingsw.network.server.Logger;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -127,7 +128,7 @@ public class Game {
 
             privateScore = player.getPrivateGoal().computeScore(player.getWindow());
             publicGoals.forEach(goal -> publicScore.getAndAccumulate(goal.computeScore(player.getWindow()), adder));
-
+            Logger.print(player.getNickname());
             scores.add(new Score(player.getNickname(), publicScore.get(), privateScore, player.getFavorToken(), player.getWindow().getEmptySpaces(), currentRound.getPlayerPosition(player)));
         }
         return Score.sort(scores);

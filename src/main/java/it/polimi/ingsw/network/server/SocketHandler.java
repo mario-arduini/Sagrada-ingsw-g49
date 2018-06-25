@@ -152,7 +152,9 @@ public class SocketHandler implements Runnable, ConnectionHandler{
         try {
             gameFlowHandler.chooseSchema(getJsonPositiveIntValue(message, "id"));
         } catch (IndexOutOfBoundsException | InvalidParameterException |
-                WindowAlreadySetException | GameNotStartedException | GameOverException e){
+                WindowAlreadySetException | GameNotStartedException |
+                GameOverException e){
+            Logger.print(e);
             notifySchemas(gameFlowHandler.getInitialSchemas());
         }
     }
