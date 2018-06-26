@@ -1,17 +1,23 @@
 package it.polimi.ingsw.network.client;
 
+import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
+import it.polimi.ingsw.controller.exceptions.GameOverException;
+import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
+import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
+import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.client.model.*;
-import it.polimi.ingsw.network.server.rmi.LoginInterface;
+import it.polimi.ingsw.network.server.exception.LoginFailedException;
+
 import java.net.SocketException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.*;
 import java.util.logging.*;
 
-public class Client {
+public class Client extends UnicastRemoteObject implements ClientInterface{
 
     private static final Logger LOGGER = Logger.getLogger( Client.class.getName() );
 
@@ -25,11 +31,13 @@ public class Client {
     private boolean serverConnected;    //* is it useful?
     private GameSnapshot gameSnapshot;
     private LoginInterface serverInterface;
+    private ClientSocketHandler socketHandler;
     private boolean flagContinue;
     private boolean serverResult;
 
-    private Client(){
+    private Client() throws RemoteException {
         super();
+        ClientLogger.initLogger(LOGGER);
         this.gameSnapshot = new GameSnapshot();
         gameStarted = false;
         flagContinue = false;
@@ -51,9 +59,17 @@ public class Client {
         return serverConnected;
     }
 
-    boolean login(String nickname, String password){
+    void login(String nickname, String password){
         gameSnapshot.setPlayer(nickname);
-        return server.login(nickname, password);
+        if(serverInterface == null)
+            server = socketHandler.login(nickname, password);
+        else {
+            try {
+                server = (Connection) serverInterface.login(nickname, password,this);
+            } catch (RemoteException | LoginFailedException e) {
+                LOGGER.warning(e.toString());
+            }
+        }
     }
 
     void setLogged(boolean logged){
@@ -70,14 +86,16 @@ public class Client {
     boolean createConnection(ConnectionType connectionType) {
         if(connectionType == ConnectionType.SOCKET) {
             try {
-                server = new ClientSocketHandler(this, serverAddress, serverPort);
+                socketHandler = new ClientSocketHandler(this, serverAddress, serverPort);
             } catch (SocketException e) {
                 return false;
             }
         }
         else if(connectionType == ConnectionType.RMI) {
             try {
-                startRMI();
+                Registry registry = LocateRegistry.getRegistry(serverAddress);
+                this.serverInterface = (LoginInterface) registry.lookup("logger");
+
             }  catch (NotBoundException | RemoteException e) {
                 return false;
             }
@@ -85,21 +103,30 @@ public class Client {
         return true;
     }
 
-    private void startRMI() throws NotBoundException, RemoteException {
-            new ClientRMIHandler(serverAddress);
-    }
-
     void placeDice(int diceNumber, int row, int column){
-        server.placeDice(gameSnapshot.getDraftPool().get(diceNumber - 1), row, column);
+        try {
+            server.placeDice(row, column, gameSnapshot.getDraftPool().get(diceNumber - 1));
+        } catch (RemoteException | GameOverException | NotYourTurnException | NoAdjacentDiceException | BadAdjacentDiceException | DiceAlreadyExtractedException | FirstDiceMisplacedException | DiceNotInDraftPoolException | ConstraintViolatedException | GameNotStartedException | NoSameColorDicesException e) {
+            LOGGER.warning(e.toString());
+        }
     }
 
     void useToolCard(String name){
-        server.useToolCard(name);
+        try {
+            server.useToolCard(name);
+        } catch (RemoteException | GameNotStartedException | GameOverException | InvalidDiceValueException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | ConstraintViolatedException | BadAdjacentDiceException | NotWantedAdjacentDiceException | FirstDiceMisplacedException | NoAdjacentDiceException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException e) {
+            LOGGER.warning(e.toString());
+        }
     }
 
     synchronized void logout(){
-        if(serverConnected)
-            server.logout();
+        if(serverConnected) {
+            try {
+                server.logout();
+            } catch (RemoteException e) {
+                LOGGER.warning(e.toString());
+            }
+        }
 
         logged = false;
         synchronized (cliHandler){
@@ -113,7 +140,11 @@ public class Client {
     }
 
     void pass(){
-        server.pass();
+        try {
+            server.pass();
+        } catch (RemoteException | GameNotStartedException | GameOverException | NotYourTurnException e) {
+            LOGGER.warning(e.toString());
+        }
     }
 
 
@@ -122,28 +153,37 @@ public class Client {
 
 
 
-    void notifyLogin(List<String> nicknames){
+    @Override
+    public void notifyLogin(List<String> nicknames) throws RemoteException{
         for(String nickname : nicknames)
             gameSnapshot.addOtherPlayer(nickname);
         cliHandler.printWaitingRoom();
     }
 
-    void notifyLogin(String nickname){
+    @Override
+    public void notifyLogin(String nickname) throws RemoteException{
         gameSnapshot.addOtherPlayer(nickname);
         cliHandler.printWaitingRoom();
     }
 
-    void notifyLogout(String nickname){
+    @Override
+    public void notifyLogout(String nickname) throws RemoteException{
         gameSnapshot.removeOtherPlayer(nickname);
         cliHandler.printWaitingRoom();
     }
 
-    void notifySchemas(List<Schema> schemas){
+    @Override
+    public void notifySchemas(List<Schema> schemas) throws RemoteException{
         gameStarted = true;
-        server.sendSchema(cliHandler.chooseSchema(gameSnapshot, schemas));
+        try {
+            server.chooseSchema(cliHandler.chooseSchema(gameSnapshot, schemas));
+        } catch (GameNotStartedException | GameOverException | WindowAlreadySetException | RemoteException e) {
+            LOGGER.warning(e.toString());
+        }
     }
 
-    void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack){
+    @Override
+    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack) throws RemoteException{
         gameSnapshot.getPlayer().setMyTurn(currentPlayer.equals(gameSnapshot.getPlayer().getNickname()));
         gameSnapshot.getPlayer().setDiceExtracted(false);
         gameSnapshot.getPlayer().setUsedToolCard(false);
@@ -152,11 +192,19 @@ public class Client {
         if(newRound)
             gameSnapshot.setRoundTrack(roundTrack);
 
+        if(!cliHandler.getPlayingRound()) {
+            cliHandler.setPlayingRound(true);
+            synchronized (cliHandler) {
+                cliHandler.notifyAll();
+            }
+        }
+
         CLIHandler.printGame(gameSnapshot);
         CLIHandler.printMenu(gameSnapshot);
     }
 
-    void notifyOthersSchemas(Map<String, Schema> playersSchemas){
+    @Override
+    public void notifyOthersSchemas(Map<String, Schema> playersSchemas) throws RemoteException{
         for (Map.Entry<String, Schema> entry : playersSchemas.entrySet()) {
             if(!entry.getKey().equals(gameSnapshot.getPlayer().getNickname()))
                 gameSnapshot.findPlayer(entry.getKey()).get().setWindow(entry.getValue());
@@ -165,7 +213,8 @@ public class Client {
         }
     }
 
-    void notifyDicePlaced(String nickname, int row, int column, Dice dice){
+    @Override
+    public void notifyDicePlaced(String nickname, int row, int column, Dice dice) throws RemoteException{
         gameSnapshot.getDraftPool().remove(dice);
         if(!nickname.equals(gameSnapshot.getPlayer().getNickname()))
             gameSnapshot.findPlayer(nickname).get().getWindow().addDice(row, column, dice);
@@ -178,7 +227,8 @@ public class Client {
         CLIHandler.printMenu(gameSnapshot);
     }
 
-    void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack){
+    @Override
+    public void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack) throws RemoteException{
         Optional<PlayerSnapshot> playerSnapshot = gameSnapshot.findPlayer(player);
         ToolCard toolCardUsed = gameSnapshot.getToolCardByName(toolCard);
         if(playerSnapshot.isPresent()){
@@ -198,7 +248,8 @@ public class Client {
         }
     }
 
-    void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal){
+    @Override
+    public void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal) throws RemoteException{
         List<ToolCard> toolCardsClass = new ArrayList<>();
         for(String name : toolCards)
             toolCardsClass.add(new ToolCard(name, ""));
@@ -208,6 +259,25 @@ public class Client {
         gameSnapshot.getPlayer().setPrivateGoal(privateGoal);
     }
 
+    @Override
+    public void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack) throws RemoteException{
+        PlayerSnapshot playerSnapshot;
+        for(String user : windows.keySet()){
+            playerSnapshot = new PlayerSnapshot(user);
+            playerSnapshot.setWindow(windows.get(user));
+            playerSnapshot.setFavorToken(favorToken.get(user));
+            if(user.equals(gameSnapshot.getPlayer().getNickname()))
+                gameSnapshot.setPlayer(playerSnapshot);
+            else
+                gameSnapshot.addOtherPlayer(playerSnapshot);
+        }
+        gameSnapshot.setRoundTrack(roundTrack);
+    }
+
+    @Override
+    public void notifyEndGame(List<Score> scores) throws RemoteException{
+        cliHandler.gameOver(scores);
+    }
 
 
 
@@ -237,12 +307,7 @@ public class Client {
 
 
         //TODO remove all below
-        if(!cliHandler.getPlayingRound()) {
-            cliHandler.setPlayingRound(true);
-            synchronized (cliHandler) {
-                cliHandler.notifyAll();
-            }
-        }
+
     }
 
     GameSnapshot getGameSnapshot(){
@@ -251,10 +316,6 @@ public class Client {
 
     boolean isGameStarted() {
         return gameStarted;
-    }
-
-    void gameOver(List<Score> scores){
-        cliHandler.gameOver(scores);
     }
 
     boolean getFlagContinue(){
@@ -283,27 +344,28 @@ public class Client {
         cliHandler.notifyUsedToolCard(player, toolCard);
     }
 
-    String getPlusMinusOption(String prompt){
-        return cliHandler.askPlusMinusOption(prompt);
+    @Override
+    public boolean askIfPlus(String prompt) throws RemoteException{
+        return cliHandler.askIfPlus(prompt);
     }
 
-    Dice getDiceFromDraftPool(String prompt){
-        return cliHandler.askDiceFromDraftPool(prompt);
+    @Override
+    public Dice askDiceDraftPool(String prompt) throws RemoteException{
+        return cliHandler.askDiceDraftPool(prompt);
     }
 
-    int getDiceFromRoundTrack(String prompt){
-        return cliHandler.askDiceFromRoundTrack(prompt);
+    @Override
+    public int askDiceRoundTrack(String prompt) throws RemoteException{
+        return cliHandler.askDiceRoundTrack(prompt);
     }
 
-    Coordinate getDiceFromWindow(String prompt){
-        return cliHandler.askDiceFromWindow(prompt);
+    @Override
+    public Coordinate askDiceWindow(String prompt) throws RemoteException{
+        return cliHandler.askDiceWindow(prompt);
     }
 
-    Coordinate getPlacementPosition(){
-        return cliHandler.askPlacementPosition();
-    }
-
-    int getDiceValue(String prompt){
+    @Override
+    public int askDiceValue(String prompt) throws RemoteException{
         return cliHandler.askDiceValue(prompt);
     }
 
@@ -317,10 +379,15 @@ public class Client {
             return;
         }
 
-        Client client = new Client();
-        CLIHandler cliHandler;
         ClientLogger.LogToFile();
+        Client client = null;
+        try {
+            client = new Client();
+        } catch (RemoteException e) {
+            LOGGER.warning(e.toString());
+        }
 
+        CLIHandler cliHandler;
         if(args[0].equalsIgnoreCase("-g")) {
             switch (args[1].toLowerCase()) {
                 case "cli":

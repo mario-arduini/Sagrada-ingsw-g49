@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
-import it.polimi.ingsw.controller.GameRoom;
 import it.polimi.ingsw.controller.GamesHandler;
 import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
 import it.polimi.ingsw.controller.exceptions.GameOverException;
@@ -12,9 +11,6 @@ import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.model.goalcards.PrivateGoal;
-import it.polimi.ingsw.model.goalcards.PublicGoal;
-import it.polimi.ingsw.model.toolcards.ToolCard;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
 import java.io.*;
@@ -27,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SocketHandler implements Runnable, ConnectionHandler{
+public class SocketHandler implements Runnable, ClientInterface {
     private Socket socket;
     private BufferedReader input;
     private PrintWriter output;

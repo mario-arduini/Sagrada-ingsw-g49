@@ -2,7 +2,7 @@ package it.polimi.ingsw.model.toolcards;
 
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.network.server.ConnectionHandler;
+import it.polimi.ingsw.network.server.ClientInterface;
 
 import java.util.List;
 import java.util.Random;
@@ -13,7 +13,7 @@ final class Effects {
         super();
     }
 
-    static void getDraftedDice(Round round, ConnectionHandler connection){
+    static void getDraftedDice(Round round, ClientInterface connection){
         boolean valid = false;
         Dice dice = null;
         String prompt = "choose-drafted";
@@ -27,7 +27,7 @@ final class Effects {
         round.setDiceExtracted(true);
     }
 
-    static boolean addDiceToWindow(Player player, Dice dice, ConnectionHandler connection) {
+    static boolean addDiceToWindow(Player player, Dice dice, ClientInterface connection) {
         if(player.getWindow().possiblePlaces(dice, Window.RuleIgnored.NONE)==0) return false;
         boolean valid = false;
         Coordinate coords;
@@ -45,7 +45,7 @@ final class Effects {
         return true;
     }
 
-    static void move(Player player,Window.RuleIgnored ruleIgnored,boolean optional, ConnectionHandler connection){
+    static void move(Player player,Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection){
         if(optional && !connection.askIfPlus("want-move")) return;
         Coordinate start = null;
         Coordinate end = null;
@@ -96,7 +96,7 @@ final class Effects {
         }
     }
 
-    public static Dice move(Player player, List<Dice> roundTrack, Dice old, Window.RuleIgnored ruleIgnored,boolean optional, ConnectionHandler connection) {
+    public static Dice move(Player player, List<Dice> roundTrack, Dice old, Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection) {
         if(optional && !connection.askIfPlus("want-move")) return null;
         Coordinate start = null;
         Coordinate end = null;
@@ -167,7 +167,7 @@ final class Effects {
         dice.roll();
     }
 
-    static void changeValue(Dice dice, int value, ConnectionHandler connection) {
+    static void changeValue(Dice dice, int value, ClientInterface connection) {
         String message = "ask-plus";
         boolean valid=false;
         while (!valid){
@@ -209,7 +209,7 @@ final class Effects {
         });
     }
 
-    static void swapRoundTrack(Round round,List<Dice> roundTrack, ConnectionHandler connection){
+    static void swapRoundTrack(Round round,List<Dice> roundTrack, ClientInterface connection){
         boolean valid = false;
         int position=0;
         String prompt = "choose-round-swap";
@@ -228,7 +228,7 @@ final class Effects {
         round.setCurrentDiceDrafted(toSwap);
     }
 
-    static void getDiceFromBag(Round round, Dice dice, ConnectionHandler connection){
+    static void getDiceFromBag(Round round, Dice dice, ClientInterface connection){
         int value;
         boolean valid = false;
         String prompt = "choose-value";

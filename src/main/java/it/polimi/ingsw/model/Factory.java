@@ -105,7 +105,7 @@ public class Factory {
         JsonParser parser = new JsonParser();
         JsonObject jsonObject;
 
-
+        System.out.println(file.getName());
         jsonObject = parser.parse(new FileReader(file)).getAsJsonObject();
         toolCard = new ToolCard(jsonObject);
 

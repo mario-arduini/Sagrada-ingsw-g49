@@ -30,10 +30,13 @@ class CLIHandler {
         int command;
         boolean ok = false;
 
+        Client.ConnectionType connectionType;
         do {
+            connectionType = askConnectionType();
             client.setServerAddress(askServerAddress());
-            client.setServerPort(askServerPort());
-        }while (!client.createConnection(askConnectionType()));
+            if(connectionType == Client.ConnectionType.SOCKET)
+                client.setServerPort(askServerPort());
+        }while (!client.createConnection(connectionType));
 
         waitConnection();
 
@@ -45,8 +48,9 @@ class CLIHandler {
                 ClientLogger.printlnWithClear("Logged out");
                 return;
             }
+            client.login(askNickname(), askPassword());
 
-            if(client.login(askNickname(), askPassword())) {
+            if(waitResult()) {
                 client.setLogged(true);
                 ok = true;
             }
@@ -95,7 +99,7 @@ class CLIHandler {
         String address = "";
         boolean ok = false;
         while (!ok) {
-            ClientLogger.printWithClear("Insert server address: ");
+            ClientLogger.print("\nInsert server address: ");
             try {
                 address = input.readLine();
             } catch (IOException e) {
@@ -134,7 +138,7 @@ class CLIHandler {
         int choice = -1;
 
         while (choice != 0 && choice != 1) {
-            ClientLogger.println("\nConnection types:");
+            ClientLogger.printlnWithClear("Connection types:");
             ClientLogger.println("0) Socket");
             ClientLogger.println("1) RMI");
             ClientLogger.print("Your choice: ");
@@ -275,7 +279,7 @@ class CLIHandler {
             if(!waitResult()) {
                 printGame(client.getGameSnapshot());
                 ClientLogger.println("\nConstraint violated!");
-                client.printMenu();
+                printMenu(client.getGameSnapshot());
             } else
                 client.verifyEndTurn();
         }else
@@ -380,7 +384,7 @@ class CLIHandler {
         ClientLogger.println(player + " used the tool card " + toolCard);
     }
 
-    String askPlusMinusOption(String prompt){
+    boolean askIfPlus(String prompt){
         String choice = "";
         boolean ask = true;
         ClientLogger.print(MessageHandler.get(prompt));
@@ -397,26 +401,21 @@ class CLIHandler {
             else
                 ClientLogger.print("Not a valid choice, retry: ");
         }
-        return choice;
+        return choice.equalsIgnoreCase("+");
     }
 
-    Dice askDiceFromDraftPool(String prompt){
+    Dice askDiceDraftPool(String prompt){
         ClientLogger.print(MessageHandler.get(prompt));
         return client.getGameSnapshot().getDraftPool().get(readInt(1, client.getGameSnapshot().getDraftPool().size()) - 1);
     }
 
-    int askDiceFromRoundTrack(String prompt){
+    int askDiceRoundTrack(String prompt){
         ClientLogger.print(MessageHandler.get(prompt));
         return readInt(1, 10) - 1;
     }
 
-    Coordinate askDiceFromWindow(String prompt){
+    Coordinate askDiceWindow(String prompt){
         ClientLogger.println(MessageHandler.get(prompt));
-        return getPosition();
-    }
-
-    Coordinate askPlacementPosition(){
-        ClientLogger.println("Choose a free position on your window");
         return getPosition();
     }
 

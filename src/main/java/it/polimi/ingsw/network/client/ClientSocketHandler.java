@@ -2,10 +2,13 @@ package it.polimi.ingsw.network.client;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
+import it.polimi.ingsw.controller.exceptions.GameOverException;
+import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
+import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
+import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.client.model.Coordinate;
 import it.polimi.ingsw.network.client.model.Dice;
-import it.polimi.ingsw.network.client.model.GameSnapshot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.rmi.RemoteException;
 import java.util.logging.Logger;
 
 public class ClientSocketHandler implements Connection {
@@ -24,8 +28,6 @@ public class ClientSocketHandler implements Connection {
     private Socket socket;
     private ServerListener serverListener;
     private Thread thread;
-    private boolean flagContinue;
-    private boolean serverResult;
     private JsonObject jsonObject;
     private Gson gson;
 
@@ -44,44 +46,26 @@ public class ClientSocketHandler implements Connection {
             throw new SocketException();
         }
         gson = new Gson();
-        flagContinue = false;
     }
 
-    @Override
-    public synchronized boolean login(String nickname, String password) {
+    ClientSocketHandler login(String nickname, String password) {
 
         createJsonCommand("login");
         jsonObject.addProperty("nickname", nickname);
         jsonObject.addProperty("password", password);
-
         socketPrintLine(jsonObject);
-
-        while (!flagContinue)
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                LOGGER.warning(e.toString());
-            }
-
-        flagContinue = false;
-        return serverResult;
-    }
-
-    synchronized void notifyResult(boolean result){
-        serverResult = result;
-        flagContinue = true;
-        notifyAll();
+        return this;
     }
 
     @Override
-    public void sendSchema(int schema){
+    public void chooseSchema(Integer schema) throws RuntimeException, GameNotStartedException, GameOverException, WindowAlreadySetException {
         createJsonCommand("schema");
         jsonObject.addProperty("id", schema);
         socketPrintLine(jsonObject);
     }
 
     @Override
-    public void placeDice(Dice dice, int row, int column){
+    public void placeDice(int row, int column, Dice dice) throws RemoteException, GameOverException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException, NoSameColorDicesException, GameNotStartedException{
         createJsonCommand("place-dice");
         jsonObject.addProperty("dice", gson.toJson(dice));
         jsonObject.addProperty("row", row - 1);
@@ -90,29 +74,20 @@ public class ClientSocketHandler implements Connection {
     }
 
     @Override
-    public synchronized boolean useToolCard(String name) {
+    public void useToolCard(String name) throws RemoteException, GameNotStartedException, GameOverException, NoSuchToolCardException, InvalidDiceValueException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException, NotDraftedYetException, NotYourFirstTurnException, NothingCanBeMovedException, NoSameColorDicesException{
         createJsonCommand("toolcard");
         jsonObject.addProperty("name", name);
         socketPrintLine(jsonObject);
-
-        while (!flagContinue)
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                LOGGER.warning(e.toString());
-            }
-        flagContinue = false;
-        return serverResult;
     }
 
     @Override
-    public void pass(){
+    public void pass() throws RemoteException, GameNotStartedException, GameOverException, NotYourTurnException{
         createJsonCommand("pass");
         socketPrintLine(jsonObject);
     }
 
     @Override
-    public void logout(){
+    public void logout() throws RemoteException{
         createJsonCommand("logout");
         socketPrintLine(jsonObject);
         stopServerListener();
@@ -153,9 +128,9 @@ public class ClientSocketHandler implements Connection {
 
     //region TOOLCARD
 
-    void sendPlusMinusOption(String choice){
+    void sendPlusMinusOption(boolean choice){
         createJsonCommand("toolcard-plus-minus");
-        jsonObject.addProperty("choice", choice.equals("+")||choice.equals("y"));
+        jsonObject.addProperty("choice", choice);
         socketPrintLine(jsonObject);
     }
 
@@ -173,12 +148,6 @@ public class ClientSocketHandler implements Connection {
 
     void sendDiceFromWindow(Coordinate coordinate){
         createJsonCommand("toolcard-dice-window");
-        jsonObject.addProperty("choice", gson.toJson(coordinate));
-        socketPrintLine(jsonObject);
-    }
-
-    void sendPlacementPosition(Coordinate coordinate){
-        createJsonCommand("toolcard-place-window");
         jsonObject.addProperty("choice", gson.toJson(coordinate));
         socketPrintLine(jsonObject);
     }

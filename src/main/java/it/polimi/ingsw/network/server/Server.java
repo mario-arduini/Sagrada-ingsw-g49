@@ -30,7 +30,7 @@ public class Server {
     }
 
     private void startServer() throws IOException {
-        LoginInterface rmiLogger = new Login(gamesHandler);
+        Login rmiLogger = new Login(gamesHandler);
         Socket clientSocket;
 
         Registry registry = LocateRegistry.createRegistry(1099);
