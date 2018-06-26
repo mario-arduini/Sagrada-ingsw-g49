@@ -1,9 +1,8 @@
 package it.polimi.ingsw.controller;
 
-import com.sun.java.swing.plaf.windows.WindowsTreeUI;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
-import it.polimi.ingsw.network.server.ConnectionHandler;
+import it.polimi.ingsw.network.server.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
 
 import java.util.HashMap;
@@ -13,12 +12,12 @@ import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 public class GameRoom extends Game{
-    private List<ConnectionHandler> connections;
+    private List<ClientInterface> connections;
     private boolean notifyEndGame;
     private Timer timer;
     private int secondsTimer = 120; //TODO: read value from file.
 
-    GameRoom(List<Player> playerList, List<ConnectionHandler> connections) throws NoMorePlayersException {
+    GameRoom(List<Player> playerList, List<ClientInterface> connections) throws NoMorePlayersException {
         super(playerList);
         this.connections = connections;
         this.notifyEndGame = true;
@@ -82,12 +81,12 @@ public class GameRoom extends Game{
         timer.schedule(new GameRoom.TimerExpired(), (long) secondsTimer * 1000);
     }
 
-    public synchronized void replaceConnection(ConnectionHandler oldConnection, ConnectionHandler newConnection){
+    public synchronized void replaceConnection(ClientInterface oldConnection, ClientInterface newConnection){
         this.connections.remove(oldConnection);
         this.connections.add(newConnection);
     }
 
-    public synchronized void logout(String nickname, ConnectionHandler connection){
+    public synchronized void logout(String nickname, ClientInterface connection){
         connections.remove(connection);
         connections.forEach(conn -> conn.notifyLogout(nickname));
         suspendPlayer(nickname);

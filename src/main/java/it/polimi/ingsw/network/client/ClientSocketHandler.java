@@ -2,10 +2,8 @@ package it.polimi.ingsw.network.client;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import it.polimi.ingsw.network.client.model.Coordinate;
 import it.polimi.ingsw.network.client.model.Dice;
-import it.polimi.ingsw.network.client.model.GameSnapshot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,8 +22,6 @@ public class ClientSocketHandler implements Connection {
     private Socket socket;
     private ServerListener serverListener;
     private Thread thread;
-    private boolean flagContinue;
-    private boolean serverResult;
     private JsonObject jsonObject;
     private Gson gson;
 
@@ -44,7 +40,6 @@ public class ClientSocketHandler implements Connection {
             throw new SocketException();
         }
         gson = new Gson();
-        flagContinue = false;
     }
 
     @Override
@@ -54,12 +49,6 @@ public class ClientSocketHandler implements Connection {
         jsonObject.addProperty("nickname", nickname);
         jsonObject.addProperty("password", password);
         socketPrintLine(jsonObject);
-    }
-
-    synchronized void notifyResult(boolean result){
-        serverResult = result;
-        flagContinue = true;
-        notifyAll();
     }
 
     @Override
@@ -133,9 +122,9 @@ public class ClientSocketHandler implements Connection {
 
     //region TOOLCARD
 
-    void sendPlusMinusOption(String choice){
+    void sendPlusMinusOption(boolean choice){
         createJsonCommand("toolcard-plus-minus");
-        jsonObject.addProperty("choice", choice.equals("+")||choice.equals("y"));
+        jsonObject.addProperty("choice", choice);
         socketPrintLine(jsonObject);
     }
 

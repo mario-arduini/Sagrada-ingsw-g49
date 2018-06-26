@@ -60,7 +60,7 @@ public class ServerListener implements Runnable {
                         }
                         break;
                     case "verified":
-                        server.notifyResult(true);
+                        client.setServerResult(true);
                         break;
                     case "failed":
                         client.setServerResult(false);

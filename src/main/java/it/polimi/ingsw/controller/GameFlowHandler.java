@@ -11,7 +11,7 @@ import it.polimi.ingsw.model.Window;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
-import it.polimi.ingsw.network.server.ConnectionHandler;
+import it.polimi.ingsw.network.server.ClientInterface;
 import it.polimi.ingsw.network.server.rmi.FlowHandlerInterface;
 
 import java.rmi.RemoteException;
@@ -27,9 +27,9 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     private GamesHandler gamesHandler;
     private List<Schema> initialSchemas = null;
     private ToolCard activeToolCard;
-    private ConnectionHandler connection;
+    private ClientInterface connection;
 
-    GameFlowHandler(GamesHandler gamesHandler, ConnectionHandler connection, Player player) throws RemoteException{
+    GameFlowHandler(GamesHandler gamesHandler, ClientInterface connection, Player player) throws RemoteException{
         this.player = player;
         this.gameRoom = null;
         this.gamesHandler = gamesHandler;
@@ -41,7 +41,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         return this.player;
     }
 
-    protected ConnectionHandler getConnection(){
+    protected ClientInterface getConnection(){
         return this.connection;
     }
 
@@ -99,7 +99,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         return gameRoom == null ? gamesHandler.getWaitingPlayers() : gameRoom.getPlayersNick();
     }
 
-    public void reconnection(ConnectionHandler connection){
+    public void reconnection(ClientInterface connection){
         gameRoom.replaceConnection(this.connection, connection);
         this.connection = connection;
 

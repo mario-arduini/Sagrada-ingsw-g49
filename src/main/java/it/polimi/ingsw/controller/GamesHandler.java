@@ -2,8 +2,7 @@ package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
-import it.polimi.ingsw.network.client.Connection;
-import it.polimi.ingsw.network.server.ConnectionHandler;
+import it.polimi.ingsw.network.server.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
@@ -31,7 +30,7 @@ public class GamesHandler {
         //TODO: Throw exception if file does not exist
     }
 
-    public synchronized GameFlowHandler login(String nickname, String password, ConnectionHandler connection) throws LoginFailedException, RemoteException {
+    public synchronized GameFlowHandler login(String nickname, String password, ClientInterface connection) throws LoginFailedException, RemoteException {
         Player user;
         GameFlowHandler newGameFlow;
         if (this.findGameFlow(nickname).isPresent())
@@ -55,7 +54,7 @@ public class GamesHandler {
         return allGameFlows.stream().filter(gameFlow -> gameFlow.getPlayer().getNickname().equalsIgnoreCase(nickname)).findFirst();
     }
 
-    private synchronized GameFlowHandler reconnection(String nickname, String password, ConnectionHandler connection) throws LoginFailedException {
+    private synchronized GameFlowHandler reconnection(String nickname, String password, ClientInterface connection) throws LoginFailedException {
         Optional<GameFlowHandler> gameFlowFetched = findGameFlow(nickname);
         GameFlowHandler gameFlow;
 
@@ -132,7 +131,7 @@ public class GamesHandler {
 
     private synchronized void startGame() {
         List<Player> playerList;
-        List<ConnectionHandler> connections;
+        List<ClientInterface> connections;
         GameRoom game;
         try {
             playerList = waitingRoom.stream().map(GameFlowHandler::getPlayer).collect(Collectors.toList());

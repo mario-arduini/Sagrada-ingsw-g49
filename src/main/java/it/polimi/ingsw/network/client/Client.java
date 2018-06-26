@@ -8,7 +8,7 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.util.logging.*;
 
-public class Client {
+public class Client implements ClientInterface{
 
     private static final Logger LOGGER = Logger.getLogger( Client.class.getName() );
 
@@ -119,28 +119,33 @@ public class Client {
 
 
 
-    void notifyLogin(List<String> nicknames){
+    @Override
+    public void notifyLogin(List<String> nicknames){
         for(String nickname : nicknames)
             gameSnapshot.addOtherPlayer(nickname);
         cliHandler.printWaitingRoom();
     }
 
-    void notifyLogin(String nickname){
+    @Override
+    public void notifyLogin(String nickname){
         gameSnapshot.addOtherPlayer(nickname);
         cliHandler.printWaitingRoom();
     }
 
-    void notifyLogout(String nickname){
+    @Override
+    public void notifyLogout(String nickname){
         gameSnapshot.removeOtherPlayer(nickname);
         cliHandler.printWaitingRoom();
     }
 
-    void notifySchemas(List<Schema> schemas){
+    @Override
+    public void notifySchemas(List<Schema> schemas){
         gameStarted = true;
         server.sendSchema(cliHandler.chooseSchema(gameSnapshot, schemas));
     }
 
-    void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack){
+    @Override
+    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack){
         gameSnapshot.getPlayer().setMyTurn(currentPlayer.equals(gameSnapshot.getPlayer().getNickname()));
         gameSnapshot.getPlayer().setDiceExtracted(false);
         gameSnapshot.getPlayer().setUsedToolCard(false);
@@ -160,7 +165,8 @@ public class Client {
         CLIHandler.printMenu(gameSnapshot);
     }
 
-    void notifyOthersSchemas(Map<String, Schema> playersSchemas){
+    @Override
+    public void notifyOthersSchemas(Map<String, Schema> playersSchemas){
         for (Map.Entry<String, Schema> entry : playersSchemas.entrySet()) {
             if(!entry.getKey().equals(gameSnapshot.getPlayer().getNickname()))
                 gameSnapshot.findPlayer(entry.getKey()).get().setWindow(entry.getValue());
@@ -169,7 +175,8 @@ public class Client {
         }
     }
 
-    void notifyDicePlaced(String nickname, int row, int column, Dice dice){
+    @Override
+    public void notifyDicePlaced(String nickname, int row, int column, Dice dice){
         gameSnapshot.getDraftPool().remove(dice);
         if(!nickname.equals(gameSnapshot.getPlayer().getNickname()))
             gameSnapshot.findPlayer(nickname).get().getWindow().addDice(row, column, dice);
@@ -182,7 +189,8 @@ public class Client {
         CLIHandler.printMenu(gameSnapshot);
     }
 
-    void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack){
+    @Override
+    public void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack){
         Optional<PlayerSnapshot> playerSnapshot = gameSnapshot.findPlayer(player);
         ToolCard toolCardUsed = gameSnapshot.getToolCardByName(toolCard);
         if(playerSnapshot.isPresent()){
@@ -202,7 +210,8 @@ public class Client {
         }
     }
 
-    void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal){
+    @Override
+    public void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal){
         List<ToolCard> toolCardsClass = new ArrayList<>();
         for(String name : toolCards)
             toolCardsClass.add(new ToolCard(name, ""));
@@ -212,7 +221,8 @@ public class Client {
         gameSnapshot.getPlayer().setPrivateGoal(privateGoal);
     }
 
-    void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack){
+    @Override
+    public void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack){
         PlayerSnapshot playerSnapshot;
         for(String user : windows.keySet()){
             playerSnapshot = new PlayerSnapshot(user);
@@ -226,8 +236,8 @@ public class Client {
         gameSnapshot.setRoundTrack(roundTrack);
     }
 
-
-    void notifyEndGame(List<Score> scores){
+    @Override
+    public void notifyEndGame(List<Score> scores){
         cliHandler.gameOver(scores);
     }
 
@@ -296,27 +306,32 @@ public class Client {
         cliHandler.notifyUsedToolCard(player, toolCard);
     }
 
-    String askIfPlus(String prompt){
+    @Override
+    public boolean askIfPlus(String prompt){
         return cliHandler.askIfPlus(prompt);
     }
 
-    Dice askDiceDraftPool(String prompt){
+    @Override
+    public Dice askDiceDraftPool(String prompt){
         return cliHandler.askDiceDraftPool(prompt);
     }
 
-    int askDiceRoundTrack(String prompt){
+    @Override
+    public int askDiceRoundTrack(String prompt){
         return cliHandler.askDiceRoundTrack(prompt);
     }
 
-    Coordinate askDiceWindow(String prompt){
+    @Override
+    public Coordinate askDiceWindow(String prompt){
         return cliHandler.askDiceWindow(prompt);
     }
 
-    Coordinate getPlacementPosition(){
+    public Coordinate getPlacementPosition(){
         return cliHandler.askPlacementPosition();
     }
 
-    int askDiceValue(String prompt){
+    @Override
+    public int askDiceValue(String prompt){
         return cliHandler.askDiceValue(prompt);
     }
 

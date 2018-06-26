@@ -381,7 +381,7 @@ class CLIHandler {
         ClientLogger.println(player + " used the tool card " + toolCard);
     }
 
-    String askIfPlus(String prompt){
+    boolean askIfPlus(String prompt){
         String choice = "";
         boolean ask = true;
         ClientLogger.print(MessageHandler.get(prompt));
@@ -398,7 +398,7 @@ class CLIHandler {
             else
                 ClientLogger.print("Not a valid choice, retry: ");
         }
-        return choice;
+        return choice.equalsIgnoreCase("+");
     }
 
     Dice askDiceDraftPool(String prompt){
