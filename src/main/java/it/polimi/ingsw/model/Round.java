@@ -2,9 +2,11 @@ package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.toolcards.ToolCard;
+import it.polimi.ingsw.network.server.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Round {
     private List<Dice> draftPool;
@@ -18,6 +20,7 @@ public class Round {
     public Round(List<Dice> draftPool, List<Player> players){
         this.draftPool = new ArrayList<>(draftPool);
         this.players = new ArrayList<>(players);
+        Logger.print("New Round1: " + players.stream().map(Player::getNickname).collect(Collectors.toList()));
         for(int i = players.size() - 1; i >= 0; i--)
             this.players.add(this.players.get(i));
         diceExtracted = false;
@@ -25,6 +28,9 @@ public class Round {
         currentPlayer = -1;
         activeToolCard = null;
         playersNumber = players.size()/2;
+        Logger.print("New Round2: " + players.stream().map(Player::getNickname).collect(Collectors.toList()));
+        Logger.print("Size: " + players.size());
+
     }
 
     public Round(Round round){

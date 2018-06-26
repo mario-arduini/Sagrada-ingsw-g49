@@ -16,7 +16,7 @@ public class GameRoom extends Game{
     private List<ConnectionHandler> connections;
     private boolean notifyEndGame;
     private Timer timer;
-    private int secondsTimer = 3; //TODO: read value from file.
+    private int secondsTimer = 30; //TODO: read value from file.
 
     GameRoom(List<Player> playerList, List<ConnectionHandler> connections) throws NoMorePlayersException {
         super(playerList);

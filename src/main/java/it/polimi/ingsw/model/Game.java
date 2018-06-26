@@ -61,7 +61,7 @@ public class Game {
         int size = players.size();
         Logger.print(players.stream().map(Player::getNickname).collect(Collectors.toList()));
         Logger.print("Size Players: " + size);
-        currentRound = new Round(dealer.extractPool(2*(size) + 1),createRoundPlayers(size));
+        currentRound = new Round(dealer.extractPool(2*(size) + 1),createRoundPlayers());
         currentRound.nextPlayer();
         this.playing = false;
     }
@@ -150,7 +150,7 @@ public class Game {
         List<Dice> draftPool;
 
         int size = players.size();
-        roundPlayers = createRoundPlayers(size);
+        roundPlayers = createRoundPlayers();
 
         draftPool = currentRound.getDraftPool();
         addDiceToTracker(draftPool.get((new Random()).nextInt(draftPool.size())));
@@ -164,21 +164,19 @@ public class Game {
         }
     }
 
-    private List<Player> createRoundPlayers(int size){
+    private synchronized List<Player> createRoundPlayers(){
         List<Player> roundPlayers = new ArrayList<>();
-        int j;
+        int j, size;
+        size = players.size();
 
         nextFirstPlayer = (nextFirstPlayer + 1)%size;
-        //Add players
-        for (j = nextFirstPlayer; j == Math.abs(nextFirstPlayer - 1)%size; j = (j+1)%size)
-            roundPlayers.add(players.get(j));
-        roundPlayers.add(players.get(Math.abs(nextFirstPlayer - 1)%size));
 
-        //Add players in reverse order
-        for (j = Math.abs(nextFirstPlayer-1)%size; j == nextFirstPlayer; j = Math.abs(j-1)%size)
+        //Add players
+        for (j = nextFirstPlayer; j < size; j++)
             roundPlayers.add(players.get(j));
-        roundPlayers.add(players.get(nextFirstPlayer));
-        Logger.print("New Round: " + roundPlayers.stream().map(Player::getNickname).collect(Collectors.toList()));
+        for (j = 0; j<nextFirstPlayer; j++)
+            roundPlayers.add(players.get(j));
+
         return roundPlayers;
 
     }
