@@ -4,9 +4,14 @@ import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
 import it.polimi.ingsw.controller.exceptions.GameOverException;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
+import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
+import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
+import it.polimi.ingsw.network.RMIInterfaces.LoginInterface;
 import it.polimi.ingsw.network.client.model.*;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
+
 
 import java.net.SocketException;
 import java.rmi.NotBoundException;
@@ -17,14 +22,14 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.logging.*;
 
-public class Client extends UnicastRemoteObject implements ClientInterface{
+public class Client extends UnicastRemoteObject implements ClientInterface {
 
     private static final Logger LOGGER = Logger.getLogger( Client.class.getName() );
 
     private String serverAddress;
     private int serverPort;
     private CLIHandler cliHandler;
-    private Connection server;
+    private FlowHandlerInterface server;
     enum ConnectionType{ RMI, SOCKET }
     private boolean logged;
     private boolean gameStarted;
@@ -65,7 +70,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface{
             server = socketHandler.login(nickname, password);
         else {
             try {
-                server = (Connection) serverInterface.login(nickname, password,this);
+                server = (FlowHandlerInterface) serverInterface.login(nickname, password,this);
             } catch (RemoteException | LoginFailedException e) {
                 LOGGER.warning(e.toString());
             }
@@ -95,7 +100,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface{
             try {
                 Registry registry = LocateRegistry.getRegistry(serverAddress);
                 this.serverInterface = (LoginInterface) registry.lookup("logger");
-
+                serverConnected = true;
+                synchronized (cliHandler){
+                    cliHandler.notifyAll();
+                }
             }  catch (NotBoundException | RemoteException e) {
                 return false;
             }
@@ -216,10 +224,31 @@ public class Client extends UnicastRemoteObject implements ClientInterface{
     @Override
     public void notifyDicePlaced(String nickname, int row, int column, Dice dice) throws RemoteException{
         gameSnapshot.getDraftPool().remove(dice);
-        if(!nickname.equals(gameSnapshot.getPlayer().getNickname()))
-            gameSnapshot.findPlayer(nickname).get().getWindow().addDice(row, column, dice);
+        if(!nickname.equals(gameSnapshot.getPlayer().getNickname())) {
+            try {
+                gameSnapshot.findPlayer(nickname).get().getWindow().addDice(row, column, dice);
+            } catch (ConstraintViolatedException e) {
+                e.printStackTrace();
+            } catch (FirstDiceMisplacedException e) {
+                e.printStackTrace();
+            } catch (NoAdjacentDiceException e) {
+                e.printStackTrace();
+            } catch (BadAdjacentDiceException e) {
+                e.printStackTrace();
+            }
+        }
         else {
-            gameSnapshot.getPlayer().getWindow().addDice(row, column, dice);
+            try {
+                gameSnapshot.getPlayer().getWindow().addDice(row, column, dice);
+            } catch (ConstraintViolatedException e) {
+                e.printStackTrace();
+            } catch (FirstDiceMisplacedException e) {
+                e.printStackTrace();
+            } catch (NoAdjacentDiceException e) {
+                e.printStackTrace();
+            } catch (BadAdjacentDiceException e) {
+                e.printStackTrace();
+            }
             gameSnapshot.getPlayer().setDiceExtracted(true);
             setServerResult(true);
         }

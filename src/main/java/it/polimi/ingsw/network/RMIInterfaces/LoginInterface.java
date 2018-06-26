@@ -1,6 +1,5 @@
-package it.polimi.ingsw.network.server.rmi;
+package it.polimi.ingsw.network.RMIInterfaces;
 
-import it.polimi.ingsw.network.server.ClientInterface;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
 import java.rmi.Remote;

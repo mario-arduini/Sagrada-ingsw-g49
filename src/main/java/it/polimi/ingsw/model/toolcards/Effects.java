@@ -2,8 +2,9 @@ package it.polimi.ingsw.model.toolcards;
 
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.network.server.ClientInterface;
+import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 
+import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Random;
 
@@ -18,7 +19,11 @@ final class Effects {
         Dice dice = null;
         String prompt = "choose-drafted";
         while (!valid){
-            dice = connection.askDiceDraftPool(prompt);
+            try {
+                dice = connection.askDiceDraftPool(prompt);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             prompt = "choose-drafted-invalid";
             if(round.getDraftPool().contains(dice)) valid=true;
         }
@@ -30,10 +35,14 @@ final class Effects {
     static boolean addDiceToWindow(Player player, Dice dice, ClientInterface connection) {
         if(player.getWindow().possiblePlaces(dice, Window.RuleIgnored.NONE)==0) return false;
         boolean valid = false;
-        Coordinate coords;
+        Coordinate coords = new Coordinate(0,0); //TODO: remove this init
         String prompt = "place-dice";
         while (!valid){
-            coords = connection.askDiceWindow(prompt);
+            try {
+                coords = connection.askDiceWindow(prompt);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             prompt = "place-dice-invalid";
             try{
                 placeDice(player,dice,coords.getRow(),coords.getColumn(), Window.RuleIgnored.NONE);
@@ -46,7 +55,11 @@ final class Effects {
     }
 
     static void move(Player player,Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection){
-        if(optional && !connection.askIfPlus("want-move")) return;
+        try {
+            if(optional && !connection.askIfPlus("want-move")) return;
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         Coordinate start = null;
         Coordinate end = null;
         Window currentPlayerWindow = player.getWindow();
@@ -55,7 +68,11 @@ final class Effects {
         String message = "move-from";
         while (!valid){
             valid = true;
-            start = connection.askDiceWindow(message);
+            try {
+                start = connection.askDiceWindow(message);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             removedDice = currentPlayerWindow.getCell(start.getRow(),start.getColumn());
             if(removedDice == null){
                 valid = false;
@@ -82,7 +99,11 @@ final class Effects {
         message = "move-to";
         while (!valid) {
             valid = true;
-            end = connection.askDiceWindow(message);
+            try {
+                end = connection.askDiceWindow(message);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             if (start.getRow() == end.getRow() && start.getColumn() == end.getColumn()){
                 valid = false;
                 message = "move-to-same";
@@ -97,7 +118,11 @@ final class Effects {
     }
 
     public static Dice move(Player player, List<Dice> roundTrack, Dice old, Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection) {
-        if(optional && !connection.askIfPlus("want-move")) return null;
+        try {
+            if(optional && !connection.askIfPlus("want-move")) return null;
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         Coordinate start = null;
         Coordinate end = null;
         Window currentPlayerWindow = player.getWindow();
@@ -106,7 +131,11 @@ final class Effects {
         String message = "move-from";
         while (!valid){
             valid = true;
-            start = connection.askDiceWindow(message);
+            try {
+                start = connection.askDiceWindow(message);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             removedDice = currentPlayerWindow.getCell(start.getRow(),start.getColumn());
             if(removedDice == null){
                 valid = false;
@@ -148,7 +177,11 @@ final class Effects {
         message = "move-to";
         while (!valid) {
             valid = true;
-            end = connection.askDiceWindow(message);
+            try {
+                end = connection.askDiceWindow(message);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             if (start.getRow() == end.getRow() && start.getColumn() == end.getColumn()){
                 valid = false;
                 message = "move-to-same";
@@ -172,20 +205,24 @@ final class Effects {
         boolean valid=false;
         while (!valid){
             valid = true;
-            if (connection.askIfPlus(message)){
-                try {
-                    dice.setValue(dice.getValue()+value);
-                } catch (InvalidDiceValueException e) {
-                    valid=false;
-                    message = "ask-plus-invalid";
+            try {
+                if (connection.askIfPlus(message)){
+                    try {
+                        dice.setValue(dice.getValue()+value);
+                    } catch (InvalidDiceValueException e) {
+                        valid=false;
+                        message = "ask-plus-invalid";
+                    }
+                } else {
+                    try {
+                        dice.setValue(dice.getValue()-value);
+                    } catch (InvalidDiceValueException e) {
+                        valid = false;
+                        message = "ask-plus-invalid";
+                    }
                 }
-            } else {
-                try {
-                    dice.setValue(dice.getValue()-value);
-                } catch (InvalidDiceValueException e) {
-                    valid = false;
-                    message = "ask-plus-invalid";
-                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -214,7 +251,11 @@ final class Effects {
         int position=0;
         String prompt = "choose-round-swap";
         while(!valid){
-            position = connection.askDiceRoundTrack(prompt);
+            try {
+                position = connection.askDiceRoundTrack(prompt);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             prompt = "choose-round-swap-invalid";
             valid = true;
             try{
@@ -229,12 +270,16 @@ final class Effects {
     }
 
     static void getDiceFromBag(Round round, Dice dice, ClientInterface connection){
-        int value;
+        int value = 0; //TODO: remove this init
         boolean valid = false;
         String prompt = "choose-value";
         while (!valid){
             valid = true;
-            value = connection.askDiceValue(prompt);
+            try {
+                value = connection.askDiceValue(prompt);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             prompt = "choose-value-invalid";
             try {
                 dice.setValue(value);

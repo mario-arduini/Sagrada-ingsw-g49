@@ -1,5 +1,7 @@
 package it.polimi.ingsw.network.client.model;
 
+import it.polimi.ingsw.model.Dice;
+
 import java.util.*;
 
 public class GameSnapshot {

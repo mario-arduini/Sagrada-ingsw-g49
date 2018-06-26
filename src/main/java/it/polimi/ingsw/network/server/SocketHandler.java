@@ -11,6 +11,7 @@ import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
 import java.io.*;
@@ -469,18 +470,18 @@ public class SocketHandler implements Runnable, ClientInterface {
         }
     }
 
-    @Override
-    public void close(){
-        if (this.connected){
-            this.connected = false;
-            socketClose();
-        }
-    }
-
-    @Override
-    public String getRemoteAddress(){
-        return socket.getRemoteSocketAddress().toString();
-    }
+//    @Override
+//    public void close(){
+//        if (this.connected){
+//            this.connected = false;
+//            socketClose();
+//        }
+//    }
+//
+//    @Override
+//    public String getRemoteAddress(){
+//        return socket.getRemoteSocketAddress().toString();
+//    }
 
     private static JsonObject createErrorMessage(String description){
         JsonObject message;

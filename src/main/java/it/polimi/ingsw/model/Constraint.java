@@ -2,7 +2,9 @@ package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.model.exceptions.InvalidConstraintValueException;
 
-public final class Constraint {
+import java.io.Serializable;
+
+public final class Constraint implements Serializable {
     private final Color color;
     private final int number;
 

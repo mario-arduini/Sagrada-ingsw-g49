@@ -11,8 +11,8 @@ import it.polimi.ingsw.model.Window;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
-import it.polimi.ingsw.network.server.ClientInterface;
-import it.polimi.ingsw.network.server.rmi.FlowHandlerInterface;
+import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
+import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -50,8 +50,16 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         initialSchemas = game.extractSchemas();
         List<String> toolCards = game.getToolCards().stream().map(ToolCard::getName).collect(Collectors.toList());
         List<String> publicGoals = game.getPublicGoals().stream().map(PublicGoal::getName).collect(Collectors.toList());
-        connection.notifyGameInfo(toolCards, publicGoals, player.getPrivateGoal().getName());
-        connection.notifySchemas(initialSchemas);
+        try {
+            connection.notifyGameInfo(toolCards, publicGoals, player.getPrivateGoal().getName());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        try {
+            connection.notifySchemas(initialSchemas);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     public void chooseSchema(Integer schemaNumber) throws GameNotStartedException, GameOverException, WindowAlreadySetException{
@@ -110,10 +118,22 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
 
         List<String> toolCards = gameRoom.getToolCards().stream().map(ToolCard::getName).collect(Collectors.toList());
         List<String> publicGoals = gameRoom.getPublicGoals().stream().map(PublicGoal::getName).collect(Collectors.toList());
-        connection.notifyGameInfo(toolCards, publicGoals, player.getPrivateGoal().getName());
-        connection.notifyReconInfo(windows, favorToken, gameRoom.getRoundTrack());
+        try {
+            connection.notifyGameInfo(toolCards, publicGoals, player.getPrivateGoal().getName());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        try {
+            connection.notifyReconInfo(windows, favorToken, gameRoom.getRoundTrack());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         //TODO: maybe overload notifyRound..? Find better way? Will see it with RMI
-        connection.notifyRound(gameRoom.getCurrentRound().getCurrentPlayer().getNickname(), gameRoom.getCurrentRound().getDraftPool(), false, null);
+        try {
+            connection.notifyRound(gameRoom.getCurrentRound().getCurrentPlayer().getNickname(), gameRoom.getCurrentRound().getDraftPool(), false, null);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
 
     }
 

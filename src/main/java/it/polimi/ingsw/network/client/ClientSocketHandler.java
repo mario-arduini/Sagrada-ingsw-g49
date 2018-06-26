@@ -6,9 +6,10 @@ import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
 import it.polimi.ingsw.controller.exceptions.GameOverException;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
+import it.polimi.ingsw.model.Coordinate;
+import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.network.client.model.Coordinate;
-import it.polimi.ingsw.network.client.model.Dice;
+import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +20,7 @@ import java.net.SocketException;
 import java.rmi.RemoteException;
 import java.util.logging.Logger;
 
-public class ClientSocketHandler implements Connection {
+public class ClientSocketHandler implements FlowHandlerInterface {
 
     private static final Logger LOGGER = Logger.getLogger( ClientSocketHandler.class.getName() );
 

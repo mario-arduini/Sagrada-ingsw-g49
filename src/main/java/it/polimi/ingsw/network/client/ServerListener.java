@@ -4,6 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import it.polimi.ingsw.model.Dice;
+import it.polimi.ingsw.model.Schema;
+import it.polimi.ingsw.model.Score;
+import it.polimi.ingsw.model.Window;
 import it.polimi.ingsw.network.client.model.*;
 
 import java.lang.reflect.Type;

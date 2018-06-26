@@ -1,9 +1,10 @@
 package it.polimi.ingsw.model;
 import it.polimi.ingsw.model.exceptions.*;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class Window {
+public class Window implements Serializable {
     public static final int ROW = 4;
     public static final int COLUMN = 5;
     private final Schema schema;

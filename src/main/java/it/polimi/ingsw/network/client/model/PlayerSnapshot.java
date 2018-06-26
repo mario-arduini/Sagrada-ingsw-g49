@@ -1,5 +1,8 @@
 package it.polimi.ingsw.network.client.model;
 
+import it.polimi.ingsw.model.Schema;
+import it.polimi.ingsw.model.Window;
+
 public class PlayerSnapshot {
     private final String nickname;
     private Window window;

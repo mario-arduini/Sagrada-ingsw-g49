@@ -1,6 +1,8 @@
 package it.polimi.ingsw.network.client;
 
+import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.network.client.model.*;
+import it.polimi.ingsw.network.client.model.Color;
 
 import java.io.BufferedReader;
 import java.io.IOException;
