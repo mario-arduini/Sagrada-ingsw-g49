@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import it.polimi.ingsw.network.client.model.*;
 
 import java.lang.reflect.Type;
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -111,9 +112,6 @@ public class ServerListener implements Runnable {
                     case "toolcard-dice-window":
                         server.sendDiceFromWindow(client.askDiceWindow(jsonObject.get("prompt").getAsString()));
                         break;
-                    case "toolcard-place-window":
-                        server.sendPlacementPosition(client.getPlacementPosition());
-                        break;
                     case "toolcard-dice-value":
                         server.sendDiceValue(client.askDiceValue(jsonObject.get("prompt").getAsString()));
                         break;
@@ -123,7 +121,7 @@ public class ServerListener implements Runnable {
                     default:
                         break;
                 }
-            } catch (NullPointerException e) {
+            } catch (RemoteException | NullPointerException e) {
                 LOGGER.warning(e.toString());
             }
         }

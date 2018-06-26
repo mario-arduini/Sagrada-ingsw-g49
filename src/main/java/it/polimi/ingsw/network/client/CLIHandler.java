@@ -30,10 +30,13 @@ class CLIHandler {
         int command;
         boolean ok = false;
 
+        Client.ConnectionType connectionType;
         do {
+            connectionType = askConnectionType();
             client.setServerAddress(askServerAddress());
-            client.setServerPort(askServerPort());
-        }while (!client.createConnection(askConnectionType()));
+            if(connectionType == Client.ConnectionType.SOCKET)
+                client.setServerPort(askServerPort());
+        }while (!client.createConnection(connectionType));
 
         waitConnection();
 
@@ -96,7 +99,7 @@ class CLIHandler {
         String address = "";
         boolean ok = false;
         while (!ok) {
-            ClientLogger.printWithClear("Insert server address: ");
+            ClientLogger.print("\nInsert server address: ");
             try {
                 address = input.readLine();
             } catch (IOException e) {
@@ -135,7 +138,7 @@ class CLIHandler {
         int choice = -1;
 
         while (choice != 0 && choice != 1) {
-            ClientLogger.println("\nConnection types:");
+            ClientLogger.printlnWithClear("Connection types:");
             ClientLogger.println("0) Socket");
             ClientLogger.println("1) RMI");
             ClientLogger.print("Your choice: ");
@@ -413,11 +416,6 @@ class CLIHandler {
 
     Coordinate askDiceWindow(String prompt){
         ClientLogger.println(MessageHandler.get(prompt));
-        return getPosition();
-    }
-
-    Coordinate askPlacementPosition(){
-        ClientLogger.println("Choose a free position on your window");
         return getPosition();
     }
 

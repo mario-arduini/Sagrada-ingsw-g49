@@ -122,12 +122,12 @@ class ConnectionHandlerStub implements ClientInterface {
     public void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack) {
     }
 
-    @Override
+    //@Override
     public String getRemoteAddress() {
         return null;
     }
 
-    @Override
+    //@Override
     public void close() {
     }
 
