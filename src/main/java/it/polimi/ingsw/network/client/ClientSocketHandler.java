@@ -48,23 +48,12 @@ public class ClientSocketHandler implements Connection {
     }
 
     @Override
-    public synchronized boolean login(String nickname, String password) {
+    public void login(String nickname, String password) {
 
         createJsonCommand("login");
         jsonObject.addProperty("nickname", nickname);
         jsonObject.addProperty("password", password);
-
         socketPrintLine(jsonObject);
-
-        while (!flagContinue)
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                LOGGER.warning(e.toString());
-            }
-
-        flagContinue = false;
-        return serverResult;
     }
 
     synchronized void notifyResult(boolean result){
@@ -90,19 +79,10 @@ public class ClientSocketHandler implements Connection {
     }
 
     @Override
-    public synchronized boolean useToolCard(String name) {
+    public void useToolCard(String name) {
         createJsonCommand("toolcard");
         jsonObject.addProperty("name", name);
         socketPrintLine(jsonObject);
-
-        while (!flagContinue)
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                LOGGER.warning(e.toString());
-            }
-        flagContinue = false;
-        return serverResult;
     }
 
     @Override

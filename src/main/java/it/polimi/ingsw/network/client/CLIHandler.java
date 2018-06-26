@@ -45,8 +45,9 @@ class CLIHandler {
                 ClientLogger.printlnWithClear("Logged out");
                 return;
             }
+            client.login(askNickname(), askPassword());
 
-            if(client.login(askNickname(), askPassword())) {
+            if(waitResult()) {
                 client.setLogged(true);
                 ok = true;
             }

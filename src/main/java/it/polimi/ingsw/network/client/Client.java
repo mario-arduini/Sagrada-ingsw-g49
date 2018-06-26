@@ -48,9 +48,9 @@ public class Client {
         return serverConnected;
     }
 
-    boolean login(String nickname, String password){
+    void login(String nickname, String password){
         gameSnapshot.setPlayer(nickname);
-        return server.login(nickname, password);
+        server.login(nickname, password);
     }
 
     void setLogged(boolean logged){

@@ -74,7 +74,10 @@ public class ServerListener implements Runnable {
                         break;
                     case "round":
                         listType = new TypeToken<List<Dice>>(){}.getType();
-                        client.notifyRound(jsonObject.get("player").getAsString(), gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType), jsonObject.get("new-round").getAsBoolean(), gson.fromJson(jsonObject.get("round-track").getAsString(),listType));
+                        if(jsonObject.get("new-round").getAsBoolean())
+                            client.notifyRound(jsonObject.get("player").getAsString(), gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType), true, gson.fromJson(jsonObject.get("round-track").getAsString(),listType));
+                        else
+                            client.notifyRound(jsonObject.get("player").getAsString(), gson.fromJson(jsonObject.get("draft-pool").getAsString(), listType), false, null);
                         break;
                     case "schema-chosen":
                         client.notifyOthersSchemas(gson.fromJson(jsonObject.get("content").getAsString(), new TypeToken<HashMap<String, Schema>>(){}.getType()));
