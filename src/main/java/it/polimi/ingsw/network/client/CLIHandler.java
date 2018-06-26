@@ -275,7 +275,7 @@ class CLIHandler {
             if(!waitResult()) {
                 printGame(client.getGameSnapshot());
                 ClientLogger.println("\nConstraint violated!");
-                client.printMenu();
+                printMenu(client.getGameSnapshot());
             } else
                 client.verifyEndTurn();
         }else
@@ -380,7 +380,7 @@ class CLIHandler {
         ClientLogger.println(player + " used the tool card " + toolCard);
     }
 
-    String askPlusMinusOption(String prompt){
+    String askIfPlus(String prompt){
         String choice = "";
         boolean ask = true;
         ClientLogger.print(MessageHandler.get(prompt));
@@ -400,17 +400,17 @@ class CLIHandler {
         return choice;
     }
 
-    Dice askDiceFromDraftPool(String prompt){
+    Dice askDiceDraftPool(String prompt){
         ClientLogger.print(MessageHandler.get(prompt));
         return client.getGameSnapshot().getDraftPool().get(readInt(1, client.getGameSnapshot().getDraftPool().size()) - 1);
     }
 
-    int askDiceFromRoundTrack(String prompt){
+    int askDiceRoundTrack(String prompt){
         ClientLogger.print(MessageHandler.get(prompt));
         return readInt(1, 10) - 1;
     }
 
-    Coordinate askDiceFromWindow(String prompt){
+    Coordinate askDiceWindow(String prompt){
         ClientLogger.println(MessageHandler.get(prompt));
         return getPosition();
     }

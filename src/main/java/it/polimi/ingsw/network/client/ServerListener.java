@@ -89,41 +89,30 @@ public class ServerListener implements Runnable {
                     case "reconnect-info":
                         HashMap<String,Window> playersWindow = gson.fromJson(jsonObject.get("windows").getAsString(),new TypeToken<HashMap<String,Window>>(){}.getType());
                         HashMap<String,Integer> favorMap = gson.fromJson(jsonObject.get("favor-token").getAsString(),new TypeToken<HashMap<String,Integer>>(){}.getType());
-                        client.getGameSnapshot().setRoundTrack(gson.fromJson(jsonObject.get("round-track").getAsString(),new TypeToken<List<Dice>>(){}.getType()));
-
-                        PlayerSnapshot playerSnapshot;
-                        for(String user : playersWindow.keySet()){
-                            playerSnapshot = new PlayerSnapshot(user);
-                            playerSnapshot.setWindow(playersWindow.get(user));
-                            playerSnapshot.setFavorToken(favorMap.get(user));
-                            if(user.equals(client.getGameSnapshot().getPlayer().getNickname()))
-                                client.getGameSnapshot().setPlayer(playerSnapshot);
-                            else
-                                client.getGameSnapshot().addOtherPlayer(playerSnapshot);
-                        }
+                        client.notifyReconInfo(playersWindow, favorMap, gson.fromJson(jsonObject.get("round-track").getAsString(),new TypeToken<List<Dice>>(){}.getType()));
                         break;
                     case "game-over":
-                        client.gameOver(gson.fromJson(jsonObject.get("scores").getAsString(), new TypeToken<List<Score>>(){}.getType()));
+                        client.notifyEndGame(gson.fromJson(jsonObject.get("scores").getAsString(), new TypeToken<List<Score>>(){}.getType()));
                         break;
 
                     //region TOOLCARD
                     case "toolcard-plus-minus":
-                        server.sendPlusMinusOption(client.getPlusMinusOption(jsonObject.get("prompt").getAsString()));
+                        server.sendPlusMinusOption(client.askIfPlus(jsonObject.get("prompt").getAsString()));
                         break;
                     case "toolcard-dice-draftpool":
-                        server.sendDiceFromDraftPool(client.getDiceFromDraftPool(jsonObject.get("prompt").getAsString()));
+                        server.sendDiceFromDraftPool(client.askDiceDraftPool(jsonObject.get("prompt").getAsString()));
                         break;
                     case "toolcard-dice-roundtrack":
-                        server.sendDiceFromRoundTrack(client.getDiceFromRoundTrack(jsonObject.get("prompt").getAsString()));
+                        server.sendDiceFromRoundTrack(client.askDiceRoundTrack(jsonObject.get("prompt").getAsString()));
                         break;
                     case "toolcard-dice-window":
-                        server.sendDiceFromWindow(client.getDiceFromWindow(jsonObject.get("prompt").getAsString()));
+                        server.sendDiceFromWindow(client.askDiceWindow(jsonObject.get("prompt").getAsString()));
                         break;
                     case "toolcard-place-window":
                         server.sendPlacementPosition(client.getPlacementPosition());
                         break;
                     case "toolcard-dice-value":
-                        server.sendDiceValue(client.getDiceValue(jsonObject.get("prompt").getAsString()));
+                        server.sendDiceValue(client.askDiceValue(jsonObject.get("prompt").getAsString()));
                         break;
 
                     //endregion

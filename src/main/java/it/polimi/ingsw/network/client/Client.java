@@ -5,10 +5,7 @@ import it.polimi.ingsw.network.server.rmi.LoginInterface;
 import java.net.SocketException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.*;
 
 public class Client {
@@ -152,6 +149,13 @@ public class Client {
         if(newRound)
             gameSnapshot.setRoundTrack(roundTrack);
 
+        if(!cliHandler.getPlayingRound()) {
+            cliHandler.setPlayingRound(true);
+            synchronized (cliHandler) {
+                cliHandler.notifyAll();
+            }
+        }
+
         CLIHandler.printGame(gameSnapshot);
         CLIHandler.printMenu(gameSnapshot);
     }
@@ -208,6 +212,24 @@ public class Client {
         gameSnapshot.getPlayer().setPrivateGoal(privateGoal);
     }
 
+    void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack){
+        PlayerSnapshot playerSnapshot;
+        for(String user : windows.keySet()){
+            playerSnapshot = new PlayerSnapshot(user);
+            playerSnapshot.setWindow(windows.get(user));
+            playerSnapshot.setFavorToken(favorToken.get(user));
+            if(user.equals(gameSnapshot.getPlayer().getNickname()))
+                gameSnapshot.setPlayer(playerSnapshot);
+            else
+                gameSnapshot.addOtherPlayer(playerSnapshot);
+        }
+        gameSnapshot.setRoundTrack(roundTrack);
+    }
+
+
+    void notifyEndGame(List<Score> scores){
+        cliHandler.gameOver(scores);
+    }
 
 
 
@@ -237,12 +259,7 @@ public class Client {
 
 
         //TODO remove all below
-        if(!cliHandler.getPlayingRound()) {
-            cliHandler.setPlayingRound(true);
-            synchronized (cliHandler) {
-                cliHandler.notifyAll();
-            }
-        }
+
     }
 
     GameSnapshot getGameSnapshot(){
@@ -251,10 +268,6 @@ public class Client {
 
     boolean isGameStarted() {
         return gameStarted;
-    }
-
-    void gameOver(List<Score> scores){
-        cliHandler.gameOver(scores);
     }
 
     boolean getFlagContinue(){
@@ -283,27 +296,27 @@ public class Client {
         cliHandler.notifyUsedToolCard(player, toolCard);
     }
 
-    String getPlusMinusOption(String prompt){
-        return cliHandler.askPlusMinusOption(prompt);
+    String askIfPlus(String prompt){
+        return cliHandler.askIfPlus(prompt);
     }
 
-    Dice getDiceFromDraftPool(String prompt){
-        return cliHandler.askDiceFromDraftPool(prompt);
+    Dice askDiceDraftPool(String prompt){
+        return cliHandler.askDiceDraftPool(prompt);
     }
 
-    int getDiceFromRoundTrack(String prompt){
-        return cliHandler.askDiceFromRoundTrack(prompt);
+    int askDiceRoundTrack(String prompt){
+        return cliHandler.askDiceRoundTrack(prompt);
     }
 
-    Coordinate getDiceFromWindow(String prompt){
-        return cliHandler.askDiceFromWindow(prompt);
+    Coordinate askDiceWindow(String prompt){
+        return cliHandler.askDiceWindow(prompt);
     }
 
     Coordinate getPlacementPosition(){
         return cliHandler.askPlacementPosition();
     }
 
-    int getDiceValue(String prompt){
+    int askDiceValue(String prompt){
         return cliHandler.askDiceValue(prompt);
     }
 
