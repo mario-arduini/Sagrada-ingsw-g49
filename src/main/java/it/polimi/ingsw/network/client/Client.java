@@ -30,7 +30,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     private int serverPort;
     private CLIHandler cliHandler;
     private FlowHandlerInterface server;
-    enum ConnectionType{ RMI, SOCKET }
+    public enum ConnectionType{ RMI, SOCKET }
     private boolean logged;
     private boolean gameStarted;
     private boolean serverConnected;    //* is it useful?
@@ -40,7 +40,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     private boolean flagContinue;
     private boolean serverResult;
 
-    private Client() throws RemoteException {
+    Client() throws RemoteException {
         super();
         ClientLogger.initLogger(LOGGER);
         this.gameSnapshot = new GameSnapshot();
@@ -48,7 +48,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         flagContinue = false;
     }
 
-    private void setCLIHandler(CLIHandler cliHandler){
+    void setCLIHandler(CLIHandler cliHandler){
         this.cliHandler = cliHandler;
     }
 
@@ -81,7 +81,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         this.logged = logged;
     }
 
-    void welcomePlayer(){
+    @Override
+    public void welcomePlayer(){
         serverConnected = true;
         synchronized (cliHandler) {
             cliHandler.notifyAll();
@@ -319,8 +320,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
 
 
-
-    synchronized void serverDisconnected(){
+    @Override
+    public synchronized void serverDisconnected(){
         if(logged) {
             cliHandler.notifyServerDisconnected();
             logged = false;
@@ -343,7 +344,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return gameSnapshot;
     }
 
-    boolean isGameStarted() {
+    @Override
+    public boolean isGameStarted() {
         return gameStarted;
     }
 
@@ -359,7 +361,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return serverResult;
     }
 
-    void setServerResult(boolean serverResult){
+    @Override
+    public void setServerResult(boolean serverResult){
         this.serverResult = serverResult;
         flagContinue = true;
         synchronized (cliHandler){
@@ -399,40 +402,4 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     //endregion
-
-    public static void main(String[] args) {
-        final String ERROR = "usage:  sagrada  -g  [cli | gui]";
-
-        if(args.length != 2){
-            ClientLogger.println(ERROR);
-            return;
-        }
-
-        ClientLogger.LogToFile();
-        Client client = null;
-        try {
-            client = new Client();
-        } catch (RemoteException e) {
-            LOGGER.warning(e.toString());
-        }
-
-        CLIHandler cliHandler;
-        if(args[0].equalsIgnoreCase("-g")) {
-            switch (args[1].toLowerCase()) {
-                case "cli":
-                    cliHandler = new CLIHandler(client);
-                    client.setCLIHandler(cliHandler);
-                    cliHandler.start();
-                    break;
-                case "gui":
-                    break;
-                default:
-                    ClientLogger.println(ERROR);
-                    return;
-            }
-            client.logout();
-        }
-        else
-            ClientLogger.println(ERROR);
-    }
 }

@@ -8,11 +8,11 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 
-public class Main extends Application {
+public class GuiMain extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        URL path = Main.class.getClassLoader().getResource("gui-views/connessione.fxml");
+        URL path = GuiMain.class.getClassLoader().getResource("gui-views/connessione.fxml");
         Parent root = FXMLLoader.load(path);
         primaryStage.setTitle("Sagrada - Connessione");
         primaryStage.setScene(new Scene(root));

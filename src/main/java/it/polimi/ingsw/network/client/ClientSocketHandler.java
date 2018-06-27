@@ -9,6 +9,7 @@ import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.Coordinate;
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
 
 import java.io.BufferedReader;
@@ -33,7 +34,7 @@ public class ClientSocketHandler implements FlowHandlerInterface {
     private Gson gson;
 
 
-    ClientSocketHandler(Client client, String serverAddress, int serverPort) throws SocketException {
+    public ClientSocketHandler(ClientInterface client, String serverAddress, int serverPort) throws SocketException {
         ClientLogger.initLogger(LOGGER);
         try {
             socket = new Socket(serverAddress, serverPort);

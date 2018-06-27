@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<GridPane alignment="center" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="536.0" prefWidth="442.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.network.client.gui.Controller">
+<GridPane alignment="center" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="536.0" prefWidth="442.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.network.client.gui.GuiClient">
    <columnConstraints>
       <ColumnConstraints maxWidth="482.0" minWidth="178.0" prefWidth="180.0" />
    </columnConstraints>
@@ -73,7 +73,7 @@
             <Image url="@sagrada2.jpg" />
          </image>
       </ImageView>
-      <Label text="Connected!" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+      <Label fx:id="status" text="Connected!" GridPane.halignment="CENTER" GridPane.rowIndex="2">
          <font>
             <Font size="20.0" />
          </font>
