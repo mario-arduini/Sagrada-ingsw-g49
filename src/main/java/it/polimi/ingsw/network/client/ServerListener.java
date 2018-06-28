@@ -8,9 +8,12 @@ import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.model.Score;
 import it.polimi.ingsw.model.Window;
-import it.polimi.ingsw.network.client.model.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.net.Socket;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -20,12 +23,14 @@ public class ServerListener implements Runnable {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName() );
     private Client client;
     private ClientSocketHandler server;
+    private BufferedReader input;
     private boolean connected;
     private static Gson gson = new Gson();
 
-    ServerListener(Client client, ClientSocketHandler server) {
+    ServerListener(Client client, ClientSocketHandler server, Socket socket) throws IOException {
         this.client = client;
         this.server = server;
+        input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         connected = true;
         ClientLogger.initLogger(LOGGER);
     }
@@ -40,7 +45,7 @@ public class ServerListener implements Runnable {
         while (connected){
             jsonObject = new JsonObject();
             try {
-                jsonObject = parser.parse(server.socketReadLine()).getAsJsonObject();  //TODO: bring here socketReadLine
+                jsonObject = parser.parse(socketReadLine()).getAsJsonObject();
             } catch (IllegalStateException e) {
                 LOGGER.warning(e.toString());
                 continue;
@@ -133,5 +138,14 @@ public class ServerListener implements Runnable {
 
     void setConnected(boolean connected){
         this.connected = connected;
+    }
+
+    private String socketReadLine(){
+        try {
+            return input.readLine();
+        } catch(Exception e) {
+            LOGGER.warning(e.toString());
+        }
+        return null;
     }
 }

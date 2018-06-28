@@ -70,7 +70,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             server = socketHandler.login(nickname, password);
         else {
             try {
-                server = (FlowHandlerInterface) serverInterface.login(nickname, password,this);
+                server = serverInterface.login(nickname, password,this);
+                setServerResult(true);
             } catch (RemoteException | LoginFailedException e) {
                 LOGGER.warning(e.toString());
             }
@@ -130,7 +131,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     synchronized void logout(){
         if(serverConnected) {
             try {
-                server.logout();
+                server.logout();  //TODO: control behav with rmi
             } catch (RemoteException e) {
                 LOGGER.warning(e.toString());
             }
@@ -176,18 +177,28 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     @Override
     public void notifyLogout(String nickname) throws RemoteException{
-        gameSnapshot.removeOtherPlayer(nickname);
-        cliHandler.printWaitingRoom();
+        if(!gameStarted) {
+            gameSnapshot.removeOtherPlayer(nickname);
+            cliHandler.printWaitingRoom();
+        }
+        else{
+            //TODO: notify other logout
+        }
+    }
+
+    void sendSchemaChoice(int choice){
+        try {
+            server.chooseSchema(choice);
+        } catch (GameNotStartedException | GameOverException | WindowAlreadySetException | RemoteException e) {
+            LOGGER.warning(e.toString());
+        }
     }
 
     @Override
     public void notifySchemas(List<Schema> schemas) throws RemoteException{
         gameStarted = true;
-        try {
-            server.chooseSchema(cliHandler.chooseSchema(gameSnapshot, schemas));
-        } catch (GameNotStartedException | GameOverException | WindowAlreadySetException | RemoteException e) {
-            LOGGER.warning(e.toString());
-        }
+        cliHandler.printSchemaChoice(gameSnapshot, schemas);
+        setServerResult(true);
     }
 
     @Override
@@ -199,13 +210,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         gameSnapshot.setDraftPool(draftPool);
         if(newRound)
             gameSnapshot.setRoundTrack(roundTrack);
-
-        if(!cliHandler.getPlayingRound()) {
-            cliHandler.setPlayingRound(true);
-            synchronized (cliHandler) {
-                cliHandler.notifyAll();
-            }
-        }
 
         CLIHandler.printGame(gameSnapshot);
         CLIHandler.printMenu(gameSnapshot);
@@ -219,6 +223,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             else
                 gameSnapshot.getPlayer().setWindow(entry.getValue());
         }
+        gameStarted = true;
+        //setServerResult(true);
     }
 
     @Override
@@ -267,13 +273,16 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             gameSnapshot.setRoundTrack(roundTrack);
             gameSnapshot.setDraftPool(draftPool);
 
+            CLIHandler.printGame(gameSnapshot);
+            CLIHandler.printMenu(gameSnapshot);
+
             if(player.equalsIgnoreCase(gameSnapshot.getPlayer().getNickname())) {
                 gameSnapshot.getPlayer().setUsedToolCard(true);
                 serverResult = true;
                 setServerResult(true);
             }
-            CLIHandler.printGame(gameSnapshot);
-            CLIHandler.printMenu(gameSnapshot);
+            else
+                cliHandler.notifyUsedToolCard(player, toolCard);
         }
     }
 
@@ -331,14 +340,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    void printMenu(){
-        CLIHandler.printMenu(gameSnapshot);
-
-
-        //TODO remove all below
-
-    }
-
     GameSnapshot getGameSnapshot(){
         return gameSnapshot;
     }
@@ -368,10 +369,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     //region TOOLCARD
-
-    void notifyUsedToolCard(String player, String toolCard){
-        cliHandler.notifyUsedToolCard(player, toolCard);
-    }
 
     @Override
     public boolean askIfPlus(String prompt) throws RemoteException{

@@ -11,9 +11,7 @@ import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
@@ -24,7 +22,6 @@ public class ClientSocketHandler implements FlowHandlerInterface {
 
     private static final Logger LOGGER = Logger.getLogger( ClientSocketHandler.class.getName() );
 
-    private BufferedReader input;
     private PrintWriter output;
     private Socket socket;
     private ServerListener serverListener;
@@ -37,9 +34,8 @@ public class ClientSocketHandler implements FlowHandlerInterface {
         ClientLogger.initLogger(LOGGER);
         try {
             socket = new Socket(serverAddress, serverPort);
-            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new PrintWriter(socket.getOutputStream(), true);
-            serverListener = new ServerListener(client, this);
+            serverListener = new ServerListener(client, this, socket);
             thread = new Thread(serverListener);
             thread.start();
         } catch (Exception e) {
@@ -108,15 +104,6 @@ public class ClientSocketHandler implements FlowHandlerInterface {
     private void socketPrintLine(JsonObject jsonObject) {
         output.println(jsonObject);
         output.flush();
-    }
-
-    String socketReadLine(){
-        try {
-            return input.readLine();
-        } catch(Exception e) {
-            LOGGER.warning(e.toString());
-        }
-        return null;
     }
 
     private void socketClose(){

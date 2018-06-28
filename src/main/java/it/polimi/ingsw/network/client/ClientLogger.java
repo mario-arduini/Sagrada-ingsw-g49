@@ -15,6 +15,8 @@ class ClientLogger {
     private static final String ANSI_HOME = "\u001b[H";
     private static FileHandler fh;
 
+    private ClientLogger(){}
+
     static synchronized void print(String message){
         System.out.print(message);
         System.out.flush();
