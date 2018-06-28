@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,6 +81,26 @@ class ConnectionHandlerStub implements ClientInterface {
 
     public List<Integer> getRoundTrackIndexes() {
         return roundTrackIndexes;
+    }
+
+    @Override
+    public void welcomePlayer() throws RemoteException {
+
+    }
+
+    @Override
+    public boolean isGameStarted() throws RemoteException {
+        return false;
+    }
+
+    @Override
+    public void setServerResult(boolean result) throws RemoteException {
+
+    }
+
+    @Override
+    public void serverDisconnected() throws RemoteException {
+
     }
 
     @Override

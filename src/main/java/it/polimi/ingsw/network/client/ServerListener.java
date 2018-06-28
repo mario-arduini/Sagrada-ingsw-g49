@@ -8,6 +8,7 @@ import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.model.Score;
 import it.polimi.ingsw.model.Window;
+import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,13 +22,13 @@ import java.util.logging.Logger;
 public class ServerListener implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName() );
-    private Client client;
+    private ClientInterface client;
     private ClientSocketHandler server;
     private BufferedReader input;
     private boolean connected;
     private static Gson gson = new Gson();
 
-    ServerListener(Client client, ClientSocketHandler server, Socket socket) throws IOException {
+    ServerListener(ClientInterface client, ClientSocketHandler server, Socket socket) throws IOException {
         this.client = client;
         this.server = server;
         input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -52,7 +53,11 @@ public class ServerListener implements Runnable {
             } catch (NullPointerException e)
             {
                 connected = false;
-                client.serverDisconnected();     //server.close ??
+                try {
+                    client.serverDisconnected();     //server.close ??
+                } catch (RemoteException e1) {
+                    e1.printStackTrace();
+                }
             }
 
             try {
