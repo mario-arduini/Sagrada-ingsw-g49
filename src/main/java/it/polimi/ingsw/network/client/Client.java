@@ -225,7 +225,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
                 gameSnapshot.getPlayer().setWindow(entry.getValue());
         }
         gameStarted = true;
-        //setServerResult(true);
+        setServerResult(true);
     }
 
     @Override
@@ -366,9 +366,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     public void setServerResult(boolean serverResult){
         this.serverResult = serverResult;
         flagContinue = true;
-        synchronized (cliHandler){
-            cliHandler.notifyAll();
-        }
+        if(cliHandler.isWaiting())
+            synchronized (cliHandler){
+                cliHandler.notifyAll();
+            }
     }
 
     //region TOOLCARD

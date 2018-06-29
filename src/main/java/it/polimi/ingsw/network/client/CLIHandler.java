@@ -19,11 +19,13 @@ class CLIHandler {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
     private BufferedReader input;
     private Client client;
+    private boolean waiting;
 
     CLIHandler(Client client){
         ClientLogger.initLogger(LOGGER);
         input = new BufferedReader(new InputStreamReader(System.in));
         this.client = client;
+        this.waiting = false;
     }
 
     synchronized void start() {
@@ -64,8 +66,8 @@ class CLIHandler {
             ClientLogger.print("\nYour choice: ");
             client.sendSchemaChoice(readInt(1, 4) - 1);
             ClientLogger.print("\nWaiting other players' choice");
-            //waitResult();
-        }while (false);//!client.getServerResult());
+            waitResult();
+        }while (!client.getServerResult());
 
         while (!logout){
             command = readInt(0, 3);
@@ -302,12 +304,15 @@ class CLIHandler {
     }
 
     private synchronized boolean waitResult(){
-        while (!client.getFlagContinue())
+        while (!client.getFlagContinue()) {
+            waiting = true;
             try {
                 wait();
             } catch (InterruptedException e) {
                 LOGGER.warning(e.toString());
             }
+        }
+        waiting = false;
         client.setFlagContinue(false);
         return client.getServerResult();
     }
@@ -571,5 +576,9 @@ class CLIHandler {
         ClientLogger.printlnWithClear("GAME FINISHED\n");
         for(Score score : scores)
             ClientLogger.println(score.getPlayer() + "   " + score.getTotalScore());
+    }
+
+    boolean isWaiting(){
+        return waiting;
     }
 }
