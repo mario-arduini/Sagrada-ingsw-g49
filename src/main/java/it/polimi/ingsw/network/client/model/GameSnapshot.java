@@ -1,5 +1,7 @@
 package it.polimi.ingsw.network.client.model;
 
+import it.polimi.ingsw.model.Dice;
+
 import java.util.*;
 
 public class GameSnapshot {
@@ -31,10 +33,6 @@ public class GameSnapshot {
         this.player = new PlayerSnapshot(playerSnapshot);
     }
 
-    public void setPrivateGoal(String privateGoal){
-        player.setPrivateGoal(privateGoal);
-    }
-
     public void addOtherPlayer(String nick){
         otherPlayers.add(new PlayerSnapshot(nick));
     }
@@ -44,8 +42,8 @@ public class GameSnapshot {
     }
 
     public void removeOtherPlayer(String nick){
-        Optional<PlayerSnapshot> LoggedOutPlayer = otherPlayers.stream().filter(user -> user.getNickname().equals(nick)).findFirst();
-        LoggedOutPlayer.ifPresent(otherPlayers::remove);
+        Optional<PlayerSnapshot> loggedOutPlayer = otherPlayers.stream().filter(user -> user.getNickname().equals(nick)).findFirst();
+        loggedOutPlayer.ifPresent(otherPlayers::remove);
     }
 
     public List<PlayerSnapshot> getOtherPlayers() {

@@ -6,12 +6,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.network.server.ClientInterface;
+import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class ToolCard {
+public class ToolCard implements Serializable {
     private String cardName;
     private boolean used;
     private JsonArray effects;

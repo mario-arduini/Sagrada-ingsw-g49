@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+
+<GridPane alignment="center" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="536.0" prefWidth="442.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171" fx:controller="it.polimi.ingsw.network.client.gui.GuiClient">
+   <columnConstraints>
+      <ColumnConstraints maxWidth="482.0" minWidth="178.0" prefWidth="180.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
+      <RowConstraints maxHeight="150.0" minHeight="150.0" prefHeight="150.0" />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+   </rowConstraints>
+   <children>
+       <TextField GridPane.rowIndex="3" fx:id="address">
+           <GridPane.margin>
+               <Insets left="110.0" right="110.0" top="5.0" />
+           </GridPane.margin>
+           <padding>
+               <Insets bottom="5.0" left="3.0" right="3.0" top="5.0" />
+           </padding>
+       </TextField>
+      <TextField GridPane.rowIndex="5" fx:id="port">
+         <GridPane.margin>
+            <Insets left="110.0" right="110.0" top="5.0" />
+         </GridPane.margin>
+         <padding>
+            <Insets bottom="5.0" left="3.0" right="3.0" top="5.0" />
+         </padding>
+      </TextField>
+       <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#tryConnect" text="Connect" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.rowIndex="7" fx:id="connect">
+           <GridPane.margin>
+               <Insets bottom="60.0" left="30.0" right="30.0" top="60.0" />
+           </GridPane.margin>
+           <font>
+               <Font size="18.0" />
+           </font>
+       </Button>
+      <Label text="Server Address" GridPane.rowIndex="2">
+         <GridPane.margin>
+            <Insets left="110.0" right="110.0" top="100.0" />
+         </GridPane.margin>
+         <font>
+            <Font size="17.0" />
+         </font>
+      </Label>
+      <Label text="Port" GridPane.rowIndex="4">
+         <GridPane.margin>
+            <Insets left="110.0" right="110.0" top="30.0" />
+         </GridPane.margin>
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <ImageView fitHeight="150.0" fitWidth="442.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="TOP">
+         <image>
+            <Image url="@sagrada2.jpg" />
+         </image>
+      </ImageView>
+      <Label text="Welcome to Sagrada!" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+         <font>
+            <Font size="20.0" />
+         </font>
+         <GridPane.margin>
+            <Insets bottom="30.0" left="110.0" right="110.0" />
+         </GridPane.margin>
+      </Label>
+   </children>
+</GridPane>

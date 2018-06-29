@@ -2,7 +2,7 @@ package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
-import it.polimi.ingsw.network.server.ClientInterface;
+import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
@@ -36,11 +36,17 @@ public class GamesHandler {
         if (this.findGameFlow(nickname).isPresent())
             return reconnection(nickname, password, connection);
 
-        waitingRoom.forEach(gameFlow -> gameFlow.getConnection().notifyLogin(nickname));
+        waitingRoom.forEach(gameFlow -> {
+            try {
+                gameFlow.getConnection().notifyLogin(nickname);
+            } catch (RemoteException e) {
+                Logger.print(e.toString());
+            }
+        });
         user = new Player(nickname, password);
         //TODO: Have a look at this notify, socket vs RMI
         connection.notifyLogin(getWaitingPlayers());
-        Logger.print("Logged in: " + nickname + " " + connection.getRemoteAddress());
+        //Logger.print("Logged in: " + nickname + " " + connection.getRemoteAddress());
         newGameFlow = new GameFlowHandler(this, connection, user);
         waitingRoom.add(newGameFlow);
         waitingRoomNewPlayer();
@@ -62,10 +68,14 @@ public class GamesHandler {
             gameFlow = gameFlowFetched.get();
             if (playingUsers.contains(gameFlow) && gameFlow.getPlayer().verifyAuthToken(password)){
                 gameFlow.reconnection(connection);
-                Logger.print("Reconnected: " + nickname + " " + connection.getRemoteAddress());
+                //Logger.print("Reconnected: " + nickname + " " + connection.getRemoteAddress());
                 List<String> users = gameFlow.getPlayers();
                 users = users.stream().filter(nick -> !nick.equalsIgnoreCase(nickname)).collect(Collectors.toList());
-                connection.notifyLogin(users);
+                try {
+                    connection.notifyLogin(users);
+                } catch (RemoteException e) {
+                    Logger.print(e.toString());
+                }
                 return gameFlow;
             }
         }
@@ -79,12 +89,18 @@ public class GamesHandler {
             gameFlow = gameFlowFetched.get();
             if (waitingRoom.contains(gameFlow)) {
                 waitingRoom.remove(gameFlow);
-                waitingRoom.forEach(user -> user.getConnection().notifyLogout(nickname));
+                waitingRoom.forEach(user -> {
+                    try {
+                        user.getConnection().notifyLogout(nickname);
+                    } catch (RemoteException e) {
+                        Logger.print(e.toString());
+                    }
+                });
                 waitingRoomDisconnection(gameFlow);
             } else {
                 playingUsers.remove(gameFlow);
             }
-            Logger.print("Logged out: " + gameFlow.getPlayer().getNickname() + " " + gameFlow.getConnection().getRemoteAddress());
+            //Logger.print("Logged out: " + gameFlow.getPlayer().getNickname() + " " + gameFlow.getConnection().getRemoteAddress());
         }else {
             Logger.print("Logout failed: " + nickname);
         }

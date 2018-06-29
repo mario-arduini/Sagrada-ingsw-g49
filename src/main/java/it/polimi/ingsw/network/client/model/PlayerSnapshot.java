@@ -1,5 +1,8 @@
 package it.polimi.ingsw.network.client.model;
 
+import it.polimi.ingsw.model.Schema;
+import it.polimi.ingsw.model.Window;
+
 public class PlayerSnapshot {
     private final String nickname;
     private Window window;
@@ -19,7 +22,7 @@ public class PlayerSnapshot {
         usedToolCard = false;
     }
 
-    public PlayerSnapshot(PlayerSnapshot player){
+    PlayerSnapshot(PlayerSnapshot player){
         this.nickname = player.nickname;
         this.window = new Window(player.window);
         this.favorToken = player.favorToken;
@@ -43,7 +46,7 @@ public class PlayerSnapshot {
 
     public void setWindow(Window window){
         this.window = window;
-    }   //TODO: possibly remove
+    }
 
     public int getFavorToken() {
         return favorToken;

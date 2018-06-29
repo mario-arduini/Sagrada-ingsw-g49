@@ -1,13 +1,15 @@
 package it.polimi.ingsw.network.server.rmi;
 
 import it.polimi.ingsw.controller.GamesHandler;
-import it.polimi.ingsw.network.server.ClientInterface;
+import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
+import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
+import it.polimi.ingsw.network.RMIInterfaces.LoginInterface;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-public class Login extends UnicastRemoteObject implements LoginInterface{
+public class Login extends UnicastRemoteObject implements LoginInterface {
     private GamesHandler gamesHandler;
 
     public Login (GamesHandler gamesHandler) throws RemoteException{

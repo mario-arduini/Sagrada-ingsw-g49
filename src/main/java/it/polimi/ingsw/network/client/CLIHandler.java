@@ -1,6 +1,8 @@
 package it.polimi.ingsw.network.client;
 
+import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.network.client.model.*;
+import it.polimi.ingsw.network.client.model.Color;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,7 +19,6 @@ class CLIHandler {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
     private BufferedReader input;
     private Client client;
-    private boolean playingRound;
 
     CLIHandler(Client client){
         ClientLogger.initLogger(LOGGER);
@@ -57,11 +58,18 @@ class CLIHandler {
             else
                 ClientLogger.println("Login failed, password is not correct\n");
         }
-        waitStartRound();
+
+        waitResult();
+        do {
+            ClientLogger.print("\nYour choice: ");
+            client.sendSchemaChoice(readInt(1, 4) - 1);
+            ClientLogger.print("\nWaiting other players' choice");
+            //waitResult();
+        }while (false);//!client.getServerResult());
 
         while (!logout){
             command = readInt(0, 3);
-            if(command > 0 && (!playingRound || !client.getGameSnapshot().getPlayer().isMyTurn()))
+            if(command > 0 && !client.getGameSnapshot().getPlayer().isMyTurn())
                 ClientLogger.print(ERROR);
             else
                 switch (command){
@@ -212,15 +220,6 @@ class CLIHandler {
         return password != null && !password.equals("") && password.length() >= 4;
     }
 
-    private synchronized void waitStartRound(){
-        while(!playingRound)
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                LOGGER.warning(e.toString());
-            }
-    }
-
     void printWaitingRoom(){
         ClientLogger.printlnWithClear("Waiting for game to start, insert 0 to logout");
         ClientLogger.println("\nWaiting room:");
@@ -228,37 +227,18 @@ class CLIHandler {
         client.getGameSnapshot().getOtherPlayers().forEach(nick -> ClientLogger.println(nick.getNickname()));
     }
 
-    int chooseSchema(GameSnapshot gameSnapshot, List<Schema> schemas){
+    void printSchemaChoice(GameSnapshot gameSnapshot, List<Schema> schemas){
         ClientLogger.printlnWithClear("GAME STARTED!\n");
         printFooter(gameSnapshot);
         printSchemas(schemas);
-        int choice = 0;
-        while (choice == 0) {
-            ClientLogger.print("\nInsert your choice: ");
-
-            try {
-                choice = Integer.parseInt(input.readLine());
-            }catch (IOException | NumberFormatException e){
-                ClientLogger.println("Invalid choice");
-                continue;
-            }
-
-            if(choice < 1 || choice > 4){
-                choice = 0;
-                ClientLogger.println("Invalid choice");
-            }
-        }
-        ClientLogger.println("\nWaiting other players' choice");
-        return choice - 1;
     }
 
-    void setPlayingRound(boolean playingRound){
-        this.playingRound = playingRound;
-    }
 
     private void placeDice(){
         if(client.getGameSnapshot().getPlayer().isMyTurn()){
-            int dice = -1, row = -1, column = -1;
+            int dice = -1;
+            int row = -1;
+            int column = -1;
             boolean ask = true;
             printGame(client.getGameSnapshot());
 
@@ -321,7 +301,7 @@ class CLIHandler {
             client.verifyEndTurn();
     }
 
-    boolean waitResult(){
+    private synchronized boolean waitResult(){
         while (!client.getFlagContinue())
             try {
                 wait();
@@ -349,9 +329,7 @@ class CLIHandler {
             ClientLogger.println("\nIt's " + gameSnapshot.getCurrentPlayer() + "'s turn, wait for your turn\n\nTo logout insert 0");
     }
 
-    boolean getPlayingRound(){
-        return playingRound;
-    }
+
 
     void notifyServerDisconnected(){
         ClientLogger.printlnWithClear("Server disconnected");
@@ -381,7 +359,7 @@ class CLIHandler {
     //region TOOLCARD
 
     void notifyUsedToolCard(String player, String toolCard){
-        ClientLogger.println(player + " used the tool card " + toolCard);
+        ClientLogger.println("\n" + player + " used the tool card " + toolCard);
     }
 
     boolean askIfPlus(String prompt){

@@ -1,6 +1,5 @@
 package it.polimi.ingsw.model;
 
-import com.sun.java.swing.plaf.windows.WindowsTreeUI;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;

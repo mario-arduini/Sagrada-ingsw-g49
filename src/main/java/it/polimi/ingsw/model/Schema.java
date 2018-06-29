@@ -3,7 +3,9 @@ package it.polimi.ingsw.model;
 import it.polimi.ingsw.model.exceptions.InvalidDifficultyValueException;
 import it.polimi.ingsw.model.exceptions.UnexpectedMatrixSizeException;
 
-public final class Schema {
+import java.io.Serializable;
+
+public final class Schema implements Serializable {
     private final int difficulty;
     private final Constraint[][] constraint;
     private static final int ROW = 4;

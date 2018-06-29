@@ -6,24 +6,23 @@ import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
 import it.polimi.ingsw.controller.exceptions.GameOverException;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
+import it.polimi.ingsw.model.Coordinate;
+import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.network.client.model.Coordinate;
-import it.polimi.ingsw.network.client.model.Dice;
+import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
+import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
 import java.rmi.RemoteException;
 import java.util.logging.Logger;
 
-public class ClientSocketHandler implements Connection {
+public class ClientSocketHandler implements FlowHandlerInterface {
 
     private static final Logger LOGGER = Logger.getLogger( ClientSocketHandler.class.getName() );
 
-    private BufferedReader input;
     private PrintWriter output;
     private Socket socket;
     private ServerListener serverListener;
@@ -32,13 +31,12 @@ public class ClientSocketHandler implements Connection {
     private Gson gson;
 
 
-    ClientSocketHandler(Client client, String serverAddress, int serverPort) throws SocketException {
+    public ClientSocketHandler(ClientInterface client, String serverAddress, int serverPort) throws SocketException {
         ClientLogger.initLogger(LOGGER);
         try {
             socket = new Socket(serverAddress, serverPort);
-            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new PrintWriter(socket.getOutputStream(), true);
-            serverListener = new ServerListener(client, this);
+            serverListener = new ServerListener(client, this, socket);
             thread = new Thread(serverListener);
             thread.start();
         } catch (Exception e) {
@@ -107,15 +105,6 @@ public class ClientSocketHandler implements Connection {
     private void socketPrintLine(JsonObject jsonObject) {
         output.println(jsonObject);
         output.flush();
-    }
-
-    String socketReadLine(){
-        try {
-            return input.readLine();
-        } catch(Exception e) {
-            LOGGER.warning(e.toString());
-        }
-        return null;
     }
 
     private void socketClose(){
