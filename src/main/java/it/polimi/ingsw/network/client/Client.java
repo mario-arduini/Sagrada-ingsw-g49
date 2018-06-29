@@ -115,8 +115,9 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     void placeDice(int diceNumber, int row, int column){
         try {
-            server.placeDice(row, column, gameSnapshot.getDraftPool().get(diceNumber - 1));
+            server.placeDice(row - 1, column - 1, gameSnapshot.getDraftPool().get(diceNumber - 1));
         } catch (RemoteException | GameOverException | NotYourTurnException | NoAdjacentDiceException | BadAdjacentDiceException | DiceAlreadyExtractedException | FirstDiceMisplacedException | DiceNotInDraftPoolException | ConstraintViolatedException | GameNotStartedException | NoSameColorDicesException e) {
+            setServerResult(false);
             LOGGER.warning(e.toString());
         }
     }
@@ -125,6 +126,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         try {
             server.useToolCard(name);
         } catch (RemoteException | GameNotStartedException | GameOverException | InvalidDiceValueException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | ConstraintViolatedException | BadAdjacentDiceException | NotWantedAdjacentDiceException | FirstDiceMisplacedException | NoAdjacentDiceException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException e) {
+            setServerResult(false);
             LOGGER.warning(e.toString());
         }
     }

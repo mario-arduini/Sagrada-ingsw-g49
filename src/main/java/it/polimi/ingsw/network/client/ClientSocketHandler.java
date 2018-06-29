@@ -66,8 +66,8 @@ public class ClientSocketHandler implements FlowHandlerInterface {
     public void placeDice(int row, int column, Dice dice) throws RemoteException, GameOverException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException, NoSameColorDicesException, GameNotStartedException{
         createJsonCommand("place-dice");
         jsonObject.addProperty("dice", gson.toJson(dice));
-        jsonObject.addProperty("row", row - 1);
-        jsonObject.addProperty("column", column - 1);
+        jsonObject.addProperty("row", row);
+        jsonObject.addProperty("column", column);
         socketPrintLine(jsonObject);
     }
 
