@@ -20,16 +20,16 @@ public class ClientMain {
         if(args[0].equalsIgnoreCase("-g")) {
             switch (args[1].toLowerCase()) {
                 case "cli":
-                    Client client = null;
-                    try {
-                        client = new Client();
-                    } catch (RemoteException e) {
-
-                    }
-                    cliHandler = new CLIHandler(client);
-                    client.setCLIHandler(cliHandler);
-                    cliHandler.start();
-                    client.logout();
+//                    Client client = null;
+//                    try {
+//                        client = new Client();
+//                    } catch (RemoteException e) {
+//
+//                    }
+                    cliHandler = new CLIHandler();
+//                    client.setCLIHandler(cliHandler);
+//                    cliHandler.start();
+//                    client.logout();
                     break;
                 case "gui":
                     Application.launch(GuiMain.class);

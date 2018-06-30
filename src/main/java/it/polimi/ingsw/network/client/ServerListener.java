@@ -73,9 +73,7 @@ public class ServerListener implements Runnable {
                         client.notifyLogin(players);
                         break;
                     case "quit":
-                        if(!client.isGameStarted()) {
                             client.notifyLogout(jsonObject.get("nickname").getAsString());
-                        }
                         break;
                     case "verified":
                         client.setServerResult(true);
