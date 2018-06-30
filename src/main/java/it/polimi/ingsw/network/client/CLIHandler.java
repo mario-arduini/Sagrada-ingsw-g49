@@ -61,13 +61,16 @@ class CLIHandler {
                 ClientLogger.println("Login failed, password is not correct\n");
         }
 
-        waitResult();
-        do {
-            ClientLogger.print("\nYour choice: ");
-            client.sendSchemaChoice(readInt(1, 4) - 1);
-            ClientLogger.print("\nWaiting other players' choice");
+        if(!client.isGameStarted()) {
             waitResult();
-        }while (!client.getServerResult());
+            do {
+                ClientLogger.print("\nYour choice: ");
+                client.sendSchemaChoice(readInt(1, 4) - 1);
+                if (!client.getFlagContinue())
+                    ClientLogger.print("\nWaiting other players' choice");
+                waitResult();
+            } while (!client.getServerResult());
+        }
 
         while (!logout){
             command = readInt(0, 3);

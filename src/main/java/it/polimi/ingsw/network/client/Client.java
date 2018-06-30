@@ -167,6 +167,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     @Override
     public void notifyLogin(List<String> nicknames) throws RemoteException{
+        setServerResult(true);
         for(String nickname : nicknames)
             gameSnapshot.addOtherPlayer(nickname);
         cliHandler.printWaitingRoom();
@@ -205,6 +206,17 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     @Override
+    public void notifyOthersSchemas(Map<String, Schema> playersSchemas) throws RemoteException{
+        for (Map.Entry<String, Schema> entry : playersSchemas.entrySet()) {
+            if(!entry.getKey().equals(gameSnapshot.getPlayer().getNickname()))
+                gameSnapshot.findPlayer(entry.getKey()).get().setWindow(entry.getValue());
+            else
+                gameSnapshot.getPlayer().setWindow(entry.getValue());
+        }
+        setServerResult(true);
+    }
+
+    @Override
     public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack) throws RemoteException{
         gameSnapshot.getPlayer().setMyTurn(currentPlayer.equals(gameSnapshot.getPlayer().getNickname()));
         gameSnapshot.getPlayer().setDiceExtracted(false);
@@ -216,18 +228,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
         CLIHandler.printGame(gameSnapshot);
         CLIHandler.printMenu(gameSnapshot);
-    }
-
-    @Override
-    public void notifyOthersSchemas(Map<String, Schema> playersSchemas) throws RemoteException{
-        for (Map.Entry<String, Schema> entry : playersSchemas.entrySet()) {
-            if(!entry.getKey().equals(gameSnapshot.getPlayer().getNickname()))
-                gameSnapshot.findPlayer(entry.getKey()).get().setWindow(entry.getValue());
-            else
-                gameSnapshot.getPlayer().setWindow(entry.getValue());
-        }
-        gameStarted = true;
-        setServerResult(true);
     }
 
     @Override
@@ -313,6 +313,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
                 gameSnapshot.addOtherPlayer(playerSnapshot);
         }
         gameSnapshot.setRoundTrack(roundTrack);
+        gameStarted = true;
     }
 
     @Override

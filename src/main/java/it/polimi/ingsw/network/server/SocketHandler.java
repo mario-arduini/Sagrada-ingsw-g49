@@ -204,18 +204,16 @@ public class SocketHandler implements Runnable, ClientInterface {
     @Override
     public void notifyLogin(String nickname) {
         JsonObject message;
-        message = createMessage("new_player");
-        List <String> nicks = new ArrayList<>();
-        nicks.add(nickname);
-        message.addProperty("nicknames", gson.toJson(nicks));
+        message = createMessage("new-player");
+        message.addProperty(NICKNAME_STRING, nickname);
         socketSendMessage(message);
     }
 
     @Override
     public void notifyLogin(List<String> nicknames){
         JsonObject message;
-        message = createMessage("new_player");
-        message.addProperty("nicknames", gson.toJson(nicknames));
+        message = createMessage("game-room");
+        message.addProperty("players", gson.toJson(nicknames));
         socketSendMessage(message);
     }
 
@@ -424,7 +422,6 @@ public class SocketHandler implements Runnable, ClientInterface {
                     password = command.get("password").getAsString();
                     try{
                         gameFlowHandler = gamesHandler.login(nickname, password, this);
-                        socketSendMessage(createMessage("verified"));
                         return true;
                     }catch (LoginFailedException | RemoteException e){
                         socketSendMessage(createErrorMessage(e.toString()));

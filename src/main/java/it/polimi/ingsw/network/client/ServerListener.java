@@ -65,8 +65,11 @@ public class ServerListener implements Runnable {
                     case "welcome":
                         client.welcomePlayer();
                         break;
-                    case "new_player":
-                        List<String> players = gson.fromJson(jsonObject.get("nicknames").getAsString(), new TypeToken<List<String>>(){}.getType());
+                    case "new-player":
+                        client.notifyLogin(jsonObject.get("nickname").getAsString());
+                        break;
+                    case "game-room":
+                        List<String> players = gson.fromJson(jsonObject.get("players").getAsString(), new TypeToken<List<String>>(){}.getType());
                         client.notifyLogin(players);
                         break;
                     case "quit":
