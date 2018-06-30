@@ -22,13 +22,13 @@ import java.util.logging.Logger;
 public class ServerListener implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName() );
-    private ClientInterface client;
+    private Client client;
     private ClientSocketHandler server;
     private BufferedReader input;
     private boolean connected;
     private static Gson gson = new Gson();
 
-    ServerListener(ClientInterface client, ClientSocketHandler server, Socket socket) throws IOException {
+    ServerListener(Client client, ClientSocketHandler server, Socket socket) throws IOException {
         this.client = client;
         this.server = server;
         input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -53,11 +53,7 @@ public class ServerListener implements Runnable {
             } catch (NullPointerException e)
             {
                 connected = false;
-                try {
-                    client.serverDisconnected();     //server.close ??
-                } catch (RemoteException e1) {
-                    e1.printStackTrace();
-                }
+                client.serverDisconnected();     //server.close ??
             }
 
             try {

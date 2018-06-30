@@ -82,7 +82,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         this.logged = logged;
     }
 
-    @Override
     public void welcomePlayer(){
         serverConnected = true;
         synchronized (cliHandler) {
@@ -331,8 +330,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
 
 
-
-    @Override
     public synchronized void serverDisconnected(){
         if(logged) {
             cliHandler.notifyServerDisconnected();
@@ -348,7 +345,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return gameSnapshot;
     }
 
-    @Override
     public boolean isGameStarted() {
         return gameStarted;
     }
@@ -365,7 +361,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return serverResult;
     }
 
-    @Override
     public void setServerResult(boolean serverResult){
         this.serverResult = serverResult;
         flagContinue = true;
