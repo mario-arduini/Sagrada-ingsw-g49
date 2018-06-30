@@ -40,16 +40,13 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     private boolean flagContinue;
     private boolean serverResult;
 
-    Client() throws RemoteException {
+    Client(CLIHandler cliHandler) throws RemoteException {
         super();
         ClientLogger.initLogger(LOGGER);
         this.gameSnapshot = new GameSnapshot();
+        this.cliHandler = cliHandler;
         gameStarted = false;
         flagContinue = false;
-    }
-
-    void setCLIHandler(CLIHandler cliHandler){
-        this.cliHandler = cliHandler;
     }
 
     void setServerAddress(String serverAddress){
@@ -82,7 +79,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         this.logged = logged;
     }
 
-    @Override
     public void welcomePlayer(){
         serverConnected = true;
         synchronized (cliHandler) {
@@ -331,8 +327,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
 
 
-
-    @Override
     public synchronized void serverDisconnected(){
         if(logged) {
             cliHandler.notifyServerDisconnected();
@@ -348,7 +342,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return gameSnapshot;
     }
 
-    @Override
     public boolean isGameStarted() {
         return gameStarted;
     }
@@ -365,7 +358,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return serverResult;
     }
 
-    @Override
     public void setServerResult(boolean serverResult){
         this.serverResult = serverResult;
         flagContinue = true;

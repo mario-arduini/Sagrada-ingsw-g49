@@ -8,7 +8,6 @@ import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.model.Score;
 import it.polimi.ingsw.model.Window;
-import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,13 +21,13 @@ import java.util.logging.Logger;
 public class ServerListener implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName() );
-    private ClientInterface client;
+    private Client client;
     private ClientSocketHandler server;
     private BufferedReader input;
     private boolean connected;
     private static Gson gson = new Gson();
 
-    ServerListener(ClientInterface client, ClientSocketHandler server, Socket socket) throws IOException {
+    ServerListener(Client client, ClientSocketHandler server, Socket socket) throws IOException {
         this.client = client;
         this.server = server;
         input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -44,7 +43,6 @@ public class ServerListener implements Runnable {
         Type listType;
 
         while (connected){
-            jsonObject = new JsonObject();
             try {
                 jsonObject = parser.parse(socketReadLine()).getAsJsonObject();
             } catch (IllegalStateException e) {
@@ -53,11 +51,8 @@ public class ServerListener implements Runnable {
             } catch (NullPointerException e)
             {
                 connected = false;
-                try {
-                    client.serverDisconnected();     //server.close ??
-                } catch (RemoteException e1) {
-                    e1.printStackTrace();
-                }
+                client.serverDisconnected();     //server.close ??
+                continue;
             }
 
             try {
@@ -140,10 +135,6 @@ public class ServerListener implements Runnable {
                 LOGGER.warning(e.toString());
             }
         }
-    }
-
-    void setConnected(boolean connected){
-        this.connected = connected;
     }
 
     private String socketReadLine(){

@@ -31,7 +31,7 @@ public class ClientSocketHandler implements FlowHandlerInterface {
     private Gson gson;
 
 
-    public ClientSocketHandler(ClientInterface client, String serverAddress, int serverPort) throws SocketException {
+    public ClientSocketHandler(Client client, String serverAddress, int serverPort) throws SocketException {
         ClientLogger.initLogger(LOGGER);
         try {
             socket = new Socket(serverAddress, serverPort);
@@ -92,9 +92,12 @@ public class ClientSocketHandler implements FlowHandlerInterface {
     }
 
     private void stopServerListener(){
-        serverListener.setConnected(false);
-        thread.interrupt();
         socketClose();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void createJsonCommand(String command){

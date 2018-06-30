@@ -13,33 +13,22 @@ public class ClientMain {
             ClientLogger.println(ERROR);
             return;
         }
-
         ClientLogger.LogToFile();
 
-        CLIHandler cliHandler;
         if(args[0].equalsIgnoreCase("-g")) {
             switch (args[1].toLowerCase()) {
                 case "cli":
-//                    Client client = null;
-//                    try {
-//                        client = new Client();
-//                    } catch (RemoteException e) {
-//
-//                    }
-                    cliHandler = new CLIHandler();
-//                    client.setCLIHandler(cliHandler);
-//                    cliHandler.start();
-//                    client.logout();
+                    (new CLIHandler()).start();
                     break;
                 case "gui":
                     Application.launch(GuiMain.class);
                     break;
                 default:
                     ClientLogger.println(ERROR);
-                    return;
             }
         }
         else
             ClientLogger.println(ERROR);
+        System.exit(0);
     }
 }

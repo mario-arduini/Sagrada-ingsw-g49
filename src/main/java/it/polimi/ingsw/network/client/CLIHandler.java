@@ -7,10 +7,11 @@ import it.polimi.ingsw.network.client.model.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.rmi.RemoteException;
 import java.util.List;
 import java.util.logging.Logger;
 
-class CLIHandler {
+class CLIHandler implements GraphicInterface{
 
     private static final int WINDOW_WIDTH = 27;
     private static final int ROWS = 4;
@@ -21,11 +22,16 @@ class CLIHandler {
     private Client client;
     private boolean waiting;
 
-    CLIHandler(Client client){
+    CLIHandler() {
         ClientLogger.initLogger(LOGGER);
         input = new BufferedReader(new InputStreamReader(System.in));
-        this.client = client;
         this.waiting = false;
+
+        try {
+            this.client = new Client(this);
+        }catch (RemoteException e){
+            LOGGER.warning(e.toString());
+        }
     }
 
     synchronized void start() {

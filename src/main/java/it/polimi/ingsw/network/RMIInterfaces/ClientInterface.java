@@ -11,11 +11,6 @@ import java.util.Map;
 
 public interface ClientInterface extends Remote, Serializable {
 
-    void welcomePlayer() throws RemoteException;
-    boolean isGameStarted() throws RemoteException;
-    void setServerResult(boolean result) throws RemoteException;
-    void serverDisconnected() throws RemoteException;
-
     void notifyLogin(String nickname) throws RemoteException;
     void notifyLogin(List<String> nicknames) throws RemoteException;
     void notifyLogout(String nickname) throws RemoteException;

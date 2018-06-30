@@ -1,8 +1,10 @@
 package it.polimi.ingsw.network.client.gui;
 
+import com.sun.prism.GraphicsResource;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 import it.polimi.ingsw.network.client.ClientSocketHandler;
+import it.polimi.ingsw.network.client.GraphicInterface;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class GuiClient extends UnicastRemoteObject implements ClientInterface {
+public class GuiClient extends UnicastRemoteObject implements GraphicInterface {
 
     public PasswordField password;
     public TextField nickname;
@@ -110,16 +112,7 @@ public class GuiClient extends UnicastRemoteObject implements ClientInterface {
 
     public void tryConnect(ActionEvent actionEvent) {
 
-        try {
-            socketHandler = new ClientSocketHandler(this, address.getCharacters().toString(), Integer.parseInt(port.getCharacters().toString()));
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
 
-        // use wait and notify here!!
-        while(!serverConnected){
-
-        }
 
         Stage stage = (Stage) connect.getScene().getWindow();
         Parent root = null;
@@ -139,106 +132,5 @@ public class GuiClient extends UnicastRemoteObject implements ClientInterface {
     public void trylogin(ActionEvent actionEvent) {
         Stage stage = (Stage) login.getScene().getWindow();
         stage.setResizable(true);
-    }
-
-    @Override
-    public void welcomePlayer() throws RemoteException{
-        serverConnected = true;
-        //status.textProperty().set("Connected");
-    }
-
-    @Override
-    public boolean isGameStarted() throws RemoteException {
-        return false;
-    }
-
-    @Override
-    public void setServerResult(boolean result) throws RemoteException {
-
-    }
-
-    @Override
-    public void serverDisconnected() throws RemoteException {
-
-    }
-
-    @Override
-    public void notifyLogin(String nickname) throws RemoteException {
-
-    }
-
-    @Override
-    public void notifyLogin(List<String> nicknames) throws RemoteException {
-
-    }
-
-    @Override
-    public void notifyLogout(String nickname) throws RemoteException {
-
-    }
-
-    @Override
-    public void notifySchemas(List<Schema> schemas) throws RemoteException {
-
-    }
-
-    @Override
-    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack) throws RemoteException {
-
-    }
-
-    @Override
-    public void notifyOthersSchemas(Map<String, Schema> playersSchemas) throws RemoteException {
-
-    }
-
-    @Override
-    public void notifyDicePlaced(String nickname, int row, int column, Dice dice) throws RemoteException {
-
-    }
-
-    @Override
-    public void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack) throws RemoteException {
-
-    }
-
-    @Override
-    public void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal) throws RemoteException {
-
-    }
-
-    @Override
-    public void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack) throws RemoteException {
-
-    }
-
-    @Override
-    public void notifyEndGame(List<Score> scores) throws RemoteException {
-
-    }
-
-    @Override
-    public Coordinate askDiceWindow(String prompt) throws RemoteException {
-        return null;
-    }
-
-    @Override
-    public Dice askDiceDraftPool(String prompt) throws RemoteException {
-        return null;
-    }
-
-    @Override
-    public int askDiceRoundTrack(String prompt) throws RemoteException {
-        return 0;
-    }
-
-    @Override
-    public boolean askIfPlus(String prompt) throws RemoteException {
-        return false;
-    }
-
-    @Override
-    public int askDiceValue(String prompt) throws RemoteException {
-        return 0;
     }
 }

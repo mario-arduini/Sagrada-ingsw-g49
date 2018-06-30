@@ -182,26 +182,6 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public void welcomePlayer() throws RemoteException {
-
-    }
-
-    @Override
-    public boolean isGameStarted() throws RemoteException {
-        return false;
-    }
-
-    @Override
-    public void setServerResult(boolean result) throws RemoteException {
-
-    }
-
-    @Override
-    public void serverDisconnected() throws RemoteException {
-
-    }
-
-    @Override
     public void notifyLogin(String nickname) {
         JsonObject message;
         message = createMessage("new-player");
