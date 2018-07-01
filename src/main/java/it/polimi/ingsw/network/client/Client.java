@@ -79,12 +79,12 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         this.logged = logged;
     }
 
-    void welcomePlayer(){
-        serverConnected = true;
-        synchronized (cliHandler) {
-            cliHandler.notifyAll();
-        }
-    }
+//    void welcomePlayer(){
+//        serverConnected = true;
+//        synchronized (cliHandler) {
+//            cliHandler.notifyAll();
+//        }
+//    }
 
     boolean createConnection(ConnectionType connectionType) {
         if(connectionType == ConnectionType.SOCKET) {
@@ -98,14 +98,12 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             try {
                 Registry registry = LocateRegistry.getRegistry(serverAddress);
                 this.serverInterface = (LoginInterface) registry.lookup("logger");
-                serverConnected = true;
-                synchronized (cliHandler){
-                    cliHandler.notifyAll();
-                }
             }  catch (NotBoundException | RemoteException e) {
                 return false;
             }
         }
+        serverConnected = true;
+        setServerResult(true);
         return true;
     }
 
@@ -159,7 +157,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     @Override
     public void notifyLogin(List<String> nicknames) throws RemoteException{
-        setServerResult(true);
+        //setServerResult(true);
         for(String nickname : nicknames)
             gameSnapshot.addOtherPlayer(nickname);
         cliHandler.printWaitingRoom();
