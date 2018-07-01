@@ -46,7 +46,7 @@ public class GamesHandler {
         user = new Player(nickname, password);
         //TODO: Have a look at this notify, socket vs RMI
         connection.notifyLogin(getWaitingPlayers());
-        //Logger.print("Logged in: " + nickname + " " + connection.getRemoteAddress());
+        Logger.print("Logged in: " + nickname); //+ " " + connection.getRemoteAddress());
         newGameFlow = new GameFlowHandler(this, connection, user);
         waitingRoom.add(newGameFlow);
         waitingRoomNewPlayer();
@@ -68,7 +68,7 @@ public class GamesHandler {
             gameFlow = gameFlowFetched.get();
             if (playingUsers.contains(gameFlow) && gameFlow.getPlayer().verifyAuthToken(password)){
                 gameFlow.reconnection(connection);
-                //Logger.print("Reconnected: " + nickname + " " + connection.getRemoteAddress());
+                Logger.print("Reconnected: " + nickname); //+ " " + connection.getRemoteAddress());
                 List<String> users = gameFlow.getPlayers();
                 users = users.stream().filter(nick -> !nick.equalsIgnoreCase(nickname)).collect(Collectors.toList());
                 try {
@@ -100,7 +100,7 @@ public class GamesHandler {
             } else {
                 playingUsers.remove(gameFlow);
             }
-            //Logger.print("Logged out: " + gameFlow.getPlayer().getNickname() + " " + gameFlow.getConnection().getRemoteAddress());
+            Logger.print("Logged out: " + gameFlow.getPlayer().getNickname()); //+ " " + gameFlow.getConnection().getRemoteAddress());
         }else {
             Logger.print("Logout failed: " + nickname);
         }
