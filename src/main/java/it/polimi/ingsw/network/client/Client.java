@@ -79,12 +79,12 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         this.logged = logged;
     }
 
-    public void welcomePlayer(){
-        serverConnected = true;
-        synchronized (cliHandler) {
-            cliHandler.notifyAll();
-        }
-    }
+//    void welcomePlayer(){
+//        serverConnected = true;
+//        synchronized (cliHandler) {
+//            cliHandler.notifyAll();
+//        }
+//    }
 
     boolean createConnection(ConnectionType connectionType) {
         if(connectionType == ConnectionType.SOCKET) {
@@ -98,14 +98,12 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             try {
                 Registry registry = LocateRegistry.getRegistry(serverAddress);
                 this.serverInterface = (LoginInterface) registry.lookup("logger");
-                serverConnected = true;
-                synchronized (cliHandler){
-                    cliHandler.notifyAll();
-                }
             }  catch (NotBoundException | RemoteException e) {
                 return false;
             }
         }
+        serverConnected = true;
+        setServerResult(true);
         return true;
     }
 
@@ -127,18 +125,14 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    synchronized void logout(){
+    void logout(){
+        logged = false;
         if(serverConnected) {
             try {
                 server.logout();  //TODO: control behav with rmi
             } catch (RemoteException e) {
                 LOGGER.warning(e.toString());
             }
-        }
-
-        logged = false;
-        synchronized (cliHandler){
-            notifyAll();
         }
     }
 
@@ -163,7 +157,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     @Override
     public void notifyLogin(List<String> nicknames) throws RemoteException{
-        setServerResult(true);
+        //setServerResult(true);
         for(String nickname : nicknames)
             gameSnapshot.addOtherPlayer(nickname);
         cliHandler.printWaitingRoom();
@@ -310,6 +304,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
         gameSnapshot.setRoundTrack(roundTrack);
         gameStarted = true;
+        setServerResult(true);
     }
 
     @Override
@@ -327,14 +322,11 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
 
 
-    public synchronized void serverDisconnected(){
+    void serverDisconnected(){
+        serverConnected = false;
         if(logged) {
             cliHandler.notifyServerDisconnected();
             logged = false;
-            serverConnected = false;
-            synchronized (cliHandler){
-                notifyAll();
-            }
         }
     }
 
@@ -342,7 +334,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return gameSnapshot;
     }
 
-    public boolean isGameStarted() {
+    boolean isGameStarted() {
         return gameStarted;
     }
 
@@ -358,7 +350,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return serverResult;
     }
 
-    public void setServerResult(boolean serverResult){
+    void setServerResult(boolean serverResult){
         this.serverResult = serverResult;
         flagContinue = true;
         if(cliHandler.isWaiting())

@@ -25,6 +25,7 @@ public class ClientMain {
                     break;
                 default:
                     ClientLogger.println(ERROR);
+                    break;
             }
         }
         else

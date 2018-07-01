@@ -57,9 +57,9 @@ public class ServerListener implements Runnable {
 
             try {
                 switch (jsonObject.get("message").getAsString()) {
-                    case "welcome":
-                        client.welcomePlayer();
-                        break;
+//                    case "welcome":
+//                        client.welcomePlayer();
+//                        break;
                     case "new-player":
                         client.notifyLogin(jsonObject.get("nickname").getAsString());
                         break;

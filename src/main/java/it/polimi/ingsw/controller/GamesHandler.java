@@ -68,14 +68,7 @@ public class GamesHandler {
             gameFlow = gameFlowFetched.get();
             if (playingUsers.contains(gameFlow) && gameFlow.getPlayer().verifyAuthToken(password)){
                 gameFlow.reconnection(connection);
-                Logger.print("Reconnected: " + nickname); //+ " " + connection.getRemoteAddress());
-                List<String> users = gameFlow.getPlayers();
-                users = users.stream().filter(nick -> !nick.equalsIgnoreCase(nickname)).collect(Collectors.toList());
-                try {
-                    connection.notifyLogin(users);
-                } catch (RemoteException e) {
-                    Logger.print(e.toString());
-                }
+
                 return gameFlow;
             }
         }

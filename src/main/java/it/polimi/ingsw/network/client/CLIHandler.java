@@ -583,6 +583,8 @@ class CLIHandler implements GraphicInterface{
 
     void gameOver(List<Score> scores){
         ClientLogger.printlnWithClear("GAME FINISHED\n");
+        input = null;
+        //input = new BufferedReader(new InputStreamReader(System.in));
         for(Score score : scores)
             ClientLogger.println(score.getPlayer() + "   " + score.getTotalScore());
     }
