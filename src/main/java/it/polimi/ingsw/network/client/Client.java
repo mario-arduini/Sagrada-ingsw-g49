@@ -214,31 +214,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     @Override
     public void notifyDicePlaced(String nickname, int row, int column, Dice dice) throws RemoteException{
         gameSnapshot.getDraftPool().remove(dice);
-        if(!nickname.equals(gameSnapshot.getPlayer().getNickname())) {
-            try {
-                gameSnapshot.findPlayer(nickname).get().getWindow().addDice(row, column, dice);
-            } catch (ConstraintViolatedException e) {
-                e.printStackTrace();
-            } catch (FirstDiceMisplacedException e) {
-                e.printStackTrace();
-            } catch (NoAdjacentDiceException e) {
-                e.printStackTrace();
-            } catch (BadAdjacentDiceException e) {
-                e.printStackTrace();
-            }
-        }
-        else {
-            try {
-                gameSnapshot.getPlayer().getWindow().addDice(row, column, dice);
-            } catch (ConstraintViolatedException e) {
-                e.printStackTrace();
-            } catch (FirstDiceMisplacedException e) {
-                e.printStackTrace();
-            } catch (NoAdjacentDiceException e) {
-                e.printStackTrace();
-            } catch (BadAdjacentDiceException e) {
-                e.printStackTrace();
-            }
+        gameSnapshot.findPlayer(nickname).get().getWindow().setDice(row, column, dice);
+        if(nickname.equals(gameSnapshot.getPlayer().getNickname())){
             gameSnapshot.getPlayer().setDiceExtracted(true);
             setServerResult(true);
         }
@@ -303,6 +280,12 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         gameStarted = false;
     }
 
+
+    public void suspended(String player){
+        gameSnapshot.findPlayer(player).get().suspend();
+        if(player.equalsIgnoreCase(gameSnapshot.getPlayer().getNickname()))
+            handler.interruptInput();
+    }
 
 
 

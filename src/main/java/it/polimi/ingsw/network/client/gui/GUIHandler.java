@@ -263,4 +263,9 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public void wakeUp(boolean serverResult) {
         
     }
+
+    @Override
+    public void interruptInput(){
+
+    }
 }

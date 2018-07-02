@@ -22,4 +22,5 @@ public interface GraphicInterface {
     Coordinate askDiceWindow(String prompt);
     int askDiceValue(String prompt);
     void wakeUp(boolean serverResult);
+    void interruptInput();
 }

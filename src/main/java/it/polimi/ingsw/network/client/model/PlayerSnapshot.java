@@ -30,12 +30,10 @@ public class PlayerSnapshot {
     }
 
     public String getNickname() {
-
         return nickname;
     }
 
     public Window getWindow() {
-
         return window;
     }
 
@@ -65,7 +63,6 @@ public class PlayerSnapshot {
     }
 
     public boolean isSuspended() {
-
         return suspended;
     }
 

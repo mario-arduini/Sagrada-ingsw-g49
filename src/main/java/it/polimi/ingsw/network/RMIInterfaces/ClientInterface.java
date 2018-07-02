@@ -22,7 +22,7 @@ public interface ClientInterface extends Remote, Serializable {
     void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack) throws RemoteException;
     void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal) throws RemoteException;
     void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack) throws RemoteException;
-    void notifyEndGame(List<Score> scores) throws RemoteException;;
+    void notifyEndGame(List<Score> scores) throws RemoteException;
 
     //String getRemoteAddress();
     //void close();

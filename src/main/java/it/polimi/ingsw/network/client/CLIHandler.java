@@ -576,12 +576,12 @@ class CLIHandler implements GraphicInterface{
         int whiteSpaceHalf;
         int whiteSpaceNum;
 
-        whiteSpaceNum = WINDOW_WIDTH - p.getNickname().length() - 1 - p.getWindow().getSchema().getDifficulty();
+        whiteSpaceNum = WINDOW_WIDTH - p.getNickname().length() - (p.isSuspended() ? 4 : 0) - 1 - p.getWindow().getSchema().getDifficulty();
         whiteSpaceHalf = whiteSpaceNum/2;
 
         for(i=0;i<whiteSpaceHalf;i++) ClientLogger.print(" ");
 
-        ClientLogger.print(p.getNickname()+" ");
+        ClientLogger.print(p.getNickname()+ (p.isSuspended() ? " (S) " : " "));
         for(i=0;i<p.getFavorToken();i++) ClientLogger.print("\u25CF");
         for(;i<p.getWindow().getSchema().getDifficulty();i++) ClientLogger.print("\u25CB");
 
@@ -606,6 +606,11 @@ class CLIHandler implements GraphicInterface{
             //ClientLogger.println("   Description: " + toolcard.getDescription());
             ClientLogger.println("|  Cost: " + (toolcard.getUsed() ? "2" : "1"));
         }
+    }
+
+    @Override
+    public void interruptInput(){
+        future.cancel(true);
     }
 
     @Override
