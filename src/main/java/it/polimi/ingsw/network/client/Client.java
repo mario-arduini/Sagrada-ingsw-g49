@@ -37,8 +37,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     private GameSnapshot gameSnapshot;
     private LoginInterface serverInterface;
     private ClientSocketHandler socketHandler;
-    private boolean flagContinue;
-    private boolean serverResult;
 
     public Client(GraphicInterface handler) throws RemoteException {
         super();
@@ -46,7 +44,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         this.gameSnapshot = new GameSnapshot();
         this.handler = handler;
         gameStarted = false;
-        flagContinue = false;
     }
 
     public void setServerAddress(String serverAddress){
@@ -57,7 +54,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         this.serverPort = serverPort;
     }
 
-    public boolean getServerConnected(){
+    boolean getServerConnected(){
         return serverConnected;
     }
 
@@ -70,21 +67,15 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
                 server = serverInterface.login(nickname, password,this);
                 setServerResult(true);
             } catch (RemoteException | LoginFailedException e) {
+                setServerResult(false);
                 LOGGER.warning(e.toString());
             }
         }
     }
 
-    public void setLogged(boolean logged){
+    void setLogged(boolean logged){
         this.logged = logged;
     }
-
-//    void welcomePlayer(){
-//        serverConnected = true;
-//        synchronized (handler) {
-//            handler.notifyAll();
-//        }
-//    }
 
     public boolean createConnection(ConnectionType connectionType) {
         if(connectionType == ConnectionType.SOCKET) {
@@ -129,7 +120,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         logged = false;
         if(serverConnected) {
             try {
-                server.logout();  //TODO: control behav with rmi
+                server.logout();
             } catch (RemoteException e) {
                 LOGGER.warning(e.toString());
             }
@@ -271,7 +262,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
             if(player.equalsIgnoreCase(gameSnapshot.getPlayer().getNickname())) {
                 gameSnapshot.getPlayer().setUsedToolCard(true);
-                serverResult = true;
                 setServerResult(true);
             }
             else
@@ -338,25 +328,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return gameStarted;
     }
 
-    boolean getFlagContinue(){
-        return flagContinue;
-    }
-
-    void setFlagContinue(boolean flagContinue){
-        this.flagContinue = flagContinue;
-    }
-
-    boolean getServerResult(){
-        return serverResult;
-    }
-
     void setServerResult(boolean serverResult){
-        this.serverResult = serverResult;
-        flagContinue = true;
-        if(handler.isWaiting())
-            synchronized (handler){
-                handler.notifyAll();
-            }
+        handler.wakeUp(serverResult);
     }
 
     //region TOOLCARD

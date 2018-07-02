@@ -21,10 +21,15 @@ class CLIHandler implements GraphicInterface{
     private BufferedReader input;
     private Client client;
     private boolean waiting;
+    private boolean serverResult;
+    private boolean flagContinue;
+    private InputStreamReader inputStreamReader;
 
     CLIHandler() {
         ClientLogger.initLogger(LOGGER);
-        input = new BufferedReader(new InputStreamReader(System.in));
+        inputStreamReader = new InputStreamReader(System.in);
+        input = new BufferedReader(inputStreamReader);
+        flagContinue = false;
         this.waiting = false;
 
         try {
@@ -72,10 +77,10 @@ class CLIHandler implements GraphicInterface{
             do {
                 ClientLogger.print("\nYour choice: ");
                 client.sendSchemaChoice(readInt(1, 4) - 1);
-                if (!client.getFlagContinue())
+                if (!flagContinue)
                     ClientLogger.print("\nWaiting other players' choice");
                 waitResult();
-            } while (!client.getServerResult());
+            } while (!serverResult);
         }
 
         while (!logout){
@@ -315,7 +320,7 @@ class CLIHandler implements GraphicInterface{
     }
 
     private synchronized boolean waitResult(){
-        while (!client.getFlagContinue()) {
+        while (!flagContinue) {
             waiting = true;
             try {
                 wait();
@@ -324,8 +329,8 @@ class CLIHandler implements GraphicInterface{
             }
         }
         waiting = false;
-        client.setFlagContinue(false);
-        return client.getServerResult();
+        flagContinue = false;
+        return serverResult;
     }
 
     @Override
@@ -595,7 +600,14 @@ class CLIHandler implements GraphicInterface{
     @Override
     public void gameOver(List<Score> scores){
         ClientLogger.printlnWithClear("GAME FINISHED\n");
-        input = null;
+
+        try {
+            inputStreamReader.close();
+            inputStreamReader = new InputStreamReader(System.in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         //input = new BufferedReader(new InputStreamReader(System.in));
         for(Score score : scores)
             ClientLogger.println(score.getPlayer() + "   " + score.getTotalScore());
@@ -604,5 +616,15 @@ class CLIHandler implements GraphicInterface{
     @Override
     public boolean isWaiting(){
         return waiting;
+    }
+
+    @Override
+    public void wakeUp(boolean serverResult){
+        this.serverResult = serverResult;
+        flagContinue = true;
+        if(waiting)
+            synchronized (this) {
+                this.notifyAll();
+            }
     }
 }
