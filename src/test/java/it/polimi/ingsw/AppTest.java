@@ -21,7 +21,6 @@ class FirstJUnitTest{
         new ConstraintTest();
         new RoundTest();
         new SchemaTest();
-        new WaitingRoomTest();
 
         factoryTest.extractPrivateTest();
         factoryTest.extractPublicTest();

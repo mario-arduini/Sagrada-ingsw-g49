@@ -54,10 +54,15 @@ public class GameRoom extends Game{
             nextRound();
             newRound = true;
         }
-        if (!isGameFinished()) {
+        if (!checkGameFinished()) {
             notifyRound(newRound);
             startTimer();
-        }else if(notifyEndGame) {
+        }
+    }
+
+    private boolean checkGameFinished(){
+        if (!isGameFinished()) return false;
+        if (notifyEndGame){
             connections.forEach(user -> {
                 try {
                     user.notifyEndGame(computeFinalScores());
@@ -68,6 +73,7 @@ public class GameRoom extends Game{
             notifyEndGame = false;
             Logger.print("Game Over: " + getPlayers().stream().map(Player::getNickname).collect(Collectors.toList()));
         }
+        return true;
     }
 
     private void notifyRound(boolean newRound){
@@ -140,6 +146,7 @@ public class GameRoom extends Game{
         });
         suspendPlayer(nickname);
         if (nickname.equalsIgnoreCase(getCurrentRound().getCurrentPlayer().getNickname())) goOn();
+        checkGameFinished();
     }
 
     protected synchronized List<String> getPlayersNick(){

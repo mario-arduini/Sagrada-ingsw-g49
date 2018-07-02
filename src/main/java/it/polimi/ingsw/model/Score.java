@@ -64,17 +64,13 @@ public class Score implements Serializable {
 
         //Sort by Total Score
         sortedScores.sort(Comparator.comparingInt(Score::getTotalScore).reversed());
-        Logger.print("Total Score: " + sortedScores.stream().map(Score::getPlayer).collect(Collectors.toList()));
 
         //Sort by Private Goal
         sortedScores = Score.partialSort(sortedScores, Comparator.comparing(Score::getPrivateScore).reversed());
-        Logger.print("Private Score: " + sortedScores.stream().map(Score::getPlayer).collect(Collectors.toList()));
         //Sort by Favor Token
         sortedScores = Score.partialSort(sortedScores, Comparator.comparing(Score::getFavorToken).reversed());
-        Logger.print("Favor Score: " + sortedScores.stream().map(Score::getPlayer).collect(Collectors.toList()));
         //Sort by Round position
         sortedScores = Score.partialSort(sortedScores, Comparator.comparing(Score::getRoundPosition).reversed());
-        Logger.print("Round Score" + sortedScores.stream().map(Score::getPlayer).collect(Collectors.toList()));
         return sortedScores;
     }
 

@@ -4,6 +4,7 @@ import it.polimi.ingsw.controller.GamesHandler;
 import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
 import it.polimi.ingsw.network.RMIInterfaces.LoginInterface;
+import it.polimi.ingsw.network.server.Logger;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
 import java.rmi.RemoteException;
@@ -18,6 +19,7 @@ public class Login extends UnicastRemoteObject implements LoginInterface {
 
     @Override
     public FlowHandlerInterface login(String name, String password, ClientInterface connectionHandler) throws LoginFailedException, RemoteException {
+        Logger.print("Connection over Rmi: " + name);
         return this.gamesHandler.login(name, password, connectionHandler);
     }
 

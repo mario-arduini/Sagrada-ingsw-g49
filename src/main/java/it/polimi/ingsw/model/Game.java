@@ -3,13 +3,10 @@ package it.polimi.ingsw.model;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
-import it.polimi.ingsw.network.server.Logger;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BinaryOperator;
-import java.util.stream.Collectors;
 
 public class Game {
     private final Factory dealer;
@@ -58,8 +55,6 @@ public class Game {
         });
 
         int size = players.size();
-        Logger.print(players.stream().map(Player::getNickname).collect(Collectors.toList()));
-        Logger.print("Size Players: " + size);
         currentRound = new Round(dealer.extractPool(2*(size) + 1),createRoundPlayers());
         currentRound.nextPlayer();
         this.playing = false;
@@ -126,20 +121,18 @@ public class Game {
         List <Score> scores = new ArrayList<>();
         BinaryOperator<Integer> adder = (n1, n2) -> n1 + n2;
         int privateScore;
-        Logger.print(players);
         for(Player player: this.players){
             AtomicInteger publicScore = new AtomicInteger();
 
             privateScore = player.getPrivateGoal().computeScore(player.getWindow());
             publicGoals.forEach(goal -> publicScore.getAndAdd(goal.computeScore(player.getWindow())));
-            Logger.print(player.getNickname());
             scores.add(new Score(player.getNickname(), publicScore.get(), privateScore, player.getFavorToken(), player.getWindow().getEmptySpaces(), currentRound.getPlayerPosition(player)));
         }
         return Score.sort(scores);
     }
 
     public boolean isGameFinished(){
-        return trackIndex == 11 || players.stream().filter(p -> !p.isSuspended()).count()<2;
+        return trackIndex == 9 || players.stream().filter(p -> !p.isSuspended()).count()<2;
     }
 
     //TODO: consider moving this method to GameRoom
