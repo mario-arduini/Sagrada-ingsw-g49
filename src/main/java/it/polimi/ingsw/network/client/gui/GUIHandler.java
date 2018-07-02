@@ -40,6 +40,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     private ToggleGroup connectionRadioGroup;
 
     private Client client;
+    private Stage stage;
 
     private boolean addressOk,portOk,lastPortOk,nicknameOk,passwordOk,isConnecting;
     private Client.ConnectionType connectionType;
@@ -93,7 +94,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             int portNumber;
             try{
                 portNumber = Integer.parseInt(newValue);
-                if(portNumber >= 1000 && portNumber <= 65535){
+                if(portNumber >= 10000 && portNumber <= 65535){
                     portOk = true;
                     port.setStyle("-fx-text-inner-color: black;");
                 } else {
@@ -114,6 +115,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 port.setVisible(true);
                 portLabel.setVisible(true);
                 portOk = lastPortOk;
+                connect.setDisable(!(addressOk && portOk)||isConnecting);
             }
             else {
                 connectionType = Client.ConnectionType.RMI;
@@ -121,6 +123,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 portLabel.setVisible(false);
                 lastPortOk = false;
                 portOk = true;
+                connect.setDisable(!(addressOk && portOk)||isConnecting);
             }
         });
     }
@@ -162,7 +165,19 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             if(connectionType.equals(Client.ConnectionType.SOCKET)) client.setServerPort(Integer.parseInt(port.getText()));
             if(client.createConnection(connectionType)){
                 Platform.runLater(() -> {
-                    status.textProperty().set("Connected!");
+                    try {
+                        stage = (Stage) connect.getScene().getWindow();
+                        URL path = GUIHandler.class.getClassLoader().getResource("gui-views/login.fxml");
+                        FXMLLoader fxmlLoader = new FXMLLoader(path);
+                        Parent root = fxmlLoader.load();
+                        GUIHandler controller = (GUIHandler) fxmlLoader.getController();
+                        controller.passClient(client);
+                        stage.setScene(new Scene(root));
+                        stage.setTitle("Sagrada - Login");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                 });
             } else {
                 Platform.runLater(() -> {
@@ -176,8 +191,11 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     }
 
     public void trylogin(ActionEvent actionEvent) {
-        Stage stage = (Stage) login.getScene().getWindow();
-        stage.setResizable(true);
+
+    }
+
+    public void passClient(Client client){
+        this.client = client;
     }
 
     @Override

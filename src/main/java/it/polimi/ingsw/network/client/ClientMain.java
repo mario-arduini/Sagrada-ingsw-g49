@@ -21,7 +21,13 @@ public class ClientMain {
                     (new CLIHandler()).start();
                     break;
                 case "gui":
-                    Application.launch(GuiMain.class);
+                    try{
+                        Application.launch(GuiMain.class);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                        ClientLogger.println(MessageHandler.get("error-gui"));
+                        (new CLIHandler()).start();
+                    }
                     break;
                 default:
                     ClientLogger.println(ERROR);

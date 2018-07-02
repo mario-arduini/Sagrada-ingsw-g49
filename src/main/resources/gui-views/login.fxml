@@ -68,11 +68,11 @@
             <Font size="18.0" />
          </font>
       </Label>
-      <ImageView fitHeight="150.0" fitWidth="442.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="TOP">
-         <image>
-            <Image url="@sagrada2.jpg" />
-         </image>
-      </ImageView>
+       <ImageView fitHeight="150.0" fitWidth="442.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="TOP">
+           <image>
+               <Image url="@sagrada2.jpg" />
+           </image>
+       </ImageView>
       <Label fx:id="status" text="Connected!" GridPane.halignment="CENTER" GridPane.rowIndex="2">
          <font>
             <Font size="20.0" />
