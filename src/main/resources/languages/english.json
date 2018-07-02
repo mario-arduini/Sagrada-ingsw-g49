@@ -1,4 +1,6 @@
 {
+  "error-gui":"Unexpected error in starting GUI, starting CLI client instead",
+
   "ask-plus-invalid":"Cannot choose this option, add [+] or reduce [-] ? ",
   "move-to-same":"Cannot move the dice to the same position, choose another position",
   "move-from-not-round-color":"Dice has to be of the same color of one of the dice of the round track, choose another dice",
