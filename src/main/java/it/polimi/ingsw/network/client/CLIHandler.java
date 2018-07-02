@@ -231,14 +231,16 @@ class CLIHandler implements GraphicInterface{
         return password != null && !password.equals("") && password.length() >= 4;
     }
 
-    void printWaitingRoom(){
+    @Override
+    public void printWaitingRoom(){
         ClientLogger.printlnWithClear("Waiting for game to start, insert 0 to logout");
         ClientLogger.println("\nWaiting room:");
         ClientLogger.println(client.getGameSnapshot().getPlayer().getNickname());
         client.getGameSnapshot().getOtherPlayers().forEach(nick -> ClientLogger.println(nick.getNickname()));
     }
 
-    void printSchemaChoice(GameSnapshot gameSnapshot, List<Schema> schemas){
+    @Override
+    public void printSchemaChoice(GameSnapshot gameSnapshot, List<Schema> schemas){
         ClientLogger.printlnWithClear("GAME STARTED!\n");
         printFooter(gameSnapshot);
         printSchemas(schemas);
@@ -326,7 +328,8 @@ class CLIHandler implements GraphicInterface{
         return client.getServerResult();
     }
 
-    static void printMenu(GameSnapshot gameSnapshot){
+    @Override
+    public void printMenu(GameSnapshot gameSnapshot){
         if(gameSnapshot.getPlayer().isMyTurn()) {
             ClientLogger.print("\nIt's your turn\n\nChoose an option:\n0) Logout");
             if (!gameSnapshot.getPlayer().isDiceAlreadyExtracted()) {
@@ -345,7 +348,8 @@ class CLIHandler implements GraphicInterface{
 
 
 
-    void notifyServerDisconnected(){
+    @Override
+    public void notifyServerDisconnected(){
         ClientLogger.printlnWithClear("Server disconnected");
     }
 
@@ -372,11 +376,13 @@ class CLIHandler implements GraphicInterface{
 
     //region TOOLCARD
 
-    void notifyUsedToolCard(String player, String toolCard){
+    @Override
+    public void notifyUsedToolCard(String player, String toolCard){
         ClientLogger.println("\n" + player + " used the tool card " + toolCard);
     }
 
-    boolean askIfPlus(String prompt){
+    @Override
+    public boolean askIfPlus(String prompt){
         String choice = "";
         boolean ask = true;
         ClientLogger.print(MessageHandler.get(prompt));
@@ -396,22 +402,26 @@ class CLIHandler implements GraphicInterface{
         return choice.equalsIgnoreCase("+");
     }
 
-    Dice askDiceDraftPool(String prompt){
+    @Override
+    public Dice askDiceDraftPool(String prompt){
         ClientLogger.print(MessageHandler.get(prompt));
         return client.getGameSnapshot().getDraftPool().get(readInt(1, client.getGameSnapshot().getDraftPool().size()) - 1);
     }
 
-    int askDiceRoundTrack(String prompt){
+    @Override
+    public int askDiceRoundTrack(String prompt){
         ClientLogger.print(MessageHandler.get(prompt));
         return readInt(1, 10) - 1;
     }
 
-    Coordinate askDiceWindow(String prompt){
+    @Override
+    public Coordinate askDiceWindow(String prompt){
         ClientLogger.println(MessageHandler.get(prompt));
         return getPosition();
     }
 
-    int askDiceValue(String prompt){
+    @Override
+    public int askDiceValue(String prompt){
         ClientLogger.print(MessageHandler.get(prompt));
         return readInt(1, 6);
     }
@@ -453,7 +463,8 @@ class CLIHandler implements GraphicInterface{
         }
     }
 
-    static void printGame(GameSnapshot gameSnapshot){
+    @Override
+    public void printGame(GameSnapshot gameSnapshot){
         final String CLI_21_DASH = "---------------------";
         PlayerSnapshot p = gameSnapshot.getPlayer();
         List<PlayerSnapshot> otherPlayers = gameSnapshot.getOtherPlayers();
@@ -581,7 +592,8 @@ class CLIHandler implements GraphicInterface{
         }
     }
 
-    void gameOver(List<Score> scores){
+    @Override
+    public void gameOver(List<Score> scores){
         ClientLogger.printlnWithClear("GAME FINISHED\n");
         input = null;
         //input = new BufferedReader(new InputStreamReader(System.in));
@@ -589,7 +601,8 @@ class CLIHandler implements GraphicInterface{
             ClientLogger.println(score.getPlayer() + "   " + score.getTotalScore());
     }
 
-    boolean isWaiting(){
+    @Override
+    public boolean isWaiting(){
         return waiting;
     }
 }
