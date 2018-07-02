@@ -146,18 +146,7 @@ public class GameRoom extends Game{
         });
         suspendPlayer(nickname);
         if (nickname.equalsIgnoreCase(getCurrentRound().getCurrentPlayer().getNickname())) goOn();
-        checkGameFinished();
-    }
-
-    public void suspendPlayer(String nickname){
-        super.suspendPlayer(nickname);
-        connections.forEach(conn -> {
-            try {
-                conn.notifySuspention(nickname);
-            } catch (RemoteException e) {
-                Logger.print(e.toString());
-            }
-        });
+        else checkGameFinished();
     }
 
     protected synchronized List<String> getPlayersNick(){
@@ -168,5 +157,30 @@ public class GameRoom extends Game{
         public void run() {
             suspendCurrentPlayer(); goOn();
         }
+    }
+
+    @Override
+    public void suspendPlayer(String nickname){
+        super.suspendPlayer(nickname);
+        connections.forEach(conn -> {
+            try {
+                conn.notifySuspention(nickname);
+            } catch (RemoteException e) {
+                Logger.print("SuspendPlayer on notify: " + nickname + " " + e.toString());
+            }
+        });
+    }
+
+    @Override
+    public synchronized void suspendCurrentPlayer(){
+        String nickname = getCurrentRound().getCurrentPlayer().getNickname();
+        super.suspendCurrentPlayer();
+        connections.forEach(conn -> {
+            try {
+                conn.notifySuspention(nickname);
+            } catch (RemoteException e) {
+                Logger.print("SuspendCurrentPlayer on notify: " + nickname + " " + e.toString());
+            }
+        });
     }
 }
