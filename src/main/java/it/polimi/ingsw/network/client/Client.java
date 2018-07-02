@@ -28,7 +28,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     private String serverAddress;
     private int serverPort;
-    private CLIHandler cliHandler;
+    private GraphicInterface handler;
     private FlowHandlerInterface server;
     public enum ConnectionType{ RMI, SOCKET }
     private boolean logged;
@@ -40,28 +40,28 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     private boolean flagContinue;
     private boolean serverResult;
 
-    Client(CLIHandler cliHandler) throws RemoteException {
+    public Client(GraphicInterface handler) throws RemoteException {
         super();
         ClientLogger.initLogger(LOGGER);
         this.gameSnapshot = new GameSnapshot();
-        this.cliHandler = cliHandler;
+        this.handler = handler;
         gameStarted = false;
         flagContinue = false;
     }
 
-    void setServerAddress(String serverAddress){
+    public void setServerAddress(String serverAddress){
         this.serverAddress = serverAddress;
     }
 
-    void setServerPort(int serverPort){
+    public void setServerPort(int serverPort){
         this.serverPort = serverPort;
     }
 
-    boolean getServerConnected(){
+    public boolean getServerConnected(){
         return serverConnected;
     }
 
-    void login(String nickname, String password){
+    public void login(String nickname, String password){
         gameSnapshot.setPlayer(nickname);
         if(serverInterface == null)
             server = socketHandler.login(nickname, password);
@@ -75,18 +75,18 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    void setLogged(boolean logged){
+    public void setLogged(boolean logged){
         this.logged = logged;
     }
 
 //    void welcomePlayer(){
 //        serverConnected = true;
-//        synchronized (cliHandler) {
-//            cliHandler.notifyAll();
+//        synchronized (handler) {
+//            handler.notifyAll();
 //        }
 //    }
 
-    boolean createConnection(ConnectionType connectionType) {
+    public boolean createConnection(ConnectionType connectionType) {
         if(connectionType == ConnectionType.SOCKET) {
             try {
                 socketHandler = new ClientSocketHandler(this, serverAddress, serverPort);
@@ -160,20 +160,20 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         //setServerResult(true);
         for(String nickname : nicknames)
             gameSnapshot.addOtherPlayer(nickname);
-        cliHandler.printWaitingRoom();
+        handler.printWaitingRoom();
     }
 
     @Override
     public void notifyLogin(String nickname) throws RemoteException{
         gameSnapshot.addOtherPlayer(nickname);
-        cliHandler.printWaitingRoom();
+        handler.printWaitingRoom();
     }
 
     @Override
     public void notifyLogout(String nickname) throws RemoteException{
         if(!gameStarted) {
             gameSnapshot.removeOtherPlayer(nickname);
-            cliHandler.printWaitingRoom();
+            handler.printWaitingRoom();
         }
         else{
             //TODO: notify other logout
@@ -191,7 +191,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     @Override
     public void notifySchemas(List<Schema> schemas) throws RemoteException{
         gameStarted = true;
-        cliHandler.printSchemaChoice(gameSnapshot, schemas);
+        handler.printSchemaChoice(gameSnapshot, schemas);
         setServerResult(true);
     }
 
@@ -216,8 +216,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         if(newRound)
             gameSnapshot.setRoundTrack(roundTrack);
 
-        CLIHandler.printGame(gameSnapshot);
-        CLIHandler.printMenu(gameSnapshot);
+        handler.printGame(gameSnapshot);
+        handler.printMenu(gameSnapshot);
     }
 
     @Override
@@ -251,8 +251,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             gameSnapshot.getPlayer().setDiceExtracted(true);
             setServerResult(true);
         }
-        CLIHandler.printGame(gameSnapshot);
-        CLIHandler.printMenu(gameSnapshot);
+        handler.printGame(gameSnapshot);
+        handler.printMenu(gameSnapshot);
     }
 
     @Override
@@ -266,8 +266,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             gameSnapshot.setRoundTrack(roundTrack);
             gameSnapshot.setDraftPool(draftPool);
 
-            CLIHandler.printGame(gameSnapshot);
-            CLIHandler.printMenu(gameSnapshot);
+            handler.printGame(gameSnapshot);
+            handler.printMenu(gameSnapshot);
 
             if(player.equalsIgnoreCase(gameSnapshot.getPlayer().getNickname())) {
                 gameSnapshot.getPlayer().setUsedToolCard(true);
@@ -275,7 +275,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
                 setServerResult(true);
             }
             else
-                cliHandler.notifyUsedToolCard(player, toolCard);
+                handler.notifyUsedToolCard(player, toolCard);
         }
     }
 
@@ -309,7 +309,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     @Override
     public void notifyEndGame(List<Score> scores) throws RemoteException{
-        cliHandler.gameOver(scores);
+        handler.gameOver(scores);
     }
 
 
@@ -325,7 +325,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     void serverDisconnected(){
         serverConnected = false;
         if(logged) {
-            cliHandler.notifyServerDisconnected();
+            handler.notifyServerDisconnected();
             logged = false;
         }
     }
@@ -353,9 +353,9 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     void setServerResult(boolean serverResult){
         this.serverResult = serverResult;
         flagContinue = true;
-        if(cliHandler.isWaiting())
-            synchronized (cliHandler){
-                cliHandler.notifyAll();
+        if(handler.isWaiting())
+            synchronized (handler){
+                handler.notifyAll();
             }
     }
 
@@ -363,27 +363,27 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     @Override
     public boolean askIfPlus(String prompt) throws RemoteException{
-        return cliHandler.askIfPlus(prompt);
+        return handler.askIfPlus(prompt);
     }
 
     @Override
     public Dice askDiceDraftPool(String prompt) throws RemoteException{
-        return cliHandler.askDiceDraftPool(prompt);
+        return handler.askDiceDraftPool(prompt);
     }
 
     @Override
     public int askDiceRoundTrack(String prompt) throws RemoteException{
-        return cliHandler.askDiceRoundTrack(prompt);
+        return handler.askDiceRoundTrack(prompt);
     }
 
     @Override
     public Coordinate askDiceWindow(String prompt) throws RemoteException{
-        return cliHandler.askDiceWindow(prompt);
+        return handler.askDiceWindow(prompt);
     }
 
     @Override
     public int askDiceValue(String prompt) throws RemoteException{
-        return cliHandler.askDiceValue(prompt);
+        return handler.askDiceValue(prompt);
     }
 
     //endregion
