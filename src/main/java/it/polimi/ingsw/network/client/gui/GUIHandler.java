@@ -235,11 +235,6 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     }
 
     @Override
-    public boolean isWaiting() {
-        return false;
-    }
-
-    @Override
     public boolean askIfPlus(String prompt) {
         return false;
     }

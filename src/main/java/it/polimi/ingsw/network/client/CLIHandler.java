@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 class CLIHandler implements GraphicInterface{
@@ -24,6 +28,7 @@ class CLIHandler implements GraphicInterface{
     private boolean serverResult;
     private boolean flagContinue;
     private InputStreamReader inputStreamReader;
+    private Future<String> future;
 
     CLIHandler() {
         ClientLogger.initLogger(LOGGER);
@@ -113,7 +118,8 @@ class CLIHandler implements GraphicInterface{
                             ClientLogger.print(ERROR);
                         break;
                     default:
-                        ClientLogger.print(ERROR);
+                        if(!client.isGameStarted())
+                            return;
             }
         }
     }
@@ -364,9 +370,14 @@ class CLIHandler implements GraphicInterface{
 
         while (ask) {
             try{
-                value = Integer.parseInt(input.readLine());
-            }
-            catch (IOException | NumberFormatException e){
+                future = Executors.newSingleThreadExecutor().submit(new ReadInt(input));
+                value = Integer.parseInt(future.get());
+            } catch (ExecutionException | InterruptedException e) {
+                ClientLogger.print("A problem happened, retry: ");
+                continue;
+            } catch (CancellationException e){
+                return  -1;
+            } catch (NumberFormatException e){
                 ClientLogger.print("Must be a number, retry: ");
                 continue;
             }
@@ -600,22 +611,10 @@ class CLIHandler implements GraphicInterface{
     @Override
     public void gameOver(List<Score> scores){
         ClientLogger.printlnWithClear("GAME FINISHED\n");
-
-        try {
-            inputStreamReader.close();
-            inputStreamReader = new InputStreamReader(System.in);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        //input = new BufferedReader(new InputStreamReader(System.in));
         for(Score score : scores)
             ClientLogger.println(score.getPlayer() + "   " + score.getTotalScore());
-    }
 
-    @Override
-    public boolean isWaiting(){
-        return waiting;
+        future.cancel(true);
     }
 
     @Override

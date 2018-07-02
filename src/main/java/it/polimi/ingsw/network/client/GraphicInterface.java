@@ -16,7 +16,6 @@ public interface GraphicInterface {
     void notifyUsedToolCard(String player,String toolCard);
     void gameOver(List<Score> scores);
     void notifyServerDisconnected();
-    boolean isWaiting();
     boolean askIfPlus(String prompt);
     Dice askDiceDraftPool(String prompt);
     int askDiceRoundTrack(String prompt);

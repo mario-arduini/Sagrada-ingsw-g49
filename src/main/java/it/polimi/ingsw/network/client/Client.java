@@ -300,6 +300,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     @Override
     public void notifyEndGame(List<Score> scores) throws RemoteException{
         handler.gameOver(scores);
+        gameStarted = false;
     }
 
 
