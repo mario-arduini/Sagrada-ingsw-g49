@@ -1,1 +1,3 @@
-{"name":"Alesatore per lamina di rame","effects":[{"move":{"ignore":"NUMBER"}}],"prerequisites":["dice-window","favor-token"]}
+{"name":"Alesatore per lamina di rame",
+	"effects":[{"move":{"ignore":"NUMBER"}}],
+	"prerequisites":["favor-token", "dice-window"]}

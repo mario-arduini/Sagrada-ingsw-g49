@@ -16,7 +16,7 @@ public class GameRoom extends Game{
     private List<ClientInterface> connections;
     private boolean notifyEndGame;
     private Timer timer;
-    private int secondsTimer = 120; //TODO: read value from file.
+    private int secondsTimer = 10; //TODO: read value from file.
 
     GameRoom(List<Player> playerList, List<ClientInterface> connections) throws NoMorePlayersException {
         super(playerList);
@@ -146,7 +146,7 @@ public class GameRoom extends Game{
         });
         suspendPlayer(nickname);
         if (nickname.equalsIgnoreCase(getCurrentRound().getCurrentPlayer().getNickname())) goOn();
-        checkGameFinished();
+        else checkGameFinished();
     }
 
     protected synchronized List<String> getPlayersNick(){
@@ -157,5 +157,30 @@ public class GameRoom extends Game{
         public void run() {
             suspendCurrentPlayer(); goOn();
         }
+    }
+
+    @Override
+    public void suspendPlayer(String nickname){
+        super.suspendPlayer(nickname);
+        connections.forEach(conn -> {
+            try {
+                conn.notifySuspention(nickname);
+            } catch (RemoteException e) {
+                Logger.print("SuspendPlayer on notify: " + nickname + " " + e.toString());
+            }
+        });
+    }
+
+    @Override
+    public synchronized void suspendCurrentPlayer(){
+        String nickname = getCurrentRound().getCurrentPlayer().getNickname();
+        super.suspendCurrentPlayer();
+        connections.forEach(conn -> {
+            try {
+                conn.notifySuspention(nickname);
+            } catch (RemoteException e) {
+                Logger.print("SuspendCurrentPlayer on notify: " + nickname + " " + e.toString());
+            }
+        });
     }
 }

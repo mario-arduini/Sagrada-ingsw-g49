@@ -29,13 +29,15 @@ class CLIHandler implements GraphicInterface{
     private boolean flagContinue;
     private InputStreamReader inputStreamReader;
     private Future<String> future;
+    private boolean newGame;
 
     CLIHandler() {
         ClientLogger.initLogger(LOGGER);
         inputStreamReader = new InputStreamReader(System.in);
         input = new BufferedReader(inputStreamReader);
         flagContinue = false;
-        this.waiting = false;
+        waiting = false;
+        newGame = true;
 
         try {
             this.client = new Client(this);
@@ -45,7 +47,6 @@ class CLIHandler implements GraphicInterface{
     }
 
     synchronized void start() {
-        boolean logout = false;
         int command;
         boolean ok = false;
 
@@ -77,7 +78,17 @@ class CLIHandler implements GraphicInterface{
                 ClientLogger.println("Login failed, password is not correct\n");
         }
 
-        if(!client.isGameStarted()) {
+        while (newGame) {
+            if(!play())
+                newGame = askNewGame();
+        }
+
+    }
+
+    private boolean play(){
+        boolean logout = false;
+        int command;
+        if (!client.isGameStarted()) {
             waitResult();
             do {
                 ClientLogger.print("\nYour choice: ");
@@ -88,40 +99,58 @@ class CLIHandler implements GraphicInterface{
             } while (!serverResult);
         }
 
-        while (!logout){
-            command = readInt(0, 3);
-            if(command > 0 && !client.getGameSnapshot().getPlayer().isMyTurn())
+        while (!logout) {
+            try {
+                command = readInt(0, 3);
+            } catch (CancellationException e) {
+                if (!client.isGameStarted())
+                    break;
+                continue;
+            }
+
+            if (command > 0 && !client.getGameSnapshot().getPlayer().isMyTurn())
                 ClientLogger.print(ERROR);
             else
-                switch (command){
+                switch (command) {
                     case 0:
                         ClientLogger.printlnWithClear("Logged out");
                         client.logout();
                         logout = true;
                         break;
                     case 1:
-                        if(!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted())
+                        if (!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted())
                             placeDice();
                         else
                             useToolCard();
                         break;
                     case 2:
-                        if(client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed() || client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted())
+                        if (client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed() || client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted())
                             client.pass();
                         else
                             useToolCard();
                         break;
                     case 3:
-                        if(!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted() && !client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed())
+                        if (!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted() && !client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed())
                             client.pass();
                         else
                             ClientLogger.print(ERROR);
                         break;
                     default:
-                        if(!client.isGameStarted())
-                            return;
-            }
+                        ClientLogger.print(ERROR);
+                        break;
+                }
         }
+        return logout;
+    }
+
+    private boolean askNewGame(){
+        ClientLogger.print("\nChoose an option:\n0) Logout\n1) New game\nYour choice: ");
+        if(readInt(0, 1) == 1){
+            client.newGame();
+            waitResult();
+            return true;
+        }
+        return false;
     }
 
     private String askServerAddress(){
@@ -267,12 +296,16 @@ class CLIHandler implements GraphicInterface{
             printGame(client.getGameSnapshot());
 
             while (ask) {
-                ClientLogger.print("\nInsert dice number: ");
-                dice = readInt(1, client.getGameSnapshot().getDraftPool().size());
-                ClientLogger.print("Insert row: ");
-                row = readInt(1, ROWS);
-                ClientLogger.print("Insert column: ");
-                column = readInt(1, COLUMNS);
+                try {
+                    ClientLogger.print("\nInsert dice number: ");
+                    dice = readInt(1, client.getGameSnapshot().getDraftPool().size());
+                    ClientLogger.print("Insert row: ");
+                    row = readInt(1, ROWS);
+                    ClientLogger.print("Insert column: ");
+                    column = readInt(1, COLUMNS);
+                }catch (CancellationException e){
+                    return;
+                }
 
                 if (dice > client.getGameSnapshot().getDraftPool().size())
                     ClientLogger.println("Invalid choice!");
@@ -302,10 +335,13 @@ class CLIHandler implements GraphicInterface{
         while (choice < 0 || choice > 3) {
             ClientLogger.print("\nInsert tool card number: ");
             try {
-                choice = Integer.parseInt(input.readLine());
-            } catch (IOException | NumberFormatException e) {
+                choice = readInt(0, 3);
+            } catch (NumberFormatException e) {
                 choice = -1;
+            }catch (CancellationException e){
+                return;
             }
+
             if(choice == 0) {
                 printGame(client.getGameSnapshot());
                 printMenu(client.getGameSnapshot());
@@ -375,8 +411,6 @@ class CLIHandler implements GraphicInterface{
             } catch (ExecutionException | InterruptedException e) {
                 ClientLogger.print("A problem happened, retry: ");
                 continue;
-            } catch (CancellationException e){
-                return  -1;
             } catch (NumberFormatException e){
                 ClientLogger.print("Must be a number, retry: ");
                 continue;

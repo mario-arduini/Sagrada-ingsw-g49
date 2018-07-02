@@ -21,5 +21,5 @@ public interface FlowHandlerInterface extends Remote, Serializable {
     void useToolCard(String cardName) throws RemoteException, GameNotStartedException, GameOverException, NoSuchToolCardException, InvalidDiceValueException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException, NotDraftedYetException, NotYourFirstTurnException, NothingCanBeMovedException, NoSameColorDicesException;
     void pass() throws RemoteException, GameNotStartedException, GameOverException, NotYourTurnException;
     void logout() throws RemoteException;
-    //void newGame();
+    void newGame() throws RemoteException;
 }

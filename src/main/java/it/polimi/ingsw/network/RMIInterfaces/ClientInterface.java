@@ -26,6 +26,7 @@ public interface ClientInterface extends Remote, Serializable {
 
     //String getRemoteAddress();
     //void close();
+    void notifySuspention(String nickname) throws RemoteException;
 
     Coordinate askDiceWindow(String prompt) throws RemoteException;
     Dice askDiceDraftPool(String prompt) throws RemoteException;

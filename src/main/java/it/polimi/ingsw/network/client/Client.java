@@ -166,9 +166,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             gameSnapshot.removeOtherPlayer(nickname);
             handler.printWaitingRoom();
         }
-        else{
-            //TODO: notify other logout
-        }
     }
 
     void sendSchemaChoice(int choice){
@@ -280,15 +277,21 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         gameStarted = false;
     }
 
-
-    public void suspended(String player){
-        gameSnapshot.findPlayer(player).get().suspend();
-        if(player.equalsIgnoreCase(gameSnapshot.getPlayer().getNickname()))
+    @Override
+    public void notifySuspention(String nickname){
+        gameSnapshot.findPlayer(nickname).get().suspend();
+        if(nickname.equalsIgnoreCase(gameSnapshot.getPlayer().getNickname()))
             handler.interruptInput();
+        handler.wakeUp(false);
     }
 
-
-
+    void newGame(){
+        try {
+            server.newGame();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 
