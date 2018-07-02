@@ -12,10 +12,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -37,10 +34,15 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public Button connect;
     public Button login;
     public Label status;
+    public RadioButton rmi;
+    public RadioButton socket;
+    public Label portLabel;
+    private ToggleGroup connectionRadioGroup;
 
     private Client client;
 
-    private boolean addressOk,portOk,nicknameOk,passwordOk,isConnecting;
+    private boolean addressOk,portOk,lastPortOk,nicknameOk,passwordOk,isConnecting;
+    private Client.ConnectionType connectionType;
     private boolean serverConnected;
     private static final Pattern PATTERN = Pattern.compile(
             "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
@@ -66,6 +68,15 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         addressOk = false;
         portOk = false;
         isConnecting = false;
+
+        connectionRadioGroup = new ToggleGroup();
+
+        rmi.setToggleGroup(connectionRadioGroup);
+        rmi.setUserData("rmi");
+        socket.setToggleGroup(connectionRadioGroup);
+        socket.setUserData("socket");
+        socket.setSelected(true);
+        connectionType = Client.ConnectionType.SOCKET;
 
         address.textProperty().addListener((observable, oldValue, newValue) -> {
             if(PATTERN.matcher(newValue).matches()||newValue.trim().equals("localhost")){
@@ -94,6 +105,22 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 port.setStyle("-fx-text-inner-color: red;");
             } finally {
                 connect.setDisable(!(addressOk && portOk)||isConnecting);
+            }
+        });
+
+        connectionRadioGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue.getUserData().toString().equals("socket")){
+                connectionType = Client.ConnectionType.SOCKET;
+                port.setVisible(true);
+                portLabel.setVisible(true);
+                portOk = lastPortOk;
+            }
+            else {
+                connectionType = Client.ConnectionType.RMI;
+                port.setVisible(false);
+                portLabel.setVisible(false);
+                lastPortOk = false;
+                portOk = true;
             }
         });
     }
@@ -132,10 +159,10 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
         new Thread(() -> {
             client.setServerAddress(address.getText());
-            client.setServerPort(Integer.parseInt(port.getText()));
-            if(client.createConnection(Client.ConnectionType.SOCKET)){
+            if(connectionType.equals(Client.ConnectionType.SOCKET)) client.setServerPort(Integer.parseInt(port.getText()));
+            if(client.createConnection(connectionType)){
                 Platform.runLater(() -> {
-                    status.textProperty().set("Connected bitches!");
+                    status.textProperty().set("Connected!");
                 });
             } else {
                 Platform.runLater(() -> {
