@@ -360,5 +360,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return handler.askDiceValue(prompt);
     }
 
+    public void notifySuspention(String nickname){
+        return;
+    }
     //endregion
 }

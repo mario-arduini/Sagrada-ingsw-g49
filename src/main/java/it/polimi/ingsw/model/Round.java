@@ -18,8 +18,8 @@ public class Round {
     private int playersNumber;
 
     public Round(List<Dice> draftPool, List<Player> players){
-        this.draftPool = new ArrayList<>(draftPool);
-        this.players = new ArrayList<>(players);
+        this.draftPool = draftPool;
+        this.players = players;
         for(int i = players.size() - 1; i >= 0; i--)
             this.players.add(this.players.get(i));
         diceExtracted = false;

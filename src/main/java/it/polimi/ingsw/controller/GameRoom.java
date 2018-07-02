@@ -149,6 +149,17 @@ public class GameRoom extends Game{
         checkGameFinished();
     }
 
+    public void suspendPlayer(String nickname){
+        super.suspendPlayer(nickname);
+        connections.forEach(conn -> {
+            try {
+                conn.notifySuspention(nickname);
+            } catch (RemoteException e) {
+                Logger.print(e.toString());
+            }
+        });
+    }
+
     protected synchronized List<String> getPlayersNick(){
         return super.getPlayers().stream().map(Player::getNickname).collect(Collectors.toList());
     }

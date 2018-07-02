@@ -60,10 +60,6 @@ public class SocketHandler implements Runnable, ClientInterface {
             e1.printStackTrace();
         }
 
-        message = createMessage("welcome");
-        socketSendMessage(message);
-
-
         while (connected && !this.login());
 
         while(connected){
@@ -285,6 +281,14 @@ public class SocketHandler implements Runnable, ClientInterface {
         JsonObject message;
         message = createMessage("game-over");
         message.addProperty("scores", gson.toJson(scores));
+        socketSendMessage(message);
+    }
+
+    @Override
+    public void notifySuspention(String nickname){
+        JsonObject message;
+        message = createMessage("suspended");
+        message.addProperty("player", nickname);
         socketSendMessage(message);
     }
 
