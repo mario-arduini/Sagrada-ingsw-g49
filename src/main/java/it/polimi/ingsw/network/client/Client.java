@@ -311,7 +311,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    GameSnapshot getGameSnapshot(){
+    public GameSnapshot getGameSnapshot(){
         return gameSnapshot;
     }
 

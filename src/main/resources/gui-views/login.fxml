@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
@@ -52,7 +53,7 @@
                <Font size="18.0" />
            </font>
        </Button>
-      <Label text="Nickname" GridPane.rowIndex="2">
+      <Label fx:id="nicknameLabel" text="Nickname" GridPane.rowIndex="2">
          <GridPane.margin>
             <Insets left="110.0" right="110.0" top="100.0" />
          </GridPane.margin>
@@ -60,7 +61,7 @@
             <Font size="17.0" />
          </font>
       </Label>
-      <Label text="Password (4+ chars)" GridPane.rowIndex="4">
+      <Label fx:id="passwordLabel" text="Password (4+ chars)" GridPane.rowIndex="4">
          <GridPane.margin>
             <Insets left="110.0" right="110.0" top="30.0" />
          </GridPane.margin>
@@ -81,5 +82,15 @@
             <Insets bottom="30.0" left="110.0" right="110.0" />
          </GridPane.margin>
       </Label>
+      <Label fx:id="waitingRoom" text="Waiting Room" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="BOTTOM">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <ListView fx:id="playerListView" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="4" GridPane.rowSpan="3">
+         <GridPane.margin>
+            <Insets left="110.0" right="110.0" />
+         </GridPane.margin>
+      </ListView>
    </children>
 </GridPane>

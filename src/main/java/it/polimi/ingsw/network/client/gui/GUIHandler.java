@@ -5,6 +5,8 @@ import it.polimi.ingsw.network.client.Client;
 import it.polimi.ingsw.network.client.GraphicInterface;
 import it.polimi.ingsw.network.client.model.GameSnapshot;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,6 +24,10 @@ import java.util.regex.Pattern;
 
 public class GUIHandler extends UnicastRemoteObject implements GraphicInterface {
 
+    @FXML private Label passwordLabel;
+    @FXML private Label nicknameLabel;
+    @FXML private Label waitingRoom;
+    @FXML private ListView playerListView;
     @FXML private PasswordField password;
     @FXML private TextField nickname;
     @FXML private TextField address;
@@ -33,6 +39,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     @FXML private RadioButton socket;
     @FXML private Label portLabel;
     private ToggleGroup connectionRadioGroup;
+    ObservableList<String> playerList = FXCollections.observableArrayList();
 
     private Client client;
     private Stage stage;
@@ -129,6 +136,8 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     }
 
     private void initLoginScene(){
+        waitingRoom.setVisible(false);
+        playerListView.setVisible(false);
         login.setDisable(true);
         nicknameOk = false;
         passwordOk = false;
@@ -196,10 +205,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         status.textProperty().set("Logging In...");
         login.setDisable(true);
         isLogging = true;
-        new Thread(() -> {
-            isLogging = true;
-            client.login(nickname.getText(),password.getText());
-        }).start();
+        client.login(nickname.getText(),password.getText());
     }
 
     public void passClient(Client client){
@@ -208,7 +214,12 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public void printWaitingRoom() {
-
+        Platform.runLater(() -> {
+            playerList.clear();
+            client.getGameSnapshot().getOtherPlayers().forEach(nick -> playerList.add(nick.getNickname()));
+            playerList.add(client.getGameSnapshot().getPlayer().getNickname());
+        });
+        wakeUp(true);
     }
 
     @Override
@@ -268,22 +279,33 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public void wakeUp(boolean serverResult) {
-        System.out.println("i was called");
-        Platform.runLater(() -> {
-            if(isLogging){
-                if(serverResult){
-                    status.textProperty().set("Logged in");
-                } else {
-                    status.textProperty().set("Wrong password!");
-                    login.setDisable(false);
-                    isLogging = false;
-                }
-            }
-        });
+        if(isLogging) handleLogin(serverResult);
     }
 
     @Override
     public void interruptInput(){
 
+    }
+
+    public void handleLogin(boolean serverResult){
+        Platform.runLater(() -> {
+            if(serverResult){
+                isLogging = false;
+                status.textProperty().set("Logged in");
+                password.setVisible(false);
+                passwordLabel.setVisible(false);
+                nickname.setVisible(false);
+                nicknameLabel.setVisible(false);
+                login.setVisible(false);
+
+                waitingRoom.setVisible(true);
+                playerListView.setItems(playerList);
+                playerListView.setVisible(true);
+            } else {
+                status.textProperty().set("Wrong password!");
+                login.setDisable(false);
+                isLogging = false;
+            }
+        });
     }
 }
