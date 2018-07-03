@@ -223,7 +223,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack){
+    public void notifyReconInfo(Map<String, Window> windows, Map<String, Integer> favorToken, List<Dice> roundTrack){
         JsonObject message;
         message = createMessage("reconnect-info");
         message.addProperty("windows", gson.toJson(windows));
@@ -285,7 +285,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public void notifySuspention(String nickname){
+    public void notifySuspension(String nickname){
         JsonObject message;
         message = createMessage("suspended");
         message.addProperty("player", nickname);

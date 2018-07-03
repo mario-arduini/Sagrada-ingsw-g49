@@ -120,7 +120,7 @@ class ConnectionHandlerStub implements ClientInterface {
     }
 
     @Override
-    public void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack) {
+    public void notifyReconInfo(Map<String, Window> windows, Map<String, Integer> favorToken, List<Dice> roundTrack) {
     }
 
     //@Override
@@ -162,7 +162,7 @@ class ConnectionHandlerStub implements ClientInterface {
     }
 
     @Override
-    public void notifySuspention(String nickname){
+    public void notifySuspension(String nickname){
     }
 }
 

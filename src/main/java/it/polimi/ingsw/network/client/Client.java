@@ -28,18 +28,18 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     private String serverAddress;
     private int serverPort;
-    private GraphicInterface handler;
+    private transient GraphicInterface handler;
     private FlowHandlerInterface server;
     public enum ConnectionType{ RMI, SOCKET }
     private boolean logged;
+    private String password;
     private boolean gameStarted;
-    private boolean serverConnected;    //* is it useful?
-    private GameSnapshot gameSnapshot;
-    private LoginInterface serverInterface;
+    private boolean serverConnected;
+    private transient GameSnapshot gameSnapshot;
+    private transient LoginInterface serverInterface;
     private ClientSocketHandler socketHandler;
 
     public Client(GraphicInterface handler) throws RemoteException {
-        super();
         ClientLogger.initLogger(LOGGER);
         this.gameSnapshot = new GameSnapshot();
         this.handler = handler;
@@ -64,21 +64,27 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     public void login(String nickname, String password){
         gameSnapshot.setPlayer(nickname);
+        this.password  = password;
         if(serverInterface == null)
             server = socketHandler.login(nickname, password);
         else {
             try {
                 server = serverInterface.login(nickname, password,this);
                 setServerResult(true);
-            } catch (RemoteException | LoginFailedException e) {
+            } catch (LoginFailedException e) {
                 setServerResult(false);
-                LOGGER.warning(e.toString());
+            }catch (RemoteException e){
+                serverDisconnected();
             }
         }
     }
 
-    void setLogged(boolean logged){
-        this.logged = logged;
+    private void tryReconnection(){
+
+    }
+
+    void setLogged(){
+        this.logged = true;
     }
 
     public boolean createConnection(ConnectionType connectionType) {
@@ -105,18 +111,22 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     void placeDice(int diceNumber, int row, int column){
         try {
             server.placeDice(row - 1, column - 1, gameSnapshot.getDraftPool().get(diceNumber - 1));
-        } catch (RemoteException | GameOverException | NotYourTurnException | NoAdjacentDiceException | BadAdjacentDiceException | DiceAlreadyExtractedException | FirstDiceMisplacedException | DiceNotInDraftPoolException | ConstraintViolatedException | GameNotStartedException | NoSameColorDicesException e) {
+        } catch (GameOverException | NotYourTurnException | NoAdjacentDiceException | BadAdjacentDiceException | DiceAlreadyExtractedException | FirstDiceMisplacedException | DiceNotInDraftPoolException | ConstraintViolatedException | GameNotStartedException | NoSameColorDicesException e) {
             setServerResult(false);
             LOGGER.warning(e.toString());
+        } catch (RemoteException e){
+            serverDisconnected();
         }
     }
 
     void useToolCard(String name){
         try {
             server.useToolCard(name);
-        } catch (RemoteException | GameNotStartedException | GameOverException | InvalidDiceValueException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | ConstraintViolatedException | BadAdjacentDiceException | NotWantedAdjacentDiceException | FirstDiceMisplacedException | NoAdjacentDiceException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException e) {
+        } catch (GameNotStartedException | GameOverException | InvalidDiceValueException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | ConstraintViolatedException | BadAdjacentDiceException | NotWantedAdjacentDiceException | FirstDiceMisplacedException | NoAdjacentDiceException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException e) {
             setServerResult(false);
             LOGGER.warning(e.toString());
+        } catch (RemoteException e){
+            serverDisconnected();
         }
     }
 
@@ -126,7 +136,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             try {
                 server.logout();
             } catch (RemoteException e) {
-                LOGGER.warning(e.toString());
+                serverDisconnected();
             }
         }
     }
@@ -139,8 +149,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     void pass(){
         try {
             server.pass();
-        } catch (RemoteException | GameNotStartedException | GameOverException | NotYourTurnException e) {
+        } catch (GameNotStartedException | GameOverException | NotYourTurnException e) {
             LOGGER.warning(e.toString());
+        } catch (RemoteException e){
+            serverDisconnected();
         }
     }
 
@@ -151,21 +163,20 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
 
     @Override
-    public void notifyLogin(List<String> nicknames) throws RemoteException{
-        //setServerResult(true);
+    public void notifyLogin(List<String> nicknames){
         for(String nickname : nicknames)
             gameSnapshot.addOtherPlayer(nickname);
         handler.printWaitingRoom();
     }
 
     @Override
-    public void notifyLogin(String nickname) throws RemoteException{
+    public void notifyLogin(String nickname){
         gameSnapshot.addOtherPlayer(nickname);
         handler.printWaitingRoom();
     }
 
     @Override
-    public void notifyLogout(String nickname) throws RemoteException{
+    public void notifyLogout(String nickname){
         if(!gameStarted) {
             gameSnapshot.removeOtherPlayer(nickname);
             handler.printWaitingRoom();
@@ -175,23 +186,25 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     void sendSchemaChoice(int choice){
         try {
             server.chooseSchema(choice);
-        } catch (GameNotStartedException | GameOverException | WindowAlreadySetException | RemoteException e) {
+        } catch (GameNotStartedException | GameOverException | WindowAlreadySetException e) {
             LOGGER.warning(e.toString());
+        }  catch (RemoteException e){
+            serverDisconnected();
         }
     }
 
     @Override
-    public void notifySchemas(List<Schema> schemas) throws RemoteException{
+    public void notifySchemas(List<Schema> schemas){
         gameStarted = true;
         handler.printSchemaChoice(gameSnapshot, schemas);
         setServerResult(true);
     }
 
     @Override
-    public void notifyOthersSchemas(Map<String, Schema> playersSchemas) throws RemoteException{
+    public void notifyOthersSchemas(Map<String, Schema> playersSchemas){
         for (Map.Entry<String, Schema> entry : playersSchemas.entrySet()) {
             if(!entry.getKey().equals(gameSnapshot.getPlayer().getNickname()))
-                gameSnapshot.findPlayer(entry.getKey()).get().setWindow(entry.getValue());
+                gameSnapshot.findPlayer(entry.getKey()).ifPresent(playerSnapshot -> playerSnapshot.setWindow(entry.getValue()));
             else
                 gameSnapshot.getPlayer().setWindow(entry.getValue());
         }
@@ -199,7 +212,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     @Override
-    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack) throws RemoteException{
+    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack){
         gameSnapshot.getPlayer().setMyTurn(currentPlayer.equals(gameSnapshot.getPlayer().getNickname()));
         gameSnapshot.getPlayer().setDiceExtracted(false);
         gameSnapshot.getPlayer().setUsedToolCard(false);
@@ -213,9 +226,9 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     @Override
-    public void notifyDicePlaced(String nickname, int row, int column, Dice dice) throws RemoteException{
+    public void notifyDicePlaced(String nickname, int row, int column, Dice dice){
         gameSnapshot.getDraftPool().remove(dice);
-        gameSnapshot.findPlayer(nickname).get().getWindow().setDice(row, column, dice);
+        gameSnapshot.findPlayer(nickname).ifPresent(playerSnapshot -> playerSnapshot.getWindow().setDice(row, column, dice));
         if(nickname.equals(gameSnapshot.getPlayer().getNickname())){
             gameSnapshot.getPlayer().setDiceExtracted(true);
             setServerResult(true);
@@ -225,7 +238,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     @Override
-    public void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack) throws RemoteException{
+    public void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack){
         Optional<PlayerSnapshot> playerSnapshot = gameSnapshot.findPlayer(player);
         ToolCard toolCardUsed = gameSnapshot.getToolCardByName(toolCard);
         if(playerSnapshot.isPresent()){
@@ -248,7 +261,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     @Override
-    public void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal) throws RemoteException{
+    public void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal){
         List<ToolCard> toolCardsClass = new ArrayList<>();
         for(String name : toolCards)
             toolCardsClass.add(new ToolCard(name, ""));
@@ -259,13 +272,13 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     @Override
-    public void notifyReconInfo(HashMap<String, Window> windows, HashMap<String, Integer> favorToken, List<Dice> roundTrack) throws RemoteException{
+    public void notifyReconInfo(Map<String, Window> windows, Map<String, Integer> favorToken, List<Dice> roundTrack){
         PlayerSnapshot playerSnapshot;
-        for(String user : windows.keySet()){
-            playerSnapshot = new PlayerSnapshot(user);
-            playerSnapshot.setWindow(windows.get(user));
-            playerSnapshot.setFavorToken(favorToken.get(user));
-            if(user.equals(gameSnapshot.getPlayer().getNickname()))
+        for(Map.Entry<String, Window> user : windows.entrySet()){
+            playerSnapshot = new PlayerSnapshot(user.getKey());
+            playerSnapshot.setWindow(user.getValue());
+            playerSnapshot.setFavorToken(favorToken.get(user.getKey()));
+            if(user.getKey().equals(gameSnapshot.getPlayer().getNickname()))
                 gameSnapshot.setPlayer(playerSnapshot);
             else
                 gameSnapshot.addOtherPlayer(playerSnapshot);
@@ -276,14 +289,14 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     @Override
-    public void notifyEndGame(List<Score> scores) throws RemoteException{
+    public void notifyEndGame(List<Score> scores){
         handler.gameOver(scores);
         gameStarted = false;
     }
 
     @Override
-    public void notifySuspention(String nickname){
-        gameSnapshot.findPlayer(nickname).get().suspend();
+    public void notifySuspension(String nickname){
+        gameSnapshot.findPlayer(nickname).ifPresent(PlayerSnapshot::suspend);
         if(nickname.equalsIgnoreCase(gameSnapshot.getPlayer().getNickname()))
             handler.interruptInput();
         handler.wakeUp(false);
@@ -291,9 +304,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     void newGame(){
         try {
+            gameSnapshot.newGame();
             server.newGame();
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        } catch (RemoteException e){
+            serverDisconnected();
         }
     }
 
@@ -326,27 +340,27 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     //region TOOLCARD
 
     @Override
-    public boolean askIfPlus(String prompt) throws RemoteException{
+    public boolean askIfPlus(String prompt){
         return handler.askIfPlus(prompt);
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt) throws RemoteException{
+    public Dice askDiceDraftPool(String prompt){
         return handler.askDiceDraftPool(prompt);
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt) throws RemoteException{
+    public int askDiceRoundTrack(String prompt){
         return handler.askDiceRoundTrack(prompt);
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt) throws RemoteException{
+    public Coordinate askDiceWindow(String prompt){
         return handler.askDiceWindow(prompt);
     }
 
     @Override
-    public int askDiceValue(String prompt) throws RemoteException{
+    public int askDiceValue(String prompt){
         return handler.askDiceValue(prompt);
     }
 

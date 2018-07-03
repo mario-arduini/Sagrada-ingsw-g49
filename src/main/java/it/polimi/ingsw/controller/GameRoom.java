@@ -13,7 +13,7 @@ public class GameRoom extends Game{
     private List<ClientInterface> connections;
     private boolean notifyEndGame;
     private Timer timer;
-    private int secondsTimer = 1000000000; //TODO: read value from file.
+    private int secondsTimer = 10; //TODO: read value from file.
 
     GameRoom(List<Player> playerList, List<ClientInterface> connections) throws NoMorePlayersException {
         super(playerList);
@@ -21,7 +21,7 @@ public class GameRoom extends Game{
         this.notifyEndGame = true;
     }
 
-    public synchronized void notifyAllToolCardUsed(String nickname, String toolcard, Window window){
+    synchronized void notifyAllToolCardUsed(String nickname, String toolcard, Window window){
         connections.forEach(user -> {
             try {
                 user.notifyToolCardUse(nickname, toolcard, window, getCurrentRound().getDraftPool(), getRoundTrack());
@@ -31,7 +31,7 @@ public class GameRoom extends Game{
         });
     }
 
-    public synchronized void notifyAllDicePlaced(String nickname, int row, int column, Dice dice){
+    synchronized void notifyAllDicePlaced(String nickname, int row, int column, Dice dice){
         connections.forEach(user -> {
             try {
                 user.notifyDicePlaced(nickname, row, column, dice);
@@ -41,7 +41,7 @@ public class GameRoom extends Game{
         });
     }
 
-    public synchronized void goOn(){
+    synchronized void goOn(){
         if (timer != null)
             timer.cancel();
         boolean newRound = false;
@@ -57,7 +57,7 @@ public class GameRoom extends Game{
         }
     }
 
-    public boolean isGameStarted(){
+    boolean isGameStarted(){
         List<Player> inGamePlayers = getPlayers();
         for (Player p: inGamePlayers)
             if (p.getWindow()==null)
@@ -103,7 +103,7 @@ public class GameRoom extends Game{
         });
     }
 
-    public synchronized void gameReady(){
+    synchronized void gameReady(){
         if (!getPlaying()) {
             String firstPlayer = getCurrentRound().getCurrentPlayer().getNickname();
             List<Dice> draftPool = getCurrentRound().getDraftPool();
@@ -136,12 +136,12 @@ public class GameRoom extends Game{
         timer.schedule(new GameRoom.TimerExpired(), (long) secondsTimer * 1000);
     }
 
-    public synchronized void replaceConnection(ClientInterface oldConnection, ClientInterface newConnection){
+    synchronized void replaceConnection(ClientInterface oldConnection, ClientInterface newConnection){
         this.connections.remove(oldConnection);
         this.connections.add(newConnection);
     }
 
-    public synchronized void logout(String nickname, ClientInterface connection){
+    synchronized void logout(String nickname, ClientInterface connection){
 
         connections.remove(connection);
         connections.forEach(conn -> {
@@ -156,7 +156,7 @@ public class GameRoom extends Game{
         else checkGameFinished();
     }
 
-    protected synchronized List<String> getPlayersNick(){
+    synchronized List<String> getPlayersNick(){
         return super.getPlayers().stream().map(Player::getNickname).collect(Collectors.toList());
     }
 
@@ -171,7 +171,7 @@ public class GameRoom extends Game{
         super.suspendPlayer(nickname);
         connections.forEach(conn -> {
             try {
-                conn.notifySuspention(nickname);
+                conn.notifySuspension(nickname);
             } catch (RemoteException e) {
                 Logger.print("SuspendPlayer on notify: " + nickname + " " + e.toString());
             }
@@ -184,7 +184,7 @@ public class GameRoom extends Game{
         super.suspendCurrentPlayer();
         connections.forEach(conn -> {
             try {
-                conn.notifySuspention(nickname);
+                conn.notifySuspension(nickname);
             } catch (RemoteException e) {
                 Logger.print("SuspendCurrentPlayer on notify: " + nickname + " " + e.toString());
             }

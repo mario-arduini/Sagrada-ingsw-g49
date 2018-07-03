@@ -27,14 +27,12 @@ class CLIHandler implements GraphicInterface{
     private boolean waiting;
     private boolean serverResult;
     private boolean flagContinue;
-    private InputStreamReader inputStreamReader;
     private Future<String> future;
     private boolean newGame;
 
     CLIHandler() {
         ClientLogger.initLogger(LOGGER);
-        inputStreamReader = new InputStreamReader(System.in);
-        input = new BufferedReader(inputStreamReader);
+        input = new BufferedReader(new InputStreamReader(System.in));
         flagContinue = false;
         waiting = false;
         newGame = true;
@@ -71,7 +69,7 @@ class CLIHandler implements GraphicInterface{
             client.login(askNickname(), askPassword());
 
             if(waitResult()) {
-                client.setLogged(true);
+                client.setLogged();
                 ok = true;
             }
             else
@@ -284,8 +282,6 @@ class CLIHandler implements GraphicInterface{
         ClientLogger.printlnWithClear("GAME STARTED!\n");
         printFooter(gameSnapshot);
         printSchemas(schemas);
-        ClientLogger.println(gameSnapshot.getPlayer().getPrivateGoal());
-        ClientLogger.println(client.getGameSnapshot().getPlayer().getPrivateGoal());
     }
 
 
@@ -626,20 +622,23 @@ class CLIHandler implements GraphicInterface{
     }
 
     private static void printPublicGoals(List<String> publicGoals){
-
+        StringBuilder names = new StringBuilder();
+        for(String name : publicGoals)
+            names.append(" ").append(name).append(",");
+        names.deleteCharAt(names.length() - 1);
+        ClientLogger.println("PUBLIC GOAL:" + names + "\n");
     }
 
     private static void printPrivateGoal(String privateGoal){
-
+        ClientLogger.println("PRIVATE GOAL: " + privateGoal);
     }
 
     private static void printToolCards(List<ToolCard> toolCards){
         int i = 0;
-        ClientLogger.println("TOOL CARDS");
+        ClientLogger.println("\nTOOL CARDS");
         for (ToolCard toolcard: toolCards) {
             ClientLogger.print(++i + ") " + toolcard.getName());
             for(int j = toolcard.getName().length();j<31;j++) ClientLogger.print(" ");
-            //ClientLogger.println("   Description: " + toolcard.getDescription());
             ClientLogger.println("|  Cost: " + (toolcard.getUsed() ? "2" : "1"));
         }
     }
@@ -654,7 +653,6 @@ class CLIHandler implements GraphicInterface{
         ClientLogger.printlnWithClear("GAME FINISHED\n");
         for(Score score : scores)
             ClientLogger.println(score.getPlayer() + "   " + score.getTotalScore());
-
         future.cancel(true);
     }
 

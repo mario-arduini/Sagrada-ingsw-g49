@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.Socket;
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -48,18 +47,14 @@ public class ServerListener implements Runnable {
             } catch (IllegalStateException e) {
                 LOGGER.warning(e.toString());
                 continue;
-            } catch (NullPointerException e)
-            {
+            } catch (NullPointerException e) {
                 connected = false;
-                client.serverDisconnected();     //server.close ??
+                client.serverDisconnected();
                 continue;
             }
 
             try {
                 switch (jsonObject.get("message").getAsString()) {
-//                    case "welcome":
-//                        client.welcomePlayer();
-//                        break;
                     case "new-player":
                         client.notifyLogin(jsonObject.get("nickname").getAsString());
                         break;
@@ -68,7 +63,7 @@ public class ServerListener implements Runnable {
                         client.notifyLogin(players);
                         break;
                     case "quit":
-                            client.notifyLogout(jsonObject.get("nickname").getAsString());
+                        client.notifyLogout(jsonObject.get("nickname").getAsString());
                         break;
                     case "verified":
                         client.setServerResult(true);
@@ -101,7 +96,7 @@ public class ServerListener implements Runnable {
                         client.notifyDicePlaced(jsonObject.get("nickname").getAsString(), jsonObject.get("row").getAsInt(), jsonObject.get("column").getAsInt(), gson.fromJson(jsonObject.get("dice").getAsString(),Dice.class));
                         break;
                     case "suspended":
-                        client.notifySuspention(jsonObject.get("player").getAsString());
+                        client.notifySuspension(jsonObject.get("player").getAsString());
                         break;
                     case "reconnect-info":
                         HashMap<String,Window> playersWindow = gson.fromJson(jsonObject.get("windows").getAsString(),new TypeToken<HashMap<String,Window>>(){}.getType());
@@ -128,13 +123,12 @@ public class ServerListener implements Runnable {
                     case "toolcard-dice-value":
                         server.sendDiceValue(client.askDiceValue(jsonObject.get("prompt").getAsString()));
                         break;
-
                     //endregion
 
                     default:
                         break;
                 }
-            } catch (RemoteException | NullPointerException e) {
+            } catch (NullPointerException e) {
                 LOGGER.warning(e.toString());
             }
         }
@@ -144,8 +138,7 @@ public class ServerListener implements Runnable {
         try {
             return input.readLine();
         } catch(Exception e) {
-            LOGGER.warning(e.toString());
+            throw new NullPointerException();
         }
-        return null;
     }
 }

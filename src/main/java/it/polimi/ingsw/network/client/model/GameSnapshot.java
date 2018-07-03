@@ -21,6 +21,15 @@ public class GameSnapshot {
         this.draftPool = new ArrayList<>();
     }
 
+    public void newGame(){
+        this.roundTrack.clear();
+        this.toolCards.clear();
+        this.publicGoals.clear();
+        this.otherPlayers.clear();
+        this.draftPool.clear();
+        this.currentPlayer = null;
+    }
+
     public PlayerSnapshot getPlayer() {
         return player;
     }

@@ -2,32 +2,25 @@ package it.polimi.ingsw.network.client;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
-import it.polimi.ingsw.controller.exceptions.GameOverException;
-import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
-import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
 import it.polimi.ingsw.model.Coordinate;
 import it.polimi.ingsw.model.Dice;
-import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
-import java.rmi.RemoteException;
 import java.util.logging.Logger;
 
 public class ClientSocketHandler implements FlowHandlerInterface {
 
     private static final Logger LOGGER = Logger.getLogger( ClientSocketHandler.class.getName() );
 
-    private PrintWriter output;
-    private Socket socket;
-    private ServerListener serverListener;
-    private Thread thread;
-    private JsonObject jsonObject;
-    private Gson gson;
+    private transient PrintWriter output;
+    private transient Socket socket;
+    private transient Thread thread;
+    private transient JsonObject jsonObject;
+    private transient Gson gson;
 
 
     ClientSocketHandler(Client client, String serverAddress, int serverPort) throws SocketException {
@@ -35,7 +28,7 @@ public class ClientSocketHandler implements FlowHandlerInterface {
         try {
             socket = new Socket(serverAddress, serverPort);
             output = new PrintWriter(socket.getOutputStream(), true);
-            serverListener = new ServerListener(client, this, socket);
+            ServerListener serverListener = new ServerListener(client, this, socket);
             thread = new Thread(serverListener);
             thread.start();
         } catch (Exception e) {
@@ -55,14 +48,14 @@ public class ClientSocketHandler implements FlowHandlerInterface {
     }
 
     @Override
-    public void chooseSchema(Integer schema) throws RuntimeException, GameNotStartedException, GameOverException, WindowAlreadySetException {
+    public void chooseSchema(Integer schema){
         createJsonCommand("schema");
         jsonObject.addProperty("id", schema);
         socketPrintLine(jsonObject);
     }
 
     @Override
-    public void placeDice(int row, int column, Dice dice) throws RemoteException, GameOverException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException, NoSameColorDicesException, GameNotStartedException{
+    public void placeDice(int row, int column, Dice dice){
         createJsonCommand("place-dice");
         jsonObject.addProperty("dice", gson.toJson(dice));
         jsonObject.addProperty("row", row);
@@ -71,20 +64,20 @@ public class ClientSocketHandler implements FlowHandlerInterface {
     }
 
     @Override
-    public void useToolCard(String name) throws RemoteException, GameNotStartedException, GameOverException, NoSuchToolCardException, InvalidDiceValueException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException, NotDraftedYetException, NotYourFirstTurnException, NothingCanBeMovedException, NoSameColorDicesException{
+    public void useToolCard(String name){
         createJsonCommand("toolcard");
         jsonObject.addProperty("name", name);
         socketPrintLine(jsonObject);
     }
 
     @Override
-    public void pass() throws RemoteException, GameNotStartedException, GameOverException, NotYourTurnException{
+    public void pass(){
         createJsonCommand("pass");
         socketPrintLine(jsonObject);
     }
 
     @Override
-    public void logout() throws RemoteException{
+    public void logout(){
         createJsonCommand("logout");
         socketPrintLine(jsonObject);
         stopServerListener();
@@ -101,7 +94,7 @@ public class ClientSocketHandler implements FlowHandlerInterface {
         try {
             thread.join();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.warning(e.toString());
         }
     }
 
