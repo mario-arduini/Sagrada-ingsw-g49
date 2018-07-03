@@ -6,10 +6,7 @@ import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
 
 import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GameRoom extends Game{
@@ -54,18 +51,27 @@ public class GameRoom extends Game{
             nextRound();
             newRound = true;
         }
-        if (!checkGameFinished()) {
+        if (!checkGameFinished() && isGameStarted()) {
             notifyRound(newRound);
             startTimer();
         }
     }
 
+    public boolean isGameStarted(){
+        List<Player> inGamePlayers = getPlayers();
+        for (Player p: inGamePlayers)
+            if (p.getWindow()==null)
+                return false;
+        return true;
+    }
+
     private boolean checkGameFinished(){
         if (!isGameFinished()) return false;
         if (notifyEndGame){
+            List<Score> scores = isGameStarted() ? computeFinalScores() :  new ArrayList<>();
             connections.forEach(user -> {
                 try {
-                    user.notifyEndGame(computeFinalScores());
+                    user.notifyEndGame(scores);
                 } catch (RemoteException e) {
                     Logger.print(e.toString());
                 }
@@ -136,6 +142,7 @@ public class GameRoom extends Game{
     }
 
     public synchronized void logout(String nickname, ClientInterface connection){
+
         connections.remove(connection);
         connections.forEach(conn -> {
             try {

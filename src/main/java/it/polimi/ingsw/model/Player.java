@@ -26,10 +26,10 @@ public class Player {
     public Player(Player player){
         this.nickname = player.nickname;
         this.authToken = player.authToken;
-        this.privateGoal = player.privateGoal;
-        this.window = new Window(player.window);
-        this.favorToken = player.favorToken;
-        this.suspended = player.suspended;
+        this.privateGoal = null;
+        this.window = null;
+        this.favorToken = 0;
+        this.suspended = false;
     }
 
     @Override

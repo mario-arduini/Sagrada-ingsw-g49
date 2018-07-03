@@ -4,21 +4,17 @@ import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
 import it.polimi.ingsw.controller.exceptions.GameOverException;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
-import it.polimi.ingsw.model.Dice;
-import it.polimi.ingsw.model.Player;
-import it.polimi.ingsw.model.Schema;
-import it.polimi.ingsw.model.Window;
+import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
 import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
+import it.polimi.ingsw.network.server.Logger;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerInterface{
@@ -28,6 +24,8 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     private List<Schema> initialSchemas = null;
     private ToolCard activeToolCard;
     private ClientInterface connection;
+    private Timer timer;
+    private int secondsTimerSchema = 30; //TODO: read value from file.
 
     GameFlowHandler(GamesHandler gamesHandler, ClientInterface connection, Player player) throws RemoteException{
         this.player = player;
@@ -60,11 +58,14 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+        startTimer();
     }
 
     public void chooseSchema(Integer schemaNumber) throws GameNotStartedException, GameOverException, WindowAlreadySetException{
         if (gameRoom == null) throw new GameNotStartedException();
         if (gameRoom.isGameFinished()) throw new GameOverException();
+        if (timer != null)
+            timer.cancel();
         player.setWindow(initialSchemas.get(schemaNumber));
         checkGameReady();
     }
@@ -86,17 +87,13 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     }
 
     private void checkGameReady(){
-        List<Player> inGamePlayers = gameRoom.getPlayers();
-        for (Player p: inGamePlayers)
-            if (p.getWindow()==null)
-                return;
+        if (!gameRoom.isGameStarted()) return;
         gameRoom.gameReady();
     }
 
     public void disconnected(){
-        if (gameRoom == null){
+        if (gameRoom == null)
             gamesHandler.waitingRoomDisconnection(this);
-        }
     }
 
     public List<Schema> getInitialSchemas(){
@@ -146,6 +143,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         if (gameRoom != null && !gameRoom.isGameFinished())
             gameRoom.logout(player.getNickname(), connection);
         this.gameRoom = null;
+        this.player = new Player(player);
         gamesHandler.goToWaitingRoom(this);
     }
 
@@ -162,4 +160,25 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         this.activeToolCard.use(gameRoom, connection);
         gameRoom.notifyAllToolCardUsed(player.getNickname(), activeToolCard.getName(), player.getWindow());
     }
+
+    class TimerExpired extends TimerTask {
+        public void run() {
+            try {
+                player.setWindow(new Schema(0, new Constraint[4][5], "Empty Schema"));
+            } catch (WindowAlreadySetException | InvalidDifficultyValueException
+                    | UnexpectedMatrixSizeException e) {
+            }
+            logout();
+            try {
+                connection.notifyEndGame(new ArrayList<Score>());
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    private void startTimer(){
+        timer = new Timer();
+        timer.schedule(new GameFlowHandler.TimerExpired(), (long) secondsTimerSchema * 1000);
+    }
+
 }
