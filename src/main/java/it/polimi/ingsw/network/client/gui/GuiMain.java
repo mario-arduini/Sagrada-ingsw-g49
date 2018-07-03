@@ -4,8 +4,10 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 
@@ -24,5 +26,35 @@ public class GuiMain extends Application {
 
     public static void main(String[] args) {
         launch();
+    }
+
+    public static Image getGoalImage(String goal){
+        String fileName;
+        switch (goal){
+            case "RowColorVariety": fileName = "0002.jpg"; break;
+            case "ColumnColorVariety": fileName = "0003.jpg"; break;
+            case "RowShadeVariety": fileName = "0004.jpg"; break;
+            case "ColumnShadeVariety": fileName = "0005.jpg"; break;
+            case "LightShades": fileName = "0006.jpg"; break;
+            case "MediumShades": fileName = "0007.jpg"; break;
+            case "DarkShades": fileName = "0008.jpg"; break;
+            case "FullShadeVariety": fileName = "0009.jpg"; break;
+            case "DiagonalColor": fileName = "0010.jpg"; break;
+            case "FullColorVariety": fileName = "0011.jpg"; break;
+            case "Shades of Red": fileName = "0013.jpg"; break;
+            case "Shades of Yellow": fileName = "0014.jpg"; break;
+            case "Shades of Green": fileName = "0015.jpg"; break;
+            case "Shades of Blue": fileName = "0016.jpg"; break;
+            case "Shades of Purple": fileName = "0017.jpg"; break;
+            default: fileName = "0001.jpg"; break;
+        }
+        URL path = GuiMain.class.getClassLoader().getResource("gui-views/goals/"+fileName);
+        Image goalImage = null;
+        try{
+            goalImage = new Image(path.openStream());
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        return goalImage;
     }
 }

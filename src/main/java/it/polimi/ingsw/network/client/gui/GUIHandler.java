@@ -13,17 +13,21 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class GUIHandler extends UnicastRemoteObject implements GraphicInterface {
 
+    @FXML private GridPane schemaChoice;
     @FXML private Label passwordLabel;
     @FXML private Label nicknameLabel;
     @FXML private Label waitingRoom;
@@ -38,11 +42,17 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     @FXML private RadioButton rmi;
     @FXML private RadioButton socket;
     @FXML private Label portLabel;
+    @FXML private ImageView privateGoal;
+    @FXML private ImageView publicGoal1;
+    @FXML private ImageView publicGoal2;
+    @FXML private ImageView publicGoal3;
+
     private ToggleGroup connectionRadioGroup;
     ObservableList<String> playerList = FXCollections.observableArrayList();
+    private List<GridPane> schemasGrid;
 
     private Client client;
-    private Stage stage;
+    private List<Schema> schemas;
 
     private boolean addressOk;
     private boolean portOk;
@@ -68,6 +78,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public void initialize(){
         if(connect!=null) initConnectionScene();
         else if(login!=null) initLoginScene();
+        else if(schemaChoice!=null) initSchemaChoiceScene();
 
     }
 
@@ -164,6 +175,50 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         });
     }
 
+    private void initSchemaChoiceScene(){
+        schemasGrid = new ArrayList<>();
+        schemasGrid.add((GridPane) schemaChoice.getChildren().get(4));
+        schemasGrid.add((GridPane) schemaChoice.getChildren().get(5));
+        schemasGrid.add((GridPane) schemaChoice.getChildren().get(6));
+        schemasGrid.add((GridPane) schemaChoice.getChildren().get(7));
+        ColumnConstraints schemacc = new ColumnConstraints();
+        schemacc.setPercentWidth(20.0);
+        RowConstraints schemarc = new RowConstraints();
+        schemarc.setPercentHeight(25.0);
+
+        schemasGrid.forEach(g -> {
+            g.getColumnConstraints().addAll(schemacc,schemacc,schemacc,schemacc,schemacc);
+            g.getRowConstraints().addAll(schemarc,schemarc,schemarc,schemarc);
+            g.prefHeightProperty().bind(g.widthProperty());
+        });
+    }
+
+    private void populateSchemaChoice(){
+        privateGoal.imageProperty().set( GuiMain.getGoalImage(client.getGameSnapshot().getPlayer().getPrivateGoal()) );
+        List<String> publicGoalNames = client.getGameSnapshot().getPublicGoals();
+        publicGoal1.imageProperty().set( GuiMain.getGoalImage(publicGoalNames.get(0)) );
+        publicGoal2.imageProperty().set( GuiMain.getGoalImage(publicGoalNames.get(1)) );
+        publicGoal3.imageProperty().set( GuiMain.getGoalImage(publicGoalNames.get(2)) );
+
+        for(int i=0;i<schemasGrid.size();i++) createSchema(schemas.get(i),schemasGrid.get(i));
+    }
+
+    private void createSchema(Schema schema,GridPane grid){
+        Constraint constraint;
+        for(int r = 0;r<Window.ROW;r++)
+            for (int c = 0;c<Window.COLUMN;c++){
+                constraint = schema.getConstraint(r,c);
+                if(constraint!=null){
+                    Pane cell = (Pane)grid.getChildren().get(r*Window.COLUMN+c);
+                    if(constraint.getColor()!=null){
+                        cell.setStyle("-fx-background-color: "+constraint.getColor()+";");
+                    } else {
+                        cell.getChildren().add(new Label(constraint.getNumber().toString()));
+                    }
+                }
+            }
+    }
+
     public void tryConnect(ActionEvent actionEvent) {
 
         status.textProperty().set("Connecting...");
@@ -176,7 +231,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             if(client.createConnection(connectionType)){
                 Platform.runLater(() -> {
                     try {
-                        stage = (Stage) connect.getScene().getWindow();
+                        Stage stage = (Stage) connect.getScene().getWindow();
                         URL path = GUIHandler.class.getClassLoader().getResource("gui-views/login.fxml");
                         FXMLLoader fxmlLoader = new FXMLLoader(path);
                         Parent root = fxmlLoader.load();
@@ -212,6 +267,10 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         this.client = client;
     }
 
+    public void passSchemas(List<Schema> schemas){
+        this.schemas = schemas;
+    }
+
     @Override
     public void printWaitingRoom() {
         Platform.runLater(() -> {
@@ -224,7 +283,25 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public void printSchemaChoice(GameSnapshot gameSnapshot, List<Schema> schemas) {
+        Platform.runLater(() -> {
+            try {
+                Stage stage = (Stage) status.getScene().getWindow();
+                URL path = GUIHandler.class.getClassLoader().getResource("gui-views/schema-choice.fxml");
+                FXMLLoader fxmlLoader = new FXMLLoader(path);
+                Parent root = fxmlLoader.load();
+                GUIHandler controller = (GUIHandler) fxmlLoader.getController();
+                controller.passClient(client);
+                controller.passSchemas(schemas);
+                controller.populateSchemaChoice();
+                client.setHandler(controller);
+                stage.setScene(new Scene(root));
+                stage.setResizable(true);
+                stage.setTitle("Sagrada - Schema Choice");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
+        });
     }
 
     @Override

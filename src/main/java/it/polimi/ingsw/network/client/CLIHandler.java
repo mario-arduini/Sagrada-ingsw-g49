@@ -284,6 +284,8 @@ class CLIHandler implements GraphicInterface{
         ClientLogger.printlnWithClear("GAME STARTED!\n");
         printFooter(gameSnapshot);
         printSchemas(schemas);
+        ClientLogger.println(gameSnapshot.getPlayer().getPrivateGoal());
+        ClientLogger.println(client.getGameSnapshot().getPlayer().getPrivateGoal());
     }
 
 

@@ -26,7 +26,7 @@ public final class Constraint implements Serializable {
         return color;
     }
 
-    public int getNumber(){
+    public Integer getNumber(){
 
         return number;
     }
