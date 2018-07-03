@@ -90,6 +90,12 @@ public class ClientSocketHandler implements FlowHandlerInterface {
         stopServerListener();
     }
 
+    @Override
+    public void newGame(){
+        createJsonCommand("new-game");
+        socketPrintLine(jsonObject);
+    }
+
     private void stopServerListener(){
         socketClose();
         try {

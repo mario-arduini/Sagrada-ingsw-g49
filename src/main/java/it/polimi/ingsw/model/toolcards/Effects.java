@@ -3,6 +3,7 @@ package it.polimi.ingsw.model.toolcards;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
+import it.polimi.ingsw.network.server.Logger;
 
 import java.rmi.RemoteException;
 import java.util.List;
@@ -35,7 +36,7 @@ final class Effects {
     static boolean addDiceToWindow(Player player, Dice dice, ClientInterface connection) {
         if(player.getWindow().possiblePlaces(dice, Window.RuleIgnored.NONE)==0) return false;
         boolean valid = false;
-        Coordinate coords = new Coordinate(0,0); //TODO: remove this init
+        Coordinate coords = null;
         String prompt = "place-dice";
         while (!valid){
             try {
@@ -43,12 +44,15 @@ final class Effects {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            prompt = "place-dice-invalid";
-            try{
-                placeDice(player,dice,coords.getRow(),coords.getColumn(), Window.RuleIgnored.NONE);
-                valid = true;
-            } catch (ConstraintViolatedException | NotWantedAdjacentDiceException
-                    |FirstDiceMisplacedException | BadAdjacentDiceException | NoAdjacentDiceException e) {
+            if (coords!= null) {
+                prompt = "place-dice-invalid";
+                try {
+                    placeDice(player, dice, coords.getRow(), coords.getColumn(), Window.RuleIgnored.NONE);
+                    valid = true;
+                } catch (ConstraintViolatedException | NotWantedAdjacentDiceException
+                        | FirstDiceMisplacedException | BadAdjacentDiceException | NoAdjacentDiceException e) {
+                    Logger.print("addDiceToWindow: " + e);
+                }
             }
         }
         return true;
@@ -86,6 +90,7 @@ final class Effects {
                 } catch (NoAdjacentDiceException | BadAdjacentDiceException
                         | FirstDiceMisplacedException | ConstraintViolatedException e) {
                     expectedMinimumPositions = 1;
+                    Logger.print("move1: " + e);
                 }
                 int possiblePositions = currentPlayerWindow.possiblePlaces(removedDice,ruleIgnored);
                 if(possiblePositions<expectedMinimumPositions){
@@ -113,6 +118,7 @@ final class Effects {
                     | FirstDiceMisplacedException | ConstraintViolatedException | NotWantedAdjacentDiceException e) {
                 valid = false;
                 message = "move-to-invalid";
+                Logger.print("move2: " + e);
             }
         }
     }
@@ -149,6 +155,7 @@ final class Effects {
                 } catch (NoAdjacentDiceException | BadAdjacentDiceException
                         | FirstDiceMisplacedException | ConstraintViolatedException e) {
                     expectedMinimumPositions = 1;
+                    Logger.print("move3: " + e);
                 }
                 int possiblePositions = currentPlayerWindow.possiblePlaces(removedDice,ruleIgnored);
                 if(possiblePositions<expectedMinimumPositions){
@@ -191,6 +198,7 @@ final class Effects {
                     | FirstDiceMisplacedException | ConstraintViolatedException | NotWantedAdjacentDiceException e) {
                 valid = false;
                 message = "move-to-invalid";
+                Logger.print("move4: " + e);
             }
         }
         return removedDice;

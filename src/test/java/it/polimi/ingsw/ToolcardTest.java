@@ -160,6 +160,10 @@ class ConnectionHandlerStub implements ClientInterface {
     @Override
     public void notifyEndGame(List<Score> scores){
     }
+
+    @Override
+    public void notifySuspention(String nickname){
+    }
 }
 
 public class ToolcardTest {

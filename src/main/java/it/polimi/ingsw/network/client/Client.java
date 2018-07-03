@@ -170,9 +170,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             gameSnapshot.removeOtherPlayer(nickname);
             handler.printWaitingRoom();
         }
-        else{
-            //TODO: notify other logout
-        }
     }
 
     void sendSchemaChoice(int choice){
@@ -218,31 +215,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     @Override
     public void notifyDicePlaced(String nickname, int row, int column, Dice dice) throws RemoteException{
         gameSnapshot.getDraftPool().remove(dice);
-        if(!nickname.equals(gameSnapshot.getPlayer().getNickname())) {
-            try {
-                gameSnapshot.findPlayer(nickname).get().getWindow().addDice(row, column, dice);
-            } catch (ConstraintViolatedException e) {
-                e.printStackTrace();
-            } catch (FirstDiceMisplacedException e) {
-                e.printStackTrace();
-            } catch (NoAdjacentDiceException e) {
-                e.printStackTrace();
-            } catch (BadAdjacentDiceException e) {
-                e.printStackTrace();
-            }
-        }
-        else {
-            try {
-                gameSnapshot.getPlayer().getWindow().addDice(row, column, dice);
-            } catch (ConstraintViolatedException e) {
-                e.printStackTrace();
-            } catch (FirstDiceMisplacedException e) {
-                e.printStackTrace();
-            } catch (NoAdjacentDiceException e) {
-                e.printStackTrace();
-            } catch (BadAdjacentDiceException e) {
-                e.printStackTrace();
-            }
+        gameSnapshot.findPlayer(nickname).get().getWindow().setDice(row, column, dice);
+        if(nickname.equals(gameSnapshot.getPlayer().getNickname())){
             gameSnapshot.getPlayer().setDiceExtracted(true);
             setServerResult(true);
         }
@@ -304,11 +278,24 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     @Override
     public void notifyEndGame(List<Score> scores) throws RemoteException{
         handler.gameOver(scores);
+        gameStarted = false;
     }
 
+    @Override
+    public void notifySuspention(String nickname){
+        gameSnapshot.findPlayer(nickname).get().suspend();
+        if(nickname.equalsIgnoreCase(gameSnapshot.getPlayer().getNickname()))
+            handler.interruptInput();
+        handler.wakeUp(false);
+    }
 
-
-
+    void newGame(){
+        try {
+            server.newGame();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 

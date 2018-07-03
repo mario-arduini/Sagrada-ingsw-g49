@@ -100,6 +100,9 @@ public class ServerListener implements Runnable {
                     case "update-window":
                         client.notifyDicePlaced(jsonObject.get("nickname").getAsString(), jsonObject.get("row").getAsInt(), jsonObject.get("column").getAsInt(), gson.fromJson(jsonObject.get("dice").getAsString(),Dice.class));
                         break;
+                    case "suspended":
+                        client.notifySuspention(jsonObject.get("player").getAsString());
+                        break;
                     case "reconnect-info":
                         HashMap<String,Window> playersWindow = gson.fromJson(jsonObject.get("windows").getAsString(),new TypeToken<HashMap<String,Window>>(){}.getType());
                         HashMap<String,Integer> favorMap = gson.fromJson(jsonObject.get("favor-token").getAsString(),new TypeToken<HashMap<String,Integer>>(){}.getType());

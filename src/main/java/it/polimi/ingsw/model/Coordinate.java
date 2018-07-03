@@ -7,8 +7,8 @@ public class Coordinate implements Serializable {
     private final int column;
 
     public Coordinate(int row, int column){
-        this.row = row;
-        this.column = column;
+        this.row = row-1;
+        this.column = column-1;
     }
 
     public int getRow(){
