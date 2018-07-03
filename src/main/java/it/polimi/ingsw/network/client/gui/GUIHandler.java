@@ -42,7 +42,8 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     private boolean lastPortOk;
     private boolean nicknameOk;
     private boolean passwordOk;
-    private boolean isDoing;
+    private boolean isConnecting;
+    private boolean isLogging;
     private Client.ConnectionType connectionType;
 
     private static final Pattern PATTERN = Pattern.compile(
@@ -67,7 +68,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         connect.setDisable(true);
         addressOk = false;
         portOk = false;
-        isDoing = false;
+        isConnecting = false;
 
         connectionRadioGroup = new ToggleGroup();
 
@@ -86,7 +87,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 addressOk = false;
                 address.setStyle("-fx-text-fill: red;");
             }
-            connect.setDisable(!(addressOk && portOk)|| isDoing);
+            connect.setDisable(!(addressOk && portOk)|| isConnecting);
         });
 
         port.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -104,7 +105,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 portOk = false;
                 port.setStyle("-fx-text-inner-color: red;");
             } finally {
-                connect.setDisable(!(addressOk && portOk)|| isDoing);
+                connect.setDisable(!(addressOk && portOk)|| isConnecting);
             }
         });
 
@@ -114,7 +115,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 port.setVisible(true);
                 portLabel.setVisible(true);
                 portOk = lastPortOk;
-                connect.setDisable(!(addressOk && portOk)|| isDoing);
+                connect.setDisable(!(addressOk && portOk)|| isConnecting);
             }
             else {
                 connectionType = Client.ConnectionType.RMI;
@@ -122,7 +123,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 portLabel.setVisible(false);
                 lastPortOk = false;
                 portOk = true;
-                connect.setDisable(!(addressOk && portOk)|| isDoing);
+                connect.setDisable(!(addressOk && portOk)|| isConnecting);
             }
         });
     }
@@ -131,7 +132,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         login.setDisable(true);
         nicknameOk = false;
         passwordOk = false;
-        isDoing = false;
+        isLogging = false;
 
         nickname.textProperty().addListener((observable, oldValue, newValue) -> {
             if(newValue.length()>0){
@@ -139,7 +140,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             } else {
                 nicknameOk = false;
             }
-            login.setDisable(!(nicknameOk && passwordOk)&&isDoing);
+            login.setDisable(!(nicknameOk && passwordOk)&& isLogging);
         });
 
         password.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -150,7 +151,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 passwordOk = false;
                 password.setStyle("-fx-text-inner-color: red;");
             }
-            login.setDisable(!(nicknameOk && passwordOk)&&isDoing);
+            login.setDisable(!(nicknameOk && passwordOk)&& isLogging);
         });
     }
 
@@ -158,7 +159,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
         status.textProperty().set("Connecting...");
         connect.setDisable(true);
-        isDoing = true;
+        isConnecting = true;
 
         new Thread(() -> {
             client.setServerAddress(address.getText());
@@ -172,6 +173,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                         Parent root = fxmlLoader.load();
                         GUIHandler controller = (GUIHandler) fxmlLoader.getController();
                         controller.passClient(client);
+                        client.setHandler(controller);
                         stage.setScene(new Scene(root));
                         stage.setTitle("Sagrada - Login");
                     } catch (IOException e) {
@@ -181,9 +183,9 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 });
             } else {
                 Platform.runLater(() -> {
-                    status.textProperty().set("Connection failed! Try again");
+                    status.textProperty().set("Connection failed!");
                     connect.setDisable(false);
-                    isDoing = false;
+                    isConnecting = false;
                 });
             }
         }).start();
@@ -193,6 +195,11 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public void trylogin(ActionEvent actionEvent) {
         status.textProperty().set("Logging In...");
         login.setDisable(true);
+        isLogging = true;
+        new Thread(() -> {
+            isLogging = true;
+            client.login(nickname.getText(),password.getText());
+        }).start();
     }
 
     public void passClient(Client client){
@@ -266,6 +273,17 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public void wakeUp(boolean serverResult) {
-        
+        System.out.println("i was called");
+        Platform.runLater(() -> {
+            if(isLogging){
+                if(serverResult){
+                    status.textProperty().set("Logged in");
+                } else {
+                    status.textProperty().set("Wrong password!");
+                    login.setDisable(false);
+                    isLogging = false;
+                }
+            }
+        });
     }
 }

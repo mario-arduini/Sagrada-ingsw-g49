@@ -54,6 +54,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         this.serverPort = serverPort;
     }
 
+    public void setHandler(GraphicInterface handler){
+        this.handler = handler;
+    }
+
     boolean getServerConnected(){
         return serverConnected;
     }
