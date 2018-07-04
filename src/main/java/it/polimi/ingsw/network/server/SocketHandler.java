@@ -164,9 +164,7 @@ public class SocketHandler implements Runnable, ClientInterface {
                 InvalidFavorTokenNumberException | AlreadyDraftedException |
                 NotEnoughFavorTokenException | NotYourSecondTurnException |
                 NoDiceInRoundTrackException | NotYourTurnException |
-                ConstraintViolatedException | NotWantedAdjacentDiceException |
-                FirstDiceMisplacedException | NoSameColorDicesException |
-                BadAdjacentDiceException | NoAdjacentDiceException |
+                NoSameColorDicesException | PlayerSuspendedException |
                 NotDraftedYetException | NotYourFirstTurnException |
                 GameNotStartedException | GameOverException |
                 ToolcardAlreadyUsedException | NotEnoughDiceToMoveException e) {
@@ -300,6 +298,10 @@ public class SocketHandler implements Runnable, ClientInterface {
 
         try{
             command = socketReadCommand();
+            if (command.get("choice").getAsString().equalsIgnoreCase("rollback")){
+                socketSendMessage(createMessage("rollback-ok"));
+                throw new RollbackException();
+            }
 
             return gson.fromJson(command.get("choice").getAsString(), Coordinate.class);
 
@@ -321,6 +323,10 @@ public class SocketHandler implements Runnable, ClientInterface {
         socketSendMessage(toSend);
         try{
             command = socketReadCommand();
+            if (command.get("choice").getAsString().equalsIgnoreCase("rollback")){
+                socketSendMessage(createMessage("rollback-ok"));
+                throw new RollbackException();
+            }
 
             return gson.fromJson(command.get("choice").getAsString(), Dice.class);
 
@@ -341,6 +347,10 @@ public class SocketHandler implements Runnable, ClientInterface {
         socketSendMessage(toSend);
         try{
             command = socketReadCommand();
+            if (command.get("choice").getAsString().equalsIgnoreCase("rollback")){
+                socketSendMessage(createMessage("rollback-ok"));
+                throw new RollbackException();
+            }
 
             return getJsonPositiveIntValue(command, "choice");
 
@@ -361,6 +371,11 @@ public class SocketHandler implements Runnable, ClientInterface {
         socketSendMessage(toSend);
         try{
             command = socketReadCommand();
+            if (command.get("choice").getAsString().equalsIgnoreCase("rollback")){
+                socketSendMessage(createMessage("rollback-ok"));
+                throw new RollbackException();
+            }
+
             return command.get("choice").getAsBoolean();
 
         } catch (NullPointerException e){
@@ -381,6 +396,10 @@ public class SocketHandler implements Runnable, ClientInterface {
         socketSendMessage(toSend);
         try{
             command = socketReadCommand();
+            if (command.get("choice").getAsString().equalsIgnoreCase("rollback")){
+                socketSendMessage(createMessage("rollback-ok"));
+                throw new RollbackException();
+            }
 
             return getJsonPositiveIntValue(command, "choice");
 

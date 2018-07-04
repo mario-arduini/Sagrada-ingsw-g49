@@ -119,7 +119,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     void useToolCard(String name){
         try {
             server.useToolCard(name);
-        } catch (GameNotStartedException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | InvalidDiceValueException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | ConstraintViolatedException | BadAdjacentDiceException | NotWantedAdjacentDiceException | FirstDiceMisplacedException | NoAdjacentDiceException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException e) {
+        } catch (GameNotStartedException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException | PlayerSuspendedException e) {
             setServerResult(false);
             LOGGER.warning(e.toString());
         } catch (RemoteException e){
@@ -342,27 +342,27 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     //region TOOLCARD
 
     @Override
-    public boolean askIfPlus(String prompt){
+    public boolean askIfPlus(String prompt) throws RollbackException{
         return handler.askIfPlus(prompt);
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt){
+    public Dice askDiceDraftPool(String prompt) throws RollbackException{
         return handler.askDiceDraftPool(prompt);
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt){
+    public int askDiceRoundTrack(String prompt) throws RollbackException{
         return handler.askDiceRoundTrack(prompt);
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt){
+    public Coordinate askDiceWindow(String prompt) throws RollbackException{
         return handler.askDiceWindow(prompt);
     }
 
     @Override
-    public int askDiceValue(String prompt){
+    public int askDiceValue(String prompt) throws RollbackException{
         return handler.askDiceValue(prompt);
     }
 

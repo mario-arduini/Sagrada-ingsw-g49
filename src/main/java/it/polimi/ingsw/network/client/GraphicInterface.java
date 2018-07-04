@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.client;
 
+import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.Coordinate;
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Schema;
@@ -16,11 +17,11 @@ public interface GraphicInterface {
     void notifyUsedToolCard(String player,String toolCard);
     void gameOver(List<Score> scores);
     void notifyServerDisconnected();
-    boolean askIfPlus(String prompt);
-    Dice askDiceDraftPool(String prompt);
-    int askDiceRoundTrack(String prompt);
-    Coordinate askDiceWindow(String prompt);
-    int askDiceValue(String prompt);
+    boolean askIfPlus(String prompt) throws RollbackException;
+    Dice askDiceDraftPool(String prompt) throws RollbackException;
+    int askDiceRoundTrack(String prompt) throws RollbackException;
+    Coordinate askDiceWindow(String prompt) throws RollbackException;
+    int askDiceValue(String prompt) throws RollbackException;
     void wakeUp(boolean serverResult);
     void interruptInput();
     void printDice(Dice dice);

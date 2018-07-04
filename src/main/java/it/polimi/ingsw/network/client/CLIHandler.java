@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.client;
 
+import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.network.client.model.*;
 import it.polimi.ingsw.network.client.model.Color;
@@ -321,8 +322,8 @@ class CLIHandler implements GraphicInterface{
             ClientLogger.println("Not your turn! You can only logout");
     }
 
-    private void useToolCard(){
-        if(client.getGameSnapshot().getPlayer().getFavorToken() < 1) {
+    private void useToolCard() {
+        if (client.getGameSnapshot().getPlayer().getFavorToken() < 1) {
             ClientLogger.print("Not enough favor token!\n\nRetry: ");
             return;
         }
@@ -336,27 +337,31 @@ class CLIHandler implements GraphicInterface{
                 choice = readInt(0, 3);
             } catch (NumberFormatException e) {
                 choice = -1;
-            }catch (CancellationException e){
+            } catch (CancellationException e) {
                 return;
             }
 
-            if(choice == 0) {
+            if (choice == 0) {
                 printGame(client.getGameSnapshot());
                 printMenu(client.getGameSnapshot());
                 return;
             }
-            if(choice < 1 || choice > 3)
+            if (choice < 1 || choice > 3)
                 ClientLogger.println("Not a valid choice");
         }
 
-        client.useToolCard( client.getGameSnapshot().getToolCards().get(choice - 1).getName());
-        if(!waitResult()) {
+        ClientLogger.println("Insert 0 to go back to the menu.\n");
+
+        client.useToolCard(client.getGameSnapshot().getToolCards().get(choice - 1).getName());
+        if (!waitResult()) {
             printGame(client.getGameSnapshot());
             ClientLogger.println("\nYou can't use this card now");
             printMenu(client.getGameSnapshot());
-        }
-        else
+        } else {
             client.verifyEndTurn();
+            //printGame(client.getGameSnapshot());
+            //printMenu(client.getGameSnapshot());
+        }
     }
 
     private synchronized boolean waitResult(){
@@ -430,7 +435,7 @@ class CLIHandler implements GraphicInterface{
     }
 
     @Override
-    public boolean askIfPlus(String prompt){
+    public boolean askIfPlus(String prompt) throws RollbackException{
         String choice = "";
         boolean ask = true;
         ClientLogger.print(MessageHandler.get(prompt));
@@ -441,7 +446,7 @@ class CLIHandler implements GraphicInterface{
             } catch (IOException e) {
                 ClientLogger.print("Not a valid choice, retry: ");
             }
-
+            if (choice.equals("0")) throw new RollbackException();
             if(choice.equals("+") || choice.equals("-") || choice.equals("y") || choice.equals("n"))
                 ask = false;
             else
@@ -451,34 +456,48 @@ class CLIHandler implements GraphicInterface{
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt){
+    public Dice askDiceDraftPool(String prompt) throws RollbackException{
         ClientLogger.print(MessageHandler.get(prompt));
-        return client.getGameSnapshot().getDraftPool().get(readInt(1, client.getGameSnapshot().getDraftPool().size()) - 1);
+        int i = readInt(0, client.getGameSnapshot().getDraftPool().size());
+        if (i == 0)
+            throw new RollbackException();
+        return client.getGameSnapshot().getDraftPool().get(i - 1);
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt){
+    public int askDiceRoundTrack(String prompt) throws RollbackException{
         ClientLogger.print(MessageHandler.get(prompt));
-        return readInt(1, 10) - 1;
+        int i = readInt(0, 10);
+        if (i == 0){
+            throw new RollbackException();
+        }
+        return i - 1;
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt){
+    public Coordinate askDiceWindow(String prompt) throws RollbackException {
         ClientLogger.println(MessageHandler.get(prompt));
         return getPosition();
     }
 
     @Override
-    public int askDiceValue(String prompt){
+    public int askDiceValue(String prompt) throws RollbackException{
         ClientLogger.print(MessageHandler.get(prompt));
+        int i = readInt(0, 6);
+        if (i==0)
+            throw new RollbackException();
         return readInt(1, 6);
     }
 
-    private Coordinate getPosition(){
+    private Coordinate getPosition() throws RollbackException{
         ClientLogger.print("Insert dice row: ");
-        int row = readInt(1, ROWS);
+        int row = readInt(0, ROWS);
+        if (row==0)
+            throw new RollbackException();
         ClientLogger.print("Insert dice column: ");
-        int column = readInt(1, COLUMNS);
+        int column = readInt(0, COLUMNS);
+        if (column==0)
+            throw new RollbackException();
         return new Coordinate(row, column);
     }
 

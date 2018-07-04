@@ -35,7 +35,7 @@ public class ToolCard implements Serializable {
         return this.cardName;
     }
 
-    public void use(Game realGame, ClientInterface connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException {
+    public void use(Game realGame, ClientInterface connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException, RollbackException {
         JsonObject effect;
         String command;
         JsonObject arguments = null;
@@ -113,8 +113,6 @@ public class ToolCard implements Serializable {
                         break;
 
                 }
-            }catch (RollbackException e){
-                return;
             }catch (DisconnectionException e){
                 //TODO: do something pls :(
                 i -= 1;
@@ -123,16 +121,8 @@ public class ToolCard implements Serializable {
                 return;
             }
         }
-        synchronized (realGame) {
-            if (!game.getRound().getCurrentPlayer().equals(realGame.getCurrentRound().getCurrentPlayer())){
-                return;
-            }
-            realGame.commit(game);
-            realGame.getCurrentRound().getCurrentPlayer().useFavorToken(used ? 2 : 1);
-        }
+        realGame.commit(game, this.used);
         this.used = true;
     }
-
-
 
 }

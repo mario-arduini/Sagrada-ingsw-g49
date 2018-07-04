@@ -183,10 +183,15 @@ public class Game {
         return new TransactionSnapshot(this, diceBag);
     }
 
-    public void commit(TransactionSnapshot gameCopy){
+    public synchronized void commit(TransactionSnapshot gameCopy, boolean firstUse) throws InvalidFavorTokenNumberException, PlayerSuspendedException, NotEnoughFavorTokenException {
+        if (!gameCopy.getRound().getCurrentPlayer().equals(getCurrentRound().getCurrentPlayer())){
+            throw new PlayerSuspendedException();
+        }
+
         roundTrack = gameCopy.getRoundTrack();
         currentRound = gameCopy.getRound();
         currentRound.getCurrentPlayer().setWindow(gameCopy.getWindow());
         diceBag = gameCopy.getDiceBag();
+        getCurrentRound().getCurrentPlayer().useFavorToken(!firstUse ? 2 : 1);
     }
 }
