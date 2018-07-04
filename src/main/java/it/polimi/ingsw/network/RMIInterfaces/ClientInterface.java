@@ -31,4 +31,5 @@ public interface ClientInterface extends Remote, Serializable {
     int askDiceRoundTrack(String prompt) throws RemoteException;
     boolean askIfPlus(String prompt) throws RemoteException;
     int askDiceValue(String prompt) throws RemoteException;
+    void showDice(Dice dice) throws RemoteException;
 }

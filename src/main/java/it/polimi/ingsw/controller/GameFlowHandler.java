@@ -1,9 +1,6 @@
 package it.polimi.ingsw.controller;
 
-import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
-import it.polimi.ingsw.controller.exceptions.GameOverException;
-import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
-import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
+import it.polimi.ingsw.controller.exceptions.*;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
@@ -25,7 +22,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     private ToolCard activeToolCard;
     private ClientInterface connection;
     private Timer timer;
-    private int secondsTimerSchema = 30; //TODO: read value from file.
+    private int secondsTimerSchema = 3000; //TODO: read value from file.
 
     GameFlowHandler(GamesHandler gamesHandler, ClientInterface connection, Player player) throws RemoteException{
         this.player = player;
@@ -147,11 +144,11 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         gamesHandler.goToWaitingRoom(this);
     }
 
-    public void useToolCard(String cardName) throws GameNotStartedException, GameOverException, NoSuchToolCardException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException {
+    public void useToolCard(String cardName) throws GameNotStartedException, GameOverException, NoSuchToolCardException, ToolcardAlreadyUsedException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, BadAdjacentDiceException, ConstraintViolatedException, FirstDiceMisplacedException, NotWantedAdjacentDiceException, NoAdjacentDiceException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException {
         if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
         if (gameRoom.isGameFinished()) throw new GameOverException();
-
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
+        if (activeToolCard != null) throw new ToolcardAlreadyUsedException();
         Optional<ToolCard> fetch = (gameRoom.getToolCards()).stream().filter(card -> card.getName().equalsIgnoreCase(cardName)).findFirst();
         if (!fetch.isPresent()){
             throw new NoSuchToolCardException();

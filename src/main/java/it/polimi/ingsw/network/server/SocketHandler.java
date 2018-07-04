@@ -5,10 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
 import it.polimi.ingsw.controller.GamesHandler;
-import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
-import it.polimi.ingsw.controller.exceptions.GameOverException;
-import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
-import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
+import it.polimi.ingsw.controller.exceptions.*;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
@@ -171,9 +168,10 @@ public class SocketHandler implements Runnable, ClientInterface {
                 FirstDiceMisplacedException | NoSameColorDicesException |
                 BadAdjacentDiceException | NoAdjacentDiceException |
                 NotDraftedYetException | NotYourFirstTurnException |
-                GameNotStartedException | GameOverException e) {
+                GameNotStartedException | GameOverException |
+                ToolcardAlreadyUsedException | NotEnoughDiceToMoveException e) {
             Logger.print("Toolcard : " + nickname + " " + e);
-            socketSendMessage(createMessage("failed"));
+            socketSendMessage(createErrorMessage(e.toString()));
         }
     }
 
@@ -392,6 +390,16 @@ public class SocketHandler implements Runnable, ClientInterface {
             connected = false;
         }
         return -1;
+    }
+
+    @Override
+    public void showDice(Dice dice){
+        JsonObject message;
+
+        message = createMessage("show-dice");
+        message.addProperty("dice", gson.toJson(dice));
+
+        socketSendMessage(message);
     }
 
     private boolean login() {

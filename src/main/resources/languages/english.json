@@ -1,6 +1,5 @@
 {
   "error-gui":"Unexpected error in starting GUI, starting CLI client instead",
-
   "ask-plus-invalid":"Cannot choose this option, select either [+] or [-]?: ",
   "move-to-same":"Cannot move the dice to the same position, choose another position!",
   "move-from-not-round-color":"Dice has to be of the same color of one of the dice of the round track, choose another dice.",
@@ -8,16 +7,16 @@
   "move-to":"Choose where to move the dice.",
   "move-from-different-color":"Dice has to be of the same color as the previous one, choose another dice.",
   "move-to-invalid":"Dice cannot be placed there, choose another position!",
-  "move-from-unmovable":"Selected dice cannot be moved in any place, choose another dice to move.",
+  "move-from-unmovable":"Selected dice cannot be moved in any place.\nChoose another dice to move.",
   "ask-plus":"Do you want to add [+] or reduce [-] the value of the dice?: ",
   "move-from":"Choose the dice to move.",
-  "move-from-empty":"Select cell is empty, choose the dice to move.",
+  "move-from-empty":"Cell is empty, choose the dice to move.",
   "choose-value":"Choose the value for the dice: ",
-  "choose-value-invalid":"Value must still be between 1 and 6 furbacchione, select the value: ",
+  "choose-value-invalid":"Value must still be between 1 and 6 furbacchione!\nSelect the value: ",
   "choose-round-swap":"Select the dice to swap from the round track: ",
-  "choose-round-swap-invalid":"Not valid number, insert the position of the desired dice as a number: ",
+  "choose-round-swap-invalid":"Invalid position, insert the correct position of the desired dice: ",
   "choose-drafted":"Choose a dice from the draft pool: ",
-  "choose-drafted-invalid":"Dice not present in the draft pool furbacchione, choose another one: ",
+  "choose-drafted-invalid":"Dice not present in the draft pool furbacchione!\n Choose another one: ",
   "place-dice":"Choose where to place the dice.",
   "place-dice-invalid":"There you cannot, choose another cell."
 }

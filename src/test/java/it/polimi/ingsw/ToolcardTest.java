@@ -164,6 +164,10 @@ class ConnectionHandlerStub implements ClientInterface {
     @Override
     public void notifySuspension(String nickname){
     }
+
+    @Override
+    public void showDice(Dice dice){
+    }
 }
 
 public class ToolcardTest {

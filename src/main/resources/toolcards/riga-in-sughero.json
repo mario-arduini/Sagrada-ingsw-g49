@@ -1,1 +1,10 @@
-{"name":"Riga in sughero","effects":[{"get-draft-dice":{}},{"place-dice":{"ignore":"ADJACENCIES"}}],"prerequisites":["before-draft","favor-token"]}
+{"name":"Riga in sughero",
+	"effects":[
+		{"get-draft-dice":{}},
+		{"place-dice":{"ignore":"ADJACENCIES"}}
+	]
+	,"prerequisites":[
+		"before-draft",
+		"favor-token"
+	]
+}

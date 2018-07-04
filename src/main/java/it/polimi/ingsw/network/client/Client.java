@@ -1,9 +1,6 @@
 package it.polimi.ingsw.network.client;
 
-import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
-import it.polimi.ingsw.controller.exceptions.GameOverException;
-import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
-import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
+import it.polimi.ingsw.controller.exceptions.*;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
@@ -122,7 +119,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     void useToolCard(String name){
         try {
             server.useToolCard(name);
-        } catch (GameNotStartedException | GameOverException | InvalidDiceValueException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | ConstraintViolatedException | BadAdjacentDiceException | NotWantedAdjacentDiceException | FirstDiceMisplacedException | NoAdjacentDiceException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException e) {
+        } catch (GameNotStartedException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | InvalidDiceValueException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | ConstraintViolatedException | BadAdjacentDiceException | NotWantedAdjacentDiceException | FirstDiceMisplacedException | NoAdjacentDiceException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException e) {
             setServerResult(false);
             LOGGER.warning(e.toString());
         } catch (RemoteException e){
@@ -300,6 +297,11 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         if(nickname.equalsIgnoreCase(gameSnapshot.getPlayer().getNickname()))
             handler.interruptInput();
         handler.wakeUp(false);
+    }
+
+    @Override
+    public void showDice(Dice dice){
+        handler.printDice(dice);
     }
 
     void newGame(){

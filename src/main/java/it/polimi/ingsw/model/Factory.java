@@ -32,7 +32,8 @@ public class Factory {
         this.toolCards = new Stack<>();
         List<File> files = FilesUtil.listFiles(FilesUtil.TOOLCARD_FOLDER);
         for (File file:files){
-            toolCards.push(file);
+            if (file.getName().matches("[a-zA-Z0-9_-]+\\.json"))
+                toolCards.push(file);
         }
         this.privateGoalCards = Arrays.asList(Color.BLUE,Color.GREEN,Color.PURPLE,Color.RED,Color.YELLOW);
         this.privateGoalCardsIndex = 0;

@@ -31,7 +31,7 @@ public class ToolCard implements Serializable {
         return this.cardName;
     }
 
-    public void use(Game game, ClientInterface connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException {
+    public void use(Game game, ClientInterface connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, BadAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, NotWantedAdjacentDiceException, FirstDiceMisplacedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException {
         JsonObject effect;
         String command;
         JsonObject arguments = null;
@@ -49,6 +49,7 @@ public class ToolCard implements Serializable {
                 case "movable-color" : Prerequisites.checkMovable(game.getCurrentRound().getCurrentPlayer(), Window.RuleIgnored.COLOR); break;
                 case "movable-value" : Prerequisites.checkMovable(game.getCurrentRound().getCurrentPlayer(), Window.RuleIgnored.NUMBER); break;
                 case "movable" : Prerequisites.checkMovable(game.getCurrentRound().getCurrentPlayer(), Window.RuleIgnored.NONE); break;
+                case "two-dices-window" : Prerequisites.checkTwoDiceInWindow(game.getCurrentRound().getCurrentPlayer().getWindow()); ; break;
             }
         }
 
@@ -66,7 +67,7 @@ public class ToolCard implements Serializable {
                     Effects.getDraftedDice(game.getCurrentRound(), connection);
                     break;
                 case "place-dice":
-                    if(!Effects.addDiceToWindow(game.getCurrentRound().getCurrentPlayer(),game.getCurrentRound().getCurrentDiceDrafted(), connection)){
+                    if(!Effects.addDiceToWindow(game.getCurrentRound().getCurrentPlayer(),game.getCurrentRound().getCurrentDiceDrafted(), connection, gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class))){
                         game.getCurrentRound().getDraftPool().add(game.getCurrentRound().getCurrentDiceDrafted());
                         game.getCurrentRound().setCurrentDiceDrafted(null);
                     }
@@ -78,10 +79,10 @@ public class ToolCard implements Serializable {
                     Effects.move(game.getCurrentRound().getCurrentPlayer(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class),optional, connection);
                     break;
                 case "change-value":
-                    if (arguments.get("plus").getAsBoolean())
+                    if (arguments.get("plus")!=null && arguments.get("plus").getAsBoolean())
                         Effects.changeValue(game.getCurrentRound().getCurrentDiceDrafted(), arguments.get("value").getAsInt(), connection);
-                    else if(arguments.get("random")!=null&&arguments.get("random").getAsBoolean())
-                        Effects.changeValue(game.getCurrentRound().getCurrentDiceDrafted());
+                    else if(arguments.get("random")!=null && arguments.get("random").getAsBoolean())
+                        Effects.changeValue(game.getCurrentRound().getCurrentDiceDrafted(), connection);
                     break;
                 case "flip":
                     Effects.flip(game.getCurrentRound().getCurrentDiceDrafted());
@@ -98,9 +99,10 @@ public class ToolCard implements Serializable {
                 case "put-in-bag":
                     game.putInBag(game.getCurrentRound().getCurrentDiceDrafted());
                     break;
-                case "get-from-bag":
-                    Effects.getDiceFromBag(game.getCurrentRound(),game.getFromBag(), connection);
+                case "set-from-bag":
+                    Effects.setDiceFromBag(game.getCurrentRound(),game.getFromBag(), connection);
                     break;
+
             }
         }
         game.getCurrentRound().getCurrentPlayer().useFavorToken(used ? 2 : 1);

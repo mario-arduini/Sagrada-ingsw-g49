@@ -437,6 +437,11 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     }
 
     @Override
+    public void printDice(Dice dice){
+
+    }
+
+    @Override
     public void wakeUp(boolean serverResult) {
         if(isLogging) handleLogin(serverResult);
         if(choosingSchema) handleSchema(serverResult);

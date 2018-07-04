@@ -33,8 +33,8 @@ final class Effects {
         round.setDiceExtracted(true);
     }
 
-    static boolean addDiceToWindow(Player player, Dice dice, ClientInterface connection) {
-        if(player.getWindow().possiblePlaces(dice, Window.RuleIgnored.NONE)==0) return false;
+    static boolean addDiceToWindow(Player player, Dice dice, ClientInterface connection, Window.RuleIgnored ignore) {
+        if(player.getWindow().possiblePlaces(dice, ignore)==0) return false;
         boolean valid = false;
         Coordinate coords = null;
         String prompt = "place-dice";
@@ -47,7 +47,7 @@ final class Effects {
             if (coords!= null) {
                 prompt = "place-dice-invalid";
                 try {
-                    placeDice(player, dice, coords.getRow(), coords.getColumn(), Window.RuleIgnored.NONE);
+                    placeDice(player, dice, coords.getRow(), coords.getColumn(), ignore);
                     valid = true;
                 } catch (ConstraintViolatedException | NotWantedAdjacentDiceException
                         | FirstDiceMisplacedException | BadAdjacentDiceException | NoAdjacentDiceException e) {
@@ -204,8 +204,13 @@ final class Effects {
         return removedDice;
     }
 
-    static void changeValue(Dice dice){
+    static void changeValue(Dice dice, ClientInterface connection){
         dice.roll();
+        try {
+            connection.showDice(dice);
+        } catch (RemoteException e) {
+            Logger.print("Disconnection RMI inside toolcards.");
+        }
     }
 
     static void changeValue(Dice dice, int value, ClientInterface connection) {
@@ -232,6 +237,11 @@ final class Effects {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
+        }
+        try {
+            connection.showDice(dice);
+        } catch (RemoteException e) {
+            Logger.print("Disconnection RMI inside toolcards.");
         }
     }
 
@@ -275,12 +285,21 @@ final class Effects {
         Dice toSwap = roundTrack.get(position);
         roundTrack.set(position,round.getCurrentDiceDrafted());
         round.setCurrentDiceDrafted(toSwap);
+        round.getDraftPool().add(round.getCurrentDiceDrafted());
     }
 
-    static void getDiceFromBag(Round round, Dice dice, ClientInterface connection){
+    static void setDiceFromBag(Round round, Dice dice, ClientInterface connection){
         int value = 0; //TODO: remove this init
         boolean valid = false;
         String prompt = "choose-value";
+
+        //TODO: what if disconnection here?!
+        try {
+            connection.showDice(dice);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
         while (!valid){
             valid = true;
             try {
@@ -321,12 +340,7 @@ final class Effects {
                         player.getWindow().setDice(row, column, dice);
                     }
                 else
-                    try {
-                        player.getWindow().checkBorder(row, column);
-                        throw new NotWantedAdjacentDiceException();
-                    }catch (FirstDiceMisplacedException e){
-                        player.getWindow().setDice(row, column, dice);
-                    }
+                    player.getWindow().setDice(row, column, dice);
                 break;
             case NONE:
                 player.getWindow().addDice(row, column, dice);
