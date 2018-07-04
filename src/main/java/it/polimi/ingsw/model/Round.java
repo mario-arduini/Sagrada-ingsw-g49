@@ -30,14 +30,15 @@ public class Round {
     }
 
     public Round(Round round){
-        this.draftPool = round.draftPool;
-        this.players = round.players;
+        this.draftPool = new ArrayList<>(round.draftPool);
+        this.players = new ArrayList<>(round.players);
         this.diceExtracted = round.diceExtracted;
         this.currentPlayer = round.currentPlayer;
         this.currentDiceDrafted = round.currentDiceDrafted;
         this.activeToolCard = round.activeToolCard;
         this.playersNumber = round.playersNumber;
     }
+
 
     public List<Dice> getDraftPool(){
         return draftPool;

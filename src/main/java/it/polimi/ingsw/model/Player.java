@@ -59,6 +59,11 @@ public class Player {
         setFavorToken();
     }
 
+    public void setWindow(Window window) {
+        this.window = window;
+
+    }
+
     public String getNickname() {
 
         return nickname;

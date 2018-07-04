@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.RMIInterfaces;
 
+import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 
 import java.io.Serializable;
@@ -26,10 +27,10 @@ public interface ClientInterface extends Remote, Serializable {
 
     //void close();
 
-    Coordinate askDiceWindow(String prompt) throws RemoteException;
-    Dice askDiceDraftPool(String prompt) throws RemoteException;
-    int askDiceRoundTrack(String prompt) throws RemoteException;
-    boolean askIfPlus(String prompt) throws RemoteException;
-    int askDiceValue(String prompt) throws RemoteException;
+    Coordinate askDiceWindow(String prompt) throws RemoteException, RollbackException;
+    Dice askDiceDraftPool(String prompt) throws RemoteException, RollbackException;
+    int askDiceRoundTrack(String prompt) throws RemoteException, RollbackException;
+    boolean askIfPlus(String prompt) throws RemoteException, RollbackException;
+    int askDiceValue(String prompt) throws RemoteException, RollbackException;
     void showDice(Dice dice) throws RemoteException;
 }
