@@ -12,7 +12,6 @@ import it.polimi.ingsw.network.RMIInterfaces.LoginInterface;
 import it.polimi.ingsw.network.client.model.*;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
-
 import java.net.SocketException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
