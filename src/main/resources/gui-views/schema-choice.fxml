@@ -137,9 +137,9 @@
               <Pane GridPane.rowIndex="3" GridPane.columnIndex="4" GridPane.vgrow="ALWAYS" GridPane.hgrow="ALWAYS"></Pane>
           </children>
       </GridPane>
-      <Button mnemonicParsing="false" text="Button" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-      <Button mnemonicParsing="false" text="Button" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-      <Button mnemonicParsing="false" text="Button" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-      <Button mnemonicParsing="false" text="Button" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+      <Button fx:id="schema0" mnemonicParsing="false" text="Button" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+      <Button fx:id="schema1" mnemonicParsing="false" text="Button" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+      <Button fx:id="schema2" mnemonicParsing="false" text="Button" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+      <Button fx:id="schema3" mnemonicParsing="false" text="Button" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
    </children>
 </GridPane>
