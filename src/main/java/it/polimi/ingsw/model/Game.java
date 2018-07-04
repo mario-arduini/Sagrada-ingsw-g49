@@ -19,6 +19,7 @@ public class Game {
     private Round currentRound;
     private static final int schemaPerPlayer = 4;
     private boolean playing;
+    private List<Dice> diceBag;
 
     public Game(List<Player> playerList) throws NoMorePlayersException { //Fix UML for players
         this.dealer = new Factory();
@@ -58,6 +59,7 @@ public class Game {
         currentRound = new Round(dealer.extractPool(2*(size) + 1),createRoundPlayers());
         currentRound.nextPlayer();
         this.playing = false;
+        this.diceBag = dealer.getDiceBag();
     }
 
     protected void setPlaying(boolean playing){
@@ -177,11 +179,14 @@ public class Game {
         return this.dealer.extractSchemas(schemaPerPlayer);
     }
 
-    public void putInBag(Dice dice){
-        dealer.putInBag(dice);
+    public TransactionSnapshot beginTransaction(){
+        return new TransactionSnapshot(this, diceBag);
     }
 
-    public Dice getFromBag(){
-        return dealer.getFromBag();
+    public void commit(TransactionSnapshot gameCopy){
+        roundTrack = gameCopy.getRoundTrack();
+        currentRound = gameCopy.getRound();
+        currentRound.getCurrentPlayer().setWindow(gameCopy.getWindow());
+        diceBag = gameCopy.getDiceBag();
     }
 }

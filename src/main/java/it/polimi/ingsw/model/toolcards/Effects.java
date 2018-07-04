@@ -1,5 +1,7 @@
 package it.polimi.ingsw.model.toolcards;
 
+import it.polimi.ingsw.controller.exceptions.DisconnectionException;
+import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
@@ -15,7 +17,7 @@ final class Effects {
         super();
     }
 
-    static void getDraftedDice(Round round, ClientInterface connection){
+    static void getDraftedDice(Round round, ClientInterface connection) throws RollbackException {
         boolean valid = false;
         Dice dice = null;
         String prompt = "choose-drafted";
@@ -33,8 +35,8 @@ final class Effects {
         round.setDiceExtracted(true);
     }
 
-    static boolean addDiceToWindow(Player player, Dice dice, ClientInterface connection, Window.RuleIgnored ignore) {
-        if(player.getWindow().possiblePlaces(dice, ignore)==0) return false;
+    static boolean addDiceToWindow(Window window, Dice dice, ClientInterface connection, Window.RuleIgnored ignore) throws RollbackException, DisconnectionException {
+        if(window.possiblePlaces(dice, ignore)==0) return false;
         boolean valid = false;
         Coordinate coords = null;
         String prompt = "place-dice";
@@ -47,7 +49,7 @@ final class Effects {
             if (coords!= null) {
                 prompt = "place-dice-invalid";
                 try {
-                    placeDice(player, dice, coords.getRow(), coords.getColumn(), ignore);
+                    placeDice(window, dice, coords.getRow(), coords.getColumn(), ignore);
                     valid = true;
                 } catch (ConstraintViolatedException | NotWantedAdjacentDiceException
                         | FirstDiceMisplacedException | BadAdjacentDiceException | NoAdjacentDiceException e) {
@@ -58,7 +60,7 @@ final class Effects {
         return true;
     }
 
-    static void move(Player player,Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection){
+    static void move(Window currentPlayerWindow,Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection) throws RollbackException, DisconnectionException {
         try {
             if(optional && !connection.askIfPlus("want-move")) return;
         } catch (RemoteException e) {
@@ -66,7 +68,6 @@ final class Effects {
         }
         Coordinate start = null;
         Coordinate end = null;
-        Window currentPlayerWindow = player.getWindow();
         Dice removedDice = null;
         boolean valid = false;
         String message = "move-from";
@@ -113,7 +114,7 @@ final class Effects {
                 valid = false;
                 message = "move-to-same";
             } else try {
-                placeDice(player,removedDice, end.getRow(), end.getColumn(), ruleIgnored);
+                placeDice(currentPlayerWindow,removedDice, end.getRow(), end.getColumn(), ruleIgnored);
             } catch (NoAdjacentDiceException | BadAdjacentDiceException
                     | FirstDiceMisplacedException | ConstraintViolatedException | NotWantedAdjacentDiceException e) {
                 valid = false;
@@ -123,7 +124,7 @@ final class Effects {
         }
     }
 
-    public static Dice move(Player player, List<Dice> roundTrack, Dice old, Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection) {
+    public static Dice move(Window currentPlayerWindow, List<Dice> roundTrack, Dice old, Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection) throws RollbackException {
         try {
             if(optional && !connection.askIfPlus("want-move")) return null;
         } catch (RemoteException e) {
@@ -131,7 +132,6 @@ final class Effects {
         }
         Coordinate start = null;
         Coordinate end = null;
-        Window currentPlayerWindow = player.getWindow();
         Dice removedDice = null;
         boolean valid = false;
         String message = "move-from";
@@ -193,7 +193,7 @@ final class Effects {
                 valid = false;
                 message = "move-to-same";
             } else try {
-                placeDice(player,removedDice, end.getRow(), end.getColumn(), ruleIgnored);
+                placeDice(currentPlayerWindow,removedDice, end.getRow(), end.getColumn(), ruleIgnored);
             } catch (NoAdjacentDiceException | BadAdjacentDiceException
                     | FirstDiceMisplacedException | ConstraintViolatedException | NotWantedAdjacentDiceException e) {
                 valid = false;
@@ -213,7 +213,7 @@ final class Effects {
         }
     }
 
-    static void changeValue(Dice dice, int value, ClientInterface connection) {
+    static void changeValue(Dice dice, int value, ClientInterface connection) throws RollbackException {
         String message = "ask-plus";
         boolean valid=false;
         while (!valid){
@@ -264,7 +264,7 @@ final class Effects {
         });
     }
 
-    static void swapRoundTrack(Round round,List<Dice> roundTrack, ClientInterface connection){
+    static void swapRoundTrack(Round round,List<Dice> roundTrack, ClientInterface connection) throws RollbackException {
         boolean valid = false;
         int position=0;
         String prompt = "choose-round-swap";
@@ -288,7 +288,7 @@ final class Effects {
         round.getDraftPool().add(round.getCurrentDiceDrafted());
     }
 
-    static void setDiceFromBag(Round round, Dice dice, ClientInterface connection){
+    static void setDiceFromBag(Round round, Dice dice, ClientInterface connection) throws RollbackException {
         int value = 0; //TODO: remove this init
         boolean valid = false;
         String prompt = "choose-value";
@@ -317,33 +317,33 @@ final class Effects {
         round.setCurrentDiceDrafted(dice);
     }
 
-    private static void placeDice(Player player,Dice dice, int row, int column, Window.RuleIgnored ruleIgnored) throws NotWantedAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, BadAdjacentDiceException, FirstDiceMisplacedException {
+    private static void placeDice(Window window,Dice dice, int row, int column, Window.RuleIgnored ruleIgnored) throws NotWantedAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, BadAdjacentDiceException, FirstDiceMisplacedException {
         switch (ruleIgnored){
             case COLOR:
-                player.getWindow().checkValueConstraint(player.getWindow().getSchema().getConstraint(row, column),dice);
-                player.getWindow().checkPlacementConstraint(row, column, dice);
-                player.getWindow().setDice(row, column, dice);
+                window.checkValueConstraint(window.getSchema().getConstraint(row, column),dice);
+                window.checkPlacementConstraint(row, column, dice);
+                window.setDice(row, column, dice);
                 break;
             case NUMBER:
-                player.getWindow().checkColorConstraint(player.getWindow().getSchema().getConstraint(row, column),dice);
-                player.getWindow().checkPlacementConstraint(row, column, dice);
-                player.getWindow().setDice(row, column, dice);
+                window.checkColorConstraint(window.getSchema().getConstraint(row, column),dice);
+                window.checkPlacementConstraint(row, column, dice);
+                window.setDice(row, column, dice);
                 break;
             case ADJACENCIES:
-                player.getWindow().checkValueConstraint(player.getWindow().getSchema().getConstraint(row, column), dice);
-                player.getWindow().checkColorConstraint(player.getWindow().getSchema().getConstraint(row, column), dice);
-                if(player.getWindow().isFirstDicePlaced())
+                window.checkValueConstraint(window.getSchema().getConstraint(row, column), dice);
+                window.checkColorConstraint(window.getSchema().getConstraint(row, column), dice);
+                if(window.isFirstDicePlaced())
                     try {
-                        player.getWindow().checkAdjacencies(row, column, dice);
+                        window.checkAdjacencies(row, column, dice);
                         throw new NotWantedAdjacentDiceException();
                     }catch (NoAdjacentDiceException e){
-                        player.getWindow().setDice(row, column, dice);
+                        window.setDice(row, column, dice);
                     }
                 else
-                    player.getWindow().setDice(row, column, dice);
+                    window.setDice(row, column, dice);
                 break;
             case NONE:
-                player.getWindow().addDice(row, column, dice);
+                window.addDice(row, column, dice);
                 break;
         }
     }

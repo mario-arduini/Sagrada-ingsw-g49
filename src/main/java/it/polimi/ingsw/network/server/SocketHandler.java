@@ -291,7 +291,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt) {
+    public Coordinate askDiceWindow(String prompt) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-window");
@@ -313,7 +313,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt){
+    public Dice askDiceDraftPool(String prompt) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-draftpool");
@@ -333,7 +333,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt){
+    public int askDiceRoundTrack(String prompt) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-roundtrack");
@@ -353,7 +353,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public boolean askIfPlus(String prompt){
+    public boolean askIfPlus(String prompt) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-plus-minus");
@@ -373,7 +373,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public int askDiceValue(String prompt){
+    public int askDiceValue(String prompt) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-value");
