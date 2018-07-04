@@ -665,4 +665,9 @@ class CLIHandler implements GraphicInterface{
                 this.notifyAll();
             }
     }
+
+    @Override
+    public void printDice(Dice dice){
+        ClientLogger.println("Dice: " + dice);
+    }
 }

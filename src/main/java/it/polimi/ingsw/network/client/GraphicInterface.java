@@ -23,4 +23,5 @@ public interface GraphicInterface {
     int askDiceValue(String prompt);
     void wakeUp(boolean serverResult);
     void interruptInput();
+    void printDice(Dice dice);
 }

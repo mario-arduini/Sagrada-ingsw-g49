@@ -80,4 +80,8 @@ final class Prerequisites {
             }
         if(!valid) throw new NothingCanBeMovedException();
     }
+
+    static void checkTwoDiceInWindow(Window window) throws NotEnoughDiceToMoveException{
+        if (window.numOfDicePlaced() < 2) throw new NotEnoughDiceToMoveException();
+    }
 }

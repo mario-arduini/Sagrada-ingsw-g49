@@ -123,6 +123,9 @@ public class ServerListener implements Runnable {
                     case "toolcard-dice-value":
                         server.sendDiceValue(client.askDiceValue(jsonObject.get("prompt").getAsString()));
                         break;
+                    case "show-dice":
+                        client.showDice(gson.fromJson(jsonObject.get("dice").getAsString(), Dice.class));
+                        break;
                     //endregion
 
                     default:

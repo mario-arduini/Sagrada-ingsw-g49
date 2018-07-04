@@ -246,4 +246,13 @@ public class Window implements Serializable {
     public int getEmptySpaces(){
         return Arrays.stream(mosaic).flatMap(Arrays::stream).filter(cell -> !(cell==null)).map(d -> 1).reduce(0, (n1, n2) -> n1 + n2);
     }
+
+    public int numOfDicePlaced(){
+        int count = 0;
+        for (int i = 0; i<mosaic.length; i++)
+            for (int j = 0; j<mosaic[0].length; j++)
+                if (mosaic[i][j] != null)
+                        count++;
+        return count;
+    }
 }
