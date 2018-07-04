@@ -5,10 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.polimi.ingsw.controller.GameFlowHandler;
 import it.polimi.ingsw.controller.GamesHandler;
-import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
-import it.polimi.ingsw.controller.exceptions.GameOverException;
-import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
-import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
+import it.polimi.ingsw.controller.exceptions.*;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
@@ -167,13 +164,12 @@ public class SocketHandler implements Runnable, ClientInterface {
                 InvalidFavorTokenNumberException | AlreadyDraftedException |
                 NotEnoughFavorTokenException | NotYourSecondTurnException |
                 NoDiceInRoundTrackException | NotYourTurnException |
-                ConstraintViolatedException | NotWantedAdjacentDiceException |
-                FirstDiceMisplacedException | NoSameColorDicesException |
-                BadAdjacentDiceException | NoAdjacentDiceException |
+                NoSameColorDicesException | PlayerSuspendedException |
                 NotDraftedYetException | NotYourFirstTurnException |
-                GameNotStartedException | GameOverException e) {
+                GameNotStartedException | GameOverException |
+                ToolcardAlreadyUsedException | NotEnoughDiceToMoveException e) {
             Logger.print("Toolcard : " + nickname + " " + e);
-            socketSendMessage(createMessage("failed"));
+            socketSendMessage(createErrorMessage(e.toString()));
         }
     }
 
@@ -293,7 +289,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt) {
+    public Coordinate askDiceWindow(String prompt) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-window");
@@ -302,6 +298,10 @@ public class SocketHandler implements Runnable, ClientInterface {
 
         try{
             command = socketReadCommand();
+            if (command.get("choice").getAsString().equalsIgnoreCase("rollback")){
+                socketSendMessage(createMessage("rollback-ok"));
+                throw new RollbackException();
+            }
 
             return gson.fromJson(command.get("choice").getAsString(), Coordinate.class);
 
@@ -315,7 +315,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt){
+    public Dice askDiceDraftPool(String prompt) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-draftpool");
@@ -323,6 +323,10 @@ public class SocketHandler implements Runnable, ClientInterface {
         socketSendMessage(toSend);
         try{
             command = socketReadCommand();
+            if (command.get("choice").getAsString().equalsIgnoreCase("rollback")){
+                socketSendMessage(createMessage("rollback-ok"));
+                throw new RollbackException();
+            }
 
             return gson.fromJson(command.get("choice").getAsString(), Dice.class);
 
@@ -335,7 +339,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt){
+    public int askDiceRoundTrack(String prompt) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-roundtrack");
@@ -343,6 +347,10 @@ public class SocketHandler implements Runnable, ClientInterface {
         socketSendMessage(toSend);
         try{
             command = socketReadCommand();
+            if (command.get("choice").getAsString().equalsIgnoreCase("rollback")){
+                socketSendMessage(createMessage("rollback-ok"));
+                throw new RollbackException();
+            }
 
             return getJsonPositiveIntValue(command, "choice");
 
@@ -355,7 +363,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public boolean askIfPlus(String prompt){
+    public boolean askIfPlus(String prompt) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-plus-minus");
@@ -363,6 +371,11 @@ public class SocketHandler implements Runnable, ClientInterface {
         socketSendMessage(toSend);
         try{
             command = socketReadCommand();
+            if (command.get("choice").getAsString().equalsIgnoreCase("rollback")){
+                socketSendMessage(createMessage("rollback-ok"));
+                throw new RollbackException();
+            }
+
             return command.get("choice").getAsBoolean();
 
         } catch (NullPointerException e){
@@ -375,7 +388,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public int askDiceValue(String prompt){
+    public int askDiceValue(String prompt) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-value");
@@ -383,6 +396,10 @@ public class SocketHandler implements Runnable, ClientInterface {
         socketSendMessage(toSend);
         try{
             command = socketReadCommand();
+            if (command.get("choice").getAsString().equalsIgnoreCase("rollback")){
+                socketSendMessage(createMessage("rollback-ok"));
+                throw new RollbackException();
+            }
 
             return getJsonPositiveIntValue(command, "choice");
 
@@ -392,6 +409,16 @@ public class SocketHandler implements Runnable, ClientInterface {
             connected = false;
         }
         return -1;
+    }
+
+    @Override
+    public void showDice(Dice dice){
+        JsonObject message;
+
+        message = createMessage("show-dice");
+        message.addProperty("dice", gson.toJson(dice));
+
+        socketSendMessage(message);
     }
 
     private boolean login() {

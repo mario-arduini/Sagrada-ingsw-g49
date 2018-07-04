@@ -57,4 +57,31 @@ public class GuiMain extends Application {
         }
         return goalImage;
     }
+
+    public static Image getToolImage(String tool){
+        String fileName;
+        switch (tool){
+            case "Pinza Sgrossatrice": fileName = "0002.jpg"; break;
+            case "Pennello per Eglomise": fileName = "0003.jpg"; break;
+            case "Alesatore per lamina di rame": fileName = "0004.jpg"; break;
+            case "Lathekin": fileName = "0005.jpg"; break;
+            case "Taglierina Circolare": fileName = "0006.jpg"; break;
+            case "Pennello per pasta salda": fileName = "0007.jpg"; break;
+            case "Martelletto": fileName = "0008.jpg"; break;
+            case "Tenaglia a rotelle": fileName = "0009.jpg"; break;
+            case "Riga in sughero": fileName = "0010.jpg"; break;
+            case "Tampone Diamantato": fileName = "0011.jpg"; break;
+            case "Diluente per pasta salda": fileName = "0012.jpg"; break;
+            case "Taglierina Manuale": fileName = "0013.jpg"; break;
+            default: fileName = "0001.jpg"; break;
+        }
+        URL path = GuiMain.class.getClassLoader().getResource("gui-views/toolcards/"+fileName);
+        Image goalImage = null;
+        try{
+            goalImage = new Image(path.openStream());
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        return goalImage;
+    }
 }

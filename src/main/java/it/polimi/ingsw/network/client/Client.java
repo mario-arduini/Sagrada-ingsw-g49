@@ -1,9 +1,6 @@
 package it.polimi.ingsw.network.client;
 
-import it.polimi.ingsw.controller.exceptions.GameNotStartedException;
-import it.polimi.ingsw.controller.exceptions.GameOverException;
-import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
-import it.polimi.ingsw.controller.exceptions.NotYourTurnException;
+import it.polimi.ingsw.controller.exceptions.*;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
@@ -121,7 +118,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     void useToolCard(String name){
         try {
             server.useToolCard(name);
-        } catch (GameNotStartedException | GameOverException | InvalidDiceValueException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | ConstraintViolatedException | BadAdjacentDiceException | NotWantedAdjacentDiceException | FirstDiceMisplacedException | NoAdjacentDiceException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException e) {
+        } catch (GameNotStartedException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException | PlayerSuspendedException e) {
             setServerResult(false);
             LOGGER.warning(e.toString());
         } catch (RemoteException e){
@@ -182,7 +179,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    void sendSchemaChoice(int choice){
+    public void sendSchemaChoice(int choice){
         try {
             server.chooseSchema(choice);
         } catch (GameNotStartedException | GameOverException | WindowAlreadySetException e) {
@@ -301,6 +298,11 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         handler.wakeUp(false);
     }
 
+    @Override
+    public void showDice(Dice dice){
+        handler.printDice(dice);
+    }
+
     void newGame(){
         try {
             gameSnapshot.newGame();
@@ -339,27 +341,27 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     //region TOOLCARD
 
     @Override
-    public boolean askIfPlus(String prompt){
+    public boolean askIfPlus(String prompt) throws RollbackException{
         return handler.askIfPlus(prompt);
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt){
+    public Dice askDiceDraftPool(String prompt) throws RollbackException{
         return handler.askDiceDraftPool(prompt);
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt){
+    public int askDiceRoundTrack(String prompt) throws RollbackException{
         return handler.askDiceRoundTrack(prompt);
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt){
+    public Coordinate askDiceWindow(String prompt) throws RollbackException{
         return handler.askDiceWindow(prompt);
     }
 
     @Override
-    public int askDiceValue(String prompt){
+    public int askDiceValue(String prompt) throws RollbackException{
         return handler.askDiceValue(prompt);
     }
 

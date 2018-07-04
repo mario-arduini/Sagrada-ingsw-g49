@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.model.Score;
@@ -123,6 +124,12 @@ public class ServerListener implements Runnable {
                     case "toolcard-dice-value":
                         server.sendDiceValue(client.askDiceValue(jsonObject.get("prompt").getAsString()));
                         break;
+                    case "show-dice":
+                        client.showDice(gson.fromJson(jsonObject.get("dice").getAsString(), Dice.class));
+                        break;
+                    case "rollback-ok":
+                        client.setServerResult(true);
+                        break;
                     //endregion
 
                     default:
@@ -130,6 +137,8 @@ public class ServerListener implements Runnable {
                 }
             } catch (NullPointerException e) {
                 LOGGER.warning(e.toString());
+            } catch (RollbackException e){
+                server.sendRollback();
             }
         }
     }

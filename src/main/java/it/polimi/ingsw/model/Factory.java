@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import it.polimi.ingsw.controller.exceptions.ToolcardAlreadyUsedException;
 import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
 import it.polimi.ingsw.model.exceptions.OutOfCardsException;
 import it.polimi.ingsw.model.goalcards.*;
@@ -32,7 +33,8 @@ public class Factory {
         this.toolCards = new Stack<>();
         List<File> files = FilesUtil.listFiles(FilesUtil.TOOLCARD_FOLDER);
         for (File file:files){
-            toolCards.push(file);
+            if (file.getName().matches("[a-zA-Z0-9_-]+\\.json"))
+                toolCards.push(file);
         }
         this.privateGoalCards = Arrays.asList(Color.BLUE,Color.GREEN,Color.PURPLE,Color.RED,Color.YELLOW);
         this.privateGoalCardsIndex = 0;
@@ -62,6 +64,9 @@ public class Factory {
 
     }
 
+    public List<Dice> getDiceBag() {
+        return diceBag;
+    }
 
     public List<Schema> extractSchemas(int schemasToExtract) throws IndexOutOfBoundsException {
         Stack<Schema> extracted = new Stack<>();
@@ -141,15 +146,6 @@ public class Factory {
             extracted.add( diceBag.remove(diceBag.size()-1) );
 
         return extracted;
-    }
-
-    public void putInBag(Dice dice){
-        dice.roll();
-        diceBag.add(new Random().nextInt(diceBag.size()),dice);
-    }
-
-    public Dice getFromBag(){
-        return diceBag.remove(diceBag.size()-1);
     }
 
 }

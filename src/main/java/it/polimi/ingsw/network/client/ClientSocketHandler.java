@@ -148,5 +148,10 @@ public class ClientSocketHandler implements FlowHandlerInterface {
         socketPrintLine(jsonObject);
     }
 
+    void sendRollback(){
+        createJsonCommand("rollback");
+        jsonObject.addProperty("choice", "rollback");
+        socketPrintLine(jsonObject);
+    }
     //endregion
 }
