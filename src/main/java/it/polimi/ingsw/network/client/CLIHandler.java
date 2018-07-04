@@ -359,8 +359,10 @@ class CLIHandler implements GraphicInterface{
             printMenu(client.getGameSnapshot());
         } else {
             client.verifyEndTurn();
-            //printGame(client.getGameSnapshot());
-            //printMenu(client.getGameSnapshot());
+            if(client.getGameSnapshot().getPlayer().isMyTurn() && !client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed()) {
+                printGame(client.getGameSnapshot());
+                printMenu(client.getGameSnapshot());
+            }
         }
     }
 
