@@ -12,12 +12,11 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -396,6 +395,17 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                     r.heightProperty().bind(draftPool.heightProperty().multiply(.8));
                     r.widthProperty().bind(r.heightProperty());
                     r.setFill(Color.valueOf(dice.getColor().toString()));
+
+                    r.setOnDragDetected(event -> {
+                        Dragboard db = r.startDragAndDrop(TransferMode.MOVE);
+                        ClipboardContent diceData = new ClipboardContent();
+                        diceData.putString(dice.getColor().toString());
+
+                        db.setContent(diceData);
+
+                        event.consume();
+                    });
+
                     draftPool.getChildren().add(r);
 
                 }

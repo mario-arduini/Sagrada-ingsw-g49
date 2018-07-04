@@ -6,11 +6,15 @@ import it.polimi.ingsw.model.Window;
 import it.polimi.ingsw.network.client.model.Color;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.control.Label;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 
 import java.util.function.DoublePredicate;
@@ -36,19 +40,17 @@ public class SagradaGridPane extends GridPane {
 
     public void setSchema(Schema schema){
         Constraint constraint;
-        VBox cell;
         this.setStyle("-fx-background-color: #05040c;");
         this.paddingProperty().bind(Bindings.createObjectBinding(() -> new Insets(this.hgapProperty().doubleValue()), this.hgapProperty()));
         for(int r = 0; r< Window.ROW; r++)
             for (int c = 0;c<Window.COLUMN;c++){
-                cell = new VBox();
+                StackPane cell = new StackPane();
                 constraint = schema.getConstraint(r,c);
                 if(constraint!=null){
                     if(constraint.getColor()!=null){
                         cell.setStyle("-fx-background-color: "+getColor(constraint.getColor())+";");
                         this.add(cell,c,r);
                     } else {
-                        cell.setAlignment(Pos.CENTER);
                         cell.setStyle("-fx-background-color: "+DEF_COLOR+";");
                         Label valueLabel = new Label(constraint.getNumber().toString());
                         valueLabel.scaleXProperty().bind(this.widthProperty().multiply(0.01));
@@ -60,6 +62,24 @@ public class SagradaGridPane extends GridPane {
                     cell.setStyle("-fx-background-color: "+DEF_COLOR+";");
                     this.add(cell,c,r);
                 }
+
+                cell.setOnDragOver(event -> {
+                    if (event.getGestureSource() != cell) {
+                        /* allow for moving */
+                        event.acceptTransferModes(TransferMode.MOVE);
+                    }
+                    event.consume();
+                });
+
+                cell.setOnDragDropped(event -> {
+                    Dragboard db = event.getDragboard();
+                    System.out.println("dragged yeahaa!");
+                    System.out.println(db.getString());
+
+                    event.setDropCompleted(true);
+
+                    event.consume();
+                });
             }
 
     }
