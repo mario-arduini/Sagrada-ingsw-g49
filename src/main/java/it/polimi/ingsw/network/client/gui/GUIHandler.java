@@ -4,12 +4,14 @@ import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.network.client.Client;
 import it.polimi.ingsw.network.client.GraphicInterface;
 import it.polimi.ingsw.network.client.model.GameSnapshot;
+import it.polimi.ingsw.network.client.model.ToolCard;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -27,6 +29,14 @@ import java.util.regex.Pattern;
 
 public class GUIHandler extends UnicastRemoteObject implements GraphicInterface {
 
+    public GridPane toolGrid;
+    public GridPane otherGrid;
+    public GridPane goalGrid;
+    public TabPane tabPane;
+    @FXML private GridPane gameScene;
+    @FXML private ImageView toolCard1;
+    @FXML private ImageView toolCard2;
+    @FXML private ImageView toolCard3;
     @FXML private Button schema0;
     @FXML private Button schema1;
     @FXML private Button schema2;
@@ -84,6 +94,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         if(connect!=null) initConnectionScene();
         else if(login!=null) initLoginScene();
         else if(schemaChoice!=null) initSchemaChoiceScene();
+        else if(gameScene!=null) initGameScene();
 
     }
 
@@ -216,6 +227,13 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         });
     }
 
+    private void initGameScene(){
+        goalGrid.prefWidthProperty().bind(tabPane.widthProperty());
+        otherGrid.prefWidthProperty().bind(tabPane.widthProperty());
+        toolGrid.prefWidthProperty().bind(tabPane.widthProperty());
+        tabPane.maxHeightProperty().bind(tabPane.widthProperty().multiply(.55));
+    }
+
     private void disableSchemaChoice(){
         choosingSchema = true;
         schema0.setDisable(true);
@@ -249,6 +267,21 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     }
 
     private void populateGame() {
+        List<String> publicGoalNames = client.getGameSnapshot().getPublicGoals();
+        publicGoal1.imageProperty().set( GuiMain.getGoalImage(publicGoalNames.get(0)) );
+        publicGoal2.imageProperty().set( GuiMain.getGoalImage(publicGoalNames.get(1)) );
+        publicGoal3.imageProperty().set( GuiMain.getGoalImage(publicGoalNames.get(2)) );
+
+        List<ToolCard> toolCardNames = client.getGameSnapshot().getToolCards();
+        toolCard1.imageProperty().set( GuiMain.getToolImage(toolCardNames.get(0).getName()) );
+        toolCard2.imageProperty().set( GuiMain.getToolImage(toolCardNames.get(1).getName()) );
+        toolCard3.imageProperty().set( GuiMain.getToolImage(toolCardNames.get(2).getName()) );
+
+        SagradaGridPane player = new SagradaGridPane();
+        player.initProperty();
+        player.setSchema(client.getGameSnapshot().getPlayer().getWindow().getSchema());
+
+        gameScene.add(player,1,1);
     }
 
     private void createSchema(Schema schema,GridPane grid){
@@ -257,10 +290,11 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             for (int c = 0;c<Window.COLUMN;c++){
                 constraint = schema.getConstraint(r,c);
                 if(constraint!=null){
-                    Pane cell = (Pane)grid.getChildren().get(r*Window.COLUMN+c);
+                    VBox cell = (VBox) grid.getChildren().get(r*Window.COLUMN+c);
                     if(constraint.getColor()!=null){
                         cell.setStyle("-fx-background-color: "+constraint.getColor()+";");
                     } else {
+                        cell.setAlignment(Pos.CENTER);
                         cell.getChildren().add(new Label(constraint.getNumber().toString()));
                     }
                 }
