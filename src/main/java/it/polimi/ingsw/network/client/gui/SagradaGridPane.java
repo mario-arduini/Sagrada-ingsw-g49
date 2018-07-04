@@ -26,6 +26,7 @@ public class SagradaGridPane extends GridPane {
         RowConstraints rc = new RowConstraints();
         rc.setPercentHeight(25.0);
         rc.setValignment(VPos.CENTER);
+        this.setHeight(this.getWidth()*0.8);
         this.getColumnConstraints().addAll(cc,cc,cc,cc,cc);
         this.getRowConstraints().addAll(rc,rc,rc,rc);
         this.hgapProperty().bind(this.heightProperty().multiply(0.02));
