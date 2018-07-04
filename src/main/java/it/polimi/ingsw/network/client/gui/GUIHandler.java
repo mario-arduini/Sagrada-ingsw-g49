@@ -27,6 +27,10 @@ import java.util.regex.Pattern;
 
 public class GUIHandler extends UnicastRemoteObject implements GraphicInterface {
 
+    @FXML private Button schema0;
+    @FXML private Button schema1;
+    @FXML private Button schema2;
+    @FXML private Button schema3;
     @FXML private GridPane schemaChoice;
     @FXML private Label passwordLabel;
     @FXML private Label nicknameLabel;
@@ -61,6 +65,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     private boolean passwordOk;
     private boolean isConnecting;
     private boolean isLogging;
+    private boolean choosingSchema;
     private Client.ConnectionType connectionType;
 
     private static final Pattern PATTERN = Pattern.compile(
@@ -176,6 +181,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     }
 
     private void initSchemaChoiceScene(){
+        choosingSchema = false;
         schemasGrid = new ArrayList<>();
         schemasGrid.add((GridPane) schemaChoice.getChildren().get(4));
         schemasGrid.add((GridPane) schemaChoice.getChildren().get(5));
@@ -189,8 +195,41 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         schemasGrid.forEach(g -> {
             g.getColumnConstraints().addAll(schemacc,schemacc,schemacc,schemacc,schemacc);
             g.getRowConstraints().addAll(schemarc,schemarc,schemarc,schemarc);
-            g.prefHeightProperty().bind(g.widthProperty());
+            g.prefHeightProperty().bind(g.widthProperty().multiply(0.8));
         });
+
+        schema0.setOnAction(e -> {
+            disableSchemaChoice();
+            client.sendSchemaChoice(0);
+        });
+        schema1.setOnAction(e -> {
+            disableSchemaChoice();
+            client.sendSchemaChoice(1);
+        });
+        schema2.setOnAction(e -> {
+            disableSchemaChoice();
+            client.sendSchemaChoice(2);
+        });
+        schema3.setOnAction(e -> {
+            disableSchemaChoice();
+            client.sendSchemaChoice(3);
+        });
+    }
+
+    private void disableSchemaChoice(){
+        choosingSchema = true;
+        schema0.setDisable(true);
+        schema1.setDisable(true);
+        schema2.setDisable(true);
+        schema3.setDisable(true);
+    }
+
+    private void enableSchemaChoice(){
+        choosingSchema = false;
+        schema0.setDisable(false);
+        schema1.setDisable(false);
+        schema2.setDisable(false);
+        schema3.setDisable(false);
     }
 
     private void populateSchemaChoice(){
@@ -201,6 +240,15 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         publicGoal3.imageProperty().set( GuiMain.getGoalImage(publicGoalNames.get(2)) );
 
         for(int i=0;i<schemasGrid.size();i++) createSchema(schemas.get(i),schemasGrid.get(i));
+
+        schema0.setText("Choose "+schemas.get(0).getName());
+        schema1.setText("Choose "+schemas.get(1).getName());
+        schema2.setText("Choose "+schemas.get(2).getName());
+        schema3.setText("Choose "+schemas.get(3).getName());
+
+    }
+
+    private void populateGame() {
     }
 
     private void createSchema(Schema schema,GridPane grid){
@@ -362,6 +410,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     @Override
     public void wakeUp(boolean serverResult) {
         if(isLogging) handleLogin(serverResult);
+        if(choosingSchema) handleSchema(serverResult);
     }
 
     @Override
@@ -387,6 +436,30 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 status.textProperty().set("Wrong password!");
                 login.setDisable(false);
                 isLogging = false;
+            }
+        });
+    }
+
+    private void handleSchema(boolean serverResult){
+        Platform.runLater(() -> {
+            if(serverResult){
+                choosingSchema = false;
+                try {
+                    Stage stage = (Stage) schema0.getScene().getWindow();
+                    URL path = GUIHandler.class.getClassLoader().getResource("gui-views/game.fxml");
+                    FXMLLoader fxmlLoader = new FXMLLoader(path);
+                    Parent root = fxmlLoader.load();
+                    GUIHandler controller = (GUIHandler) fxmlLoader.getController();
+                    controller.passClient(client);
+                    controller.populateGame();
+                    client.setHandler(controller);
+                    stage.setScene(new Scene(root));
+                    stage.setTitle("Sagrada - Game");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                enableSchemaChoice();
             }
         });
     }

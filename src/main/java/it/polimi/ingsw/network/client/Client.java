@@ -180,7 +180,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    void sendSchemaChoice(int choice){
+    public void sendSchemaChoice(int choice){
         try {
             server.chooseSchema(choice);
         } catch (GameNotStartedException | GameOverException | WindowAlreadySetException e) {
