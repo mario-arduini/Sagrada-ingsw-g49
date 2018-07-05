@@ -8,7 +8,9 @@ import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 final class Effects {

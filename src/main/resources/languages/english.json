@@ -1,5 +1,12 @@
 {
   "error-gui":"Unexpected error in starting GUI, starting CLI client instead",
+  "info-welcome":"I am the fabolous info box that will give you information through the Game, now is not your turn so just wait",
+  "info-your-turn":"It's your turn cowboy! Drag a dice in the window or press one of these funny buttons",
+  "info-not-turn":"Not your turn, but see what happens in other player windows",
+  "info-dice-placed":"Great work with that dice, now play with the buttons!",
+  "info-tool-used":"Good idea, why not also place a dice?",
+  "info-dice-bad":"You crazy!? Dice can't go there",
+
   "ask-plus-invalid":"Cannot choose this option, select either [+] or [-]?: ",
   "move-to-same":"Cannot move the dice to the same position, choose another position!",
   "move-from-not-round-color":"Dice has to be of the same color of one of the dice of the round track, choose another dice.",
