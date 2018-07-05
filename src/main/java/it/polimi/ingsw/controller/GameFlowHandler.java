@@ -161,7 +161,9 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         this.activeToolCard = fetch.get();
 
         try {
+            Logger.print("Using Toolcard");
             this.activeToolCard.use(gameRoom, this);
+            Logger.print("Toolcard used");
             gameRoom.notifyAllToolCardUsed(player.getNickname(), activeToolCard.getName(), player.getWindow());
         } catch (RollbackException e) {
             activeToolCard = null;
