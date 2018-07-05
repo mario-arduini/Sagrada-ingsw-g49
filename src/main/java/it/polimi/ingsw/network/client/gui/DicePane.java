@@ -62,4 +62,8 @@ public class DicePane extends StackPane {
             event.consume();
         });
     }
+
+    public int getIdx(){
+        return idx;
+    }
 }

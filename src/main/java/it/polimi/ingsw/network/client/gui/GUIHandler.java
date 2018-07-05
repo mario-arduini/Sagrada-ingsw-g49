@@ -15,6 +15,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -35,6 +36,7 @@ import java.util.regex.Pattern;
 
 public class GUIHandler extends UnicastRemoteObject implements GraphicInterface {
 
+    @FXML private HBox roundTrack;
     @FXML private FlowPane toolBox;
     @FXML private Label info;
     @FXML private Button passButton;
@@ -91,8 +93,14 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     private boolean isLogging;
     private boolean choosingSchema;
     private boolean gameStarted;
+    private boolean usingToolcard;
     private Client.ConnectionType connectionType;
+
     private Dice askedDraft;
+    private Coordinate askedCoordinate;
+    private int askedNumber;
+    private boolean askedBool;
+    private String tmpStyle;
 
     private static final Pattern PATTERN = Pattern.compile(
             "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
@@ -311,14 +319,11 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
         List<ToolCard> tools = client.getGameSnapshot().getToolCards();
         tool1.setText(tools.get(0).getName()+ (tools.get(0).getUsed() ? " (2)" : " (1)"));
-        tool1.setOnAction(event -> {
-            System.out.println("using toolcard");
-            client.useToolCard(tools.get(0).getName());
-        });
+        tool1.setOnAction(event -> useToolCard(0));
         tool2.setText(tools.get(1).getName()+ (tools.get(1).getUsed() ? " (2)" : " (1)"));
-        tool2.setOnAction(event -> client.useToolCard(tools.get(1).getName()));
+        tool2.setOnAction(event -> useToolCard(1));
         tool3.setText(tools.get(2).getName()+ (tools.get(2).getUsed() ? " (2)" : " (1)"));
-        tool3.setOnAction(event -> client.useToolCard(tools.get(2).getName()));
+        tool3.setOnAction(event -> useToolCard(2));
 
         printGame(client.getGameSnapshot());
         printMenu(client.getGameSnapshot());
@@ -366,6 +371,17 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         login.setDisable(true);
         isLogging = true;
         client.login(nickname.getText(),password.getText());
+    }
+
+    public void useToolCard(int toolNumber){
+        List<ToolCard> tools = client.getGameSnapshot().getToolCards();
+        client.useToolCard(tools.get(toolNumber).getName());
+
+        tool1.setDisable(false);
+        tool2.setDisable(false);
+        tool3.setDisable(false);
+
+        usingToolcard = true;
     }
 
     public Client getClient(){
@@ -417,10 +433,23 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public void printGame(GameSnapshot gameSnapshot) {
         if(gameStarted){
             Platform.runLater(()->{
+                roundTrack.getChildren().clear();
+                List<Dice> track = client.getGameSnapshot().getRoundTrack();
+                for(int i = 0;i<track.size();i++){
+                    DicePane dp = new DicePane(track.get(i),i+1);
+                    dp.bindDimension(roundTrack.heightProperty());
+                    roundTrack.getChildren().add(dp);
+                }
+
                 playerGrid.updateWindow(client.getGameSnapshot().getPlayer().getWindow());
                 for(int i=0;i<otherPlayerGrids.size();i++){
                     otherPlayerGrids.get(i).updateWindow(client.getGameSnapshot().getOtherPlayers().get(i).getWindow());
                 }
+
+                List<ToolCard> tools = client.getGameSnapshot().getToolCards();
+                tool1.setText(tools.get(0).getName()+ (tools.get(0).getUsed() ? " (2)" : " (1)"));
+                tool2.setText(tools.get(1).getName()+ (tools.get(1).getUsed() ? " (2)" : " (1)"));
+                tool3.setText(tools.get(2).getName()+ (tools.get(2).getUsed() ? " (2)" : " (1)"));
             });
         }
     }
@@ -485,12 +514,12 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
         Platform.runLater(()->{
             info.setText(MessageHandler.get(prompt));
+            draftPool.setStyle("-fx-border-color:red; -fx-border-width:3; -fx-border-style:dashed;");
             draftPool.getChildren().forEach(child -> {
-                child.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                    @Override
-                    public void handle(MouseEvent event) {
-                        askedDraft = ((DicePane) event.getSource()).dice;
-                        System.out.println(this.getClass());
+                child.setOnMouseClicked(event -> {
+                    askedDraft = ((DicePane) event.getSource()).dice;
+                    draftPool.setStyle("");
+                    synchronized (this) {
                         this.notify();
                     }
                 });
@@ -498,11 +527,15 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         });
 
         try {
-            wait();
+            synchronized (this){
+                wait();
+            }
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        System.out.println("Returning "+askedDraft);
         return askedDraft;
     }
 
@@ -513,12 +546,70 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public Coordinate askDiceWindow(String prompt, boolean rollback) {
-        return null;
+
+        Platform.runLater(()->{
+            info.setText(MessageHandler.get(prompt));
+            tmpStyle = playerGrid.getStyle();
+            playerGrid.setStyle(tmpStyle + "-fx-border-color:red; -fx-border-width:3; -fx-border-style:dashed;");
+            playerGrid.getChildren().forEach(child -> {
+                System.out.println(child.getClass());
+                child.setOnMouseClicked(event -> {
+                    playerGrid.setStyle(tmpStyle);
+                    Node source = (Node) event.getSource();
+                    int row = GridPane.getRowIndex(source);
+                    int col = GridPane.getColumnIndex(source);
+                    askedCoordinate = new Coordinate(row+1,col+1);
+                    synchronized (this) {
+                        this.notify();
+                    }
+                });
+            });
+        });
+
+        try {
+            synchronized (this){
+                wait();
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Returning "+askedCoordinate);
+        return askedCoordinate;
+
     }
 
     @Override
     public int askDiceValue(String prompt, boolean rollback) {
-        return 0;
+
+        Platform.runLater(()->{
+            info.setText(MessageHandler.get(prompt));
+            roundTrack.setStyle("-fx-border-color:red; -fx-border-width:3; -fx-border-style:dashed;");
+            playerGrid.getChildren().forEach(child -> {
+                child.setOnMouseClicked(event -> {
+                    DicePane dp = (DicePane) event.getSource();
+                    roundTrack.setStyle("");
+                    askedNumber = dp.getIdx();
+                    synchronized (this) {
+                        this.notify();
+                    }
+                });
+            });
+        });
+
+        try {
+            synchronized (this){
+                wait();
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Returning "+askedNumber);
+        return askedNumber;
+
     }
 
     @Override
@@ -538,6 +629,14 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         if(playerGrid!=null&&playerGrid.isPlacingDice()&&!serverResult){
             Platform.runLater(() ->{
                 info.setText(MessageHandler.get("info-dice-bad"));
+            });
+        }
+        if(usingToolcard&&!serverResult){
+            Platform.runLater(() -> {
+                info.setText(MessageHandler.get("info-tool-fail"));
+                tool1.setDisable(false);
+                tool2.setDisable(false);
+                tool3.setDisable(false);
             });
         }
     }

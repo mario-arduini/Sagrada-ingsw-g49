@@ -22,7 +22,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     private ToolCard activeToolCard;
     private ClientInterface connection;
     private Timer timer;
-    private int secondsTimerSchema = 10; //TODO: read value from file.
+    private int secondsTimerSchema = 100; //TODO: read value from file.
 
     public GameFlowHandler(GamesHandler gamesHandler, ClientInterface connection, Player player) throws RemoteException{
         this.player = player;
