@@ -42,6 +42,7 @@ public class ToolCard implements Serializable {
         this.awake = true;
         this.timer = null;
         this.secondsTimer = 10; //TODO: CONFIG FILE
+        this.awake = true;
     }
 
     public ToolCard(ToolCard toolCard){
@@ -154,6 +155,7 @@ public class ToolCard implements Serializable {
             }
             catch (DisconnectionException e){
                 try {
+                    this.awake = false;
                     startTimer();
                     wait();
                 } catch (InterruptedException e1) {
@@ -162,6 +164,7 @@ public class ToolCard implements Serializable {
                 this.connection = gameFlow.getConnection();
                 if (gameFlow.getPlayer().isSuspended()) throw new PlayerSuspendedException();
                 i -= 1;
+                this.awake = true;
             }
             if (!game.getRound().getCurrentPlayer().equals(realGame.getCurrentRound().getCurrentPlayer())){
                 throw new PlayerSuspendedException();
@@ -190,7 +193,8 @@ public class ToolCard implements Serializable {
 
     class TimerExpired extends TimerTask {
         public void run() {
-            this.notify();
+            if (!awake)
+                this.notify();
         }
     }
 }
