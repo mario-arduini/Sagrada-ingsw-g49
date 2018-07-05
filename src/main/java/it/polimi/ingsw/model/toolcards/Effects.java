@@ -96,10 +96,12 @@ final class Effects {
         while(num > diceList.size()){
             try {
                 start.add(connection.askDiceWindow(prompt, rollback));
-                removedDice = currentPlayerWindow.getCell(start.get(diceList.size()-1).getRow(),start.get(diceList.size()-1).getColumn());
+                removedDice = currentPlayerWindow.getCell(start.get(diceList.size()).getRow(),start.get(diceList.size()).getColumn());
                 if(removedDice == null){
+                    start.remove(diceList.size());
                     prompt = "move-from-empty";
                 }else {
+                    currentPlayerWindow.removeDice(start.get(diceList.size()).getRow(),start.get(diceList.size()).getColumn());
                     diceList.add(removedDice);
                     prompt = "move-from";
                 }
@@ -121,9 +123,100 @@ final class Effects {
                     prompt = "move-to-same";
                 else {
                     try {
-                        removedDice = diceList.get(num - diceList.size());
+                        removedDice = diceList.remove(0);
                         placeDice(currentPlayerWindow,removedDice, end.getRow(), end.getColumn(), ignored);
-                        diceList.remove(removedDice);
+                        prompt = "move-to";
+                    }catch (NoAdjacentDiceException | BadAdjacentDiceException
+                            | FirstDiceMisplacedException | ConstraintViolatedException | NotWantedAdjacentDiceException e) {
+                        prompt = "move-to-invalid";
+                    }
+                }
+            } catch (RollbackException e) {
+                throw e;
+            }catch (Exception e){
+                throw new DisconnectionException();
+            }
+        }
+    }
+
+    public static void moveNColor (int n , Window currentPlayerWindow, List<Dice> roundTrack, Window.RuleIgnored ignored, boolean optional, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException{
+        String prompt;
+        //If optional asks number of moves till it's <= n
+        int num = n;
+        if (optional) {
+            num += 1;
+            prompt = "move-number";
+            while (num > n) {
+                try {
+                    num = connection.askMoveNumber(prompt, n, rollback);
+                } catch (RollbackException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new DisconnectionException();
+                }
+                prompt = "move-number-invalid";
+            }
+        }
+
+        //Fetch dice
+        List<Dice> diceList = new ArrayList<>();
+        List<Coordinate> start = new ArrayList<>();
+        Dice removedDice;
+
+        prompt = "move-from";
+        while(num > diceList.size()){
+            try {
+                start.add(connection.askDiceWindow(prompt, rollback));
+                removedDice = currentPlayerWindow.getCell(start.get(diceList.size()).getRow(),start.get(diceList.size()).getColumn());
+                if(removedDice == null){
+                    prompt = "move-from-empty";
+                    start.remove(diceList.size());
+                }else {
+                    if (diceList.size()>0){
+                        if (removedDice.getColor().equals(diceList.get(0).getColor())){
+                            currentPlayerWindow.removeDice(start.get(diceList.size()).getRow(), start.get(diceList.size()).getColumn());
+                            diceList.add(removedDice);
+                            prompt = "move-from";
+                        }else{
+                            start.remove(diceList.size());
+                            prompt = "move-from-different-color";
+                        }
+                    }else{
+                        boolean flag = false;
+                        for (Dice dice: roundTrack)
+                            if (dice.getColor().equals(removedDice.getColor()))
+                                flag = true;
+                        if (flag){
+                            currentPlayerWindow.removeDice(start.get(diceList.size()).getRow(), start.get(diceList.size()).getColumn());
+                            diceList.add(removedDice);
+                            prompt = "move-from";
+                        }else {
+                            start.remove(diceList.size());
+                            prompt = "move-from-not-round-color";
+                        }
+                    }
+                }
+
+            } catch (RollbackException e) {
+                throw e;
+            }catch (Exception e){
+                throw new DisconnectionException();
+            }
+        }
+
+        //Place dice
+        Coordinate end;
+        prompt = "move-to";
+        while (diceList.size() > 0) {
+            try {
+                end = connection.askDiceWindow(prompt, rollback);
+                if (start.get(num - diceList.size()).getRow() == end.getRow() && start.get(num - diceList.size()).getColumn() == end.getColumn())
+                    prompt = "move-to-same";
+                else {
+                    try {
+                        removedDice = diceList.remove(0);
+                        placeDice(currentPlayerWindow,removedDice, end.getRow(), end.getColumn(), ignored);
+                        prompt = "move-to";
                     }catch (NoAdjacentDiceException | BadAdjacentDiceException
                             | FirstDiceMisplacedException | ConstraintViolatedException | NotWantedAdjacentDiceException e) {
                         prompt = "move-to-invalid";

@@ -170,6 +170,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
             Logger.print("Toolcard rollback");
         }catch (Exception e){
             activeToolCard = null;
+            throw e;
         }
     }
 

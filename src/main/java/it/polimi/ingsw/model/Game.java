@@ -221,7 +221,7 @@ public class Game {
         currentRound = gameCopy.getRound();
         currentRound.getCurrentPlayer().setWindow(gameCopy.getWindow());
         diceBag = gameCopy.getDiceBag();
-        getCurrentRound().getCurrentPlayer().useFavorToken(!card.getUsed() ? 2 : 1);
+        getCurrentRound().getCurrentPlayer().useFavorToken(card.getUsed() ? 2 : 1);
         card.setUsed();
     }
 }

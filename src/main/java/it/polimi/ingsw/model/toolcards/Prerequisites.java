@@ -5,6 +5,7 @@ import it.polimi.ingsw.model.Player;
 import it.polimi.ingsw.model.Round;
 import it.polimi.ingsw.model.Window;
 import it.polimi.ingsw.model.exceptions.*;
+import it.polimi.ingsw.network.server.Logger;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ final class Prerequisites {
 
     static void checkDiceInRoundTrack(List<Dice> roundTrack) throws NoDiceInRoundTrackException{
         if(roundTrack.size()==0) throw new NoDiceInRoundTrackException();
+
     }
 
     static void checkSameColorInWindowAndRoundTrack(Player player,List<Dice> roundTrack) throws NoDiceInWindowException, NoDiceInRoundTrackException, NoSameColorDicesException {
@@ -37,6 +39,7 @@ final class Prerequisites {
                 }
         }
         throw new NoSameColorDicesException();
+
     }
 
     static void checkFirstTurn(Round round) throws NotYourFirstTurnException {
@@ -78,6 +81,7 @@ final class Prerequisites {
                     window.setDice(r,c,dice);
                 }
             }
+
         if(!valid) throw new NothingCanBeMovedException();
     }
 

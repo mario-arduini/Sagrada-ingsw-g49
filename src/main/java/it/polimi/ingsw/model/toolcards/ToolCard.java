@@ -69,24 +69,27 @@ public class ToolCard implements Serializable {
         Dice multipurposeDice = null;
         this.connection = gameFlow.getConnection();
 
+        TransactionSnapshot game = realGame.beginTransaction();
+        Logger.print("Player " + game.getRound().getCurrentPlayer().getNickname() + " using toolcard " + this.cardName);
+
         for (String prerequisite : prerequisites) {
             switch (prerequisite) {
-                case "favor-token": Prerequisites.checkFavorToken(realGame.getCurrentRound().getCurrentPlayer(), used ? 2 : 1); break;
-                case "dice-window": Prerequisites.checkDiceInWindow(realGame.getCurrentRound().getCurrentPlayer()); break;
-                case "dice-round-track": Prerequisites.checkDiceInRoundTrack(realGame.getRoundTrack()); break;
-                case "same-color-window-track": Prerequisites.checkSameColorInWindowAndRoundTrack(realGame.getCurrentRound().getCurrentPlayer(),realGame.getRoundTrack()); break;
-                case "first-turn": Prerequisites.checkFirstTurn(realGame.getCurrentRound()); break;
-                case "second-turn": Prerequisites.checkSecondTurn(realGame.getCurrentRound()); break;
-                case "before-draft": Prerequisites.checkBeforeDraft(realGame.getCurrentRound().isDiceExtracted()); break;
-                case "after-draft": Prerequisites.checkAfterDraft(realGame.getCurrentRound().isDiceExtracted()); break;
-                case "movable-color" : Prerequisites.checkMovable(realGame.getCurrentRound().getCurrentPlayer(), Window.RuleIgnored.COLOR); break;
-                case "movable-value" : Prerequisites.checkMovable(realGame.getCurrentRound().getCurrentPlayer(), Window.RuleIgnored.NUMBER); break;
-                case "movable" : Prerequisites.checkMovable(realGame.getCurrentRound().getCurrentPlayer(), Window.RuleIgnored.NONE); break;
-                case "two-dices-window" : Prerequisites.checkTwoDiceInWindow(realGame.getCurrentRound().getCurrentPlayer().getWindow()); ; break;
+                case "favor-token": Prerequisites.checkFavorToken(game.getRound().getCurrentPlayer(), used ? 2 : 1); break;
+                case "dice-window": Prerequisites.checkDiceInWindow(game.getRound().getCurrentPlayer()); break;
+                case "dice-round-track": Prerequisites.checkDiceInRoundTrack(game.getRoundTrack()); break;
+                case "same-color-window-track": Prerequisites.checkSameColorInWindowAndRoundTrack(game.getRound().getCurrentPlayer(),game.getRoundTrack()); break;
+                case "first-turn": Prerequisites.checkFirstTurn(game.getRound()); break;
+                case "second-turn": Prerequisites.checkSecondTurn(game.getRound()); break;
+                case "before-draft": Prerequisites.checkBeforeDraft(game.getRound().isDiceExtracted()); break;
+                case "after-draft": Prerequisites.checkAfterDraft(game.getRound().isDiceExtracted()); break;
+                case "movable-color" : Prerequisites.checkMovable(game.getRound().getCurrentPlayer(), Window.RuleIgnored.COLOR); break;
+                case "movable-value" : Prerequisites.checkMovable(game.getRound().getCurrentPlayer(), Window.RuleIgnored.NUMBER); break;
+                case "movable" : Prerequisites.checkMovable(game.getRound().getCurrentPlayer(), Window.RuleIgnored.NONE); break;
+                case "two-dices-window" : Prerequisites.checkTwoDiceInWindow(game.getWindow()); break;
             }
+
         }
 
-        TransactionSnapshot game = realGame.beginTransaction();
 
         for (int i = 0; i < effects.size(); i++) {
             effect = effects.get(i).getAsJsonObject();
@@ -98,6 +101,7 @@ public class ToolCard implements Serializable {
             }
             Boolean optional = arguments.get("optional")!=null ? arguments.get("optional").getAsBoolean() : false;
             try {
+
                 switch (command) {
                     case "get-draft-dice":
                         Effects.getDraftedDice(game.getRound(), connection, rollback);
@@ -120,7 +124,10 @@ public class ToolCard implements Serializable {
                         Effects.move(game.getWindow(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
                         break;
                     case "move-n":
-                        Effects.moveN(arguments.get("number").getAsInt(), game.getWindow(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
+                        if (arguments.get("color-in-track") != null && arguments.get("color-in-track").getAsBoolean())
+                            Effects.moveNColor(arguments.get("number").getAsInt(), game.getWindow(), game.getRoundTrack(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
+                        else
+                            Effects.moveN(arguments.get("number").getAsInt(), game.getWindow(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
                         break;
                     case "change-value":
                         if (arguments.get("plus") != null && arguments.get("plus").getAsBoolean())
@@ -146,7 +153,6 @@ public class ToolCard implements Serializable {
                     case "set-from-bag":
                         Effects.setDiceFromBag(game.getRound(), game.getFromBag(), connection, rollback);
                         break;
-
                 }
             }catch (RollbackException e){
                 if (this.rollback)
@@ -157,7 +163,7 @@ public class ToolCard implements Serializable {
                 try {
                     this.awake = false;
                     startTimer();
-                    wait();
+                    this.wait();
                 } catch (InterruptedException e1) {
                     Logger.print("Interrupted Exception Toolcard, awake.");
                 }
@@ -172,9 +178,11 @@ public class ToolCard implements Serializable {
         }
         try {
             realGame.commit(game, cardName);
+            Logger.print("Player " + game.getRound().getCurrentPlayer().getNickname() + " successfully used " + this.cardName);
         } catch (NoSuchToolCardException e) {
-            Logger.print("Toolcard " + game + "throws " + e.toString());
+            Logger.print("Toolcard " + cardName + " played by " + game.getRound().getCurrentPlayer().getNickname() + "throws " + e.toString());
         }
+
     }
 
 
@@ -194,7 +202,7 @@ public class ToolCard implements Serializable {
     class TimerExpired extends TimerTask {
         public void run() {
             if (!awake)
-                this.notify();
+                this.notifyAll();
         }
     }
 }
