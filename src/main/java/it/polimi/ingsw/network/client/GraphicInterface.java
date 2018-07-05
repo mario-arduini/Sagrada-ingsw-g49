@@ -22,6 +22,7 @@ public interface GraphicInterface {
     int askDiceRoundTrack(String prompt, boolean rollback) throws RollbackException;
     Coordinate askDiceWindow(String prompt, boolean rollback) throws RollbackException;
     int askDiceValue(String prompt, boolean rollback) throws RollbackException;
+    int askMoveNumber(String prompt, int n, boolean rollback) throws RollbackException;
     void wakeUp(boolean serverResult);
     void interruptInput();
     void printDice(Dice dice);

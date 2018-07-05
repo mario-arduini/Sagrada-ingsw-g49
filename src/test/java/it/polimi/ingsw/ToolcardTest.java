@@ -160,6 +160,11 @@ class ConnectionHandlerStub implements ClientInterface {
     }
 
     @Override
+    public int askMoveNumber(String prompt, int n, boolean rollback){
+        return 0;
+    }
+
+    @Override
     public void notifyEndGame(List<Score> scores){
     }
 

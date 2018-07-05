@@ -522,6 +522,11 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     }
 
     @Override
+    public int askMoveNumber(String prompt, int n, boolean rollback){
+        return 0;
+    }
+
+    @Override
     public void printDice(Dice dice){
 
     }

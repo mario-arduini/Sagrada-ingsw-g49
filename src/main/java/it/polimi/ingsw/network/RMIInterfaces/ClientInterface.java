@@ -33,5 +33,6 @@ public interface ClientInterface extends Remote, Serializable {
     int askDiceRoundTrack(String prompt, boolean rollback) throws RemoteException, RollbackException, DisconnectionException;
     boolean askIfPlus(String prompt, boolean rollback) throws RemoteException, RollbackException, DisconnectionException;
     int askDiceValue(String prompt, boolean rollback) throws RemoteException, RollbackException, DisconnectionException;
+    int askMoveNumber(String prompt, int number, boolean rollback) throws RemoteException, RollbackException, DisconnectionException;
     void showDice(Dice dice) throws RemoteException;
 }

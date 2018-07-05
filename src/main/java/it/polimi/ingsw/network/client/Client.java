@@ -366,5 +366,9 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return handler.askDiceValue(prompt, rollback);
     }
 
+    @Override
+    public int askMoveNumber(String prompt, int n, boolean rollback) throws RollbackException{
+       return handler.askMoveNumber(prompt, n, rollback);
+    }
     //endregion
 }

@@ -153,5 +153,12 @@ public class ClientSocketHandler implements FlowHandlerInterface {
         jsonObject.addProperty("choice", "rollback");
         socketPrintLine(jsonObject);
     }
+
+    void sendMoveNumber(int n){
+        createJsonCommand("move-dice-number");
+        jsonObject.addProperty("choice", n);
+        socketPrintLine(jsonObject);
+    }
+
     //endregion
 }
