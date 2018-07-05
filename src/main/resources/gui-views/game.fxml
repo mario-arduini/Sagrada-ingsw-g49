@@ -124,6 +124,10 @@
             </Tab>
         </tabs>
       </TabPane>
+       <HBox fx:id="roundTrack" prefHeight="100.0" prefWidth="200.0">
+           <padding>
+               <Insets bottom="10.0" left="10.0" top="10.0" />
+           </padding></HBox>
       <HBox fx:id="draftPool" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2">
          <padding>
             <Insets bottom="10.0" left="10.0" top="10.0" />

@@ -6,6 +6,7 @@
   "info-dice-placed":"Great work with that dice, now play with the buttons!",
   "info-tool-used":"Good idea, why not also place a dice?",
   "info-dice-bad":"You crazy!? Dice can't go there",
+  "info-tool-fail": "You can't use that toolcard now",
 
   "ask-plus-invalid":"Cannot choose this option, select either [+] or [-]?: ",
   "move-to-same":"Cannot move the dice to the same position, choose another position!",
