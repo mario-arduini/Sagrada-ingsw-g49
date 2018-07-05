@@ -5,15 +5,9 @@ import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.network.client.model.*;
 import it.polimi.ingsw.network.client.model.Color;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 class CLIHandler implements GraphicInterface{
@@ -23,26 +17,35 @@ class CLIHandler implements GraphicInterface{
     private static final int COLUMNS = 5;
     private static final String ERROR = "Invalid choice, retry: ";
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
-    private BufferedReader input;
     private Client client;
     private boolean waiting;
     private boolean serverResult;
     private boolean flagContinue;
-    private Future<String> future;
     private boolean newGame;
+
+    private boolean waitingInput;
+    private boolean flagContinueInput;
+    private String inputResult;
+    private Thread thread;
+    private CLIListener cliListener;
 
     CLIHandler() {
         ClientLogger.initLogger(LOGGER);
-        input = new BufferedReader(new InputStreamReader(System.in));
         flagContinue = false;
         waiting = false;
         newGame = true;
+        waitingInput = false;
+        flagContinueInput = false;
 
         try {
             this.client = new Client(this);
         }catch (RemoteException e){
             LOGGER.warning(e.toString());
         }
+
+        cliListener = new CLIListener(this);
+        thread = new Thread(cliListener);
+        thread.start();
     }
 
     synchronized void start() {
@@ -65,6 +68,8 @@ class CLIHandler implements GraphicInterface{
 
             if(command == 0) {
                 ClientLogger.printlnWithClear("Logged out");
+                cliListener.stopListening();
+                thread.interrupt();
                 return;
             }
             client.login(askNickname(), askPassword());
@@ -81,7 +86,8 @@ class CLIHandler implements GraphicInterface{
             if(!play())
                 newGame = askNewGame();
         }
-
+        cliListener.stopListening();
+        thread.interrupt();
     }
 
     private boolean play(){
@@ -91,7 +97,10 @@ class CLIHandler implements GraphicInterface{
             waitResult();
             do {
                 ClientLogger.print("\nYour choice: ");
-                client.sendSchemaChoice(readInt(1, 4) - 1);
+                command = readInt(1, 4);
+                if(command == -1)
+                    break;
+                client.sendSchemaChoice(command - 1);
                 if (!flagContinue)
                     ClientLogger.print("\nWaiting other players' choice");
                 waitResult();
@@ -99,13 +108,9 @@ class CLIHandler implements GraphicInterface{
         }
 
         while (!logout) {
-            try {
-                command = readInt(0, 3);
-            } catch (CancellationException e) {
-                if (!client.isGameStarted())
-                    break;
-                continue;
-            }
+            command = readInt(0, 3);
+            if (!client.isGameStarted())
+                break;
 
             if (command > 0 && !client.getGameSnapshot().getPlayer().isMyTurn())
                 ClientLogger.print(ERROR);
@@ -113,6 +118,8 @@ class CLIHandler implements GraphicInterface{
                 switch (command) {
                     case 0:
                         ClientLogger.printlnWithClear("Logged out");
+                        cliListener.stopListening();
+                        thread.interrupt();
                         client.logout();
                         logout = true;
                         break;
@@ -135,7 +142,6 @@ class CLIHandler implements GraphicInterface{
                             ClientLogger.print(ERROR);
                         break;
                     default:
-                        ClientLogger.print(ERROR);
                         break;
                 }
         }
@@ -158,12 +164,7 @@ class CLIHandler implements GraphicInterface{
         boolean ok = false;
         while (!ok) {
             ClientLogger.print("\nInsert server address: ");
-            try {
-                address = input.readLine();
-            } catch (IOException e) {
-                LOGGER.warning(e.toString());
-                continue;
-            }
+            address = waitInput();
             if (address.equals("") || address.contains(" "))
                 ClientLogger.println("Invalid server address");
             else
@@ -173,43 +174,17 @@ class CLIHandler implements GraphicInterface{
     }
 
     private int askServerPort(){
-
-        int port = 0;
-        boolean ok = false;
-
-        while (!ok) {
-            ClientLogger.print("Insert server port: ");
-            try {
-                port = Integer.parseInt(input.readLine());
-                if (port < 1000 || port > 65535)
-                    ClientLogger.println("Invalid server port");
-                else
-                    ok = true;
-            } catch (IOException | NumberFormatException e) {
-                ClientLogger.println("Server port must be a number");
-            }
-        }
-        return port;
+        ClientLogger.print("Insert server port: ");
+        return readInt(1000, 65535);
     }
 
     private Client.ConnectionType askConnectionType(){
-        int choice = -1;
+        ClientLogger.printlnWithClear("Connection types:");
+        ClientLogger.println("0) Socket");
+        ClientLogger.println("1) RMI");
+        ClientLogger.print("Your choice: ");
 
-        while (choice != 0 && choice != 1) {
-            ClientLogger.printlnWithClear("Connection types:");
-            ClientLogger.println("0) Socket");
-            ClientLogger.println("1) RMI");
-            ClientLogger.print("Your choice: ");
-
-            try {
-                choice = Integer.parseInt(input.readLine());
-            } catch (IOException | NumberFormatException e) {
-                continue;
-            }
-            if(choice != 0 && choice != 1)
-                ClientLogger.println("Not a valid choice");
-        }
-        if(choice == 1)
+        if(readInt(0, 1) == 1)
             return Client.ConnectionType.RMI;
         return Client.ConnectionType.SOCKET;
     }
@@ -229,11 +204,7 @@ class CLIHandler implements GraphicInterface{
 
         while (!ok) {
             ClientLogger.printWithClear("Insert your nickname: ");
-            try {
-                nickname = input.readLine();
-            } catch (IOException e) {
-                LOGGER.warning(e.toString());
-            }
+            nickname = waitInput();
             if (!checkNicknameProperties(nickname))
                     ClientLogger.println("Invalid nickname");
                 else
@@ -248,11 +219,7 @@ class CLIHandler implements GraphicInterface{
 
         while (!ok) {
             ClientLogger.print("Insert your password: ");
-            try {
-                password = input.readLine();
-            } catch (IOException e) {
-                LOGGER.warning(e.toString());
-            }
+            password = waitInput();
 
             if (!checkPasswordProperties(password))
                 ClientLogger.println("Invalid password, must be at least 4 character");
@@ -298,10 +265,13 @@ class CLIHandler implements GraphicInterface{
                 try {
                     ClientLogger.print("\nInsert dice number: ");
                     dice = readInt(1, client.getGameSnapshot().getDraftPool().size());
+                    if(dice == -1)  return;
                     ClientLogger.print("Insert row: ");
                     row = readInt(1, ROWS);
+                    if(row == -1)  return;
                     ClientLogger.print("Insert column: ");
                     column = readInt(1, COLUMNS);
+                    if(column == -1)  return;
                 }catch (CancellationException e){
                     return;
                 }
@@ -335,6 +305,7 @@ class CLIHandler implements GraphicInterface{
             ClientLogger.print("\nInsert tool card number: ");
             try {
                 choice = readInt(0, 3);
+                if(choice == -1)  return;
             } catch (NumberFormatException e) {
                 choice = -1;
             } catch (CancellationException e) {
@@ -380,6 +351,20 @@ class CLIHandler implements GraphicInterface{
         return serverResult;
     }
 
+    private synchronized String waitInput(){
+        while (!flagContinueInput) {
+            waitingInput = true;
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                LOGGER.warning(e.toString());
+            }
+        }
+        waitingInput = false;
+        flagContinueInput = false;
+        return inputResult;
+    }
+
     @Override
     public void printMenu(GameSnapshot gameSnapshot){
         if(gameSnapshot.getPlayer().isMyTurn()) {
@@ -408,14 +393,14 @@ class CLIHandler implements GraphicInterface{
     private int readInt(int minValue, int maxValue){
         int value = -1;
         boolean ask = true;
+        String choice;
 
         while (ask) {
             try{
-                future = Executors.newSingleThreadExecutor().submit(new ReadInt(input));
-                value = Integer.parseInt(future.get());
-            } catch (ExecutionException | InterruptedException e) {
-                ClientLogger.print("A problem happened, retry: ");
-                continue;
+                choice = waitInput();
+                if(choice == null)
+                    return -1;
+                value = Integer.parseInt(choice);
             } catch (NumberFormatException e){
                 ClientLogger.print("Must be a number, retry: ");
                 continue;
@@ -443,11 +428,7 @@ class CLIHandler implements GraphicInterface{
         ClientLogger.print(MessageHandler.get(prompt));
 
         while (ask){
-            try {
-                choice = input.readLine();
-            } catch (IOException e) {
-                ClientLogger.print("Not a valid choice, retry: ");
-            }
+            choice = waitInput();
             if (choice.equals("0")) throw new RollbackException();
             if(choice.equals("+") || choice.equals("-") || choice.equals("y") || choice.equals("n"))
                 ask = false;
@@ -666,7 +647,7 @@ class CLIHandler implements GraphicInterface{
 
     @Override
     public void interruptInput(){
-        future.cancel(true);
+        wakeUpInput(null);
     }
 
     @Override
@@ -674,7 +655,7 @@ class CLIHandler implements GraphicInterface{
         ClientLogger.printlnWithClear("GAME FINISHED\n");
         for(Score score : scores)
             ClientLogger.println(score.getPlayer() + "   " + score.getTotalScore());
-        future.cancel(true);
+        wakeUpInput(null);
     }
 
     @Override
@@ -685,6 +666,16 @@ class CLIHandler implements GraphicInterface{
             synchronized (this) {
                 this.notifyAll();
             }
+    }
+
+    void wakeUpInput(String inputResult){
+        if(waitingInput) {
+            this.inputResult = inputResult;
+            flagContinueInput = true;
+            synchronized (this) {
+                this.notifyAll();
+            }
+        }
     }
 
     @Override
