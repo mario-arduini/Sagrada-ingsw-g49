@@ -30,6 +30,7 @@ public class SagradaGridPane extends GridPane {
 
     private static final String DEF_COLOR = "#f8f6f7";
     private GUIHandler controller;
+    private boolean placingDice;
 
     public void initProperty(){
         ColumnConstraints cc = new ColumnConstraints();
@@ -80,10 +81,15 @@ public class SagradaGridPane extends GridPane {
 
     public void tryDice(CellPane cellToUpdate,int idx){
         System.out.println("setting dice in : "+cellToUpdate.getRow()+":"+cellToUpdate.getCol());
+        placingDice = true;
         if(controller!=null) this.controller.getClient().placeDice(idx,cellToUpdate.getRow()+1,cellToUpdate.getCol()+1);
     }
 
-    CellPane getCell(int r,int c){
+    public boolean isPlacingDice() {
+        return placingDice;
+    }
+
+    CellPane getCell(int r, int c){
         return (CellPane) getChildren().stream().filter(cell -> GridPane.getRowIndex(cell)==r&&GridPane.getColumnIndex(cell)==c).findFirst().get();
     }
 

@@ -3,6 +3,7 @@ package it.polimi.ingsw.network.client.gui;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.network.client.Client;
 import it.polimi.ingsw.network.client.GraphicInterface;
+import it.polimi.ingsw.network.client.MessageHandler;
 import it.polimi.ingsw.network.client.model.GameSnapshot;
 import it.polimi.ingsw.network.client.model.PlayerSnapshot;
 import it.polimi.ingsw.network.client.model.ToolCard;
@@ -33,6 +34,8 @@ import java.util.regex.Pattern;
 
 public class GUIHandler extends UnicastRemoteObject implements GraphicInterface {
 
+    @FXML private FlowPane toolBox;
+    @FXML private Label info;
     @FXML private Button passButton;
     @FXML private Button tool1;
     @FXML private Button tool2;
@@ -290,6 +293,10 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
         otherPlayerGrids = new ArrayList<>();
 
+        info.prefWidthProperty().bind(toolBox.widthProperty());
+        info.setStyle("-fx-border-width : 5; -fx-border-color: black; -fx-border-style:solid;");
+        info.setText(MessageHandler.get("info-welcome"));
+
         int i = 0;
         for(PlayerSnapshot player : client.getGameSnapshot().getOtherPlayers()){
             SagradaGridPane pGrid = new SagradaGridPane();
@@ -411,20 +418,30 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             Platform.runLater(()->{
                 draftPool.getChildren().clear();
                 boolean myTurn = client.getGameSnapshot().getPlayer().isMyTurn();
+                boolean dicePlaced = client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted();
+                boolean toolUsed = client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed();
                 List<Dice> pool = client.getGameSnapshot().getDraftPool();
                 for(int i = 0;i<pool.size();i++){
                     DicePane dp = new DicePane(pool.get(i),i+1);
                     dp.bindDimension(draftPool.heightProperty());
-                    if(myTurn&&!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted()){
+                    if(myTurn&&!dicePlaced){
                         dp.setDraggable();
                         dp.setCursor(Cursor.MOVE);
                     }
                     draftPool.getChildren().add(dp);
                 }
                 passButton.setDisable(!myTurn);
-                tool1.setDisable(!myTurn||client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed());
-                tool2.setDisable(!myTurn||client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed());
-                tool3.setDisable(!myTurn||client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed());
+                tool1.setDisable(!myTurn||toolUsed);
+                tool2.setDisable(!myTurn||toolUsed);
+                tool3.setDisable(!myTurn||toolUsed);
+
+                if(myTurn){
+                    if(toolUsed) info.setText(MessageHandler.get("info-tool-used"));
+                    else if(dicePlaced) info.setText(MessageHandler.get("info-dice-placed"));
+                    else info.setText(MessageHandler.get("info-your-turn"));
+                } else {
+                    info.setText(MessageHandler.get("info-not-turn"));
+                }
 
             });
         }
@@ -479,6 +496,11 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public void wakeUp(boolean serverResult) {
         if(isLogging) handleLogin(serverResult);
         if(choosingSchema) handleSchema(serverResult);
+        if(playerGrid!=null&&playerGrid.isPlacingDice()&&!serverResult){
+            Platform.runLater(() ->{
+                info.setText(MessageHandler.get("info-dice-bad"));
+            });
+        }
     }
 
     @Override
