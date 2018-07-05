@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model;
 
+import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
@@ -74,8 +75,16 @@ public class Game {
         return players;
     }
 
+    /**
+     * Makes a copy of each Toolcard and gives them back to a GameFlowHandler as an ArrayList.
+     * @return toolCardsCopy
+     */
     public List<ToolCard> getToolCards() {
-        return toolCards;
+        List<ToolCard> toolCardsCopy = new ArrayList<>();
+        for (ToolCard t: toolCards){
+            toolCardsCopy.add(new ToolCard(t));
+        }
+        return toolCardsCopy;
     }
 
     public List<PublicGoal> getPublicGoals() {
@@ -183,15 +192,36 @@ public class Game {
         return new TransactionSnapshot(this, diceBag);
     }
 
-    public synchronized void commit(TransactionSnapshot gameCopy, boolean firstUse) throws InvalidFavorTokenNumberException, PlayerSuspendedException, NotEnoughFavorTokenException {
+    /**
+     * Gets a Transaction object as a gameCopy and the name of the toolcard that is being used.
+     * Commits changes if toolcard exists, current player is the one in the transaction and has enough favorToken to buy it.
+     * Handles usage of toolcards.
+     * @param gameCopy
+     * @param cardName
+     * @throws NoSuchToolCardException
+     * @throws InvalidFavorTokenNumberException
+     * @throws PlayerSuspendedException
+     * @throws NotEnoughFavorTokenException
+     */
+    public synchronized void commit(TransactionSnapshot gameCopy, String cardName) throws NoSuchToolCardException, InvalidFavorTokenNumberException, PlayerSuspendedException, NotEnoughFavorTokenException {
         if (!gameCopy.getRound().getCurrentPlayer().equals(getCurrentRound().getCurrentPlayer())){
             throw new PlayerSuspendedException();
         }
+
+        ToolCard card = null;
+
+        for (ToolCard t: toolCards){
+            if (t.getName().equalsIgnoreCase(cardName))
+                card = t;
+        }
+
+        if (card == null) throw new NoSuchToolCardException();
 
         roundTrack = gameCopy.getRoundTrack();
         currentRound = gameCopy.getRound();
         currentRound.getCurrentPlayer().setWindow(gameCopy.getWindow());
         diceBag = gameCopy.getDiceBag();
-        getCurrentRound().getCurrentPlayer().useFavorToken(!firstUse ? 2 : 1);
+        getCurrentRound().getCurrentPlayer().useFavorToken(!card.getUsed() ? 2 : 1);
+        card.setUsed();
     }
 }

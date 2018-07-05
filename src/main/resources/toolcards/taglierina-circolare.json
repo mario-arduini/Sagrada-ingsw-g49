@@ -2,12 +2,13 @@
 	"effects":[
 		{"get-draft-dice":{}},
 		{"swap-round-dice":{}},
-		{"place-dice":{}}
+		{"place-dice":{"ignore":"NONE"}}
 	],
 	"prerequisites":
 	[
+		"favor-token",
 		"dice-round-track",
-		"before-draft",
-		"favor-token"
-	]
+		"before-draft"
+	],
+	"rollback":true
 }

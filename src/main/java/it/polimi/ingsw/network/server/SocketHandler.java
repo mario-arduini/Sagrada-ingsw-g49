@@ -158,7 +158,6 @@ public class SocketHandler implements Runnable, ClientInterface {
     private void useToolCard(JsonObject message){
         try {
             gameFlowHandler.useToolCard(message.get("name").getAsString());
-            socketSendMessage(createMessage("verified"));
         } catch (InvalidParameterException | NoSuchToolCardException |
                 NoDiceInWindowException | NothingCanBeMovedException |
                 InvalidFavorTokenNumberException | AlreadyDraftedException |
@@ -289,11 +288,12 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt) throws RollbackException{
+    public Coordinate askDiceWindow(String prompt, boolean rollback) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-window");
         toSend.addProperty("prompt",prompt);
+        toSend.addProperty("rollback", rollback);
         socketSendMessage(toSend);
 
         try{
@@ -315,11 +315,12 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt) throws RollbackException{
+    public Dice askDiceDraftPool(String prompt, boolean rollback) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-draftpool");
         toSend.addProperty("prompt",prompt);
+        toSend.addProperty("rollback", rollback);
         socketSendMessage(toSend);
         try{
             command = socketReadCommand();
@@ -339,11 +340,12 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt) throws RollbackException{
+    public int askDiceRoundTrack(String prompt, boolean rollback) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-roundtrack");
         toSend.addProperty("prompt",prompt);
+        toSend.addProperty("rollback", rollback);
         socketSendMessage(toSend);
         try{
             command = socketReadCommand();
@@ -363,11 +365,12 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public boolean askIfPlus(String prompt) throws RollbackException{
+    public boolean askIfPlus(String prompt, boolean rollback) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-plus-minus");
         toSend.addProperty("prompt",prompt);
+        toSend.addProperty("rollback", rollback);
         socketSendMessage(toSend);
         try{
             command = socketReadCommand();
@@ -388,11 +391,12 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public int askDiceValue(String prompt) throws RollbackException{
+    public int askDiceValue(String prompt, boolean rollback) throws RollbackException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-value");
         toSend.addProperty("prompt",prompt);
+        toSend.addProperty("rollback", rollback);
         socketSendMessage(toSend);
         try{
             command = socketReadCommand();

@@ -1,1 +1,12 @@
-{"name":"Pennello per Eglomise","effects":[{"move":{"ignore":"COLOR"}}],"prerequisites":["dice-window","movable-color","favor-token"]}
+{"name":"Pennello per Eglomise",
+
+	"effects":[
+		{"move":{"ignore":"COLOR"}}
+	],
+	"prerequisites":[
+		"favor-token",
+		"dice-window",
+		"movable-color"
+	],
+	"rollback":true
+}

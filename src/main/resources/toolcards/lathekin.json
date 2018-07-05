@@ -5,7 +5,8 @@
 		{"move":{"ignore":"NONE"}}],
 	
 	"prerequisites":[
-		"two-dices-window",
-		"favor-token"
-	]
+		"favor-token",
+		"two-dices-window"
+	],
+	"rollback":true
 }

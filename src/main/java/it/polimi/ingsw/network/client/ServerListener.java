@@ -110,19 +110,19 @@ public class ServerListener implements Runnable {
 
                     //region TOOLCARD
                     case "toolcard-plus-minus":
-                        server.sendPlusMinusOption(client.askIfPlus(jsonObject.get("prompt").getAsString()));
+                        server.sendPlusMinusOption(client.askIfPlus(jsonObject.get("prompt").getAsString(), jsonObject.get("rollback").getAsBoolean()));
                         break;
                     case "toolcard-dice-draftpool":
-                        server.sendDiceFromDraftPool(client.askDiceDraftPool(jsonObject.get("prompt").getAsString()));
+                        server.sendDiceFromDraftPool(client.askDiceDraftPool(jsonObject.get("prompt").getAsString(), jsonObject.get("rollback").getAsBoolean()));
                         break;
                     case "toolcard-dice-roundtrack":
-                        server.sendDiceFromRoundTrack(client.askDiceRoundTrack(jsonObject.get("prompt").getAsString()));
+                        server.sendDiceFromRoundTrack(client.askDiceRoundTrack(jsonObject.get("prompt").getAsString(), jsonObject.get("rollback").getAsBoolean()));
                         break;
                     case "toolcard-dice-window":
-                        server.sendDiceFromWindow(client.askDiceWindow(jsonObject.get("prompt").getAsString()));
+                        server.sendDiceFromWindow(client.askDiceWindow(jsonObject.get("prompt").getAsString(), jsonObject.get("rollback").getAsBoolean()));
                         break;
                     case "toolcard-dice-value":
-                        server.sendDiceValue(client.askDiceValue(jsonObject.get("prompt").getAsString()));
+                        server.sendDiceValue(client.askDiceValue(jsonObject.get("prompt").getAsString(), jsonObject.get("rollback").getAsBoolean()));
                         break;
                     case "show-dice":
                         client.showDice(gson.fromJson(jsonObject.get("dice").getAsString(), Dice.class));

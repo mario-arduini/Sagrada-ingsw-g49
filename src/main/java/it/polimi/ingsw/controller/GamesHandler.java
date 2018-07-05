@@ -172,7 +172,20 @@ public class GamesHandler {
     public synchronized void goToWaitingRoom(GameFlowHandler gameFlow){
         if (waitingRoom.contains(gameFlow)) return;
         playingUsers.remove(gameFlow);
-        waitingRoom.add(gameFlow);
+        try {
+            gameFlow.getConnection().notifyLogin(getWaitingPlayers());
+        } catch (Exception e) {
+            return;
+        }
+
+        waitingRoom.forEach(gameF -> {
+            try {
+                gameF.getConnection().notifyLogin(gameFlow.getPlayer().getNickname());
+            } catch (RemoteException e) {
+                Logger.print(e.toString());
+            }
+        });        waitingRoom.add(gameFlow);
+
         waitingRoomNewPlayer();
     }
 
