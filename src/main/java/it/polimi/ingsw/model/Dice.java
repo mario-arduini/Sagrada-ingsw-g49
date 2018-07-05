@@ -29,7 +29,7 @@ public class Dice implements Serializable {
         return color;
     }
 
-    public int getValue(){
+    public Integer getValue(){
         return value;
     }
 

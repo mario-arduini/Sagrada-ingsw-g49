@@ -501,7 +501,8 @@ public class ToolcardTest {
         assertEquals(0,connectionHandlerStub.getIdxWindowPositions());
         assertEquals(null,game.getCurrentRound().getCurrentPlayer().getWindow().getCell(2,1));
         assertEquals(null,game.getCurrentRound().getCurrentDiceDrafted());
-        assertEquals(5,game.getCurrentRound().getDraftPool().get(game.getCurrentRound().getDraftPool().size()-1).getValue());
+        int expectedFive = game.getCurrentRound().getDraftPool().get(game.getCurrentRound().getDraftPool().size()-1).getValue();
+        assertEquals(5,expectedFive);
 
     }
 }

@@ -12,6 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -32,6 +33,10 @@ import java.util.regex.Pattern;
 
 public class GUIHandler extends UnicastRemoteObject implements GraphicInterface {
 
+    @FXML private Button passButton;
+    @FXML private Button tool1;
+    @FXML private Button tool2;
+    @FXML private Button tool3;
     @FXML private GridPane toolGrid;
     @FXML private GridPane otherGrid;
     @FXML private GridPane goalGrid;
@@ -280,6 +285,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         playerGrid = new SagradaGridPane();
         playerGrid.initProperty();
         playerGrid.setSchema(client.getGameSnapshot().getPlayer().getWindow().getSchema());
+        playerGrid.passController(this);
         gameScene.add(playerGrid,1,1);
 
         otherPlayerGrids = new ArrayList<>();
@@ -342,6 +348,10 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         client.login(nickname.getText(),password.getText());
     }
 
+    public Client getClient(){
+        return client;
+    }
+
     public void passClient(Client client){
         this.client = client;
     }
@@ -387,27 +397,9 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public void printGame(GameSnapshot gameSnapshot) {
         if(gameStarted){
             Platform.runLater(()->{
-                for(Dice dice : client.getGameSnapshot().getDraftPool()){
-                    Rectangle r = new Rectangle();
-                    r.setHeight(draftPool.getHeight()*0.8);
-                    r.setWidth(r.getHeight());
-
-                    r.heightProperty().bind(draftPool.heightProperty().multiply(.8));
-                    r.widthProperty().bind(r.heightProperty());
-                    r.setFill(Color.valueOf(dice.getColor().toString()));
-
-                    r.setOnDragDetected(event -> {
-                        Dragboard db = r.startDragAndDrop(TransferMode.MOVE);
-                        ClipboardContent diceData = new ClipboardContent();
-                        diceData.putString(dice.getColor().toString());
-
-                        db.setContent(diceData);
-
-                        event.consume();
-                    });
-
-                    draftPool.getChildren().add(r);
-
+                playerGrid.updateWindow(client.getGameSnapshot().getPlayer().getWindow());
+                for(int i=0;i<otherPlayerGrids.size();i++){
+                    otherPlayerGrids.get(i).updateWindow(client.getGameSnapshot().getOtherPlayers().get(i).getWindow());
                 }
             });
         }
@@ -415,7 +407,27 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public void printMenu(GameSnapshot gameSnapshot) {
+        if(gameStarted){
+            Platform.runLater(()->{
+                draftPool.getChildren().clear();
+                boolean myTurn = client.getGameSnapshot().getPlayer().isMyTurn();
+                List<Dice> pool = client.getGameSnapshot().getDraftPool();
+                for(int i = 0;i<pool.size();i++){
+                    DicePane dp = new DicePane(pool.get(i),i+1);
+                    dp.bindDimension(draftPool.heightProperty());
+                    if(myTurn&&!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted()){
+                        dp.setDraggable();
+                        dp.setCursor(Cursor.MOVE);
+                    }
+                    draftPool.getChildren().add(dp);
+                }
+                passButton.setDisable(!myTurn);
+                tool1.setDisable(!myTurn||client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed());
+                tool2.setDisable(!myTurn||client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed());
+                tool3.setDisable(!myTurn||client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed());
 
+            });
+        }
     }
 
     @Override
@@ -518,5 +530,9 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 enableSchemaChoice();
             }
         });
+    }
+
+    public void pass(ActionEvent actionEvent) {
+        client.pass();
     }
 }

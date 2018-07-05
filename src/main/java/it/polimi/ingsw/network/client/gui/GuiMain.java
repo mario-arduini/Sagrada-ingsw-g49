@@ -13,6 +13,9 @@ import java.net.URL;
 
 public class GuiMain extends Application {
 
+    private static final String DEF_COLOR = "#f8f6f7";
+
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         URL path = GuiMain.class.getClassLoader().getResource("gui-views/connessione.fxml");
@@ -83,5 +86,16 @@ public class GuiMain extends Application {
             e.printStackTrace();
         }
         return goalImage;
+    }
+
+    public static String getColor(it.polimi.ingsw.model.Color color){
+        switch (color){
+            case RED: return "#d72427";
+            case PURPLE: return "#a84296";
+            case YELLOW: return "#f0da0b";
+            case GREEN: return "#04ac6e";
+            case BLUE: return "#31bbc5";
+            default: return DEF_COLOR;
+        }
     }
 }
