@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.RMIInterfaces;
 
+import it.polimi.ingsw.controller.exceptions.DisconnectionException;
 import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 
@@ -27,10 +28,10 @@ public interface ClientInterface extends Remote, Serializable {
 
     //void close();
 
-    Coordinate askDiceWindow(String prompt, boolean rollback) throws RemoteException, RollbackException;
-    Dice askDiceDraftPool(String prompt, boolean rollback) throws RemoteException, RollbackException;
-    int askDiceRoundTrack(String prompt, boolean rollback) throws RemoteException, RollbackException;
-    boolean askIfPlus(String prompt, boolean rollback) throws RemoteException, RollbackException;
-    int askDiceValue(String prompt, boolean rollback) throws RemoteException, RollbackException;
+    Coordinate askDiceWindow(String prompt, boolean rollback) throws RemoteException, RollbackException, DisconnectionException;
+    Dice askDiceDraftPool(String prompt, boolean rollback) throws RemoteException, RollbackException, DisconnectionException;
+    int askDiceRoundTrack(String prompt, boolean rollback) throws RemoteException, RollbackException, DisconnectionException;
+    boolean askIfPlus(String prompt, boolean rollback) throws RemoteException, RollbackException, DisconnectionException;
+    int askDiceValue(String prompt, boolean rollback) throws RemoteException, RollbackException, DisconnectionException;
     void showDice(Dice dice) throws RemoteException;
 }

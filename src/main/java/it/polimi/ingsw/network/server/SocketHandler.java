@@ -288,7 +288,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt, boolean rollback) throws RollbackException{
+    public Coordinate askDiceWindow(String prompt, boolean rollback) throws RollbackException, DisconnectionException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-window");
@@ -309,13 +309,12 @@ public class SocketHandler implements Runnable, ClientInterface {
             Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
             this.gameFlowHandler.disconnected();
             connected = false;
+            throw new DisconnectionException();
         }
-
-        return null;
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt, boolean rollback) throws RollbackException{
+    public Dice askDiceDraftPool(String prompt, boolean rollback) throws RollbackException, DisconnectionException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-draftpool");
@@ -335,12 +334,12 @@ public class SocketHandler implements Runnable, ClientInterface {
             Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
             this.gameFlowHandler.disconnected();
             connected = false;
+            throw new DisconnectionException();
         }
-        return null;
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt, boolean rollback) throws RollbackException{
+    public int askDiceRoundTrack(String prompt, boolean rollback) throws RollbackException, DisconnectionException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-roundtrack");
@@ -360,12 +359,12 @@ public class SocketHandler implements Runnable, ClientInterface {
             Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
             this.gameFlowHandler.disconnected();
             connected = false;
+            throw new DisconnectionException();
         }
-        return -1;
     }
 
     @Override
-    public boolean askIfPlus(String prompt, boolean rollback) throws RollbackException{
+    public boolean askIfPlus(String prompt, boolean rollback) throws RollbackException, DisconnectionException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-plus-minus");
@@ -385,13 +384,13 @@ public class SocketHandler implements Runnable, ClientInterface {
             Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
             this.gameFlowHandler.disconnected();
             connected = false;
-            throw new NullPointerException();
+            throw new DisconnectionException();
         }
 
     }
 
     @Override
-    public int askDiceValue(String prompt, boolean rollback) throws RollbackException{
+    public int askDiceValue(String prompt, boolean rollback) throws RollbackException, DisconnectionException{
         JsonObject command;
 
         JsonObject toSend = createMessage("toolcard-dice-value");
@@ -411,8 +410,8 @@ public class SocketHandler implements Runnable, ClientInterface {
             Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
             this.gameFlowHandler.disconnected();
             connected = false;
+            throw new DisconnectionException();
         }
-        return -1;
     }
 
     @Override
