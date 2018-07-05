@@ -85,6 +85,8 @@ class CLIHandler implements GraphicInterface{
         while (newGame) {
             if(!play())
                 newGame = askNewGame();
+            else
+                newGame = false;
         }
         cliListener.stopListening();
         thread.interrupt();
@@ -99,7 +101,7 @@ class CLIHandler implements GraphicInterface{
                 ClientLogger.print("\nYour choice: ");
                 command = readInt(1, 4);
                 if(command == -1)
-                    break;
+                    return false;
                 client.sendSchemaChoice(command - 1);
                 if (!flagContinue)
                     ClientLogger.print("\nWaiting other players' choice");
@@ -107,6 +109,8 @@ class CLIHandler implements GraphicInterface{
             } while (!serverResult);
         }
 
+        if(!client.isGameStarted())
+            return false;
         while (!logout) {
             command = readInt(0, 3);
             if (!client.isGameStarted())
@@ -656,6 +660,7 @@ class CLIHandler implements GraphicInterface{
         for(Score score : scores)
             ClientLogger.println(score.getPlayer() + "   " + score.getTotalScore());
         wakeUpInput(null);
+        wakeUp(true);
     }
 
     @Override
