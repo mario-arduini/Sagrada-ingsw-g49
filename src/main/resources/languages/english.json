@@ -25,5 +25,7 @@
   "choose-drafted":"Choose a dice from the draft pool: ",
   "choose-drafted-invalid":"Dice not present in the draft pool furbacchione!\n Choose another one: ",
   "place-dice":"Choose where to place the dice.",
-  "place-dice-invalid":"There you cannot, choose another cell."
+  "place-dice-invalid":"There you cannot, choose another cell.",
+  "move-number":"Choose a number of dice to move.\nYou can choose a number between 1 and ",
+  "move-number-invalid":"Invalid choice\nYou can choose a number between 1 and "
 }

@@ -490,6 +490,21 @@ class CLIHandler implements GraphicInterface{
         return i;
     }
 
+    @Override
+    public int askMoveNumber(String prompt, int n, boolean rollback) throws RollbackException{
+        int startingValue;
+        if (rollback)
+            startingValue = 0;
+        else
+            startingValue = 1;
+
+        ClientLogger.print(MessageHandler.get(prompt) + n + ": ");
+        int i = readInt(startingValue, n);
+        if (i==0)
+            throw new RollbackException();
+        return i;
+    }
+
     private Coordinate getPosition(boolean rollback) throws RollbackException{
         int startingValue;
         if (rollback)

@@ -1,8 +1,8 @@
 {"name":"Lathekin",
 	
 	"effects":[
-		{"move":{"ignore":"NONE"}},
-		{"move":{"ignore":"NONE"}}],
+		{"move-n" : {"ignore" : "NONE", "number":2 }}
+	],
 	
 	"prerequisites":[
 		"favor-token",

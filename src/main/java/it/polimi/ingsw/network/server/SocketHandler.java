@@ -415,6 +415,32 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
+    public int askMoveNumber(String prompt, int n, boolean rollback) throws RollbackException, DisconnectionException{
+        JsonObject command;
+
+        JsonObject toSend = createMessage("move-dice-number");
+        toSend.addProperty("prompt",prompt);
+        toSend.addProperty("number", n);
+        toSend.addProperty("rollback", rollback);
+        socketSendMessage(toSend);
+        try{
+            command = socketReadCommand();
+            if (command.get("choice").getAsString().equalsIgnoreCase("rollback")){
+                socketSendMessage(createMessage("rollback-ok"));
+                throw new RollbackException();
+            }
+
+            return getJsonPositiveIntValue(command, "choice");
+
+        } catch (NullPointerException e){
+            Logger.print("Disconnected: " + nickname + " " + socket.getRemoteSocketAddress().toString());
+            this.gameFlowHandler.disconnected();
+            connected = false;
+            throw new DisconnectionException();
+        }
+    }
+
+    @Override
     public void showDice(Dice dice){
         JsonObject message;
 

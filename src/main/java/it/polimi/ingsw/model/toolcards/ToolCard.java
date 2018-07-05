@@ -118,6 +118,9 @@ public class ToolCard implements Serializable {
                         }
                         Effects.move(game.getWindow(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
                         break;
+                    case "move-n":
+                        Effects.moveN(arguments.get("number").getAsInt(), game.getWindow(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
+                        break;
                     case "change-value":
                         if (arguments.get("plus") != null && arguments.get("plus").getAsBoolean())
                             Effects.changeValue(game.getRound().getCurrentDiceDrafted(), arguments.get("value").getAsInt(), connection, rollback);
@@ -144,7 +147,12 @@ public class ToolCard implements Serializable {
                         break;
 
                 }
-            }catch (DisconnectionException e){
+            }catch (RollbackException e){
+                if (this.rollback)
+                    throw e;
+                i -= 1;
+            }
+            catch (DisconnectionException e){
                 try {
                     startTimer();
                     wait();

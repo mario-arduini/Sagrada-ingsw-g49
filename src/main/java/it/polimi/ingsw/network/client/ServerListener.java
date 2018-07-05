@@ -124,6 +124,9 @@ public class ServerListener implements Runnable {
                     case "toolcard-dice-value":
                         server.sendDiceValue(client.askDiceValue(jsonObject.get("prompt").getAsString(), jsonObject.get("rollback").getAsBoolean()));
                         break;
+                    case "move-dice-number":
+                        server.sendMoveNumber(client.askMoveNumber(jsonObject.get("prompt").getAsString(), jsonObject.get("number").getAsInt(), jsonObject.get("rollback").getAsBoolean()));
+                        break;
                     case "show-dice":
                         client.showDice(gson.fromJson(jsonObject.get("dice").getAsString(), Dice.class));
                         break;

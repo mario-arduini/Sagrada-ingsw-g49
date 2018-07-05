@@ -67,6 +67,76 @@ final class Effects {
         return true;
     }
 
+
+    public static void moveN (int n , Window currentPlayerWindow, Window.RuleIgnored ignored, boolean optional, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException{
+        String prompt;
+        //If optional asks number of moves till it's <= n
+        int num = n;
+        if (optional) {
+            num += 1;
+            prompt = "move-number";
+            while (num > n) {
+                try {
+                    num = connection.askMoveNumber(prompt, n, rollback);
+                } catch (RollbackException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new DisconnectionException();
+                }
+                prompt = "move-number-invalid";
+            }
+        }
+
+        //Fetch dice
+        List<Dice> diceList = new ArrayList<>();
+        List<Coordinate> start = new ArrayList<>();
+        Dice removedDice;
+
+        prompt = "move-from";
+        while(num > diceList.size()){
+            try {
+                start.add(connection.askDiceWindow(prompt, rollback));
+                removedDice = currentPlayerWindow.getCell(start.get(diceList.size()-1).getRow(),start.get(diceList.size()-1).getColumn());
+                if(removedDice == null){
+                    prompt = "move-from-empty";
+                }else {
+                    diceList.add(removedDice);
+                    prompt = "move-from";
+                }
+
+            } catch (RollbackException e) {
+                throw e;
+            }catch (Exception e){
+                throw new DisconnectionException();
+            }
+        }
+
+        //Place dice
+        Coordinate end;
+        prompt = "move-to";
+        while (diceList.size() > 0) {
+            try {
+                end = connection.askDiceWindow(prompt, rollback);
+                if (start.get(num - diceList.size()).getRow() == end.getRow() && start.get(num - diceList.size()).getColumn() == end.getColumn())
+                    prompt = "move-to-same";
+                else {
+                    try {
+                        removedDice = diceList.get(num - diceList.size());
+                        placeDice(currentPlayerWindow,removedDice, end.getRow(), end.getColumn(), ignored);
+                        diceList.remove(removedDice);
+                    }catch (NoAdjacentDiceException | BadAdjacentDiceException
+                            | FirstDiceMisplacedException | ConstraintViolatedException | NotWantedAdjacentDiceException e) {
+                        prompt = "move-to-invalid";
+                    }
+                }
+            } catch (RollbackException e) {
+                throw e;
+            }catch (Exception e){
+                throw new DisconnectionException();
+            }
+        }
+    }
+
     static void move(Window currentPlayerWindow,Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         try {
             if(optional && !connection.askIfPlus("want-move", rollback)) return;
