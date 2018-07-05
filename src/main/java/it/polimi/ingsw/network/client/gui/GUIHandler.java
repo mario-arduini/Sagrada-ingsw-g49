@@ -11,6 +11,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
@@ -91,6 +92,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     private boolean choosingSchema;
     private boolean gameStarted;
     private Client.ConnectionType connectionType;
+    private Dice askedDraft;
 
     private static final Pattern PATTERN = Pattern.compile(
             "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
@@ -307,6 +309,17 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             i++;
         }
 
+        List<ToolCard> tools = client.getGameSnapshot().getToolCards();
+        tool1.setText(tools.get(0).getName()+ (tools.get(0).getUsed() ? " (2)" : " (1)"));
+        tool1.setOnAction(event -> {
+            System.out.println("using toolcard");
+            client.useToolCard(tools.get(0).getName());
+        });
+        tool2.setText(tools.get(1).getName()+ (tools.get(1).getUsed() ? " (2)" : " (1)"));
+        tool2.setOnAction(event -> client.useToolCard(tools.get(1).getName()));
+        tool3.setText(tools.get(2).getName()+ (tools.get(2).getUsed() ? " (2)" : " (1)"));
+        tool3.setOnAction(event -> client.useToolCard(tools.get(2).getName()));
+
         printGame(client.getGameSnapshot());
         printMenu(client.getGameSnapshot());
     }
@@ -469,7 +482,28 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public Dice askDiceDraftPool(String prompt, boolean rollback) {
-        return null;
+
+        Platform.runLater(()->{
+            info.setText(MessageHandler.get(prompt));
+            draftPool.getChildren().forEach(child -> {
+                child.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        askedDraft = ((DicePane) event.getSource()).dice;
+                        System.out.println(this.getClass());
+                        this.notify();
+                    }
+                });
+            });
+        });
+
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return askedDraft;
     }
 
     @Override
