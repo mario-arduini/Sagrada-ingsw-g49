@@ -60,7 +60,7 @@ class CLIHandler implements GraphicInterface{
                 client.setServerPort(askServerPort());
         }while (!client.createConnection(connectionType));
 
-        waitConnection();
+        waitResult();
 
         while(!ok) {
             ClientLogger.printWithClear("Welcome to Sagrada!\n\nChoose an option:\n0) Logout\n1) Login\nYour choice: ");
@@ -191,15 +191,6 @@ class CLIHandler implements GraphicInterface{
         if(readInt(0, 1) == 1)
             return Client.ConnectionType.RMI;
         return Client.ConnectionType.SOCKET;
-    }
-
-    private synchronized void waitConnection(){
-        while (!client.getServerConnected())
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                LOGGER.warning(e.toString());
-            }
     }
 
     private String askNickname(){

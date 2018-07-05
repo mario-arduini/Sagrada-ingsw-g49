@@ -158,7 +158,6 @@ public class SocketHandler implements Runnable, ClientInterface {
     private void useToolCard(JsonObject message){
         try {
             gameFlowHandler.useToolCard(message.get("name").getAsString());
-            socketSendMessage(createMessage("verified"));
         } catch (InvalidParameterException | NoSuchToolCardException |
                 NoDiceInWindowException | NothingCanBeMovedException |
                 InvalidFavorTokenNumberException | AlreadyDraftedException |

@@ -66,9 +66,6 @@ public class ServerListener implements Runnable {
                     case "quit":
                         client.notifyLogout(jsonObject.get("nickname").getAsString());
                         break;
-                    case "verified":
-                        client.setServerResult(true);
-                        break;
                     case "failed":
                         client.setServerResult(false);
                         break;

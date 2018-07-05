@@ -160,6 +160,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     @Override
     public void notifyLogin(List<String> nicknames){
+        setServerResult(true);
         for(String nickname : nicknames)
             gameSnapshot.addOtherPlayer(nickname);
         handler.printWaitingRoom();
@@ -244,15 +245,15 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             gameSnapshot.setRoundTrack(roundTrack);
             gameSnapshot.setDraftPool(draftPool);
 
-            handler.printGame(gameSnapshot);
-            handler.printMenu(gameSnapshot);
-
             if(player.equalsIgnoreCase(gameSnapshot.getPlayer().getNickname())) {
                 gameSnapshot.getPlayer().setUsedToolCard(true);
                 setServerResult(true);
             }
             else
                 handler.notifyUsedToolCard(player, toolCard);
+
+            handler.printGame(gameSnapshot);
+            handler.printMenu(gameSnapshot);
         }
     }
 
