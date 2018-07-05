@@ -17,11 +17,11 @@ public interface GraphicInterface {
     void notifyUsedToolCard(String player,String toolCard);
     void gameOver(List<Score> scores);
     void notifyServerDisconnected();
-    boolean askIfPlus(String prompt) throws RollbackException;
-    Dice askDiceDraftPool(String prompt) throws RollbackException;
-    int askDiceRoundTrack(String prompt) throws RollbackException;
-    Coordinate askDiceWindow(String prompt) throws RollbackException;
-    int askDiceValue(String prompt) throws RollbackException;
+    boolean askIfPlus(String prompt, boolean rollback) throws RollbackException;
+    Dice askDiceDraftPool(String prompt, boolean rollback) throws RollbackException;
+    int askDiceRoundTrack(String prompt, boolean rollback) throws RollbackException;
+    Coordinate askDiceWindow(String prompt, boolean rollback) throws RollbackException;
+    int askDiceValue(String prompt, boolean rollback) throws RollbackException;
     void wakeUp(boolean serverResult);
     void interruptInput();
     void printDice(Dice dice);

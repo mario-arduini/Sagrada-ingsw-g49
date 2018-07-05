@@ -7,7 +7,8 @@
 	],
 
 	"prerequisites":[
-		"before-draft",
-		"favor-token"
-	]
+		"favor-token",
+		"before-draft"
+	],
+	"rollback":false
 }

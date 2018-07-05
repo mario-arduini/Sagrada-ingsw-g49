@@ -1,1 +1,12 @@
-{"name":"Tampone Diamantato","effects":[{"get-draft-dice":{}},{"flip":{}},{"place-dice":{}}],"prerequisites":["before-draft","favor-token"]}
+{"name":"Tampone Diamantato",
+	"effects":[
+		{"get-draft-dice":{}},
+		{"flip":{}},
+		{"place-dice":{"ignore":"NONE"}}
+	],
+	"prerequisites":[
+		"favor-token",
+		"before-draft"
+	],
+	"rollback" : true
+}

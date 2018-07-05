@@ -2,6 +2,7 @@ package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
+import it.polimi.ingsw.model.toolcards.ToolCard;
 import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
 
@@ -13,7 +14,7 @@ public class GameRoom extends Game{
     private List<ClientInterface> connections;
     private boolean notifyEndGame;
     private Timer timer;
-    private int secondsTimer = 10; //TODO: read value from file.
+    private int secondsTimer = 1000000000; //TODO: read value from file.
 
     GameRoom(List<Player> playerList, List<ClientInterface> connections) throws NoMorePlayersException {
         super(playerList);

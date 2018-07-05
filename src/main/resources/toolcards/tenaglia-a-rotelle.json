@@ -1,1 +1,13 @@
-{"name":"Tenaglia a rotelle","effects":[{"get-draft-dice":{}},{"place-dice":{}},{"remove-turn":{}}],"prerequisites":["after-draft","first-turn","favor-token"]}
+{"name":"Tenaglia a rotelle",
+	"effects":[
+		{"get-draft-dice":{}},
+		{"place-dice":{"ignore":"NONE"}},
+		{"remove-turn":{}}
+	],
+	"prerequisites":[
+		"favor-token",
+		"after-draft",
+		"first-turn"
+	],
+	"rollback":true
+}

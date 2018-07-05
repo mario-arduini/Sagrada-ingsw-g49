@@ -17,15 +17,17 @@ final class Effects {
         super();
     }
 
-    static void getDraftedDice(Round round, ClientInterface connection) throws RollbackException {
+    static void getDraftedDice(Round round, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         boolean valid = false;
         Dice dice = null;
         String prompt = "choose-drafted";
         while (!valid){
             try {
-                dice = connection.askDiceDraftPool(prompt);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+                dice = connection.askDiceDraftPool(prompt, rollback);
+            } catch (RollbackException e) {
+                throw e;
+            }catch (Exception e){
+                throw new DisconnectionException();
             }
             prompt = "choose-drafted-invalid";
             if(round.getDraftPool().contains(dice)) valid=true;
@@ -35,16 +37,19 @@ final class Effects {
         round.setDiceExtracted(true);
     }
 
-    static boolean addDiceToWindow(Window window, Dice dice, ClientInterface connection, Window.RuleIgnored ignore) throws RollbackException, DisconnectionException {
+    static boolean addDiceToWindow(Window window, Dice dice, ClientInterface connection, Window.RuleIgnored ignore, boolean rollback) throws RollbackException, DisconnectionException {
         if(window.possiblePlaces(dice, ignore)==0) return false;
+
         boolean valid = false;
         Coordinate coords = null;
         String prompt = "place-dice";
         while (!valid){
             try {
-                coords = connection.askDiceWindow(prompt);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+                coords = connection.askDiceWindow(prompt, rollback);
+            } catch (RollbackException e) {
+                throw e;
+            }catch (Exception e){
+                throw new DisconnectionException();
             }
             if (coords!= null) {
                 prompt = "place-dice-invalid";
@@ -60,9 +65,9 @@ final class Effects {
         return true;
     }
 
-    static void move(Window currentPlayerWindow,Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection) throws RollbackException, DisconnectionException {
+    static void move(Window currentPlayerWindow,Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         try {
-            if(optional && !connection.askIfPlus("want-move")) return;
+            if(optional && !connection.askIfPlus("want-move", rollback)) return;
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -74,9 +79,11 @@ final class Effects {
         while (!valid){
             valid = true;
             try {
-                start = connection.askDiceWindow(message);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+                start = connection.askDiceWindow(message, rollback);
+            } catch (RollbackException e) {
+                throw e;
+            }catch (Exception e){
+                throw new DisconnectionException();
             }
             removedDice = currentPlayerWindow.getCell(start.getRow(),start.getColumn());
             if(removedDice == null){
@@ -106,9 +113,11 @@ final class Effects {
         while (!valid) {
             valid = true;
             try {
-                end = connection.askDiceWindow(message);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+                end = connection.askDiceWindow(message, rollback);
+            } catch (RollbackException e) {
+                throw e;
+            }catch (Exception e){
+                throw new DisconnectionException();
             }
             if (start.getRow() == end.getRow() && start.getColumn() == end.getColumn()){
                 valid = false;
@@ -124,11 +133,13 @@ final class Effects {
         }
     }
 
-    public static Dice move(Window currentPlayerWindow, List<Dice> roundTrack, Dice old, Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection) throws RollbackException {
+    public static Dice move(Window currentPlayerWindow, List<Dice> roundTrack, Dice old, Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         try {
-            if(optional && !connection.askIfPlus("want-move")) return null;
-        } catch (RemoteException e) {
-            e.printStackTrace();
+            if(optional && !connection.askIfPlus("want-move", rollback)) return null;
+        } catch (RollbackException e) {
+            throw e;
+        }catch (Exception e){
+            throw new DisconnectionException();
         }
         Coordinate start = null;
         Coordinate end = null;
@@ -138,9 +149,11 @@ final class Effects {
         while (!valid){
             valid = true;
             try {
-                start = connection.askDiceWindow(message);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+                start = connection.askDiceWindow(message, rollback);
+            } catch (RollbackException e) {
+                throw e;
+            }catch (Exception e){
+                throw new DisconnectionException();
             }
             removedDice = currentPlayerWindow.getCell(start.getRow(),start.getColumn());
             if(removedDice == null){
@@ -185,9 +198,11 @@ final class Effects {
         while (!valid) {
             valid = true;
             try {
-                end = connection.askDiceWindow(message);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+                end = connection.askDiceWindow(message, rollback);
+            } catch (RollbackException e) {
+                throw e;
+            }catch (Exception e){
+                throw new DisconnectionException();
             }
             if (start.getRow() == end.getRow() && start.getColumn() == end.getColumn()){
                 valid = false;
@@ -204,22 +219,22 @@ final class Effects {
         return removedDice;
     }
 
-    static void changeValue(Dice dice, ClientInterface connection){
+    static void changeValue(Dice dice, ClientInterface connection) throws DisconnectionException{
         dice.roll();
         try {
             connection.showDice(dice);
-        } catch (RemoteException e) {
-            Logger.print("Disconnection RMI inside toolcards.");
+        } catch (Exception e) {
+            throw new DisconnectionException();
         }
     }
 
-    static void changeValue(Dice dice, int value, ClientInterface connection) throws RollbackException {
+    static void changeValue(Dice dice, int value, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         String message = "ask-plus";
         boolean valid=false;
         while (!valid){
             valid = true;
             try {
-                if (connection.askIfPlus(message)){
+                if (connection.askIfPlus(message, rollback)){
                     try {
                         dice.setValue(dice.getValue()+value);
                     } catch (InvalidDiceValueException e) {
@@ -234,14 +249,16 @@ final class Effects {
                         message = "ask-plus-invalid";
                     }
                 }
-            } catch (RemoteException e) {
-                e.printStackTrace();
+            } catch (RollbackException e) {
+                throw e;
+            }catch (Exception e){
+                throw new DisconnectionException();
             }
         }
         try {
             connection.showDice(dice);
-        } catch (RemoteException e) {
-            Logger.print("Disconnection RMI inside toolcards.");
+        } catch (Exception e) {
+            throw new DisconnectionException();
         }
     }
 
@@ -264,15 +281,17 @@ final class Effects {
         });
     }
 
-    static void swapRoundTrack(Round round,List<Dice> roundTrack, ClientInterface connection) throws RollbackException {
+    static void swapRoundTrack(Round round,List<Dice> roundTrack, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         boolean valid = false;
         int position=0;
         String prompt = "choose-round-swap";
         while(!valid){
             try {
-                position = connection.askDiceRoundTrack(prompt);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+                position = connection.askDiceRoundTrack(prompt, rollback);
+            } catch (RollbackException e){
+                throw new RollbackException();
+            } catch (Exception e) {
+                throw new DisconnectionException();
             }
             prompt = "choose-round-swap-invalid";
             valid = true;
@@ -288,7 +307,7 @@ final class Effects {
         round.getDraftPool().add(round.getCurrentDiceDrafted());
     }
 
-    static void setDiceFromBag(Round round, Dice dice, ClientInterface connection) throws RollbackException {
+    static void setDiceFromBag(Round round, Dice dice, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         int value = 0; //TODO: remove this init
         boolean valid = false;
         String prompt = "choose-value";
@@ -296,16 +315,18 @@ final class Effects {
         //TODO: what if disconnection here?!
         try {
             connection.showDice(dice);
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        }catch (Exception e){
+            throw new DisconnectionException();
         }
 
         while (!valid){
             valid = true;
             try {
-                value = connection.askDiceValue(prompt);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+                value = connection.askDiceValue(prompt, rollback);
+            } catch (RollbackException e) {
+                throw e;
+            }catch (Exception e){
+                throw new DisconnectionException();
             }
             prompt = "choose-value-invalid";
             try {
