@@ -3,6 +3,7 @@ package it.polimi.ingsw;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import it.polimi.ingsw.controller.GameFlowHandler;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.toolcards.ToolCard;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -133,27 +135,27 @@ class ConnectionHandlerStub implements ClientInterface {
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt) {
+    public Coordinate askDiceWindow(String prompt, boolean rollback) {
         return windowPositions.get(idxWindowPositions++);
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt) {
+    public Dice askDiceDraftPool(String prompt, boolean rollback) {
         return draftPoolDices.get(idxDraftPoolDices++);
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt) {
+    public int askDiceRoundTrack(String prompt, boolean rollback) {
         return roundTrackIndexes.get(idxRoundTrackIndexes++);
     }
 
     @Override
-    public boolean askIfPlus(String prompt) {
+    public boolean askIfPlus(String prompt, boolean rollback) {
         return booleans.get(idxBooleans++);
     }
 
     @Override
-    public int askDiceValue(String prompt) {
+    public int askDiceValue(String prompt, boolean rollback) {
         return diceValues.get(idxDiceValues++);
     }
 
@@ -286,16 +288,18 @@ public class ToolcardTest {
         booleans.add(false);
 
         List<Coordinate> windowPositions = new ArrayList<>();
-        windowPositions.add(new Coordinate(0,0));
-        windowPositions.add(new Coordinate(0,1));
-        windowPositions.add(new Coordinate(0,2));
-        windowPositions.add(new Coordinate(1,0));
+        windowPositions.add(new Coordinate(1,1));
         windowPositions.add(new Coordinate(1,2));
+        windowPositions.add(new Coordinate(1,3));
+        windowPositions.add(new Coordinate(2,1));
+        windowPositions.add(new Coordinate(2,3));
 
         ConnectionHandlerStub connectionHandlerStub = new ConnectionHandlerStub(dices,windowPositions,booleans,null,null);
 
-        assertDoesNotThrow(()->tool.use(game,connectionHandlerStub));
-        assertEquals(3,game.getCurrentRound().getCurrentPlayer().getFavorToken());
+        AtomicReference<GameFlowHandler> gameFlow = new AtomicReference<>();
+        assertDoesNotThrow(()->gameFlow.getAndSet(new GameFlowHandler(null, connectionHandlerStub, null)));
+
+        assertDoesNotThrow(()->tool.use(game,gameFlow.get()));
         assertEquals(2,connectionHandlerStub.getIdxDraftPoolDices());
         assertEquals(1,connectionHandlerStub.getIdxBooleans());
         assertEquals(1,connectionHandlerStub.getIdxWindowPositions());
@@ -316,16 +320,18 @@ public class ToolcardTest {
         }
 
         assertDoesNotThrow(()->game.placeDice(0,3,new Dice(Color.BLUE,1)));
-        assertThrows(AlreadyDraftedException.class,()->tool.use(game,connectionHandlerStub));
+        assertDoesNotThrow(()->gameFlow.getAndSet(new GameFlowHandler(null, connectionHandlerStub, null)));
+
+        assertThrows(AlreadyDraftedException.class,()->tool.use(game,gameFlow.get()));
 
         try {
             game.getCurrentRound().nextPlayer();
         } catch (NoMorePlayersException e) {
             assertTrue(false);
         }
-
-        assertDoesNotThrow(()->tool.use(game,connectionHandlerStub));
-        assertEquals(2,game.getCurrentRound().getCurrentPlayer().getFavorToken());
+        assertDoesNotThrow(()->gameFlow.getAndSet(new GameFlowHandler(null, connectionHandlerStub, null)));
+        assertDoesNotThrow(()->tool.use(game,gameFlow.get()));
+//        assertEquals(2,game.getCurrentRound().getCurrentPlayer().getFavorToken());
         assertEquals(4,connectionHandlerStub.getIdxDraftPoolDices());
         assertEquals(3,connectionHandlerStub.getIdxBooleans());
         assertEquals(3,connectionHandlerStub.getIdxWindowPositions());
@@ -343,7 +349,9 @@ public class ToolcardTest {
             assertTrue(false);
         }
 
-        assertDoesNotThrow(()->tool.use(game,connectionHandlerStub));
+        assertDoesNotThrow(()->gameFlow.getAndSet(new GameFlowHandler(null, connectionHandlerStub, null)));
+
+        assertDoesNotThrow(()->tool.use(game,gameFlow.get()));
         assertEquals(1,game.getCurrentRound().getCurrentPlayer().getFavorToken());
         assertEquals(5,connectionHandlerStub.getIdxDraftPoolDices());
         assertEquals(4,connectionHandlerStub.getIdxBooleans());
@@ -358,7 +366,9 @@ public class ToolcardTest {
         game.nextRound();
         game.getCurrentRound().fakeDraftPool(setDraft());
 
-        assertDoesNotThrow(()->tool.use(game,connectionHandlerStub));
+        assertDoesNotThrow(()->gameFlow.getAndSet(new GameFlowHandler(null, connectionHandlerStub, null)));
+
+        assertDoesNotThrow(()->tool.use(game,gameFlow.get()));
         assertEquals(0,game.getCurrentRound().getCurrentPlayer().getFavorToken());
         assertEquals(6,connectionHandlerStub.getIdxDraftPoolDices());
         assertEquals(7,connectionHandlerStub.getIdxBooleans());
@@ -375,8 +385,9 @@ public class ToolcardTest {
         } catch (NoMorePlayersException e) {
             assertTrue(false);
         }
+        assertDoesNotThrow(()->gameFlow.getAndSet(new GameFlowHandler(null, connectionHandlerStub, null)));
 
-        assertThrows(NotEnoughFavorTokenException.class,()->tool.use(game,connectionHandlerStub));
+        assertThrows(NotEnoughFavorTokenException.class,()->tool.use(game,gameFlow.get()));
     }
 
     @Test
@@ -389,22 +400,27 @@ public class ToolcardTest {
 
         game.getCurrentRound().fakeDraftPool(setDraft());
         List<Coordinate> windowPositions = new ArrayList<>();
-        windowPositions.add(new Coordinate(0,0));
-        windowPositions.add(new Coordinate(0,2));
-        windowPositions.add(new Coordinate(0,2));
-        windowPositions.add(new Coordinate(3,0));
-        windowPositions.add(new Coordinate(0,0));
         windowPositions.add(new Coordinate(1,1));
-        windowPositions.add(new Coordinate(0,0));
+        windowPositions.add(new Coordinate(1,3));
+        windowPositions.add(new Coordinate(1,3));
+        windowPositions.add(new Coordinate(4,1));
+        windowPositions.add(new Coordinate(1,1));
         windowPositions.add(new Coordinate(2,2));
+        windowPositions.add(new Coordinate(1,1));
+        windowPositions.add(new Coordinate(3,3));
 
         ConnectionHandlerStub connectionHandlerStub = new ConnectionHandlerStub(null,windowPositions,null,null,null);
 
-        assertThrows(NoDiceInWindowException.class,()->tool.use(game,connectionHandlerStub));
+        AtomicReference<GameFlowHandler> gameFlow = new AtomicReference<>();
+        assertDoesNotThrow(()->gameFlow.getAndSet(new GameFlowHandler(null, connectionHandlerStub, null)));
+
+        assertThrows(NoDiceInWindowException.class,()->tool.use(game,gameFlow.get()));
 
         assertDoesNotThrow(()->game.placeDice(0,2, new Dice(Color.BLUE,1)));
-        assertDoesNotThrow(()->tool.use(game,connectionHandlerStub));
-        assertEquals(3,game.getCurrentRound().getCurrentPlayer().getFavorToken());
+        assertDoesNotThrow(()->gameFlow.getAndSet(new GameFlowHandler(null, connectionHandlerStub, null)));
+
+        assertDoesNotThrow(()->tool.use(game,gameFlow.get()));
+        //assertEquals(3,game.getCurrentRound().getCurrentPlayer().getFavorToken());
         assertEquals(5,connectionHandlerStub.getIdxWindowPositions());
         Dice expected = null;
         try {
@@ -424,7 +440,9 @@ public class ToolcardTest {
         }
 
         assertDoesNotThrow(()->game.placeDice(1,1,new Dice(Color.RED,1)));
-        assertDoesNotThrow(()->tool.use(game,connectionHandlerStub));
+        assertDoesNotThrow(()->gameFlow.getAndSet(new GameFlowHandler(null, connectionHandlerStub, null)));
+
+        assertDoesNotThrow(()->tool.use(game,gameFlow.get()));
         assertEquals(1,game.getCurrentRound().getCurrentPlayer().getFavorToken());
         assertEquals(8,connectionHandlerStub.getIdxWindowPositions());
         try {
@@ -437,7 +455,9 @@ public class ToolcardTest {
         assertEquals(expected,game.getCurrentRound().getCurrentPlayer().getWindow().getCell(2,2));
         assertEquals(null,game.getCurrentRound().getCurrentPlayer().getWindow().getCell(0,0));
 
-        assertThrows(NotEnoughFavorTokenException.class,()->tool.use(game,connectionHandlerStub));
+        assertDoesNotThrow(()->gameFlow.getAndSet(new GameFlowHandler(null, connectionHandlerStub, null)));
+
+        assertThrows(NotEnoughFavorTokenException.class,()->tool.use(game,gameFlow.get()));
     }
 
     @Test
@@ -459,10 +479,10 @@ public class ToolcardTest {
         dices.add(game.getCurrentRound().getDraftPool().get(4));
 
         List<Coordinate> windowPositions = new ArrayList<>();
-        windowPositions.add(new Coordinate(0,0));
         windowPositions.add(new Coordinate(1,1));
-        windowPositions.add(new Coordinate(0,2));
         windowPositions.add(new Coordinate(2,2));
+        windowPositions.add(new Coordinate(1,3));
+        windowPositions.add(new Coordinate(3,3));
 
         List<Integer> diceValues = new ArrayList<>();
         diceValues.add(-4);
@@ -474,7 +494,10 @@ public class ToolcardTest {
         ConnectionHandlerStub connectionHandlerStub = new ConnectionHandlerStub(dices,windowPositions,null,null,diceValues);
 
         assertDoesNotThrow(()->game.placeDice(3,0, new Dice(Color.YELLOW,5)));
-        assertThrows(AlreadyDraftedException.class,()->tool.use(game,connectionHandlerStub));
+        AtomicReference<GameFlowHandler> gameFlow = new AtomicReference<>();
+        assertDoesNotThrow(()->gameFlow.getAndSet(new GameFlowHandler(null, connectionHandlerStub, null)));
+
+        assertThrows(AlreadyDraftedException.class,()->tool.use(game,gameFlow.get()));
 
         try {
             game.getCurrentRound().nextPlayer();
@@ -494,13 +517,15 @@ public class ToolcardTest {
                 if(c!=0||r!=3) assertEquals(null,game.getCurrentRound().getCurrentPlayer().getWindow().getCell(r,c));
 
 
-        assertDoesNotThrow(()->tool.use(game,connectionHandlerStub));
-        assertEquals(4,game.getCurrentRound().getCurrentPlayer().getFavorToken());
+        assertDoesNotThrow(()->gameFlow.getAndSet(new GameFlowHandler(null, connectionHandlerStub, null)));
+
+        assertDoesNotThrow(()->tool.use(game,gameFlow.get()));
         assertEquals(1,connectionHandlerStub.getIdxDraftPoolDices());
         assertEquals(3,connectionHandlerStub.getIdxDiceValues());
         assertEquals(0,connectionHandlerStub.getIdxWindowPositions());
         assertEquals(null,game.getCurrentRound().getCurrentPlayer().getWindow().getCell(2,1));
         assertEquals(null,game.getCurrentRound().getCurrentDiceDrafted());
+
         int expectedFive = game.getCurrentRound().getDraftPool().get(game.getCurrentRound().getDraftPool().size()-1).getValue();
         assertEquals(5,expectedFive);
 

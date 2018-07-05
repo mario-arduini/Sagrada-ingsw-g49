@@ -4,7 +4,8 @@
 		{"place-dice":{"ignore":"ADJACENCIES"}}
 	]
 	,"prerequisites":[
-		"before-draft",
-		"favor-token"
-	]
+		"favor-token",
+		"before-draft"
+	],
+	"rollback":true
 }

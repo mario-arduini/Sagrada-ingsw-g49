@@ -1,1 +1,13 @@
-{"name":"Pinza Sgrossatrice","effects":[{"get-draft-dice":{}},{"change-value":{"plus":true,"value":1}},{"place-dice":{}}],"prerequisites":["before-draft","favor-token"]}
+{"name":"Pinza Sgrossatrice",
+	
+	"effects":[
+		{"get-draft-dice":{}},
+		{"change-value":{"plus":true,"value":1}},
+		{"place-dice":{"ignore" : "NONE"}}
+	],
+	"prerequisites":[
+		"favor-token",
+		"before-draft"
+	],
+	"rollback":true
+}

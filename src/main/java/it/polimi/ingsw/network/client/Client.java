@@ -341,28 +341,28 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     //region TOOLCARD
 
     @Override
-    public boolean askIfPlus(String prompt) throws RollbackException{
-        return handler.askIfPlus(prompt);
+    public boolean askIfPlus(String prompt, boolean rollback) throws RollbackException{
+        return handler.askIfPlus(prompt, rollback);
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt) throws RollbackException{
-        return handler.askDiceDraftPool(prompt);
+    public Dice askDiceDraftPool(String prompt, boolean rollback) throws RollbackException{
+        return handler.askDiceDraftPool(prompt, rollback);
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt) throws RollbackException{
-        return handler.askDiceRoundTrack(prompt);
+    public int askDiceRoundTrack(String prompt, boolean rollback) throws RollbackException{
+        return handler.askDiceRoundTrack(prompt, rollback);
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt) throws RollbackException{
-        return handler.askDiceWindow(prompt);
+    public Coordinate askDiceWindow(String prompt, boolean rollback) throws RollbackException{
+        return handler.askDiceWindow(prompt, rollback);
     }
 
     @Override
-    public int askDiceValue(String prompt) throws RollbackException{
-        return handler.askDiceValue(prompt);
+    public int askDiceValue(String prompt, boolean rollback) throws RollbackException{
+        return handler.askDiceValue(prompt, rollback);
     }
 
     //endregion

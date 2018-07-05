@@ -426,14 +426,14 @@ class CLIHandler implements GraphicInterface{
     }
 
     @Override
-    public boolean askIfPlus(String prompt) throws RollbackException{
+    public boolean askIfPlus(String prompt, boolean rollback) throws RollbackException{
         String choice = "";
         boolean ask = true;
         ClientLogger.print(MessageHandler.get(prompt));
 
         while (ask){
             choice = waitInput();
-            if (choice.equals("0")) throw new RollbackException();
+            if (choice.equals("0") && rollback) throw new RollbackException();
             if(choice.equals("+") || choice.equals("-") || choice.equals("y") || choice.equals("n"))
                 ask = false;
             else
@@ -443,18 +443,30 @@ class CLIHandler implements GraphicInterface{
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt) throws RollbackException{
+    public Dice askDiceDraftPool(String prompt, boolean rollback) throws RollbackException{
+        int startingValue;
+        if (rollback)
+            startingValue = 0;
+        else
+            startingValue = 1;
+
         ClientLogger.print(MessageHandler.get(prompt));
-        int i = readInt(0, client.getGameSnapshot().getDraftPool().size());
+        int i = readInt(startingValue, client.getGameSnapshot().getDraftPool().size());
         if (i == 0)
             throw new RollbackException();
         return client.getGameSnapshot().getDraftPool().get(i - 1);
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt) throws RollbackException{
+    public int askDiceRoundTrack(String prompt, boolean rollback) throws RollbackException{
+        int startingValue;
+        if (rollback)
+            startingValue = 0;
+        else
+            startingValue = 1;
+
         ClientLogger.print(MessageHandler.get(prompt));
-        int i = readInt(0, 10);
+        int i = readInt(startingValue, 10);
         if (i == 0){
             throw new RollbackException();
         }
@@ -462,27 +474,39 @@ class CLIHandler implements GraphicInterface{
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt) throws RollbackException {
+    public Coordinate askDiceWindow(String prompt, boolean rollback) throws RollbackException {
         ClientLogger.println(MessageHandler.get(prompt));
-        return getPosition();
+        return getPosition(rollback);
     }
 
     @Override
-    public int askDiceValue(String prompt) throws RollbackException{
+    public int askDiceValue(String prompt, boolean rollback) throws RollbackException{
+        int startingValue;
+        if (rollback)
+            startingValue = 0;
+        else
+            startingValue = 1;
+
         ClientLogger.print(MessageHandler.get(prompt));
-        int i = readInt(0, 6);
+        int i = readInt(startingValue, 6);
         if (i==0)
             throw new RollbackException();
-        return readInt(1, 6);
+        return i;
     }
 
-    private Coordinate getPosition() throws RollbackException{
+    private Coordinate getPosition(boolean rollback) throws RollbackException{
+        int startingValue;
+        if (rollback)
+            startingValue = 0;
+        else
+            startingValue = 1;
+
         ClientLogger.print("Insert dice row: ");
-        int row = readInt(0, ROWS);
+        int row = readInt(startingValue, ROWS);
         if (row==0)
             throw new RollbackException();
         ClientLogger.print("Insert dice column: ");
-        int column = readInt(0, COLUMNS);
+        int column = readInt(startingValue, COLUMNS);
         if (column==0)
             throw new RollbackException();
         return new Coordinate(row, column);

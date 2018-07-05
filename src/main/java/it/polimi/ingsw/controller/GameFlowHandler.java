@@ -24,7 +24,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     private Timer timer;
     private int secondsTimerSchema = 10; //TODO: read value from file.
 
-    GameFlowHandler(GamesHandler gamesHandler, ClientInterface connection, Player player) throws RemoteException{
+    public GameFlowHandler(GamesHandler gamesHandler, ClientInterface connection, Player player) throws RemoteException{
         this.player = player;
         this.gameRoom = null;
         this.gamesHandler = gamesHandler;
@@ -36,7 +36,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         return this.player;
     }
 
-    protected ClientInterface getConnection(){
+    public ClientInterface getConnection(){
         return this.connection;
     }
 
@@ -129,6 +129,9 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
             e.printStackTrace();
         }
 
+        if(activeToolCard != null){
+            activeToolCard.notify();
+        }
     }
 
     public void logout() {
@@ -158,7 +161,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         this.activeToolCard = fetch.get();
 
         try {
-            this.activeToolCard.use(gameRoom, connection);
+            this.activeToolCard.use(gameRoom, this);
             gameRoom.notifyAllToolCardUsed(player.getNickname(), activeToolCard.getName(), player.getWindow());
         } catch (RollbackException e) {
             activeToolCard = null;

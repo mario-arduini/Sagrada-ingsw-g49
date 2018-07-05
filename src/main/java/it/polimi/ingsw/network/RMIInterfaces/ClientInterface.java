@@ -27,10 +27,10 @@ public interface ClientInterface extends Remote, Serializable {
 
     //void close();
 
-    Coordinate askDiceWindow(String prompt) throws RemoteException, RollbackException;
-    Dice askDiceDraftPool(String prompt) throws RemoteException, RollbackException;
-    int askDiceRoundTrack(String prompt) throws RemoteException, RollbackException;
-    boolean askIfPlus(String prompt) throws RemoteException, RollbackException;
-    int askDiceValue(String prompt) throws RemoteException, RollbackException;
+    Coordinate askDiceWindow(String prompt, boolean rollback) throws RemoteException, RollbackException;
+    Dice askDiceDraftPool(String prompt, boolean rollback) throws RemoteException, RollbackException;
+    int askDiceRoundTrack(String prompt, boolean rollback) throws RemoteException, RollbackException;
+    boolean askIfPlus(String prompt, boolean rollback) throws RemoteException, RollbackException;
+    int askDiceValue(String prompt, boolean rollback) throws RemoteException, RollbackException;
     void showDice(Dice dice) throws RemoteException;
 }

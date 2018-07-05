@@ -446,27 +446,27 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     }
 
     @Override
-    public boolean askIfPlus(String prompt) {
+    public boolean askIfPlus(String prompt, boolean rollback) {
         return false;
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt) {
+    public Dice askDiceDraftPool(String prompt, boolean rollback) {
         return null;
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt) {
+    public int askDiceRoundTrack(String prompt, boolean rollback) {
         return 0;
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt) {
+    public Coordinate askDiceWindow(String prompt, boolean rollback) {
         return null;
     }
 
     @Override
-    public int askDiceValue(String prompt) {
+    public int askDiceValue(String prompt, boolean rollback) {
         return 0;
     }
 
