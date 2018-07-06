@@ -1,0 +1,14 @@
+{"name":"Diluente per pasta salda",
+
+	"effects":[
+		{"get-draft-dice":{}},
+		{"put-in-bag":{}},
+		{"set-from-bag":{}},
+		{"place-dice":{"ignore" : "NONE"}}
+	],
+	"prerequisites":[
+		"favor-token",
+		"before-draft"
+	],
+	"rollback":false
+}

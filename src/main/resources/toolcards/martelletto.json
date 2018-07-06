@@ -1,0 +1,12 @@
+{"name":"Martelletto",
+
+	"effects":[
+		{"reroll-pool":{}}
+	],
+	"prerequisites":[
+		"favor-token",
+		"before-draft",
+		"second-turn"
+	],
+	"rollback":false
+}
