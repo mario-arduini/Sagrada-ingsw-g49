@@ -67,7 +67,7 @@ public class GameRoom extends Game{
         return true;
     }
 
-    private boolean checkGameFinished(){
+    private synchronized boolean checkGameFinished(){
         if (!isGameFinished()) return false;
         if (notifyEndGame){
             List<Score> scoresList = isGameStarted() ? computeFinalScores() : new ArrayList<>();
