@@ -249,16 +249,20 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         if(playerSnapshot.isPresent()){
             playerSnapshot.get().useFavorToken(toolCardUsed.getUsed() ? 2 : 1);
             toolCardUsed.setUsed();
-            playerSnapshot.get().setWindow(window);
             gameSnapshot.setRoundTrack(roundTrack);
             gameSnapshot.setDraftPool(draftPool);
 
             if(player.equalsIgnoreCase(gameSnapshot.getPlayer().getNickname())) {
                 gameSnapshot.getPlayer().setUsedToolCard(true);
+                if(window.numOfDicePlaced() != gameSnapshot.getPlayer().getWindow().numOfDicePlaced())
+                    gameSnapshot.getPlayer().setDiceExtracted(true);
+                gameSnapshot.getPlayer().setWindow(window);
                 setServerResult(true);
             }
-            else
+            else {
+                playerSnapshot.get().setWindow(window);
                 handler.notifyUsedToolCard(player, toolCard);
+            }
 
             handler.printGame(gameSnapshot);
             handler.printMenu(gameSnapshot);
