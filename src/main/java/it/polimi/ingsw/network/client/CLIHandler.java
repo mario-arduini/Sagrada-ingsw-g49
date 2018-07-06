@@ -29,6 +29,12 @@ class CLIHandler implements GraphicInterface{
     private String inputResult;
     private Thread thread;
     private CLIListener cliListener;
+    private boolean waitLock1;
+    private Object lock1;
+    private boolean waitLock2;
+    private Object lock2;
+
+    private Object lockInput;
 
     CLIHandler() {
         ClientLogger.initLogger(LOGGER);
@@ -38,6 +44,11 @@ class CLIHandler implements GraphicInterface{
         waitingInput = false;
         flagContinueInput = false;
         toolCardNotCompleted = "";
+        lock1 = new Object();
+        waitLock1 = false;
+        lock2 = new Object();
+        waitLock2 = false;
+        lockInput = new Object();
 
         try {
             this.client = new Client(this);
@@ -63,7 +74,8 @@ class CLIHandler implements GraphicInterface{
             flagContinue = false;
         }while (!client.createConnection(connectionType));
 
-        waitResult();
+        waitLock2 = true;
+        waitResult(lock2);
 
         while(!ok) {
             ClientLogger.printWithClear("Welcome to Sagrada!\n\nChoose an option:\n0) Logout\n1) Login\nYour choice: ");
@@ -84,7 +96,8 @@ class CLIHandler implements GraphicInterface{
                 LOGGER.info(e.toString());
             }
 
-            if(waitResult()) {
+            waitLock2 = true;
+            if(waitResult(lock2)) {
                 //client.setLogged();
                 ok = true;
             }
@@ -111,7 +124,8 @@ class CLIHandler implements GraphicInterface{
         boolean logout = false;
         int command;
         if (!client.isGameStarted()) {
-            waitResult();
+            waitLock2 = true;
+            waitResult(lock2);
             do {
                 ClientLogger.print("\nYour choice: ");
                 command = readInt(1, 4);
@@ -122,7 +136,9 @@ class CLIHandler implements GraphicInterface{
                 client.sendSchemaChoice(command - 1);
                 if (!flagContinue)
                     ClientLogger.print("\nWaiting other players' choice");
-                waitResult();
+
+                waitLock2 = true;
+                waitResult(lock2);
             } while (!serverResult);
         }
         if(!client.isGameStarted())
@@ -179,9 +195,10 @@ class CLIHandler implements GraphicInterface{
     }
 
     private void completeToolCard() throws ServerReconnectedException{
-        //ClientLogger.println("Using the tool card " + toolCardNotCompleted);
+        ClientLogger.println("\nUsing the tool card " + toolCardNotCompleted + "\n");
         client.continueToolCard();
-        waitResult();
+        waitLock1 = true;
+        waitResult(lock1);
     }
 
     private boolean askNewGame(){
@@ -197,7 +214,8 @@ class CLIHandler implements GraphicInterface{
                     LOGGER.info(e.toString());
                 }
             }
-            waitResult();
+            waitLock2 = true;
+            waitResult(lock2);
             return true;
         }
         return false;
@@ -319,7 +337,8 @@ class CLIHandler implements GraphicInterface{
             }
             flagContinue = false;
             client.placeDice(dice, row, column);
-            if(!waitResult()) {
+            waitLock2 = true;
+            if(!waitResult(lock2)) {
                 printGame(client.getGameSnapshot());
                 ClientLogger.println("\nConstraint violated!");
                 printMenu(client.getGameSnapshot());
@@ -362,7 +381,8 @@ class CLIHandler implements GraphicInterface{
 
         flagContinue = false;
         client.useToolCard(client.getGameSnapshot().getToolCards().get(choice - 1).getName());
-        if (!waitResult()) {
+        waitLock1 = true;
+        if (!waitResult(lock1)) {
             printGame(client.getGameSnapshot());
             ClientLogger.println("\nYou can't use this card now");
             printMenu(client.getGameSnapshot());
@@ -375,11 +395,13 @@ class CLIHandler implements GraphicInterface{
         }
     }
 
-    private synchronized boolean waitResult(){
+    private boolean waitResult(Object lock){
         while (!flagContinue) {
             waiting = true;
             try {
-                wait();
+                synchronized (lock) {
+                    lock.wait();
+                }
             } catch (InterruptedException e) {
                 LOGGER.warning(e.toString());
             }
@@ -389,11 +411,13 @@ class CLIHandler implements GraphicInterface{
         return serverResult;
     }
 
-    private synchronized String waitInput(){
+    private String waitInput(){
         while (!flagContinueInput) {
             waitingInput = true;
             try {
-                wait();
+                synchronized (lockInput) {
+                    lockInput.wait();
+                }
             } catch (InterruptedException e) {
                 LOGGER.warning(e.toString());
             }
@@ -749,17 +773,24 @@ class CLIHandler implements GraphicInterface{
         flagContinue = true;
 
         if(waiting)
-            synchronized (this) {
-                this.notifyAll();
-            }
+            if(waitLock2)
+                synchronized (lock2) {
+                    lock2.notifyAll();
+                    waitLock2 = false;
+                }
+            else
+                synchronized (lock1) {
+                    lock1.notifyAll();
+                    waitLock1 = false;
+                }
     }
 
     void wakeUpInput(String inputResult){
         if(waitingInput) {
             this.inputResult = inputResult;
             flagContinueInput = true;
-            synchronized (this) {
-                this.notifyAll();
+            synchronized (lockInput) {
+                lockInput.notifyAll();
             }
         }
     }

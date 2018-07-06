@@ -349,8 +349,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
         int i = 0;
         while (i < 2){
-            if(tryReconnection())
+            if(tryReconnection()) {
+                login(gameSnapshot.getPlayer().getNickname(), password);
                 throw new ServerReconnectedException();
+            }
             try {
                 TimeUnit.SECONDS.sleep(2);
                 i++;
