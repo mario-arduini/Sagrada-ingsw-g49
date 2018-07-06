@@ -759,7 +759,8 @@ class CLIHandler implements GraphicInterface{
     public void gameOver(List<Score> scores){
         ClientLogger.printlnWithClear("GAME FINISHED\n");
         if(scores.size() == 1)
-            ClientLogger.println("YOU WIN!");
+            if(scores.get(0).getPlayer().equals(client.getGameSnapshot().getPlayer().getNickname()))
+                ClientLogger.println("YOU WIN!");
         else
             for(Score score : scores)
                 ClientLogger.println(score.getPlayer() + "   " + score.getTotalScore());
