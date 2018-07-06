@@ -71,6 +71,12 @@ public class ClientSocketHandler implements FlowHandlerInterface {
     }
 
     @Override
+    public void continueToolCard(){
+        createJsonCommand("continue-toolcard");
+        socketPrintLine(jsonObject);
+    }
+
+    @Override
     public void pass(){
         createJsonCommand("pass");
         socketPrintLine(jsonObject);

@@ -12,6 +12,7 @@ import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
+import it.polimi.ingsw.network.client.Client;
 import it.polimi.ingsw.network.server.Logger;
 
 import java.io.Serializable;
@@ -24,12 +25,10 @@ public class ToolCard implements Serializable {
     private JsonArray effects;
     private List<String> prerequisites;
     private Gson gson;
-    private ClientInterface connection;
     private boolean used;
-    private boolean awake;
-    private Timer timer;
-    private int secondsTimer;
     private boolean rollback;
+    private TransactionSnapshot game;
+    private Game realGame;
 
     public ToolCard(JsonObject toolCard){
         this.gson = new Gson();
@@ -37,12 +36,7 @@ public class ToolCard implements Serializable {
         this.effects = toolCard.get("effects").getAsJsonArray();
         this.prerequisites = gson.fromJson(toolCard.get("prerequisites"),new TypeToken<List<String>>(){}.getType());
         this.rollback = toolCard.get("rollback").getAsBoolean();
-        this.connection = null;
         this.used = false;
-        this.awake = true;
-        this.timer = null;
-        this.secondsTimer = 10; //TODO: CONFIG FILE
-        this.awake = true;
     }
 
     public ToolCard(ToolCard toolCard){
@@ -51,25 +45,20 @@ public class ToolCard implements Serializable {
         this.effects = toolCard.effects;
         this.prerequisites = toolCard.prerequisites;
         this.rollback = toolCard.rollback;
-        this.connection = null;
         this.used = toolCard.used;
-        this.awake = true;
-        this.timer = null;
-        this.secondsTimer = 10; //TODO: CONFIG FILE
     }
 
     public String getName(){
         return this.cardName;
     }
 
-    public synchronized void use(Game realGame, GameFlowHandler gameFlow) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException, RollbackException {
+    public void use(Game realGame, ClientInterface connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException, RollbackException, DisconnectionException {
         JsonObject effect;
         String command;
         JsonObject arguments = null;
         Dice multipurposeDice = null;
-        this.connection = gameFlow.getConnection();
-
-        TransactionSnapshot game = realGame.beginTransaction();
+        this.realGame = realGame;
+        this.game = realGame.beginTransaction();
         Logger.print("Player " + game.getRound().getCurrentPlayer().getNickname() + " using toolcard " + this.cardName);
 
         for (String prerequisite : prerequisites) {
@@ -159,19 +148,7 @@ public class ToolCard implements Serializable {
                     throw e;
                 i -= 1;
             }
-            catch (DisconnectionException e){
-                try {
-                    this.awake = false;
-                    startTimer();
-                    this.wait();
-                } catch (InterruptedException e1) {
-                    Logger.print("Interrupted Exception Toolcard, awake.");
-                }
-                this.connection = gameFlow.getConnection();
-                if (gameFlow.getPlayer().isSuspended()) throw new PlayerSuspendedException();
-                i -= 1;
-                this.awake = true;
-            }
+            effects.remove(effect);
             if (!game.getRound().getCurrentPlayer().equals(realGame.getCurrentRound().getCurrentPlayer())){
                 throw new PlayerSuspendedException();
             }
@@ -185,24 +162,99 @@ public class ToolCard implements Serializable {
 
     }
 
+    public void continueToolCard(ClientInterface connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException, RollbackException, DisconnectionException {
+        JsonObject effect;
+        String command;
+        JsonObject arguments = null;
+        Dice multipurposeDice = null;
+
+        for (int i = 0; i < effects.size(); i++) {
+            effect = effects.get(i).getAsJsonObject();
+            command = effect.keySet().toArray()[0].toString();
+            try {
+                arguments = effect.get(command).getAsJsonObject();
+            }catch (NullPointerException e) {
+                Logger.print("ToolCard " + e);
+            }
+            Boolean optional = arguments.get("optional")!=null ? arguments.get("optional").getAsBoolean() : false;
+            try {
+
+                switch (command) {
+                    case "get-draft-dice":
+                        Effects.getDraftedDice(game.getRound(), connection, rollback);
+                        break;
+                    case "place-dice":
+                        Window.RuleIgnored ruleIgnored;
+                        if (gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class) != null)
+                            ruleIgnored = gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class);
+                        else
+                            ruleIgnored = Window.RuleIgnored.NONE;
+                        if (!Effects.addDiceToWindow(game.getWindow(), game.getRound().getCurrentDiceDrafted(), connection, ruleIgnored, rollback)) {
+                            game.getRound().getDraftPool().add(game.getRound().getCurrentDiceDrafted());
+                            game.getRound().setCurrentDiceDrafted(null);
+                        }
+                        break;
+                    case "move":
+                        if (arguments.get("color-in-track") != null && arguments.get("color-in-track").getAsBoolean()) {
+                            multipurposeDice = Effects.move(game.getWindow(), game.getRoundTrack(), multipurposeDice, gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
+                        }
+                        Effects.move(game.getWindow(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
+                        break;
+                    case "move-n":
+                        if (arguments.get("color-in-track") != null && arguments.get("color-in-track").getAsBoolean())
+                            Effects.moveNColor(arguments.get("number").getAsInt(), game.getWindow(), game.getRoundTrack(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
+                        else
+                            Effects.moveN(arguments.get("number").getAsInt(), game.getWindow(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
+                        break;
+                    case "change-value":
+                        if (arguments.get("plus") != null && arguments.get("plus").getAsBoolean())
+                            Effects.changeValue(game.getRound().getCurrentDiceDrafted(), arguments.get("value").getAsInt(), connection, rollback);
+                        else if (arguments.get("random") != null && arguments.get("random").getAsBoolean())
+                            Effects.changeValue(game.getRound().getCurrentDiceDrafted(), connection);
+                        break;
+                    case "flip":
+                        Effects.flip(game.getRound().getCurrentDiceDrafted());
+                        break;
+                    case "remove-turn":
+                        game.getRound().removeTurn();
+                        break;
+                    case "reroll-pool":
+                        Effects.rerollPool(game.getRound().getDraftPool());
+                        break;
+                    case "swap-round-dice":
+                        Effects.swapRoundTrack(game.getRound(), game.getRoundTrack(), connection, rollback);
+                        break;
+                    case "put-in-bag":
+                        game.putInBag(game.getRound().getCurrentDiceDrafted());
+                        break;
+                    case "set-from-bag":
+                        Effects.setDiceFromBag(game.getRound(), game.getFromBag(), connection, rollback);
+                        break;
+                }
+            }catch (RollbackException e){
+                if (this.rollback)
+                    throw e;
+                i -= 1;
+            }
+            effects.remove(effect);
+            if (!game.getRound().getCurrentPlayer().equals(realGame.getCurrentRound().getCurrentPlayer())){
+                throw new PlayerSuspendedException();
+            }
+        }
+        try {
+            realGame.commit(game, cardName);
+            Logger.print("Player " + game.getRound().getCurrentPlayer().getNickname() + " successfully used " + this.cardName);
+        } catch (NoSuchToolCardException e) {
+            Logger.print("Toolcard " + cardName + " played by " + game.getRound().getCurrentPlayer().getNickname() + "throws " + e.toString());
+        }
+    }
 
     public boolean getUsed(){
-        return this.used;
+        return used;
     }
 
     public void setUsed(){
         this.used = true;
     }
 
-    private void startTimer(){
-        timer = new Timer();
-        timer.schedule(new ToolCard.TimerExpired(), (long) secondsTimer * 1000);
-    }
-
-    class TimerExpired extends TimerTask {
-        public void run() {
-            if (!awake)
-                this.notifyAll();
-        }
-    }
 }

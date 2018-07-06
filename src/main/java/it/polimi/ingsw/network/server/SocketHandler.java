@@ -88,6 +88,9 @@ public class SocketHandler implements Runnable, ClientInterface {
                         case "toolcard":
                             useToolCard(message);
                             break;
+                        case "continue-toolcard":
+                            continueToolCard();
+                            break;
                         case "new-game":
                             gameFlowHandler.newGame();
                     }
@@ -166,8 +169,26 @@ public class SocketHandler implements Runnable, ClientInterface {
                 NoSameColorDicesException | PlayerSuspendedException |
                 NotDraftedYetException | NotYourFirstTurnException |
                 GameNotStartedException | GameOverException |
-                ToolcardAlreadyUsedException | NotEnoughDiceToMoveException e) {
+                ToolcardAlreadyUsedException | NotEnoughDiceToMoveException |
+                ToolCardInUseException e) {
             Logger.print("Toolcard : " + nickname + " " + e);
+            socketSendMessage(createErrorMessage(e.toString()));
+        }
+    }
+
+    private void continueToolCard(){
+        try {
+            gameFlowHandler.continueToolCard();
+        } catch (InvalidParameterException | NoSuchToolCardException |
+                NoDiceInWindowException | NothingCanBeMovedException |
+                InvalidFavorTokenNumberException | AlreadyDraftedException |
+                NotEnoughFavorTokenException | NotYourSecondTurnException |
+                NoDiceInRoundTrackException | NotYourTurnException |
+                NoSameColorDicesException | PlayerSuspendedException |
+                NotDraftedYetException | NotYourFirstTurnException |
+                GameNotStartedException | GameOverException |
+                ToolcardAlreadyUsedException | NotEnoughDiceToMoveException e) {
+            Logger.print("Toolcard continuing: " + nickname + " " + e);
             socketSendMessage(createErrorMessage(e.toString()));
         }
     }
@@ -218,12 +239,13 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public void notifyReconInfo(Map<String, Window> windows, Map<String, Integer> favorToken, List<Dice> roundTrack){
+    public void notifyReconInfo(Map<String, Window> windows, Map<String, Integer> favorToken, List<Dice> roundTrack, String cardName){
         JsonObject message;
         message = createMessage("reconnect-info");
         message.addProperty("windows", gson.toJson(windows));
         message.addProperty("round-track", gson.toJson(roundTrack));
         message.addProperty("favor-token", gson.toJson(favorToken));
+        message.addProperty("toolcard", cardName);
         socketSendMessage(message);
     }
 

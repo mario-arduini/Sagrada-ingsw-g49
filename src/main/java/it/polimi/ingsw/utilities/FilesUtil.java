@@ -26,6 +26,8 @@ public class FilesUtil {
         File[] fList = directory.listFiles();
         List<File> fileList = new ArrayList<>();
 
+        if (fList == null) return fileList;
+
         for (File file : fList) {
             if (file.isFile()) {
                 fileList.add(file);
