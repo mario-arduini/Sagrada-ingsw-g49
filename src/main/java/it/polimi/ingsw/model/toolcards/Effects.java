@@ -147,7 +147,7 @@ final class Effects {
         if (optional) {
             num += 1;
             prompt = "move-number";
-            while (num > n) {
+            while (num > n && num > 0) {
                 try {
                     num = connection.askMoveNumber(prompt, n, rollback);
                 } catch (RollbackException e) {

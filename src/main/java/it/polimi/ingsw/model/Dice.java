@@ -25,7 +25,7 @@ public class Dice implements Serializable {
      * This constructor create a dice with a given color and number
      * @param color the color of the dice
      * @param value the number of the dice
-     * @throws InvalidDiceValueException
+     * @throws InvalidDiceValueException if the value is less than 1 or greater than 6
      */
     public Dice(Color color, int value) throws InvalidDiceValueException {
         if(value < 1 || value > 6)

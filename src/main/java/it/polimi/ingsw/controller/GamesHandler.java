@@ -6,10 +6,8 @@ import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,8 +23,7 @@ public class GamesHandler {
     public GamesHandler(){
         this.waitingRoom = new ArrayList<>();
         this.playingUsers = new ArrayList<>();
-        String filename = getClass().getClassLoader().getResource(TIMEOUT_FILE_NAME).getFile();
-        this.secondsTimer = readIntFromFile(filename);
+        this.secondsTimer = readIntFromFile(TIMEOUT_FILE_NAME);
         //TODO: Throw exception if file does not exist
     }
 
@@ -103,7 +100,7 @@ public class GamesHandler {
     private int readIntFromFile(String filename){
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader(new File(filename)));
+            reader = new BufferedReader(new InputStreamReader(GamesHandler.class.getClassLoader().getResourceAsStream(filename)));
             String text;
 
             if ((text = reader.readLine()) != null)
