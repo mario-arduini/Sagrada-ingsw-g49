@@ -131,9 +131,6 @@ class CLIHandler implements GraphicInterface{
         if(!toolCardNotCompleted.equals("")){
             completeToolCard();
             toolCardNotCompleted = "";
-            printGame(client.getGameSnapshot());
-            printFooter(client.getGameSnapshot());
-            printMenu(client.getGameSnapshot());
         }
 
         while (!logout) {
@@ -182,9 +179,7 @@ class CLIHandler implements GraphicInterface{
     }
 
     private void completeToolCard() throws ServerReconnectedException{
-        printGame(client.getGameSnapshot());
-        printFooter(client.getGameSnapshot());
-        ClientLogger.println("Using the tool card " + toolCardNotCompleted);
+        //ClientLogger.println("Using the tool card " + toolCardNotCompleted);
         client.continueToolCard();
         waitResult();
     }
@@ -655,7 +650,7 @@ class CLIHandler implements GraphicInterface{
         for(Dice dice : gameSnapshot.getRoundTrack()){
             ClientLogger.print("  "+dice);
         }
-        for(int i=gameSnapshot.getRoundTrack().size();i<9;i++) ClientLogger.print("  \u25A1");
+        for(int i=gameSnapshot.getRoundTrack().size();i<10;i++) ClientLogger.print("  \u25A1");
 
         ClientLogger.println("\n");
         printFooter(gameSnapshot);

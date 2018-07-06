@@ -35,12 +35,14 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     private transient GameSnapshot gameSnapshot;
     private transient LoginInterface serverInterface;
     private ClientSocketHandler socketHandler;
+    private boolean reconnectionInsideToolCard;
 
     public Client(GraphicInterface handler) throws RemoteException {
         ClientLogger.initLogger(LOGGER);
         this.gameSnapshot = new GameSnapshot();
         this.handler = handler;
         gameStarted = false;
+        reconnectionInsideToolCard = false;
     }
 
     public void setServerAddress(String serverAddress){
@@ -222,7 +224,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             gameSnapshot.setRoundTrack(roundTrack);
 
         handler.printGame(gameSnapshot);
-        handler.printMenu(gameSnapshot);
+        if(!reconnectionInsideToolCard)
+            handler.printMenu(gameSnapshot);
+        else
+            reconnectionInsideToolCard = false;
     }
 
     @Override
@@ -278,13 +283,16 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             playerSnapshot = new PlayerSnapshot(user.getKey());
             playerSnapshot.setWindow(user.getValue());
             playerSnapshot.setFavorToken(favorToken.get(user.getKey()));
-            if(user.getKey().equals(gameSnapshot.getPlayer().getNickname()))
-                gameSnapshot.setPlayer(playerSnapshot);
+            if(user.getKey().equals(gameSnapshot.getPlayer().getNickname())) {
+                gameSnapshot.getPlayer().setWindow(playerSnapshot.getWindow());
+                gameSnapshot.getPlayer().setFavorToken(playerSnapshot.getFavorToken());
+            }
             else
                 gameSnapshot.addOtherPlayer(playerSnapshot);
         }
         gameSnapshot.setRoundTrack(roundTrack);
         handler.setToolCardNotCompleted(cardName);
+        reconnectionInsideToolCard = true;
         gameStarted = true;
         setServerResult(true);
     }
