@@ -38,7 +38,7 @@ public class Server {
 
         serverSocket = new ServerSocket(port);
         Logger.print("Server: Socket listening on port " + port + ".");
-
+        setKiller();
         while(listening) {
             try {
                 clientSocket = serverSocket.accept();
@@ -78,7 +78,6 @@ public class Server {
                     port = 0;
                 }else {
                     Server server = new Server(port);
-                    server.setKiller();
                     server.startServer();
                     server.executor.shutdown();
                     System.exit(0);
@@ -91,4 +90,5 @@ public class Server {
                 port = 0;
             }
     }
+
 }
