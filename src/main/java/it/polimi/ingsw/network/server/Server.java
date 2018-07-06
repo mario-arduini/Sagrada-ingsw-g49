@@ -74,7 +74,7 @@ public class Server {
                 System.out.print("Enter a port: ");
                 port = Integer.parseInt(buffer.readLine());
                 if (port < 10000 || port > 65355){
-                    System.out.print("Valid port number above 10000 and below 65355");
+                    System.out.println("Valid port number above 10000 and below 65355.");
                     port = 0;
                 }else {
                     Server server = new Server(port);
@@ -84,9 +84,11 @@ public class Server {
                     System.exit(0);
                 }
             }catch (NumberFormatException e){
-                System.out.print("Not a number " + port);
+                System.out.println("Insert a number.");
+                port = 0;
             }catch (IOException e){
-                System.out.print("Not a valid port number");
+                System.out.println("Not a valid port number.");
+                port = 0;
             }
     }
 }
