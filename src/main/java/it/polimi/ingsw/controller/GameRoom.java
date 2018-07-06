@@ -176,7 +176,7 @@ public class GameRoom extends Game{
     }
 
     @Override
-    public void suspendPlayer(String nickname){
+    public synchronized void suspendPlayer(String nickname){
         super.suspendPlayer(nickname);
         connections.forEach(conn -> {
             try {

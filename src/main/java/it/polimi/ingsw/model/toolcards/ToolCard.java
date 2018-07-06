@@ -29,6 +29,7 @@ public class ToolCard implements Serializable {
     private boolean rollback;
     private TransactionSnapshot game;
     private Game realGame;
+    private int i;
 
     public ToolCard(JsonObject toolCard){
         this.gson = new Gson();
@@ -80,7 +81,7 @@ public class ToolCard implements Serializable {
         }
 
 
-        for (int i = 0; i < effects.size(); i++) {
+        for (i = 0; i < effects.size(); i++) {
             effect = effects.get(i).getAsJsonObject();
             command = effect.keySet().toArray()[0].toString();
             try {
@@ -148,7 +149,6 @@ public class ToolCard implements Serializable {
                     throw e;
                 i -= 1;
             }
-            effects.remove(effect);
             if (!game.getRound().getCurrentPlayer().equals(realGame.getCurrentRound().getCurrentPlayer())){
                 throw new PlayerSuspendedException();
             }
@@ -168,7 +168,7 @@ public class ToolCard implements Serializable {
         JsonObject arguments = null;
         Dice multipurposeDice = null;
 
-        for (int i = 0; i < effects.size(); i++) {
+        for (; i < effects.size(); i++) {
             effect = effects.get(i).getAsJsonObject();
             command = effect.keySet().toArray()[0].toString();
             try {
@@ -236,14 +236,12 @@ public class ToolCard implements Serializable {
                     throw e;
                 i -= 1;
             }
-            effects.remove(effect);
             if (!game.getRound().getCurrentPlayer().equals(realGame.getCurrentRound().getCurrentPlayer())){
                 throw new PlayerSuspendedException();
             }
         }
         try {
             realGame.commit(game, cardName);
-            Logger.print("Player " + game.getRound().getCurrentPlayer().getNickname() + " successfully used " + this.cardName);
         } catch (NoSuchToolCardException e) {
             Logger.print("Toolcard " + cardName + " played by " + game.getRound().getCurrentPlayer().getNickname() + "throws " + e.toString());
         }

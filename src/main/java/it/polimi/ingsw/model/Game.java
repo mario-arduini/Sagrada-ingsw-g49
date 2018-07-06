@@ -143,7 +143,7 @@ public class Game {
     }
 
     public boolean isGameFinished(){
-        return trackIndex == 9 || players.stream().filter(p -> !p.isSuspended()).count()<2;
+        return trackIndex == 10 || players.stream().filter(p -> !p.isSuspended()).count()<2;
     }
 
     //TODO: consider moving this method to GameRoom

@@ -179,7 +179,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         } catch (RollbackException e) {
             activeToolCard = null;
             toolCardUsed = false;
-            Logger.print("Player " + player.getNickname() +" rollback on Toolcard " +activeToolCard.getName());
+            Logger.print("Player " + player.getNickname() +" rollback on Toolcard " + cardName);
         }catch (DisconnectionException e){
             Logger.print("Disconnection: " + player.getNickname() + " while using " + cardName);
         }catch (Exception e){
@@ -196,18 +196,19 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         if (toolCardUsed) throw new ToolcardAlreadyUsedException();
         if (activeToolCard == null) throw new NoSuchToolCardException();
 
+        String cardName = activeToolCard.getName();
         try {
-            Logger.print("Player " + player.getNickname() +" is continuing to use Toolcard " +activeToolCard.getName());
+            Logger.print("Player " + player.getNickname() +" is continuing to use Toolcard " + cardName);
             this.activeToolCard.continueToolCard(connection);
             this.toolCardUsed = true;
-            Logger.print("Player " + player.getNickname() +" successfully used Toolcard " +activeToolCard.getName());
+            Logger.print("Player " + player.getNickname() +" successfully used Toolcard " + cardName);
             gameRoom.notifyAllToolCardUsed(player.getNickname(), activeToolCard.getName(), player.getWindow());
         } catch (RollbackException e) {
             activeToolCard = null;
             toolCardUsed = false;
-            Logger.print("Player " + player.getNickname() +" rollback on Toolcard " +activeToolCard.getName());
+            Logger.print("Player " + player.getNickname() +" rollback on Toolcard " );
         }catch (DisconnectionException e){
-            Logger.print("Disconnection: " + player.getNickname() + " while using " + activeToolCard.getName());
+            Logger.print("Disconnection: " + player.getNickname() + " while using " + cardName);
         }catch (Exception e){
             activeToolCard = null;
             toolCardUsed = false;
