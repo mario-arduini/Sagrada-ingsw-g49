@@ -107,7 +107,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     public void placeDice(int diceNumber, int row, int column){
         try {
             server.placeDice(row - 1, column - 1, gameSnapshot.getDraftPool().get(diceNumber - 1));
-        } catch (GameOverException | NotYourTurnException | NoAdjacentDiceException | BadAdjacentDiceException | DiceAlreadyExtractedException | FirstDiceMisplacedException | DiceNotInDraftPoolException | ConstraintViolatedException | GameNotStartedException | NoSameColorDicesException e) {
+        } catch (GameOverException | ToolCardInUseException | NotYourTurnException | NoAdjacentDiceException | BadAdjacentDiceException | DiceAlreadyExtractedException | FirstDiceMisplacedException | DiceNotInDraftPoolException | ConstraintViolatedException | GameNotStartedException | NoSameColorDicesException e) {
             setServerResult(false);
             LOGGER.warning(e.toString());
         } catch (RemoteException e){
@@ -118,7 +118,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     public void useToolCard(String name){
         try {
             server.useToolCard(name);
-        } catch (GameNotStartedException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException | PlayerSuspendedException e) {
+        } catch (GameNotStartedException | ToolCardInUseException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException | PlayerSuspendedException e) {
             setServerResult(false);
             LOGGER.warning(e.toString());
         } catch (RemoteException e){
@@ -268,8 +268,9 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         gameSnapshot.getPlayer().setPrivateGoal(privateGoal);
     }
 
+    //TODO: do something with cardName
     @Override
-    public void notifyReconInfo(Map<String, Window> windows, Map<String, Integer> favorToken, List<Dice> roundTrack){
+    public void notifyReconInfo(Map<String, Window> windows, Map<String, Integer> favorToken, List<Dice> roundTrack, String cardName){
         PlayerSnapshot playerSnapshot;
         for(Map.Entry<String, Window> user : windows.entrySet()){
             playerSnapshot = new PlayerSnapshot(user.getKey());

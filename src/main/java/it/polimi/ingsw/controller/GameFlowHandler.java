@@ -21,6 +21,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     private List<Schema> initialSchemas = null;
     private ToolCard activeToolCard;
     private ClientInterface connection;
+    private boolean toolCardUsed;
     private Timer timer;
     private int secondsTimerSchema = 100; //TODO: read value from file.
 
@@ -30,6 +31,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         this.gamesHandler = gamesHandler;
         this.activeToolCard = null;
         this.connection = connection;
+        this.toolCardUsed = false;
     }
 
     public Player getPlayer(){
@@ -67,10 +69,12 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         checkGameReady();
     }
 
-    public void placeDice(int row, int column, Dice dice) throws GameNotStartedException, GameOverException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException {
+    public void placeDice(int row, int column, Dice dice) throws GameNotStartedException, GameOverException, ToolCardInUseException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException {
         if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
         if (gameRoom.isGameFinished()) throw new GameOverException();
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
+        if (activeToolCard != null && !toolCardUsed) throw new ToolCardInUseException();
+
         gameRoom.placeDice(row, column, dice);
         gameRoom.notifyAllDicePlaced(player.getNickname(), row, column, dice);
     }
@@ -80,6 +84,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         if (gameRoom.isGameFinished()) throw new GameOverException();
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
         this.activeToolCard = null;
+        this.toolCardUsed = false;
         gameRoom.goOn();
     }
 
@@ -105,6 +110,8 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         gameRoom.replaceConnection(this.connection, connection);
         this.connection = connection;
 
+        Logger.print("Reconnected player " + player.getNickname());
+
         HashMap<String, Window> windows = new HashMap<>();
         HashMap<String, Integer> favorToken = new HashMap<>();
         gameRoom.getPlayers().forEach(p -> windows.put(p.getNickname(), p.getWindow()));
@@ -117,8 +124,13 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+
+        //Reconnection while using toolcard.
+        String toolCardName = "";
+        if(activeToolCard != null && !toolCardUsed)
+                toolCardName = activeToolCard.getName();
         try {
-            connection.notifyReconInfo(windows, favorToken, gameRoom.getRoundTrack());
+            connection.notifyReconInfo(windows, favorToken, gameRoom.getRoundTrack(), toolCardName);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -129,9 +141,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
             e.printStackTrace();
         }
 
-        if(activeToolCard != null){
-            activeToolCard.notify();
-        }
+
     }
 
     public void logout() {
@@ -147,11 +157,11 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         gamesHandler.goToWaitingRoom(this);
     }
 
-    public void useToolCard(String cardName) throws GameNotStartedException, GameOverException, NoSuchToolCardException, ToolcardAlreadyUsedException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException {
+        public void useToolCard(String cardName) throws GameNotStartedException,  GameOverException, ToolCardInUseException, NoSuchToolCardException, ToolcardAlreadyUsedException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException {
         if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
         if (gameRoom.isGameFinished()) throw new GameOverException();
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
-        if (activeToolCard != null) throw new ToolcardAlreadyUsedException();
+        if (activeToolCard != null && !toolCardUsed) throw new ToolCardInUseException();
 
         Optional<ToolCard> fetch = (gameRoom.getToolCards()).stream().filter(card -> card.getName().equalsIgnoreCase(cardName)).findFirst();
 
@@ -161,17 +171,49 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         this.activeToolCard = fetch.get();
 
         try {
-            Logger.print("Using Toolcard");
-            this.activeToolCard.use(gameRoom, this);
-            Logger.print("Toolcard used");
+            Logger.print("Player " + player.getNickname() +" is using Toolcard " +activeToolCard.getName());
+            this.activeToolCard.use(gameRoom, connection);
+            this.toolCardUsed = true;
+            Logger.print("Player " + player.getNickname() +" successfully used Toolcard " +activeToolCard.getName());
             gameRoom.notifyAllToolCardUsed(player.getNickname(), activeToolCard.getName(), player.getWindow());
         } catch (RollbackException e) {
             activeToolCard = null;
-            Logger.print("Toolcard rollback");
+            toolCardUsed = false;
+            Logger.print("Player " + player.getNickname() +" rollback on Toolcard " +activeToolCard.getName());
+        }catch (DisconnectionException e){
+            Logger.print("Disconnection: " + player.getNickname() + " while using " + cardName);
         }catch (Exception e){
             activeToolCard = null;
+            toolCardUsed = false;
             throw e;
         }
+    }
+
+    public void continueToolCard() throws GameNotStartedException,  GameOverException, NoSuchToolCardException, ToolcardAlreadyUsedException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException {
+        if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
+        if (gameRoom.isGameFinished()) throw new GameOverException();
+        if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
+        if (toolCardUsed) throw new ToolcardAlreadyUsedException();
+        if (activeToolCard == null) throw new NoSuchToolCardException();
+
+        try {
+            Logger.print("Player " + player.getNickname() +" is continuing to use Toolcard " +activeToolCard.getName());
+            this.activeToolCard.continueToolCard(connection);
+            this.toolCardUsed = true;
+            Logger.print("Player " + player.getNickname() +" successfully used Toolcard " +activeToolCard.getName());
+            gameRoom.notifyAllToolCardUsed(player.getNickname(), activeToolCard.getName(), player.getWindow());
+        } catch (RollbackException e) {
+            activeToolCard = null;
+            toolCardUsed = false;
+            Logger.print("Player " + player.getNickname() +" rollback on Toolcard " +activeToolCard.getName());
+        }catch (DisconnectionException e){
+            Logger.print("Disconnection: " + player.getNickname() + " while using " + activeToolCard.getName());
+        }catch (Exception e){
+            activeToolCard = null;
+            toolCardUsed = false;
+            throw e;
+        }
+
     }
 
     class TimerExpired extends TimerTask {
