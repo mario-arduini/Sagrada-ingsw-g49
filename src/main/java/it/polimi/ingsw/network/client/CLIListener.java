@@ -18,9 +18,12 @@ public class CLIListener implements Runnable {
 
     @Override
     public void run() {
+        String choice;
         while (listen)
             try {
-                cliHandler.wakeUpInput(input.readLine());
+                choice = input.readLine();
+                if(choice != null)
+                    cliHandler.wakeUpInput(choice);
             } catch (IOException e) {
             }
     }

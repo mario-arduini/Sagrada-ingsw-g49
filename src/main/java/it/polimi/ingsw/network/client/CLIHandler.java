@@ -427,6 +427,30 @@ class CLIHandler implements GraphicInterface{
         return inputResult;
     }
 
+    private int readInt(int minValue, int maxValue){
+        int value = -1;
+        boolean ask = true;
+        String choice;
+
+        while (ask) {
+            try{
+                choice = waitInput();
+                if(choice == null)
+                    return -1;
+                value = Integer.parseInt(choice);
+            } catch (NumberFormatException e){
+                ClientLogger.print("Must be a number, retry: ");
+                continue;
+            }
+
+            if (value < minValue || value > maxValue)
+                ClientLogger.print(ERROR);
+            else
+                ask = false;
+        }
+        return value;
+    }
+
     @Override
     public void printMenu(GameSnapshot gameSnapshot){
         if(gameSnapshot.getPlayer().isMyTurn()) {
@@ -450,30 +474,6 @@ class CLIHandler implements GraphicInterface{
     @Override
     public void notifyServerDisconnected(){
         ClientLogger.printlnWithClear("Server disconnected, trying to reconnect");
-    }
-
-    private int readInt(int minValue, int maxValue){
-        int value = -1;
-        boolean ask = true;
-        String choice;
-
-        while (ask) {
-            try{
-                choice = waitInput();
-                if(choice == null)
-                    return -1;
-                value = Integer.parseInt(choice);
-            } catch (NumberFormatException e){
-                ClientLogger.print("Must be a number, retry: ");
-                continue;
-            }
-
-            if (value < minValue || value > maxValue)
-                ClientLogger.print(ERROR);
-            else
-                ask = false;
-        }
-        return value;
     }
 
     //region TOOLCARD
