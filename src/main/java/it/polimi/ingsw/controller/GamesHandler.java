@@ -133,6 +133,13 @@ public class GamesHandler {
 
     public synchronized void waitingRoomDisconnection(GameFlowHandler gameFlow){
         waitingRoom.remove(gameFlow);
+        waitingRoom.forEach(player -> {
+            try {
+                player.getConnection().notifyLogout(gameFlow.getPlayer().getNickname());
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        });
         if(waitingRoom.size() < 2 && timer != null) {
             timer.cancel();
         }

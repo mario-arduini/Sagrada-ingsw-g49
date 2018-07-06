@@ -5,6 +5,7 @@ import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
+import it.polimi.ingsw.network.client.Client;
 import it.polimi.ingsw.network.server.Logger;
 
 import java.rmi.RemoteException;
@@ -214,8 +215,9 @@ final class Effects {
                     prompt = "move-to-same";
                 else {
                     try {
-                        removedDice = diceList.remove(0);
+                        removedDice = diceList.get(0);
                         placeDice(currentPlayerWindow,removedDice, end.getRow(), end.getColumn(), ignored);
+                        diceList.remove(0);
                         prompt = "move-to";
                     }catch (NoAdjacentDiceException | BadAdjacentDiceException
                             | FirstDiceMisplacedException | ConstraintViolatedException | NotWantedAdjacentDiceException e) {
@@ -427,11 +429,14 @@ final class Effects {
         }
     }
 
-    static void flip(Dice dice){
+    static void flip(Dice dice, ClientInterface connection) throws DisconnectionException{
         try {
             dice.setValue(7-dice.getValue());
+            connection.showDice(dice);
         } catch (InvalidDiceValueException e) {
             e.printStackTrace(); // it will never happen
+        }catch (Exception e){
+            throw new DisconnectionException();
         }
     }
 

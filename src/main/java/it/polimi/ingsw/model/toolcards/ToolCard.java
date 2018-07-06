@@ -126,7 +126,7 @@ public class ToolCard implements Serializable {
                             Effects.changeValue(game.getRound().getCurrentDiceDrafted(), connection);
                         break;
                     case "flip":
-                        Effects.flip(game.getRound().getCurrentDiceDrafted());
+                        Effects.flip(game.getRound().getCurrentDiceDrafted(), connection);
                         break;
                     case "remove-turn":
                         game.getRound().removeTurn();
@@ -213,7 +213,7 @@ public class ToolCard implements Serializable {
                             Effects.changeValue(game.getRound().getCurrentDiceDrafted(), connection);
                         break;
                     case "flip":
-                        Effects.flip(game.getRound().getCurrentDiceDrafted());
+                        Effects.flip(game.getRound().getCurrentDiceDrafted(), connection);
                         break;
                     case "remove-turn":
                         game.getRound().removeTurn();

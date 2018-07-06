@@ -73,8 +73,8 @@ public class Server {
             try {
                 System.out.print("Enter a port: ");
                 port = Integer.parseInt(buffer.readLine());
-                if (port < 10000){
-                    System.out.print("Valid port number above 10000");
+                if (port < 10000 || port > 65355){
+                    System.out.print("Valid port number above 10000 and below 65355");
                     port = 0;
                 }else {
                     Server server = new Server(port);
