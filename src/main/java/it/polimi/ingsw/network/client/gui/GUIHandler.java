@@ -25,6 +25,7 @@ import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -38,6 +39,7 @@ import java.util.regex.Pattern;
 
 public class GUIHandler extends UnicastRemoteObject implements GraphicInterface {
 
+    @FXML private VBox scoresBox;
     @FXML private HBox roundTrack;
     @FXML private FlowPane toolBox;
     @FXML private Label info;
@@ -524,7 +526,33 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public void gameOver(List<Score> scores) {
+        Platform.runLater(() -> {
+            try {
+                Stage stage = (Stage) gameScene.getScene().getWindow();
+                URL path = GUIHandler.class.getClassLoader().getResource("gui-views/gameover.fxml");
+                FXMLLoader fxmlLoader = new FXMLLoader(path);
+                Parent root = fxmlLoader.load();
+                GUIHandler controller = (GUIHandler) fxmlLoader.getController();
+                controller.passClient(client);
+                controller.showScores(scores);
+                client.setHandler(controller);
+                stage.setScene(new Scene(root));
+                stage.setTitle("Sagrada - Gameover");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
+    public void showScores(List<Score> scores){
+        for(Score score : scores){
+            Label label = new Label(score.getPlayer()+" - "+score.getTotalScore());
+            if(score.getPlayer().equals(client.getGameSnapshot().getPlayer().getNickname())){
+                label.setStyle("-fx-text-fill : green;");
+                label.setFont(new Font(20));
+            }
+            scoresBox.getChildren().add(label);
+        }
     }
 
     @Override
@@ -818,5 +846,9 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         if(toolName.equals("Pennello per pasta salda")||toolName.equals("Diluente per pasta salda")||toolName.equals("Pinza sgrossatrice")){
             draftPool.getChildren().remove(dp);
         }
+    }
+
+    public void newGame(ActionEvent actionEvent) {
+
     }
 }

@@ -94,18 +94,16 @@ public class GameRoom extends Game{
     private void notifyRound(boolean newRound){
         String firstPlayer = getCurrentRound().getCurrentPlayer().getNickname();
         List<Dice> draftPool = getCurrentRound().getDraftPool();
+        List<Dice> roundT = null;
 
         if (newRound)
-            connections.forEach(user -> {
-                try {
-                    user.notifyRound(firstPlayer, draftPool, true, getRoundTrack());
-                } catch (RemoteException e) {
-                    Logger.print(e.toString());
-                }
-            });
+            roundT = getRoundTrack();
+
+        final List<Dice> roundTrack = roundT;
+
         connections.forEach(user -> {
             try {
-                user.notifyRound(firstPlayer, draftPool, false, null);
+                user.notifyRound(firstPlayer, draftPool, newRound, roundTrack);
             } catch (RemoteException e) {
                 Logger.print(e.toString());
             }
