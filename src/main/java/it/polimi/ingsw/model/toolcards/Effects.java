@@ -60,7 +60,7 @@ final class Effects {
                     placeDice(window, dice, coords.getRow(), coords.getColumn(), ignore);
                     valid = true;
                 } catch (ConstraintViolatedException | NotWantedAdjacentDiceException
-                        | FirstDiceMisplacedException | BadAdjacentDiceException | NoAdjacentDiceException e) {
+                        | FirstDiceMisplacedException | BadAdjacentDiceException | NoAdjacentDiceException | IndexOutOfBoundsException e) {
                     Logger.print("addDiceToWindow: " + e);
                 }
             }
