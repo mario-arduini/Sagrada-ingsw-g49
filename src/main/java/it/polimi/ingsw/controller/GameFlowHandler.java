@@ -126,21 +126,29 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         }
 
         //Reconnection while using toolcard.
-        String toolCardName = "";
-        if(activeToolCard != null && !toolCardUsed)
-                toolCardName = activeToolCard.getName();
-        try {
-            connection.notifyReconInfo(windows, favorToken, gameRoom.getRoundTrack(), toolCardName);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
         //TODO: maybe overload notifyRound..? Find better way? Will see it with RMI
-        try {
-            connection.notifyRound(gameRoom.getCurrentRound().getCurrentPlayer().getNickname(), gameRoom.getCurrentRound().getDraftPool(), false, null);
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        if (player.getWindow() != null) {
+            String toolCardName = "";
+            if (activeToolCard != null && !toolCardUsed)
+                toolCardName = activeToolCard.getName();
+            try {
+                connection.notifyReconInfo(windows, favorToken, gameRoom.getRoundTrack(), toolCardName);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+            try {
+                connection.notifyRound(gameRoom.getCurrentRound().getCurrentPlayer().getNickname(), gameRoom.getCurrentRound().getDraftPool(), false, null);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
-
+        else
+            try {
+                connection.notifyLogin(gameRoom.getPlayersNick().stream().filter(name -> !name.equalsIgnoreCase(player.getNickname())).collect(Collectors.toList()));
+                connection.notifySchemas(initialSchemas);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
 
     }
 
