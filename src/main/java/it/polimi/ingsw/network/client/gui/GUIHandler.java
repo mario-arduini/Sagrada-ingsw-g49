@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.network.client.Client;
 import it.polimi.ingsw.network.client.GraphicInterface;
 import it.polimi.ingsw.network.client.MessageHandler;
+import it.polimi.ingsw.network.client.ServerReconnectedException;
 import it.polimi.ingsw.network.client.model.GameSnapshot;
 import it.polimi.ingsw.network.client.model.PlayerSnapshot;
 import it.polimi.ingsw.network.client.model.ToolCard;
@@ -220,19 +221,35 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
         schema0.setOnAction(e -> {
             disableSchemaChoice();
-            client.sendSchemaChoice(0);
+            try {
+                client.sendSchemaChoice(0);
+            } catch (ServerReconnectedException e1) {
+                e1.printStackTrace();
+            }
         });
         schema1.setOnAction(e -> {
             disableSchemaChoice();
-            client.sendSchemaChoice(1);
+            try {
+                client.sendSchemaChoice(1);
+            } catch (ServerReconnectedException e1) {
+                e1.printStackTrace();
+            }
         });
         schema2.setOnAction(e -> {
             disableSchemaChoice();
-            client.sendSchemaChoice(2);
+            try {
+                client.sendSchemaChoice(2);
+            } catch (ServerReconnectedException e1) {
+                e1.printStackTrace();
+            }
         });
         schema3.setOnAction(e -> {
             disableSchemaChoice();
-            client.sendSchemaChoice(3);
+            try {
+                client.sendSchemaChoice(3);
+            } catch (ServerReconnectedException e1) {
+                e1.printStackTrace();
+            }
         });
     }
 
@@ -370,12 +387,20 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         status.textProperty().set("Logging In...");
         login.setDisable(true);
         isLogging = true;
-        client.login(nickname.getText(),password.getText());
+        try {
+            client.login(nickname.getText(),password.getText());
+        } catch (ServerReconnectedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void useToolCard(int toolNumber){
         List<ToolCard> tools = client.getGameSnapshot().getToolCards();
-        client.useToolCard(tools.get(toolNumber).getName());
+        try {
+            client.useToolCard(tools.get(toolNumber).getName());
+        } catch (ServerReconnectedException e) {
+            e.printStackTrace();
+        }
 
         tool1.setDisable(false);
         tool2.setDisable(false);
@@ -693,6 +718,10 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     }
 
     public void pass(ActionEvent actionEvent) {
-        client.pass();
+        try {
+            client.pass();
+        } catch (ServerReconnectedException e) {
+            e.printStackTrace();
+        }
     }
 }

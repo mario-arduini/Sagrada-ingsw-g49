@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.Constraint;
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.model.Window;
+import it.polimi.ingsw.network.client.ServerReconnectedException;
 import it.polimi.ingsw.network.client.model.Color;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
@@ -82,7 +83,13 @@ public class SagradaGridPane extends GridPane {
     public void tryDice(CellPane cellToUpdate,int idx){
         System.out.println("setting dice in : "+cellToUpdate.getRow()+":"+cellToUpdate.getCol());
         placingDice = true;
-        if(controller!=null) this.controller.getClient().placeDice(idx,cellToUpdate.getRow()+1,cellToUpdate.getCol()+1);
+        if(controller!=null) {
+            try {
+                this.controller.getClient().placeDice(idx,cellToUpdate.getRow()+1,cellToUpdate.getCol()+1);
+            } catch (ServerReconnectedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public boolean isPlacingDice() {

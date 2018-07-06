@@ -16,6 +16,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.*;
 
 public class Client extends UnicastRemoteObject implements ClientInterface {
@@ -58,7 +59,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return serverConnected;
     }
 
-    public void login(String nickname, String password){
+    public void login(String nickname, String password) throws ServerReconnectedException{
         gameSnapshot.setPlayer(nickname);
         this.password  = password;
         if(serverInterface == null)
@@ -75,13 +76,15 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    private void tryReconnection(){
-
+    private boolean tryReconnection(){
+        if(serverInterface == null)
+            return createConnection(ConnectionType.SOCKET);
+        return createConnection(ConnectionType.RMI);
     }
 
-    void setLogged(){
-        this.logged = true;
-    }
+//    void setLogged(){
+//        this.logged = true;
+//    }
 
     public boolean createConnection(ConnectionType connectionType) {
         if(connectionType == ConnectionType.SOCKET) {
@@ -104,7 +107,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return true;
     }
 
-    public void placeDice(int diceNumber, int row, int column){
+    public void placeDice(int diceNumber, int row, int column) throws ServerReconnectedException{
         try {
             server.placeDice(row - 1, column - 1, gameSnapshot.getDraftPool().get(diceNumber - 1));
         } catch (GameOverException | NotYourTurnException | NoAdjacentDiceException | BadAdjacentDiceException | DiceAlreadyExtractedException | FirstDiceMisplacedException | DiceNotInDraftPoolException | ConstraintViolatedException | GameNotStartedException | NoSameColorDicesException e) {
@@ -115,7 +118,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    public void useToolCard(String name){
+    public void useToolCard(String name) throws ServerReconnectedException{
         try {
             server.useToolCard(name);
         } catch (GameNotStartedException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException | PlayerSuspendedException e) {
@@ -126,7 +129,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    void logout(){
+    void logout() throws ServerReconnectedException{
         logged = false;
         if(serverConnected) {
             try {
@@ -137,12 +140,12 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    void verifyEndTurn(){
+    void verifyEndTurn() throws ServerReconnectedException{
         if(gameSnapshot.getPlayer().isDiceAlreadyExtracted() && gameSnapshot.getPlayer().isToolCardAlreadyUsed())
             pass();
     }
 
-    public void pass(){
+    public void pass() throws ServerReconnectedException{
         try {
             server.pass();
         } catch (GameNotStartedException | GameOverException | NotYourTurnException e) {
@@ -180,7 +183,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    public void sendSchemaChoice(int choice){
+    public void sendSchemaChoice(int choice) throws ServerReconnectedException{
         try {
             server.chooseSchema(choice);
         } catch (GameNotStartedException | GameOverException | WindowAlreadySetException e) {
@@ -261,7 +264,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     public void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal){
         List<ToolCard> toolCardsClass = new ArrayList<>();
         for(String name : toolCards)
-            toolCardsClass.add(new ToolCard(name, ""));
+            toolCardsClass.add(new ToolCard(name));
         gameSnapshot.setToolCards(toolCardsClass);
 
         gameSnapshot.setPublicGoals(publicGoals);
@@ -287,8 +290,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     @Override
     public void notifyEndGame(List<Score> scores){
-        handler.gameOver(scores);
-        gameStarted = false;
+        if(gameStarted) {
+            handler.gameOver(scores);
+            gameStarted = false;
+        }
     }
 
     @Override
@@ -304,7 +309,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         handler.printDice(dice);
     }
 
-    void newGame(){
+    void newGame() throws ServerReconnectedException{
         try {
             gameSnapshot.newGame();
             server.newGame();
@@ -319,12 +324,23 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
 
 
-    void serverDisconnected(){
+    void serverDisconnected() throws ServerReconnectedException{
         serverConnected = false;
-        if(logged) {
-            handler.notifyServerDisconnected();
-            logged = false;
+        handler.notifyServerDisconnected();
+        //logged = false;
+
+        int i = 0;
+        while (i < 2){
+            if(tryReconnection())
+                throw new ServerReconnectedException();
+            try {
+                TimeUnit.SECONDS.sleep(2);
+                i++;
+            } catch (InterruptedException e) {
+                LOGGER.warning(e.toString());
+            }
         }
+        System.exit(0);
     }
 
     public GameSnapshot getGameSnapshot(){

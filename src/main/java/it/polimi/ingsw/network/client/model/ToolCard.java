@@ -5,9 +5,8 @@ public class ToolCard {
     private String description;
     private boolean used;
 
-    public ToolCard(String name, String description){
+    public ToolCard(String name){
         this.cardName = name;
-        this.description = description;
         this.used = false;
     }
 

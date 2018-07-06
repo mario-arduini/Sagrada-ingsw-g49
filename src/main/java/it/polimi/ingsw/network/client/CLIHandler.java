@@ -25,6 +25,7 @@ class CLIHandler implements GraphicInterface{
 
     private boolean waitingInput;
     private boolean flagContinueInput;
+    private String toolCardNotCompleted;
     private String inputResult;
     private Thread thread;
     private CLIListener cliListener;
@@ -36,6 +37,7 @@ class CLIHandler implements GraphicInterface{
         newGame = true;
         waitingInput = false;
         flagContinueInput = false;
+        toolCardNotCompleted = "";
 
         try {
             this.client = new Client(this);
@@ -58,6 +60,7 @@ class CLIHandler implements GraphicInterface{
             client.setServerAddress(askServerAddress());
             if(connectionType == Client.ConnectionType.SOCKET)
                 client.setServerPort(askServerPort());
+            flagContinue = false;
         }while (!client.createConnection(connectionType));
 
         waitResult();
@@ -72,10 +75,17 @@ class CLIHandler implements GraphicInterface{
                 thread.interrupt();
                 return;
             }
-            client.login(askNickname(), askPassword());
+
+            flagContinue = false;
+
+            try {
+                client.login(askNickname(), askPassword());
+            } catch (ServerReconnectedException e) {
+                LOGGER.info(e.toString());
+            }
 
             if(waitResult()) {
-                client.setLogged();
+                //client.setLogged();
                 ok = true;
             }
             else
@@ -83,16 +93,21 @@ class CLIHandler implements GraphicInterface{
         }
 
         while (newGame) {
-            if(!play())
-                newGame = askNewGame();
-            else
-                newGame = false;
+            flagContinue = false;
+            try {
+                if(!play())
+                    newGame = askNewGame();
+                else
+                    newGame = false;
+            } catch (ServerReconnectedException e) {
+                LOGGER.info(e.toString());
+            }
         }
         cliListener.stopListening();
         thread.interrupt();
     }
 
-    private boolean play(){
+    private boolean play() throws ServerReconnectedException{
         boolean logout = false;
         int command;
         if (!client.isGameStarted()) {
@@ -102,15 +117,25 @@ class CLIHandler implements GraphicInterface{
                 command = readInt(1, 4);
                 if(command == -1)
                     return false;
+
+                flagContinue = false;
                 client.sendSchemaChoice(command - 1);
                 if (!flagContinue)
                     ClientLogger.print("\nWaiting other players' choice");
                 waitResult();
             } while (!serverResult);
         }
-
         if(!client.isGameStarted())
             return false;
+
+        if(!toolCardNotCompleted.equals("")){
+            completeToolCard();
+            toolCardNotCompleted = "";
+            printGame(client.getGameSnapshot());
+            printFooter(client.getGameSnapshot());
+            printMenu(client.getGameSnapshot());
+        }
+
         while (!logout) {
             command = readInt(0, 3);
             if (!client.isGameStarted())
@@ -152,10 +177,27 @@ class CLIHandler implements GraphicInterface{
         return logout;
     }
 
+    private void completeToolCard(){
+        printGame(client.getGameSnapshot());
+        ClientLogger.print("Choose an option:\n0) Go to menu\n1) Continue to use th tool card " + toolCardNotCompleted + "\nYour choice: ");
+        int choice = readInt(0, 1);
+        if(choice == 1);
+
+    }
+
     private boolean askNewGame(){
+        boolean ok = true;
         ClientLogger.print("\nChoose an option:\n0) Logout\n1) New game\nYour choice: ");
         if(readInt(0, 1) == 1){
-            client.newGame();
+            flagContinue = false;
+            while(ok) {
+                try {
+                    client.newGame();
+                    ok = false;
+                } catch (ServerReconnectedException e) {
+                    LOGGER.info(e.toString());
+                }
+            }
             waitResult();
             return true;
         }
@@ -234,7 +276,7 @@ class CLIHandler implements GraphicInterface{
 
     @Override
     public void printWaitingRoom(){
-        ClientLogger.printlnWithClear("Waiting for game to start, insert 0 to logout");
+        ClientLogger.printlnWithClear("Waiting for game to start");
         ClientLogger.println("\nWaiting room:");
         ClientLogger.println(client.getGameSnapshot().getPlayer().getNickname());
         client.getGameSnapshot().getOtherPlayers().forEach(nick -> ClientLogger.println(nick.getNickname()));
@@ -248,7 +290,7 @@ class CLIHandler implements GraphicInterface{
     }
 
 
-    private void placeDice(){
+    private void placeDice() throws ServerReconnectedException{
         if(client.getGameSnapshot().getPlayer().isMyTurn()){
             int dice = -1;
             int row = -1;
@@ -276,6 +318,7 @@ class CLIHandler implements GraphicInterface{
                 else
                     ask = false;
             }
+            flagContinue = false;
             client.placeDice(dice, row, column);
             if(!waitResult()) {
                 printGame(client.getGameSnapshot());
@@ -287,7 +330,7 @@ class CLIHandler implements GraphicInterface{
             ClientLogger.println("Not your turn! You can only logout");
     }
 
-    private void useToolCard() {
+    private void useToolCard() throws ServerReconnectedException{
         if (client.getGameSnapshot().getPlayer().getFavorToken() < 1) {
             ClientLogger.print("Not enough favor token!\n\nRetry: ");
             return;
@@ -318,6 +361,7 @@ class CLIHandler implements GraphicInterface{
 
         ClientLogger.println("Insert 0 to go back to the menu.\n");
 
+        flagContinue = false;
         client.useToolCard(client.getGameSnapshot().getToolCards().get(choice - 1).getName());
         if (!waitResult()) {
             printGame(client.getGameSnapshot());
@@ -382,7 +426,7 @@ class CLIHandler implements GraphicInterface{
 
     @Override
     public void notifyServerDisconnected(){
-        ClientLogger.printlnWithClear("Server disconnected");
+        ClientLogger.printlnWithClear("Server disconnected, trying to reconnect");
     }
 
     private int readInt(int minValue, int maxValue){
@@ -697,6 +741,7 @@ class CLIHandler implements GraphicInterface{
     public void wakeUp(boolean serverResult){
         this.serverResult = serverResult;
         flagContinue = true;
+
         if(waiting)
             synchronized (this) {
                 this.notifyAll();

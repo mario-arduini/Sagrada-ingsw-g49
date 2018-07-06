@@ -50,7 +50,11 @@ public class ServerListener implements Runnable {
                 continue;
             } catch (NullPointerException e) {
                 connected = false;
-                client.serverDisconnected();
+                try {
+                    client.serverDisconnected();
+                } catch (ServerReconnectedException e1) {
+                    LOGGER.info(e.toString());
+                }
                 continue;
             }
 
