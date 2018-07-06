@@ -144,45 +144,49 @@ class CLIHandler implements GraphicInterface{
             if (command > 0 && !client.getGameSnapshot().getPlayer().isMyTurn())
                 ClientLogger.print(ERROR);
             else
-                switch (command) {
-                    case 0:
-                        ClientLogger.printlnWithClear("Logged out");
-                        cliListener.stopListening();
-                        thread.interrupt();
-                        client.logout();
-                        logout = true;
-                        break;
-                    case 1:
-                        if (!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted())
-                            placeDice();
-                        else
-                            useToolCard();
-                        break;
-                    case 2:
-                        if (client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed() || client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted())
-                            client.pass();
-                        else
-                            useToolCard();
-                        break;
-                    case 3:
-                        if (!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted() && !client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed())
-                            client.pass();
-                        else
-                            ClientLogger.print(ERROR);
-                        break;
-                    default:
-                        break;
+                try {
+                    switch (command) {
+                        case 0:
+                            ClientLogger.printlnWithClear("Logged out");
+                            cliListener.stopListening();
+                            thread.interrupt();
+                            client.logout();
+                            logout = true;
+                            break;
+                        case 1:
+                            if (!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted())
+                                placeDice();
+                            else
+                                useToolCard();
+                            break;
+                        case 2:
+                            if (client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed() || client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted())
+                                client.pass();
+                            else
+                                useToolCard();
+                            break;
+                        case 3:
+                            if (!client.getGameSnapshot().getPlayer().isDiceAlreadyExtracted() && !client.getGameSnapshot().getPlayer().isToolCardAlreadyUsed())
+                                client.pass();
+                            else
+                                ClientLogger.print(ERROR);
+                            break;
+                        default:
+                            break;
+                    }
+                }catch (InputInterruptedException e){
+                    break;
                 }
         }
         return logout;
     }
 
-    private void completeToolCard(){
+    private void completeToolCard() throws ServerReconnectedException{
         printGame(client.getGameSnapshot());
-        ClientLogger.print("Choose an option:\n0) Go to menu\n1) Continue to use th tool card " + toolCardNotCompleted + "\nYour choice: ");
-        int choice = readInt(0, 1);
-        if(choice == 1);
-
+        printFooter(client.getGameSnapshot());
+        ClientLogger.println("Using the tool card " + toolCardNotCompleted);
+        client.continueToolCard();
+        waitResult();
     }
 
     private boolean askNewGame(){
@@ -290,7 +294,7 @@ class CLIHandler implements GraphicInterface{
     }
 
 
-    private void placeDice() throws ServerReconnectedException{
+    private void placeDice() throws ServerReconnectedException, InputInterruptedException{
         if(client.getGameSnapshot().getPlayer().isMyTurn()){
             int dice = -1;
             int row = -1;
@@ -302,13 +306,13 @@ class CLIHandler implements GraphicInterface{
                 try {
                     ClientLogger.print("\nInsert dice number: ");
                     dice = readInt(1, client.getGameSnapshot().getDraftPool().size());
-                    if(dice == -1)  return;
+                    if(dice == -1)  throw new InputInterruptedException();
                     ClientLogger.print("Insert row: ");
                     row = readInt(1, ROWS);
-                    if(row == -1)  return;
+                    if(row == -1)  throw new InputInterruptedException();
                     ClientLogger.print("Insert column: ");
                     column = readInt(1, COLUMNS);
-                    if(column == -1)  return;
+                    if(column == -1)  throw new InputInterruptedException();
                 }catch (CancellationException e){
                     return;
                 }
@@ -330,7 +334,7 @@ class CLIHandler implements GraphicInterface{
             ClientLogger.println("Not your turn! You can only logout");
     }
 
-    private void useToolCard() throws ServerReconnectedException{
+    private void useToolCard() throws ServerReconnectedException, InputInterruptedException{
         if (client.getGameSnapshot().getPlayer().getFavorToken() < 1) {
             ClientLogger.print("Not enough favor token!\n\nRetry: ");
             return;
@@ -343,7 +347,7 @@ class CLIHandler implements GraphicInterface{
             ClientLogger.print("\nInsert tool card number: ");
             try {
                 choice = readInt(0, 3);
-                if(choice == -1)  return;
+                if(choice == -1)  throw new InputInterruptedException();
             } catch (NumberFormatException e) {
                 choice = -1;
             } catch (CancellationException e) {
@@ -564,6 +568,10 @@ class CLIHandler implements GraphicInterface{
 
     //endregion
 
+    public void setToolCardNotCompleted(String toolCard){
+        this.toolCardNotCompleted = toolCard;
+    }
+
     private static void printFooter(GameSnapshot gameSnapshot){
         printPublicGoals(gameSnapshot.getPublicGoals());
         printPrivateGoal(gameSnapshot.getPlayer().getPrivateGoal());
@@ -731,8 +739,11 @@ class CLIHandler implements GraphicInterface{
     @Override
     public void gameOver(List<Score> scores){
         ClientLogger.printlnWithClear("GAME FINISHED\n");
-        for(Score score : scores)
-            ClientLogger.println(score.getPlayer() + "   " + score.getTotalScore());
+        if(scores.size() == 1)
+            ClientLogger.println("YOU WIN!");
+        else
+            for(Score score : scores)
+                ClientLogger.println(score.getPlayer() + "   " + score.getTotalScore());
         wakeUpInput(null);
         wakeUp(true);
     }

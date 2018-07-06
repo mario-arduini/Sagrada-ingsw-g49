@@ -271,7 +271,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         gameSnapshot.getPlayer().setPrivateGoal(privateGoal);
     }
 
-    //TODO: do something with cardName
     @Override
     public void notifyReconInfo(Map<String, Window> windows, Map<String, Integer> favorToken, List<Dice> roundTrack, String cardName){
         PlayerSnapshot playerSnapshot;
@@ -285,6 +284,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
                 gameSnapshot.addOtherPlayer(playerSnapshot);
         }
         gameSnapshot.setRoundTrack(roundTrack);
+        handler.setToolCardNotCompleted(cardName);
         gameStarted = true;
         setServerResult(true);
     }
@@ -323,7 +323,16 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
 
 
-
+    void continueToolCard() throws ServerReconnectedException{
+        try {
+            server.continueToolCard();
+        } catch (GameNotStartedException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException | PlayerSuspendedException e) {
+            setServerResult(false);
+            LOGGER.warning(e.toString());
+        } catch (RemoteException e){
+            serverDisconnected();
+        }
+    }
 
     void serverDisconnected() throws ServerReconnectedException{
         serverConnected = false;

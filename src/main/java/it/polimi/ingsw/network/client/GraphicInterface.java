@@ -26,4 +26,5 @@ public interface GraphicInterface {
     void wakeUp(boolean serverResult);
     void interruptInput();
     void printDice(Dice dice);
+    void setToolCardNotCompleted(String toolCard);
 }

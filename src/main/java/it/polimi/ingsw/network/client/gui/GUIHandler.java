@@ -724,4 +724,9 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void setToolCardNotCompleted(String toolCard){
+
+    }
 }
