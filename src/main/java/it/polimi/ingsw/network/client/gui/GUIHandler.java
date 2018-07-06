@@ -33,6 +33,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class GUIHandler extends UnicastRemoteObject implements GraphicInterface {
@@ -102,6 +103,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     private int askedNumber;
     private boolean askedBool;
     private String tmpStyle;
+    private int toolcardInUse;
 
     private static final Pattern PATTERN = Pattern.compile(
             "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
@@ -407,6 +409,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         tool3.setDisable(false);
 
         usingToolcard = true;
+        toolcardInUse = toolNumber;
     }
 
     public Client getClient(){
@@ -531,7 +534,34 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public boolean askIfPlus(String prompt, boolean rollback) {
-        return false;
+        Platform.runLater(()->{
+
+            ButtonType plus = new ButtonType("+", ButtonBar.ButtonData.YES);
+            ButtonType minus = new ButtonType("-", ButtonBar.ButtonData.NO);
+            Alert askBool = new Alert(Alert.AlertType.CONFIRMATION, prompt, plus,minus);
+
+            askBool.showAndWait();
+
+            if(askBool.getResult() == plus) askedBool = true;
+            else askedBool = false;
+
+            synchronized (this) {
+                this.notify();
+            }
+
+        });
+
+        try {
+            synchronized (this){
+                wait();
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Returning "+askedCoordinate);
+        return askedBool;
     }
 
     @Override
@@ -542,7 +572,9 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             draftPool.setStyle("-fx-border-color:red; -fx-border-width:3; -fx-border-style:dashed;");
             draftPool.getChildren().forEach(child -> {
                 child.setOnMouseClicked(event -> {
-                    askedDraft = ((DicePane) event.getSource()).dice;
+                    DicePane dp = (DicePane) event.getSource();
+                    askedDraft = dp.dice;
+                    removeFromDraftIfNecessary(dp);
                     draftPool.setStyle("");
                     synchronized (this) {
                         this.notify();
@@ -566,7 +598,32 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public int askDiceRoundTrack(String prompt, boolean rollback) {
-        return 0;
+        Platform.runLater(()->{
+            info.setText(MessageHandler.get(prompt));
+            roundTrack.setStyle("-fx-border-color:red; -fx-border-width:3; -fx-border-style:dashed;");
+            playerGrid.getChildren().forEach(child -> {
+                child.setOnMouseClicked(event -> {
+                    DicePane dp = (DicePane) event.getSource();
+                    roundTrack.setStyle("");
+                    askedNumber = dp.getIdx();
+                    synchronized (this) {
+                        this.notify();
+                    }
+                });
+            });
+        });
+
+        try {
+            synchronized (this){
+                wait();
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Returning "+askedNumber);
+        return askedNumber;
     }
 
     @Override
@@ -609,18 +666,39 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public int askDiceValue(String prompt, boolean rollback) {
 
         Platform.runLater(()->{
-            info.setText(MessageHandler.get(prompt));
-            roundTrack.setStyle("-fx-border-color:red; -fx-border-width:3; -fx-border-style:dashed;");
-            playerGrid.getChildren().forEach(child -> {
-                child.setOnMouseClicked(event -> {
-                    DicePane dp = (DicePane) event.getSource();
-                    roundTrack.setStyle("");
-                    askedNumber = dp.getIdx();
-                    synchronized (this) {
-                        this.notify();
-                    }
-                });
-            });
+
+            ButtonType button1 = new ButtonType("1");
+            ButtonType button2 = new ButtonType("2");
+            ButtonType button3 = new ButtonType("3");
+            ButtonType button4 = new ButtonType("4");
+            ButtonType button5 = new ButtonType("5");
+            ButtonType button6 = new ButtonType("6");
+
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Dice Value");
+            alert.setHeaderText(prompt);
+
+            alert.getButtonTypes().setAll(button1,button2,button3,button4,button5,button6);
+
+            alert.showAndWait();
+            if (alert.getResult() == button1){
+                askedNumber = 1;
+            } else if (alert.getResult() == button2){
+                askedNumber = 2;
+            } else if (alert.getResult() == button3){
+                askedNumber = 3;
+            } else if (alert.getResult() == button4){
+                askedNumber = 4;
+            } else if (alert.getResult() == button5){
+                askedNumber = 5;
+            } else if (alert.getResult() == button6){
+                askedNumber = 6;
+            }
+
+            synchronized (this) {
+                this.notify();
+            }
+
         });
 
         try {
@@ -644,7 +722,12 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public void printDice(Dice dice){
-
+        Platform.runLater(() -> {
+            DicePane dp = new DicePane(dice);
+            dp.bindDimension(draftPool.heightProperty());
+            dp.setStyle(dp.getStyle() + "-fx-border-color:red; -fx-border-style:dashed;");
+            draftPool.getChildren().add(dp);
+        });
     }
 
     @Override
@@ -728,5 +811,12 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     @Override
     public void setToolCardNotCompleted(String toolCard){
 
+    }
+
+    private void removeFromDraftIfNecessary(DicePane dp){
+        String toolName = client.getGameSnapshot().getToolCards().get(toolcardInUse).getName();
+        if(toolName.equals("Pennello per pasta salda")||toolName.equals("Diluente per pasta salda")||toolName.equals("Pinza sgrossatrice")){
+            draftPool.getChildren().remove(dp);
+        }
     }
 }
