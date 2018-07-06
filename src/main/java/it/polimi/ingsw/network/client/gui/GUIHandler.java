@@ -398,13 +398,12 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         }
     }
 
-    public void useToolCard(int toolNumber){
+    private void useToolCard(int toolNumber){
         List<ToolCard> tools = client.getGameSnapshot().getToolCards();
-        try {
-            client.useToolCard(tools.get(toolNumber).getName());
-        } catch (ServerReconnectedException e) {
-            e.printStackTrace();
-        }
+
+        System.out.println(Thread.currentThread().getId());
+        client.useToolCard(tools.get(toolNumber).getName());
+
 
         tool1.setDisable(false);
         tool2.setDisable(false);
@@ -466,7 +465,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 roundTrack.getChildren().clear();
                 List<Dice> track = client.getGameSnapshot().getRoundTrack();
                 for(int i = 0;i<track.size();i++){
-                    DicePane dp = new DicePane(track.get(i),i+1);
+                    DicePane dp = new DicePane(track.get(i),i);
                     dp.bindDimension(roundTrack.heightProperty());
                     roundTrack.getChildren().add(dp);
                 }
@@ -528,7 +527,9 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public void gameOver(List<Score> scores) {
         Platform.runLater(() -> {
             try {
-                Stage stage = (Stage) gameScene.getScene().getWindow();
+                Stage stage;
+                if(gameScene!=null) stage = (Stage) gameScene.getScene().getWindow();
+                else stage = (Stage) schemaChoice.getScene().getWindow();
                 URL path = GUIHandler.class.getClassLoader().getResource("gui-views/gameover.fxml");
                 FXMLLoader fxmlLoader = new FXMLLoader(path);
                 Parent root = fxmlLoader.load();
@@ -549,8 +550,8 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             Label label = new Label(score.getPlayer()+" - "+score.getTotalScore());
             if(score.getPlayer().equals(client.getGameSnapshot().getPlayer().getNickname())){
                 label.setStyle("-fx-text-fill : green;");
-                label.setFont(new Font(20));
             }
+            label.setFont(new Font(20));
             scoresBox.getChildren().add(label);
         }
     }
@@ -566,7 +567,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
             ButtonType plus = new ButtonType("+", ButtonBar.ButtonData.YES);
             ButtonType minus = new ButtonType("-", ButtonBar.ButtonData.NO);
-            Alert askBool = new Alert(Alert.AlertType.CONFIRMATION, prompt, plus,minus);
+            Alert askBool = new Alert(Alert.AlertType.CONFIRMATION, MessageHandler.get(prompt), plus,minus);
 
             askBool.showAndWait();
 
@@ -605,14 +606,19 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                     removeFromDraftIfNecessary(dp);
                     draftPool.setStyle("");
                     synchronized (this) {
+
+                        System.out.println("Notifying on "+this.getClass());
                         this.notify();
                     }
                 });
             });
         });
 
+        System.out.println(Thread.currentThread().getId());
+
         try {
             synchronized (this){
+                System.out.println("Waiting on "+this.getClass());
                 wait();
             }
 
@@ -629,7 +635,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         Platform.runLater(()->{
             info.setText(MessageHandler.get(prompt));
             roundTrack.setStyle("-fx-border-color:red; -fx-border-width:3; -fx-border-style:dashed;");
-            playerGrid.getChildren().forEach(child -> {
+            roundTrack.getChildren().forEach(child -> {
                 child.setOnMouseClicked(event -> {
                     DicePane dp = (DicePane) event.getSource();
                     roundTrack.setStyle("");
@@ -704,23 +710,27 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Dice Value");
-            alert.setHeaderText(prompt);
+            alert.setHeaderText(MessageHandler.get(prompt));
 
             alert.getButtonTypes().setAll(button1,button2,button3,button4,button5,button6);
 
-            alert.showAndWait();
-            if (alert.getResult() == button1){
-                askedNumber = 1;
-            } else if (alert.getResult() == button2){
-                askedNumber = 2;
-            } else if (alert.getResult() == button3){
-                askedNumber = 3;
-            } else if (alert.getResult() == button4){
-                askedNumber = 4;
-            } else if (alert.getResult() == button5){
-                askedNumber = 5;
-            } else if (alert.getResult() == button6){
-                askedNumber = 6;
+            boolean choose = false;
+            while (!choose){
+                choose = true;
+                alert.showAndWait();
+                if (alert.getResult() == button1){
+                    askedNumber = 1;
+                } else if (alert.getResult() == button2){
+                    askedNumber = 2;
+                } else if (alert.getResult() == button3){
+                    askedNumber = 3;
+                } else if (alert.getResult() == button4){
+                    askedNumber = 4;
+                } else if (alert.getResult() == button5){
+                    askedNumber = 5;
+                } else if (alert.getResult() == button6){
+                    askedNumber = 6;
+                } else choose = false;
             }
 
             synchronized (this) {
@@ -745,7 +755,49 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public int askMoveNumber(String prompt, int n, boolean rollback){
-        return 0;
+        Platform.runLater(()->{
+
+            List<ButtonType> buttonNumbers = new ArrayList<>();
+
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("How many to move");
+            alert.setHeaderText(MessageHandler.get(prompt));
+
+            for(Integer i = 1;i <= n;i++){
+                ButtonType button = new ButtonType(i.toString());
+                buttonNumbers.add(button);
+                alert.getButtonTypes().add(button);
+            }
+
+            boolean choose = false;
+
+            while (!choose){
+                alert.showAndWait();
+                for(Integer i = 0;i < n;i++){
+                    if(alert.getResult() == buttonNumbers.get(i)){
+                        askedNumber = i+1;
+                        choose = true;
+                    }
+                }
+            }
+
+            synchronized (this) {
+                this.notify();
+            }
+
+        });
+
+        try {
+            synchronized (this){
+                wait();
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Returning "+askedNumber);
+        return askedNumber;
     }
 
     @Override
@@ -785,23 +837,36 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public void handleLogin(boolean serverResult){
         Platform.runLater(() -> {
             if(serverResult){
-                isLogging = false;
-                status.textProperty().set("Logged in");
-                password.setVisible(false);
-                passwordLabel.setVisible(false);
-                nickname.setVisible(false);
-                nicknameLabel.setVisible(false);
-                login.setVisible(false);
-
-                waitingRoom.setVisible(true);
-                playerListView.setItems(playerList);
-                playerListView.setVisible(true);
+                setWaitingRoom();
+                Stage stage = (Stage) login.getScene().getWindow();
+                stage.setOnCloseRequest( event ->
+                {
+                    try {
+                        client.logout();
+                    } catch (ServerReconnectedException e) {
+                        e.printStackTrace();
+                    }
+                });
             } else {
                 status.textProperty().set("Wrong password!");
                 login.setDisable(false);
                 isLogging = false;
             }
         });
+    }
+
+    public void setWaitingRoom(){
+        isLogging = false;
+        status.textProperty().set("Logged in");
+        password.setVisible(false);
+        passwordLabel.setVisible(false);
+        nickname.setVisible(false);
+        nicknameLabel.setVisible(false);
+        login.setVisible(false);
+
+        waitingRoom.setVisible(true);
+        playerListView.setItems(playerList);
+        playerListView.setVisible(true);
     }
 
     private void handleSchema(boolean serverResult){
@@ -838,7 +903,23 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public void setToolCardNotCompleted(String toolCard){
-
+        Platform.runLater(() -> {
+            Stage stage = (Stage) login.getScene().getWindow();
+            URL path = GUIHandler.class.getClassLoader().getResource("gui-views/game.fxml");
+            FXMLLoader fxmlLoader = new FXMLLoader(path);
+            Parent root = null;
+            try {
+                root = fxmlLoader.load();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            GUIHandler controller = (GUIHandler) fxmlLoader.getController();
+            controller.passClient(client);
+            controller.populateGame();
+            client.setHandler(controller);
+            stage.setScene(new Scene(root));
+            stage.setTitle("Sagrada - Game");
+        });
     }
 
     private void removeFromDraftIfNecessary(DicePane dp){
@@ -849,6 +930,27 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     }
 
     public void newGame(ActionEvent actionEvent) {
+        try {
+            client.newGame();
+        } catch (ServerReconnectedException e) {
+            e.printStackTrace();
+        }
 
+        try {
+            Stage stage = (Stage) scoresBox.getScene().getWindow();
+            URL path = GUIHandler.class.getClassLoader().getResource("gui-views/login.fxml");
+            FXMLLoader fxmlLoader = new FXMLLoader(path);
+            Parent root = fxmlLoader.load();
+            GUIHandler controller = (GUIHandler) fxmlLoader.getController();
+            controller.passClient(client);
+            controller.setWaitingRoom();
+            controller.printWaitingRoom();
+            client.setHandler(controller);
+
+            stage.setScene(new Scene(root));
+            stage.setTitle("Sagrada - Waiting Room");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

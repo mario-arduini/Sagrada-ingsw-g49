@@ -120,18 +120,25 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    public void useToolCard(String name) throws ServerReconnectedException{
-        try {
-            server.useToolCard(name);
-        } catch (GameNotStartedException | ToolCardInUseException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException | PlayerSuspendedException e) {
-            setServerResult(false);
-            LOGGER.warning(e.toString());
-        } catch (RemoteException e){
-            serverDisconnected();
-        }
+    public void useToolCard(String name) {
+        new Thread(()->{
+            try {
+                server.useToolCard(name);
+            } catch (GameNotStartedException | ToolCardInUseException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException | PlayerSuspendedException e) {
+                setServerResult(false);
+                LOGGER.warning(e.toString());
+            } catch (RemoteException e){
+                try {
+                    serverDisconnected();
+                } catch (ServerReconnectedException e1) {
+                    e1.printStackTrace();
+                    // TODO settare variabile
+                }
+            }
+        }).start();
     }
 
-    void logout() throws ServerReconnectedException{
+    public void logout() throws ServerReconnectedException{
         logged = false;
         if(serverConnected) {
             try {
@@ -322,7 +329,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         handler.printDice(dice);
     }
 
-    void newGame() throws ServerReconnectedException{
+    public void newGame() throws ServerReconnectedException{
         try {
             gameSnapshot.newGame();
             server.newGame();
