@@ -67,10 +67,16 @@ public class GameRoom extends Game{
         return true;
     }
 
-    private boolean checkGameFinished(){
+    private synchronized boolean checkGameFinished(){
         if (!isGameFinished()) return false;
         if (notifyEndGame){
-            List<Score> scores = isGameStarted() ? computeFinalScores() :  new ArrayList<>();
+            List<Score> scoresList = isGameStarted() ? computeFinalScores() : new ArrayList<>();
+
+            //if player is alone, return only his score
+            if(getPlayers().stream().filter(p -> !p.isSuspended()).count() == 1)
+                scoresList = scoresList.stream().filter(score -> score.getPlayer().equalsIgnoreCase(getPlayers().stream().filter(p -> !p.isSuspended()).findFirst().get().getNickname())).collect(Collectors.toList());
+
+            final List<Score> scores = scoresList;
             connections.forEach(user -> {
                 try {
                     user.notifyEndGame(scores);
@@ -78,6 +84,7 @@ public class GameRoom extends Game{
                     Logger.print(e.toString());
                 }
             });
+
             notifyEndGame = false;
             Logger.print("Game Over: " + getPlayers().stream().map(Player::getNickname).collect(Collectors.toList()));
         }
