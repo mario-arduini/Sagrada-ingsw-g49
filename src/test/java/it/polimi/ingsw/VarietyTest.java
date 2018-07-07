@@ -40,6 +40,8 @@ public class VarietyTest {
             e.printStackTrace();
         } catch (InvalidDiceValueException e) {
             e.printStackTrace();
+        } catch (DiceAlreadyHereException e) {
+            e.printStackTrace();
         }
     }
 
@@ -76,6 +78,8 @@ public class VarietyTest {
         } catch (BadAdjacentDiceException e) {
             e.printStackTrace();
         } catch (InvalidDiceValueException e) {
+            e.printStackTrace();
+        }catch (DiceAlreadyHereException e) {
             e.printStackTrace();
         }
     }
