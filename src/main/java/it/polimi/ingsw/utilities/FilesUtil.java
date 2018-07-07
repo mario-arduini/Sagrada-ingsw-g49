@@ -1,13 +1,11 @@
 package it.polimi.ingsw.utilities;
 
-import it.polimi.ingsw.model.Game;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
  * Contains some methods to list files and folders from a directory
@@ -18,25 +16,36 @@ public class FilesUtil {
      *
      * @param directoryName to be listed
      */
-    public static final String SCHEMA_FOLDER = "schemas";
-    public static final String TOOLCARD_FOLDER = "toolcards";
+    public static final String SCHEMA_FOLDER = "schema";
+    public static final String TOOLCARD_FOLDER = "toolcard";
     public static final String LOG_FOLDER = "log";
-    public static final String LANGUAGES_FOLDER = "languages";
+    //public static final String LANGUAGES_FOLDER = "language";
 
-    public static List<File> listFiles(String directoryName) {
+    public static List<BufferedReader> listFiles(String radixName, int number) {
 
-        InputStream inputStream = FilesUtil.class.getClassLoader().getResourceAsStream(directoryName);
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        List<BufferedReader> files = new ArrayList<>();
+        String s;
+        for(int i = 1; i <= number; i++) {
+            if(i == 7 && radixName.equals(SCHEMA_FOLDER))
+                i = 13;
+            s = radixName + i + ".json";
+            files.add(new BufferedReader(new InputStreamReader(FilesUtil.class.getClassLoader().getResourceAsStream(s))));
+        }
+        return files;
+    }
 
-        System.out.println(new File(".").getAbsolutePath());
+    public static List<File> filesToWrite(String dir, String fileName) {
 
-
-        File directory = new File(FilesUtil.class.getClassLoader().getResource(directoryName).getPath());
+        try {
+            Files.createDirectory(Paths.get(new File(dir).getAbsolutePath()));
+            Files.createFile(Paths.get(new File(dir + "/" + fileName).getAbsolutePath()));
+        } catch (IOException e) {
+        }
+        File directory = new File(new File(dir).getAbsolutePath());
+        System.out.println(directory);
         //get all the files from a directory
         File[] fList = directory.listFiles();
         List<File> fileList = new ArrayList<>();
-
-        if (fList == null) return fileList;
 
         for (File file : fList) {
             if (file.isFile()) {

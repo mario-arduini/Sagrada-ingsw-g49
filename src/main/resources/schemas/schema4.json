@@ -1,0 +1,6 @@
+{"difficulty":5,"constraint":[
+[{"number":4},null,{"number":2},{"number":5},{"color":"GREEN","number":0}],
+[null,null,{"number":6},{"color":"GREEN","number":0},{"number":2}],
+[null,{"number":3},{"color":"GREEN","number":0},{"number":4},null],
+[{"number":5},{"color":"GREEN","number":0},{"number":1},null,null]],
+"name":"Virtus"}

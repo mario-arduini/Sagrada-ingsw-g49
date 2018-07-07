@@ -6,9 +6,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import it.polimi.ingsw.utilities.FilesUtil;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.BufferedReader;
 import java.util.HashMap;
 import java.util.List;
 
@@ -17,22 +15,19 @@ public class MessageHandler {
 
     private MessageHandler(){}
 
-    public static void init(String language){
-        if(messages==null){
-            List<File> languages = FilesUtil.listFiles(FilesUtil.LANGUAGES_FOLDER);
-            File chosenLanguage = null;
-            for(File file:languages){
-                if(file.getName().equals(language+".json")||
-                        (chosenLanguage==null&&file.getName().equals("english.json"))) chosenLanguage = file;
+    private static void init(String language){
+        if(messages == null){
+            List<BufferedReader> languages = FilesUtil.listFiles(language, 1);
+            BufferedReader chosenLanguage = null;
+            for(BufferedReader file:languages){
+                //if(file.getName().equals(language+".json")||
+                        //(chosenLanguage==null&&file.getName().equals("english.json")))
+                chosenLanguage = file;
             }
 
             JsonParser parser = new JsonParser();
-            JsonObject languageJson = null;
-            try {
-                languageJson = parser.parse(new FileReader(chosenLanguage)).getAsJsonObject();
-            } catch (FileNotFoundException e) {
+            JsonObject languageJson = parser.parse(chosenLanguage).getAsJsonObject();
 
-            }
             Gson gson = new Gson();
             messages = gson.fromJson(languageJson,new TypeToken<HashMap<String,String>>(){}.getType());
         }

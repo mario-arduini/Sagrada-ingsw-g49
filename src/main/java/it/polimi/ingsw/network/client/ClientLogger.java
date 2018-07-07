@@ -46,7 +46,7 @@ class ClientLogger {
 
     static synchronized void LogToFile() {
         try {
-            Optional<File> file = FilesUtil.listFiles(FilesUtil.LOG_FOLDER).stream().filter(logFile -> logFile.getName().equalsIgnoreCase("clientLog.log")).findFirst();
+            Optional<File> file = FilesUtil.filesToWrite(FilesUtil.LOG_FOLDER, "clientLog.log").stream().filter(logFile -> logFile.getName().equalsIgnoreCase("clientLog.log")).findFirst();
 
             if(file.isPresent()) {
                 fh = new FileHandler(file.get().getAbsolutePath());

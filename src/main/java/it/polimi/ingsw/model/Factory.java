@@ -13,13 +13,14 @@ import it.polimi.ingsw.model.toolcards.*;
 import it.polimi.ingsw.network.server.Logger;
 import it.polimi.ingsw.utilities.FilesUtil;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.*;
 
 public class Factory {
-    private Stack<File> toolCards;
+    private Stack<BufferedReader> toolCards;
     private List<Color> privateGoalCards;
     private int privateGoalCardsIndex;
     private List<Integer> publicGoalCards;
@@ -31,9 +32,9 @@ public class Factory {
 
     public Factory() {
         this.toolCards = new Stack<>();
-        List<File> files = FilesUtil.listFiles(FilesUtil.TOOLCARD_FOLDER);
-        for (File file:files){
-            if (file.getName().matches("[a-zA-Z0-9_-]+\\.json"))
+        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.TOOLCARD_FOLDER, 12);
+        for (BufferedReader file:files){
+            //if (file.getName().matches("[a-zA-Z0-9_-]+\\.json"))
                 toolCards.push(file);
         }
         this.privateGoalCards = Arrays.asList(Color.BLUE,Color.GREEN,Color.PURPLE,Color.RED,Color.YELLOW);
@@ -78,19 +79,19 @@ public class Factory {
 
     private Stack<Schema> loadSchemasFromFile(){
         Stack<Schema> schemas= new Stack<>();
-        List<File> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER);
+        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER, 22);
         JsonParser parser = new JsonParser();
         JsonObject jsonObject;
         Gson gson = new Gson();
 
-        for (File file:files){
-            try {
-                jsonObject = parser.parse(new FileReader(file)).getAsJsonObject();
+        for (BufferedReader file:files){
+            //try {
+                jsonObject = parser.parse(file).getAsJsonObject();
                 schemas.push(gson.fromJson(jsonObject, Schema.class));
-            } catch (FileNotFoundException e) {
-                Logger.print(String.format("Schema not found %s", file.getAbsolutePath()));
-                e.printStackTrace();
-            }
+            //} catch (FileNotFoundException e) {
+                //Logger.print(String.format("Schema not found %s", file..getAbsolutePath()));
+                //e.printStackTrace();
+            //}
         }
         return schemas;
     }
@@ -99,18 +100,18 @@ public class Factory {
         ToolCard toolCard;
         try {
             toolCard = loadToolCardFromFile(toolCards.pop());
-        } catch (FileNotFoundException | EmptyStackException e) {
+        } catch (EmptyStackException e) {
             throw new OutOfCardsException();
         }
         return toolCard;
     }
 
-    private ToolCard loadToolCardFromFile(File file) throws FileNotFoundException {
+    private ToolCard loadToolCardFromFile(BufferedReader file) {
         ToolCard toolCard;
         JsonParser parser = new JsonParser();
         JsonObject jsonObject;
 
-        jsonObject = parser.parse(new FileReader(file)).getAsJsonObject();
+        jsonObject = parser.parse(file).getAsJsonObject();
         toolCard = new ToolCard(jsonObject);
 
         return toolCard;
