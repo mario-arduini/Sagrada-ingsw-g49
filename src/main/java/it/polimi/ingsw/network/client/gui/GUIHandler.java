@@ -432,7 +432,11 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         List<ToolCard> tools = client.getGameSnapshot().getToolCards();
 
         System.out.println(Thread.currentThread().getId());
-        client.useToolCard(tools.get(toolNumber).getName());
+        try {
+            client.useToolCard(tools.get(toolNumber).getName());
+        } catch (ServerReconnectedException e) {
+            e.printStackTrace();
+        }
 
 
         tool1.setDisable(false);

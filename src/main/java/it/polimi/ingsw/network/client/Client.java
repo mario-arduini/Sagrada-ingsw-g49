@@ -17,6 +17,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.*;
 
 public class Client extends UnicastRemoteObject implements ClientInterface {
@@ -70,7 +71,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         else {
             try {
                 server = serverInterface.login(nickname, password,this);
-                setServerResult(true);
+                //setServerResult(true);
             } catch (LoginFailedException e) {
                 setServerResult(false);
             }catch (RemoteException e){
@@ -109,7 +110,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     public void placeDice(int diceNumber, int row, int column) throws ServerReconnectedException{
         try {
             server.placeDice(row - 1, column - 1, gameSnapshot.getDraftPool().get(diceNumber - 1));
-        } catch (GameOverException | ToolCardInUseException | NotYourTurnException | NoAdjacentDiceException | BadAdjacentDiceException | DiceAlreadyExtractedException | FirstDiceMisplacedException | DiceNotInDraftPoolException | ConstraintViolatedException | GameNotStartedException | NoSameColorDicesException e) {
+        } catch (GameOverException | ToolCardInUseException | NotYourTurnException | NoAdjacentDiceException | BadAdjacentDiceException | DiceAlreadyExtractedException | FirstDiceMisplacedException | DiceNotInDraftPoolException | ConstraintViolatedException | GameNotStartedException | NoSameColorDicesException | DiceAlreadyHereException e) {
             setServerResult(false);
             LOGGER.warning(e.toString());
         } catch (RemoteException e){
@@ -117,7 +118,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    public void useToolCard(String name) {
+    public void useToolCard(String name) throws ServerReconnectedException{
+        AtomicReference<Boolean> reconnection = new AtomicReference<>(false);
         new Thread(()->{
             try {
                 server.useToolCard(name);
@@ -128,11 +130,12 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
                 try {
                     serverDisconnected();
                 } catch (ServerReconnectedException e1) {
-                    e1.printStackTrace();
-                    // TODO settare variabile
+                    reconnection.getAndSet(true);
                 }
             }
         }).start();
+        if(reconnection.get())
+            throw new ServerReconnectedException();
     }
 
     public void logout() throws ServerReconnectedException{
@@ -169,7 +172,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     @Override
     public void notifyLogin(List<String> nicknames){
-        setServerResult(true);
+        //setServerResult(true);
         for(String nickname : nicknames)
             gameSnapshot.addOtherPlayer(nickname);
         handler.printWaitingRoom();
@@ -355,20 +358,27 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
+    void wakeUp(){
+        handler.wakeUp(true);
+    }
+
     void serverDisconnected() throws ServerReconnectedException{
         if(logged) {
             serverConnected = false;
             handler.notifyServerDisconnected();
-
+            handler.interruptInput();
+            handler.wakeUp(false);
             int i = 0;
-            while (i < 2) {
+            while (i < 20) {
                 if (tryReconnection()) {
+                    serverConnected = true;
+                    gameSnapshot.newGame();
                     if(password != null)
                         login(gameSnapshot.getPlayer().getNickname(), password);
                     throw new ServerReconnectedException();
                 }
                 try {
-                    TimeUnit.SECONDS.sleep(10);
+                    TimeUnit.SECONDS.sleep(2);
                     i++;
                 } catch (InterruptedException e) {
                     LOGGER.warning(e.toString());

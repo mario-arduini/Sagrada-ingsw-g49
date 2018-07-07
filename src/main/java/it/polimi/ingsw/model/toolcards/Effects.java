@@ -59,8 +59,10 @@ public final class Effects {
                 try {
                     placeDice(window, dice, coords.getRow(), coords.getColumn(), ignore);
                     valid = true;
-                } catch (ConstraintViolatedException | NotWantedAdjacentDiceException
-                        | FirstDiceMisplacedException | BadAdjacentDiceException | NoAdjacentDiceException | IndexOutOfBoundsException e) {
+                } catch (ConstraintViolatedException | NotWantedAdjacentDiceException |
+                        FirstDiceMisplacedException | BadAdjacentDiceException |
+                        NoAdjacentDiceException | IndexOutOfBoundsException |
+                        DiceAlreadyHereException e) {
                     Logger.print("addDiceToWindow: " + e);
                 }
             }
@@ -263,7 +265,7 @@ public final class Effects {
                 try{
                     currentPlayerWindow.canBePlaced(removedDice,start.getRow(),start.getColumn(),ruleIgnored);
                 } catch (NoAdjacentDiceException | BadAdjacentDiceException
-                        | FirstDiceMisplacedException | ConstraintViolatedException e) {
+                        | FirstDiceMisplacedException | ConstraintViolatedException | DiceAlreadyHereException e) {
                     expectedMinimumPositions = 1;
                     Logger.print("move1: " + e);
                 }
@@ -291,8 +293,9 @@ public final class Effects {
                 message = "move-to-same";
             } else try {
                 placeDice(currentPlayerWindow,removedDice, end.getRow(), end.getColumn(), ruleIgnored);
-            } catch (NoAdjacentDiceException | BadAdjacentDiceException
-                    | FirstDiceMisplacedException | ConstraintViolatedException | NotWantedAdjacentDiceException e) {
+            } catch (NoAdjacentDiceException | BadAdjacentDiceException |
+                    FirstDiceMisplacedException | ConstraintViolatedException |
+                    DiceAlreadyHereException | NotWantedAdjacentDiceException e) {
                 valid = false;
                 message = "move-to-invalid";
                 Logger.print("move2: " + e);
@@ -333,7 +336,7 @@ public final class Effects {
                 try{
                     currentPlayerWindow.canBePlaced(removedDice,start.getRow(),start.getColumn(),ruleIgnored);
                 } catch (NoAdjacentDiceException | BadAdjacentDiceException
-                        | FirstDiceMisplacedException | ConstraintViolatedException e) {
+                        | FirstDiceMisplacedException | DiceAlreadyHereException | ConstraintViolatedException e) {
                     expectedMinimumPositions = 1;
                     Logger.print("move3: " + e);
                 }
@@ -377,7 +380,8 @@ public final class Effects {
             } else try {
                 placeDice(currentPlayerWindow,removedDice, end.getRow(), end.getColumn(), ruleIgnored);
             } catch (NoAdjacentDiceException | BadAdjacentDiceException
-                    | FirstDiceMisplacedException | ConstraintViolatedException | NotWantedAdjacentDiceException e) {
+                    | FirstDiceMisplacedException | ConstraintViolatedException
+                    | NotWantedAdjacentDiceException | DiceAlreadyHereException e) {
                 valid = false;
                 message = "move-to-invalid";
                 Logger.print("move4: " + e);
@@ -508,7 +512,7 @@ public final class Effects {
         round.setCurrentDiceDrafted(dice);
     }
 
-    private static void placeDice(Window window,Dice dice, int row, int column, Window.RuleIgnored ruleIgnored) throws NotWantedAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, BadAdjacentDiceException, FirstDiceMisplacedException {
+    private static void placeDice(Window window,Dice dice, int row, int column, Window.RuleIgnored ruleIgnored) throws NotWantedAdjacentDiceException, ConstraintViolatedException, NoAdjacentDiceException, BadAdjacentDiceException, FirstDiceMisplacedException, DiceAlreadyHereException{
         switch (ruleIgnored){
             case COLOR:
                 window.checkValueConstraint(window.getSchema().getConstraint(row, column),dice);

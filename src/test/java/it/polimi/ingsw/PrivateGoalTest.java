@@ -35,6 +35,8 @@ public class PrivateGoalTest {
             e.printStackTrace();
         } catch (InvalidDiceValueException e) {
             e.printStackTrace();
+        }catch (DiceAlreadyHereException e) {
+            e.printStackTrace();
         }
     }
 
