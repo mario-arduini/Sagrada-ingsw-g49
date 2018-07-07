@@ -131,6 +131,9 @@ public class ServerListener implements Runnable {
                     case "show-dice":
                         client.showDice(gson.fromJson(jsonObject.get("dice").getAsString(), Dice.class));
                         break;
+                    case "alert-dice":
+                        client.alertDiceInDraftPool(gson.fromJson(jsonObject.get("dice").getAsString(), Dice.class));
+                        break;
                     case "rollback-ok":
                         client.setServerResult(true);
                         break;

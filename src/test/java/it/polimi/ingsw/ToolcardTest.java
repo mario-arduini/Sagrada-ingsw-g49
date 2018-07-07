@@ -125,6 +125,11 @@ class ConnectionHandlerStub implements ClientInterface {
     public void notifyReconInfo(Map<String, Window> windows, Map<String, Integer> favorToken, List<Dice> roundTrack, String cardName) {
     }
 
+    @Override
+    public void alertDiceInDraftPool(Dice dice){
+
+    }
+
     //@Override
     public String getRemoteAddress() {
         return null;

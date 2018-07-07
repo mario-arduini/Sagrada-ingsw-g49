@@ -553,6 +553,12 @@ class CLIHandler implements GraphicInterface{
     }
 
     @Override
+    public void alertDiceInDraftPool(Dice dice){
+        ClientLogger.println(MessageHandler.get("alert-dice"));
+        printDice(dice);
+    }
+
+    @Override
     public int askMoveNumber(String prompt, int n, boolean rollback) throws RollbackException{
         int startingValue;
         if (rollback)

@@ -329,6 +329,11 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         handler.printDice(dice);
     }
 
+    @Override
+    public void alertDiceInDraftPool(Dice dice){
+        handler.alertDiceInDraftPool(dice);
+    }
+
     public void newGame() throws ServerReconnectedException{
         try {
             gameSnapshot.newGame();

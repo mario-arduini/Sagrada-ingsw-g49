@@ -472,6 +472,16 @@ public class SocketHandler implements Runnable, ClientInterface {
         socketSendMessage(message);
     }
 
+    @Override
+    public void alertDiceInDraftPool(Dice dice){
+        JsonObject message;
+
+        message = createMessage("alert-dice");
+        message.addProperty("dice", gson.toJson(dice));
+
+        socketSendMessage(message);
+    }
+
     private boolean login() {
         JsonObject command;
         String password;

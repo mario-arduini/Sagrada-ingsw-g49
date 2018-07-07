@@ -16,6 +16,7 @@ import it.polimi.ingsw.network.client.Client;
 import it.polimi.ingsw.network.server.Logger;
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -190,8 +191,7 @@ public class ToolCard implements Serializable {
                         else
                             ruleIgnored = Window.RuleIgnored.NONE;
                         if (!Effects.addDiceToWindow(game.getWindow(), game.getRound().getCurrentDiceDrafted(), connection, ruleIgnored, rollback)) {
-                            game.getRound().getDraftPool().add(game.getRound().getCurrentDiceDrafted());
-                            game.getRound().setCurrentDiceDrafted(null);
+                            putDiceInDraftPool(connection);
                         }
                         break;
                     case "move":
@@ -255,4 +255,13 @@ public class ToolCard implements Serializable {
         this.used = true;
     }
 
+    public void putDiceInDraftPool(ClientInterface connection) throws DisconnectionException{
+        game.getRound().getDraftPool().add(game.getRound().getCurrentDiceDrafted());
+        game.getRound().setCurrentDiceDrafted(null);
+        try {
+            connection.alertDiceInDraftPool(game.getRound().getCurrentDiceDrafted());
+        } catch (Exception e) {
+            throw new DisconnectionException();
+        }
+    }
 }

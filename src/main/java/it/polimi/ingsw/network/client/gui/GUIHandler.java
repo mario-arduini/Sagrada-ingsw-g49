@@ -830,6 +830,11 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     }
 
     @Override
+    public void alertDiceInDraftPool(Dice dice){
+
+    }
+
+    @Override
     public void interruptInput(){
 
     }
