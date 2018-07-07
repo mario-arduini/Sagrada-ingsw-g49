@@ -1,0 +1,6 @@
+{"difficulty":5,"constraint":[
+[{"color":"PURPLE","number":0},{"number":6},null,null,{"number":3}],
+[{"number":5},{"color":"PURPLE","number":0},{"number":3},null,null],
+[null,{"number":2},{"color":"PURPLE","number":0},{"number":1},null],
+[null,{"number":1},{"number":5},{"color":"PURPLE","number":0},{"number":4}]],
+"name":"Firmitas"}

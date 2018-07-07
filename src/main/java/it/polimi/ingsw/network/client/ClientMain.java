@@ -3,12 +3,12 @@ package it.polimi.ingsw.network.client;
 import it.polimi.ingsw.network.client.gui.GuiMain;
 import javafx.application.Application;
 
-/***
+/**
  * Starts a client program based on a chosen interface
  */
 public class ClientMain {
 
-    /***
+    /**
      * Starts a CLI or GUI based interface of the client based on the parameters passed
      * @param args parameters passed when the program is launched
      */

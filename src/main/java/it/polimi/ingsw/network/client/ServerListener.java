@@ -18,6 +18,9 @@ import java.net.Socket;
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * Contains information and methods to always listen what the server sends to the client via socket
+ */
 public class ServerListener implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName() );
@@ -27,6 +30,14 @@ public class ServerListener implements Runnable {
     private boolean connected;
     private static Gson gson = new Gson();
 
+    /**
+     * Creates an object with a reference to notify the client about what the server sends
+     * Initialises parameters to read form socket
+     * @param client the client object use to notify what the server sends
+     * @param server the object used to reply to the server
+     * @param socket the object used to create what is needed to read from socket
+     * @throws IOException system exception
+     */
     ServerListener(Client client, ClientSocketHandler server, Socket socket) throws IOException {
         this.client = client;
         this.server = server;
@@ -35,6 +46,10 @@ public class ServerListener implements Runnable {
         ClientLogger.initLogger(LOGGER);
     }
 
+    /**
+     * Starts to always listens what the server sends via socket
+     * Notifies the client about what the server sends
+     */
     @Override
     public void run() {
 
@@ -151,6 +166,10 @@ public class ServerListener implements Runnable {
         }
     }
 
+    /**
+     * Reads what the server sends via socket
+     * @return what the server has sent via socket
+     */
     private String socketReadLine(){
         try {
             return input.readLine();
