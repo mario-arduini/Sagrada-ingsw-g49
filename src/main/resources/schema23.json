@@ -1,0 +1,6 @@
+{"difficulty":5,"constraint":[
+[{"color":"YELLOW","number":0},null,{"number":2},null,{"number":6}],
+[null,{"number":4},null,{"number":5},{"color":"YELLOW","number":0}],
+[null,null,null,{"color":"YELLOW","number":0},{"number":5}],
+[{"number":1},{"number":2},{"color":"YELLOW","number":0},{"number":3},null]],
+"name":"Comitas"}

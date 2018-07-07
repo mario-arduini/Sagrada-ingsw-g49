@@ -20,6 +20,10 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.*;
 
+/**
+ * Contains technical information about the state of client program
+ * Provides methods to communicates with the server and the other way around
+ */
 public class Client extends UnicastRemoteObject implements ClientInterface {
 
     private static final Logger LOGGER = Logger.getLogger( Client.class.getName() );
@@ -38,6 +42,11 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     private ClientSocketHandler socketHandler;
     private boolean reconnectionInsideToolCard;
 
+    /**
+     * Creates a new Client object and initialises some parameters like the graphic handler chosen
+     * @param handler the object that represents either the CLI or the GUI
+     * @throws RemoteException RMI exception
+     */
     public Client(GraphicInterface handler) throws RemoteException {
         ClientLogger.initLogger(LOGGER);
         this.gameSnapshot = new GameSnapshot();
@@ -47,22 +56,44 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         logged = true;
     }
 
+    /**
+     * Sets the IP address of the server for the connection
+     * @param serverAddress the server IP address
+     */
     public void setServerAddress(String serverAddress){
         this.serverAddress = serverAddress;
     }
 
+    /**
+     * Sets the port of the server for the connection
+     * @param serverPort the server port
+     */
     public void setServerPort(int serverPort){
         this.serverPort = serverPort;
     }
 
+    /**
+     * Sets Sets the object that represents either the CLI or the GUI based on what the user chose
+     * @param handler the object representing the type of graphic the user chose
+     */
     public void setHandler(GraphicInterface handler){
         this.handler = handler;
     }
 
+    /**
+     * Used to know if the connection with the server is active
+     * @return true if the connection with the server is active, false otherwise
+     */
     boolean getServerConnected(){
         return serverConnected;
     }
 
+    /**
+     * Sends to the server a request to log in the user
+     * @param nickname the name chosen by the user
+     * @param password the password chosen by the user
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     */
     public void login(String nickname, String password) throws ServerReconnectedException{
         gameSnapshot.setPlayer(nickname);
         this.password  = password;
@@ -80,12 +111,21 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
+    /**
+     * Tries to reconnect to the server, if the connection went down, with the information already provided by the user
+     * @return true if the reconnection was successful, false otherwise
+     */
     private boolean tryReconnection(){
         if(serverInterface == null)
             return createConnection(ConnectionType.SOCKET);
         return createConnection(ConnectionType.RMI);
     }
 
+    /**
+     * Tries to connect to the server with the information provided by the user
+     * @param connectionType the type of connection (RMI or socket) the user chose
+     * @return true if the connection was successful, false otherwise
+     */
     public boolean createConnection(ConnectionType connectionType) {
         if(connectionType == ConnectionType.SOCKET) {
             try {
@@ -107,6 +147,13 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         return true;
     }
 
+    /**
+     * Sends to the server a request to place a dice in a specific cell
+     * @param diceNumber the dice chosen by the user to place in the window
+     * @param row the row of the cell chosen by the user
+     * @param column the column of the cell chosen by the user
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     */
     public void placeDice(int diceNumber, int row, int column) throws ServerReconnectedException{
         try {
             server.placeDice(row - 1, column - 1, gameSnapshot.getDraftPool().get(diceNumber - 1));
@@ -118,6 +165,11 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
+    /**
+     * Sends to the server a request to use a specific tool card
+     * @param name the name of the tool card chosen by the user
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     */
     public void useToolCard(String name) throws ServerReconnectedException{
         AtomicReference<Boolean> reconnection = new AtomicReference<>(false);
         new Thread(()->{
@@ -138,6 +190,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             throw new ServerReconnectedException();
     }
 
+    /**
+     * Tells the server that the user decided to log out from the game
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     */
     public void logout() throws ServerReconnectedException{
         logged = false;
         if(serverConnected) {
@@ -149,11 +205,19 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
+    /**
+     * Verifies if the user cannot do anymore moves in a specific turn and if so, it passes automatically
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     */
     public void verifyEndTurn() throws ServerReconnectedException{
         if(gameSnapshot.getPlayer().isDiceAlreadyExtracted() && gameSnapshot.getPlayer().isToolCardAlreadyUsed())
             pass();
     }
 
+    /**
+     * Tells the server that the user passes his turn
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     */
     public void pass() throws ServerReconnectedException{
         try {
             server.pass();
@@ -165,11 +229,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
 
-
-
-
-
-
+    /**
+     * Adds to the waiting room a list of nicknames of new players and notifies the user
+     * @param nicknames the nicknames of the new players in the waiting room
+     */
     @Override
     public void notifyLogin(List<String> nicknames){
         //setServerResult(true);
@@ -178,12 +241,20 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         handler.printWaitingRoom();
     }
 
+    /**
+     * Adds to the waiting room the nickname of a new players and notifies the user
+     * @param nickname the nickname of the new player in the waiting room
+     */
     @Override
     public void notifyLogin(String nickname){
         gameSnapshot.addOtherPlayer(nickname);
         handler.printWaitingRoom();
     }
 
+    /**
+     * Removes from the waiting room a nickname of a player and notifies the user
+     * @param nickname the nickname of the player to remove from the waiting room
+     */
     @Override
     public void notifyLogout(String nickname){
         if(!gameStarted) {
@@ -192,6 +263,11 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
+    /**
+     * Sends to the server the number of the schema the user chose
+     * @param choice the number of the schema the user chose
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     */
     public void sendSchemaChoice(int choice) throws ServerReconnectedException{
         try {
             server.chooseSchema(choice);
@@ -202,12 +278,20 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
+    /**
+     * Notifies the possible schemas the user can choose from
+     * @param schemas the schemas the user can choose from
+     */
     @Override
     public void notifySchemas(List<Schema> schemas){
         handler.printSchemaChoice(gameSnapshot, schemas);
         setServerResult(true);
     }
 
+    /**
+     * Notifies to the user the schemas chosen from the other users in the game
+     * @param playersSchemas the users with their chosen schemas
+     */
     @Override
     public void notifyOthersSchemas(Map<String, Schema> playersSchemas){
         gameStarted = true;
@@ -220,6 +304,13 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         setServerResult(true);
     }
 
+    /**
+     * Notifies that a new turn or round has begun to the user and sets all the new parameters of the new round/turn
+     * @param currentPlayer the user who is now playing
+     * @param draftPool the current content of the draft pool
+     * @param newRound indicates if a new round started
+     * @param roundTrack if a new round started contains the new round track
+     */
     @Override
     public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack){
         gameSnapshot.getPlayer().setMyTurn(currentPlayer.equals(gameSnapshot.getPlayer().getNickname()));
@@ -237,6 +328,13 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             reconnectionInsideToolCard = false;
     }
 
+    /**
+     * Notifies to the user that a specif user placed a dice and where it has been placed and updates his window
+     * @param nickname the users who placed the dice
+     * @param row the row of the cell where the dice was placed
+     * @param column the column of the cell where the dice was placed
+     * @param dice the dice that has been placed
+     */
     @Override
     public void notifyDicePlaced(String nickname, int row, int column, Dice dice){
         gameSnapshot.getDraftPool().remove(dice);
@@ -249,6 +347,14 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         handler.printMenu(gameSnapshot);
     }
 
+    /**
+     * Notifies to the user that a specif user used a tool card and updates some parameters about that tool card and that user
+     * @param player the users who used the tool card
+     * @param toolCard the tool card used by the user
+     * @param window the new window of that user
+     * @param draftPool the current draft pool
+     * @param roundTrack the current round track
+     */
     @Override
     public void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack){
         Optional<PlayerSnapshot> playerSnapshot = gameSnapshot.findPlayer(player);
@@ -276,6 +382,12 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
+    /**
+     * Sets some information about the game, like the tool cards, the public goals, and the private goal of the user
+     * @param toolCards the tool cards of this game
+     * @param publicGoals the public goals of this game
+     * @param privateGoal the private goal of the user
+     */
     @Override
     public void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal){
         List<ToolCard> toolCardsClass = new ArrayList<>();
@@ -287,6 +399,13 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         gameSnapshot.getPlayer().setPrivateGoal(privateGoal);
     }
 
+    /**
+     * Sets some information about a game, which is already started, after a reconnection
+     * @param windows contains every users of the game with their window
+     * @param favorToken contains every users of the game with their favour token
+     * @param roundTrack the current round track of the game
+     * @param cardName the name of the tool card if the connection went down during its use
+     */
     @Override
     public void notifyReconInfo(Map<String, Window> windows, Map<String, Integer> favorToken, List<Dice> roundTrack, String cardName){
         PlayerSnapshot playerSnapshot;
@@ -308,6 +427,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         setServerResult(true);
     }
 
+    /**
+     * Notifies the user that the game is finished and notifies the scores
+     * @param scores a list of users with their score
+     */
     @Override
     public void notifyEndGame(List<Score> scores){
         if(gameStarted) {
@@ -316,6 +439,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
+    /**
+     * Notifies the user that a certain user has been suspended
+     * @param nickname the user suspended
+     */
     @Override
     public void notifySuspension(String nickname){
         gameSnapshot.findPlayer(nickname).ifPresent(PlayerSnapshot::suspend);
@@ -324,16 +451,28 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         handler.wakeUp(false);
     }
 
+    /**
+     * Shows to the users a specif dice
+     * @param dice the dice to be shown
+     */
     @Override
     public void showDice(Dice dice){
         handler.printDice(dice);
     }
 
+    /**
+     * Notifies the user that a dice has been inserted into the draft pool
+     * @param dice the dice inserted into the draft pool
+     */
     @Override
     public void alertDiceInDraftPool(Dice dice){
         handler.alertDiceInDraftPool(dice);
     }
 
+    /**
+     * Asks the server to start a new game
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     */
     public void newGame() throws ServerReconnectedException{
         try {
             gameSnapshot.newGame();
@@ -344,9 +483,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
 
-
-
-
+    /**
+     * Asks the server to continue to use a tool card after a reconnection if the disconnection happened during the use of a tool card
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     */
     void continueToolCard() throws ServerReconnectedException{
         try {
             server.continueToolCard();
@@ -358,10 +498,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    void wakeUp(){
-        handler.wakeUp(true);
-    }
-
+    /**
+     * Notifies to the user that the connection with the server went down and try to reconnect with the server
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     */
     void serverDisconnected() throws ServerReconnectedException{
         if(logged) {
             serverConnected = false;
@@ -388,45 +528,100 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
+    /**
+     * Used to get the object that contains information about the state of the game
+     * @return the object represent the state of the game
+     */
     public GameSnapshot getGameSnapshot(){
         return gameSnapshot;
     }
 
+    /**
+     * Used to know if the game started
+     * @return true if the game has already started, false otherwise
+     */
     boolean isGameStarted() {
         return gameStarted;
     }
 
+    /**
+     * Notifies that the server has responded
+     * @param serverResult is true if everything went ok, false otherwise
+     */
     void setServerResult(boolean serverResult){
         handler.wakeUp(serverResult);
     }
 
     //region TOOLCARD
 
+    /** Asks the user if to increment or decrement the value of the dice
+     * Asks the user to choose
+     * @param prompt the code of the message to print to the user
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return true if user wants to the increment the value of the dice, false otherwise
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     @Override
     public boolean askIfPlus(String prompt, boolean rollback) throws RollbackException{
         return handler.askIfPlus(prompt, rollback);
     }
 
+    /**
+     * Asks the user to chose a dice from the draftpool
+     * @param prompt the code of the message to print to the user
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return the dice the user chose from the draft pool
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     @Override
     public Dice askDiceDraftPool(String prompt, boolean rollback) throws RollbackException{
         return handler.askDiceDraftPool(prompt, rollback);
     }
 
+    /**
+     * Asks the user to chose a dice from the round track
+     * @param prompt the code of the message to print to the user
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return the dice the user chose from the round track
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     @Override
     public int askDiceRoundTrack(String prompt, boolean rollback) throws RollbackException{
         return handler.askDiceRoundTrack(prompt, rollback);
     }
 
+    /**
+     * Asks the user to choose a free cell or a occupied one from the window based con the code message
+     * @param prompt the code of the message to print to the user
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return the cell form the windows chosen by the user
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     @Override
     public Coordinate askDiceWindow(String prompt, boolean rollback) throws RollbackException{
         return handler.askDiceWindow(prompt, rollback);
     }
 
+    /**
+     * Asks the user a value for a dice
+     * @param prompt the code of the message to print to the user
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return the value of the dice that the user decided
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     @Override
     public int askDiceValue(String prompt, boolean rollback) throws RollbackException{
         return handler.askDiceValue(prompt, rollback);
     }
 
+    /**
+     * Asks the user how many dice to move
+     * @param prompt the code of the message to print to the user
+     * @param n the maximum number of dice the user can decide to move
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return the numbre of dice the user decided to move
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     @Override
     public int askMoveNumber(String prompt, int n, boolean rollback) throws RollbackException{
        return handler.askMoveNumber(prompt, n, rollback);

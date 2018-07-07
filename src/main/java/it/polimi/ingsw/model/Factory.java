@@ -73,7 +73,7 @@ public class Factory {
 
     private Stack<Schema> loadSchemasFromFile(){
         Stack<Schema> schemas= new Stack<>();
-        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER, 22);
+        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER, 24);
         JsonParser parser = new JsonParser();
         JsonObject jsonObject;
         Gson gson = new Gson();
