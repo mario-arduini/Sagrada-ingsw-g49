@@ -43,6 +43,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         this.handler = handler;
         gameStarted = false;
         reconnectionInsideToolCard = false;
+        logged = true;
     }
 
     public void setServerAddress(String serverAddress){
@@ -83,10 +84,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             return createConnection(ConnectionType.SOCKET);
         return createConnection(ConnectionType.RMI);
     }
-
-//    void setLogged(){
-//        this.logged = true;
-//    }
 
     public boolean createConnection(ConnectionType connectionType) {
         if(connectionType == ConnectionType.SOCKET) {
@@ -204,13 +201,13 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
 
     @Override
     public void notifySchemas(List<Schema> schemas){
-        gameStarted = true;
         handler.printSchemaChoice(gameSnapshot, schemas);
         setServerResult(true);
     }
 
     @Override
     public void notifyOthersSchemas(Map<String, Schema> playersSchemas){
+        gameStarted = true;
         for (Map.Entry<String, Schema> entry : playersSchemas.entrySet()) {
             if(!entry.getKey().equals(gameSnapshot.getPlayer().getNickname()))
                 gameSnapshot.findPlayer(entry.getKey()).ifPresent(playerSnapshot -> playerSnapshot.setWindow(entry.getValue()));
@@ -303,7 +300,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
         gameSnapshot.setRoundTrack(roundTrack);
         handler.setToolCardNotCompleted(cardName);
-        reconnectionInsideToolCard = true;
+        reconnectionInsideToolCard = !cardName.equals("");
         gameStarted = true;
         setServerResult(true);
     }
@@ -359,24 +356,26 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     void serverDisconnected() throws ServerReconnectedException{
-        serverConnected = false;
-        handler.notifyServerDisconnected();
-        //logged = false;
+        if(logged) {
+            serverConnected = false;
+            handler.notifyServerDisconnected();
 
-        int i = 0;
-        while (i < 2){
-            if(tryReconnection()) {
-                login(gameSnapshot.getPlayer().getNickname(), password);
-                throw new ServerReconnectedException();
+            int i = 0;
+            while (i < 2) {
+                if (tryReconnection()) {
+                    if(password != null)
+                        login(gameSnapshot.getPlayer().getNickname(), password);
+                    throw new ServerReconnectedException();
+                }
+                try {
+                    TimeUnit.SECONDS.sleep(10);
+                    i++;
+                } catch (InterruptedException e) {
+                    LOGGER.warning(e.toString());
+                }
             }
-            try {
-                TimeUnit.SECONDS.sleep(2);
-                i++;
-            } catch (InterruptedException e) {
-                LOGGER.warning(e.toString());
-            }
+            System.exit(0);
         }
-        System.exit(0);
     }
 
     public GameSnapshot getGameSnapshot(){

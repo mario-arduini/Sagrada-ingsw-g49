@@ -11,9 +11,7 @@
 //import it.polimi.ingsw.utilities.FilesUtil;
 //import org.junit.jupiter.api.Test;
 //
-//import java.io.File;
-//import java.io.FileNotFoundException;
-//import java.io.FileReader;
+//import java.io.*;
 //import java.rmi.RemoteException;
 //import java.util.ArrayList;
 //import java.util.HashMap;
@@ -205,24 +203,26 @@
 //        players.add(new Player("lucas", "bWFsYW5kcmlubwo="));
 //        players.add(new Player("jhonny", "Z3VhbnRvbmUK" ));
 //
-//        List<File> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER);
+//        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER, 22);
 //        JsonParser parser = new JsonParser();
 //        JsonObject jsonObject;
 //        Gson gson = new Gson();
 //
-//        File file = null;
-//        for(File f : files){
-//            if(f.getName().equals(schema+".json")){
-//                file = f; break;
-//            }
-//        }
+//        BufferedReader file = null;
+//        if(schema < files.size())
+//            file = files.get(schema - 1);
+//        else
+//            assertTrue(false);
+////        for(File f : files){
+////            if(f.getName().equals(schema+".json")){
+////                file = f; break;
+////            }
+////        }
 //
 //        try {
-//            jsonObject = parser.parse(new FileReader(file)).getAsJsonObject();
+//            jsonObject = parser.parse(file).getAsJsonObject();
 //            players.get(0).setWindow(gson.fromJson(jsonObject, Schema.class));
 //            players.get(1).setWindow(gson.fromJson(jsonObject, Schema.class));
-//        } catch (FileNotFoundException e) {
-//            assertTrue(false);
 //        } catch (WindowAlreadySetException e) {
 //            assertTrue(false);
 //        }
@@ -237,8 +237,8 @@
 //    }
 //
 //    public ToolCard getToolCard(String name){
-//        List<File> files = FilesUtil.listFiles(FilesUtil.TOOL_CARD_FOLDER);
-//        File file = null;
+//        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.TOOL_CARD_FOLDER, 12);
+//        BufferedReader file = null;
 //
 //        for(File f : files){
 //            if(f.getName().equals(name)){

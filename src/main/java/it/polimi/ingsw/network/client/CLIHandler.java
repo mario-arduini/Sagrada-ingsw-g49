@@ -95,10 +95,8 @@ class CLIHandler implements GraphicInterface{
             }
 
             waitLock2 = true;
-            if(waitResult(lock2)) {
-                //client.setLogged();
+            if(waitResult(lock2))
                 ok = true;
-            }
             else
                 ClientLogger.println("Login failed, password is not correct\n");
         }
@@ -111,6 +109,7 @@ class CLIHandler implements GraphicInterface{
                 else
                     newGame = false;
             } catch (ServerReconnectedException e) {
+                waitResult(lock2);
                 LOGGER.info(e.toString());
             }
         }
