@@ -487,7 +487,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
      * Asks the server to continue to use a tool card after a reconnection if the disconnection happened during the use of a tool card
      * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
      */
-    void continueToolCard() throws ServerReconnectedException{
+    public void continueToolCard() throws ServerReconnectedException{
         try {
             server.continueToolCard();
         } catch (GameNotStartedException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException | PlayerSuspendedException e) {
