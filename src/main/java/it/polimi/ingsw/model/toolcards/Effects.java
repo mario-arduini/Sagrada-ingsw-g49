@@ -14,13 +14,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-final class Effects {
+public final class Effects {
 
     private Effects(){
         super();
     }
 
-    static void getDraftedDice(Round round, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
+    public static void getDraftedDice(Round round, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         boolean valid = false;
         Dice dice = null;
         String prompt = "choose-drafted";
@@ -40,7 +40,7 @@ final class Effects {
         round.setDiceExtracted(true);
     }
 
-    static boolean addDiceToWindow(Window window, Dice dice, ClientInterface connection, Window.RuleIgnored ignore, boolean rollback) throws RollbackException, DisconnectionException {
+    public static boolean addDiceToWindow(Window window, Dice dice, ClientInterface connection, Window.RuleIgnored ignore, boolean rollback) throws RollbackException, DisconnectionException {
         if(window.possiblePlaces(dice, ignore)==0) return false;
 
         boolean valid = false;
@@ -232,7 +232,7 @@ final class Effects {
         }
     }
 
-    static void move(Window currentPlayerWindow,Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
+    public static void move(Window currentPlayerWindow,Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         try {
             if(optional && !connection.askIfPlus("want-move", rollback)) return;
         } catch (RemoteException e) {
@@ -386,7 +386,7 @@ final class Effects {
         return removedDice;
     }
 
-    static void changeValue(Dice dice, ClientInterface connection) throws DisconnectionException{
+    public static void changeValue(Dice dice, ClientInterface connection) throws DisconnectionException{
         dice.roll();
         try {
             connection.showDice(dice);
@@ -395,7 +395,7 @@ final class Effects {
         }
     }
 
-    static void changeValue(Dice dice, int value, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
+    public static void changeValue(Dice dice, int value, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         String message = "ask-plus";
         boolean valid=false;
         while (!valid){
@@ -429,7 +429,7 @@ final class Effects {
         }
     }
 
-    static void flip(Dice dice, ClientInterface connection) throws DisconnectionException{
+    public static void flip(Dice dice, ClientInterface connection) throws DisconnectionException{
         try {
             dice.setValue(7-dice.getValue());
             connection.showDice(dice);
@@ -440,7 +440,7 @@ final class Effects {
         }
     }
 
-    static void rerollPool(List<Dice> dices){
+    public static void rerollPool(List<Dice> dices){
         Random random = new Random();
         dices.forEach(d -> {
             try {
@@ -451,7 +451,7 @@ final class Effects {
         });
     }
 
-    static void swapRoundTrack(Round round,List<Dice> roundTrack, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
+    public static void swapRoundTrack(Round round,List<Dice> roundTrack, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         boolean valid = false;
         int position=0;
         String prompt = "choose-round-swap";
@@ -477,7 +477,7 @@ final class Effects {
         round.getDraftPool().add(round.getCurrentDiceDrafted());
     }
 
-    static void setDiceFromBag(Round round, Dice dice, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
+    public static void setDiceFromBag(Round round, Dice dice, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         int value = 0; //TODO: remove this init
         boolean valid = false;
         String prompt = "choose-value";
