@@ -29,7 +29,6 @@ class CLIHandler implements GraphicInterface{
     private String inputResult;
     private Thread thread;
     private CLIListener cliListener;
-    private boolean waitLock1;
     private Object lock1;
     private boolean waitLock2;
     private Object lock2;
@@ -45,7 +44,6 @@ class CLIHandler implements GraphicInterface{
         flagContinueInput = false;
         toolCardNotCompleted = "";
         lock1 = new Object();
-        waitLock1 = false;
         lock2 = new Object();
         waitLock2 = false;
         lockInput = new Object();
@@ -197,7 +195,6 @@ class CLIHandler implements GraphicInterface{
     private void completeToolCard() throws ServerReconnectedException{
         ClientLogger.println("\nUsing the tool card " + toolCardNotCompleted + "\n");
         client.continueToolCard();
-        waitLock1 = true;
         waitResult(lock1);
     }
 
@@ -381,7 +378,6 @@ class CLIHandler implements GraphicInterface{
 
         flagContinue = false;
         client.useToolCard(client.getGameSnapshot().getToolCards().get(choice - 1).getName());
-        waitLock1 = true;
         if (!waitResult(lock1)) {
             printGame(client.getGameSnapshot());
             ClientLogger.println("\nYou can't use this card now");
@@ -788,7 +784,6 @@ class CLIHandler implements GraphicInterface{
             else
                 synchronized (lock1) {
                     lock1.notifyAll();
-                    waitLock1 = false;
                 }
     }
 

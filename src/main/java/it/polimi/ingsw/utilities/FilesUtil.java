@@ -1,48 +1,57 @@
 package it.polimi.ingsw.utilities;
 
-import it.polimi.ingsw.model.Game;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
- * Contains some methods to list files and folders from a directory
+ * Contains some methods to get a single file or to list files and folders from a directory
  */
 public class FilesUtil {
-    /**
-     * Returns a list of all the files under a directory
-     *
-     * @param directoryName to be listed
+
+    /***
+     * Private constructor because this class contains static methods only
      */
-    public static final String SCHEMA_FOLDER = "schemas";
-    public static final String TOOLCARD_FOLDER = "toolcards";
+    private FilesUtil(){
+    }
+
+    public static final String SCHEMA_FOLDER = "schema";
+    public static final String TOOL_CARD_FOLDER = "toolcard";
     public static final String LOG_FOLDER = "log";
-    public static final String LANGUAGES_FOLDER = "languages";
 
-    public static List<File> listFiles(String directoryName) {
+    /***
+     * Creates a list of all the files with a same radix under a directory
+     * @param radixName relative path with the radix the files have to have to be considered
+     * @param number the number of files with the given radix
+     * @return the list with the files from the directory
+     */
+    public static List<BufferedReader> listFiles(String radixName, int number) {
 
-        InputStream inputStream = FilesUtil.class.getClassLoader().getResourceAsStream(directoryName);
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-
-        System.out.println(new File(".").getAbsolutePath());
-
-
-        File directory = new File(FilesUtil.class.getClassLoader().getResource(directoryName).getPath());
-        //get all the files from a directory
-        File[] fList = directory.listFiles();
-        List<File> fileList = new ArrayList<>();
-
-        if (fList == null) return fileList;
-
-        for (File file : fList) {
-            if (file.isFile()) {
-                fileList.add(file);
-            }
+        List<BufferedReader> files = new ArrayList<>();
+        String s;
+        for(int i = 1; i <= number; i++) {
+            if(i == 7 && radixName.equals(SCHEMA_FOLDER))
+                i = 13;
+            s = radixName + i + ".json";
+            files.add(new BufferedReader(new InputStreamReader(FilesUtil.class.getClassLoader().getResourceAsStream(s))));
         }
-        return fileList;
+        return files;
+    }
+
+    /***
+     * Gets a file from a given directory
+     * @param dir the directory where the file required is in
+     * @param fileName the name of the file required
+     * @return the file required
+     */
+    public static File fileToWrite(String dir, String fileName) {
+
+        try {
+            Files.createDirectory(Paths.get(new File(dir).getAbsolutePath()));
+            Files.createFile(Paths.get(new File(dir + "/" + fileName).getAbsolutePath()));
+        } catch (IOException e) {
+        }
+         return new File(new File(dir + "/" + fileName).getAbsolutePath());
     }
 }

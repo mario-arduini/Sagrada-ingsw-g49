@@ -12,9 +12,7 @@ import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
 import it.polimi.ingsw.utilities.FilesUtil;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -203,25 +201,17 @@ public class EffectTest {
         players.add(new Player("lucas", "bWFsYW5kcmlubwo="));
         players.add(new Player("jhonny", "Z3VhbnRvbmUK"));
 
-        List<File> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER);
         JsonParser parser = new JsonParser();
         JsonObject jsonObject;
         Gson gson = new Gson();
 
-        File file = null;
-        for (File f : files) {
-            if (f.getName().equals(schema + ".json")) {
-                file = f;
-                break;
-            }
-        }
+        BufferedReader is;
+        is = new BufferedReader(new InputStreamReader(FilesUtil.class.getClassLoader().getResourceAsStream("schema"+schema+".json")));
 
         try {
-            jsonObject = parser.parse(new FileReader(file)).getAsJsonObject();
+            jsonObject = parser.parse(is).getAsJsonObject();
             players.get(0).setWindow(gson.fromJson(jsonObject, Schema.class));
             players.get(1).setWindow(gson.fromJson(jsonObject, Schema.class));
-        } catch (FileNotFoundException e) {
-            assertTrue(false);
         } catch (WindowAlreadySetException e) {
             assertTrue(false);
         }
