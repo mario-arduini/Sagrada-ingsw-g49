@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.client.gui;
 
+import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.network.client.Client;
 import it.polimi.ingsw.network.client.GraphicInterface;
@@ -112,9 +113,12 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     private boolean askedBool;
     private String tmpStyle;
     private int toolcardInUse;
+    private boolean backed;
 
     private static final Pattern PATTERN = Pattern.compile(
             "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
+    private boolean alertDiceUnplacable;
+    private DicePane activeDice;
 
     public GUIHandler() throws RemoteException {
         super();
@@ -501,7 +505,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 for(int i = 0;i<favorTokens;i++){
                     Circle c = new Circle(roundTrack.heightProperty().get()*0.15);
                     c.setFill(Paint.valueOf("white"));
-                    c.setStyle("-fx-border-color: black; -fx-border-width:1; -fx-border-style:solid;");
+                    c.setStroke(Paint.valueOf("black"));
                     c.radiusProperty().bind(roundTrack.heightProperty().multiply(0.15));
                     favToken.getChildren().add(c);
                 }
@@ -555,6 +559,11 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                     info.setText(MessageHandler.get("info-not-turn"));
                 }
 
+                if(alertDiceUnplacable){
+                    info.setText(MessageHandler.get("info-unplaceable-dice"));
+                    alertDiceUnplacable = false;
+                }
+
             });
         }
     }
@@ -603,8 +612,10 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     }
 
     @Override
-    public boolean askIfPlus(String prompt, boolean rollback) {
+    public boolean askIfPlus(String prompt, boolean rollback) throws RollbackException {
         Platform.runLater(()->{
+
+            addRollback(rollback);
 
             ButtonType plus = new ButtonType("+", ButtonBar.ButtonData.YES);
             ButtonType minus = new ButtonType("-", ButtonBar.ButtonData.NO);
@@ -630,14 +641,19 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             e.printStackTrace();
         }
 
+        if(rollback&&backed) throw new RollbackException();
+
         System.out.println("Returning "+askedCoordinate);
         return askedBool;
     }
 
     @Override
-    public Dice askDiceDraftPool(String prompt, boolean rollback) {
+    public Dice askDiceDraftPool(String prompt, boolean rollback) throws RollbackException {
 
         Platform.runLater(()->{
+
+            addRollback(rollback);
+
             info.setText(MessageHandler.get(prompt));
             draftPool.setStyle("-fx-border-color:red; -fx-border-width:3; -fx-border-style:dashed;");
             draftPool.getChildren().forEach(child -> {
@@ -667,13 +683,18 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             e.printStackTrace();
         }
 
+        if(rollback&&backed) throw new RollbackException();
+
         System.out.println("Returning "+askedDraft);
         return askedDraft;
     }
 
     @Override
-    public int askDiceRoundTrack(String prompt, boolean rollback) {
+    public int askDiceRoundTrack(String prompt, boolean rollback) throws RollbackException {
         Platform.runLater(()->{
+
+            addRollback(rollback);
+
             info.setText(MessageHandler.get(prompt));
             roundTrack.setStyle("-fx-border-color:red; -fx-border-width:3; -fx-border-style:dashed;");
             roundTrack.getChildren().forEach(child -> {
@@ -697,14 +718,19 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             e.printStackTrace();
         }
 
+        if(rollback&&backed) throw new RollbackException();
+
         System.out.println("Returning "+askedNumber);
         return askedNumber;
     }
 
     @Override
-    public Coordinate askDiceWindow(String prompt, boolean rollback) {
+    public Coordinate askDiceWindow(String prompt, boolean rollback) throws RollbackException {
 
         Platform.runLater(()->{
+
+            addRollback(rollback);
+
             info.setText(MessageHandler.get(prompt));
             tmpStyle = playerGrid.getStyle();
             playerGrid.setStyle(tmpStyle + "-fx-border-color:red; -fx-border-width:3; -fx-border-style:dashed;");
@@ -731,6 +757,8 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        if(rollback&&backed) throw new RollbackException();
 
         System.out.println("Returning "+askedCoordinate);
         return askedCoordinate;
@@ -773,6 +801,8 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                     askedNumber = 6;
                 } else choose = false;
             }
+
+            activeDice.valueLabel.setText(askedNumber+"");
 
             synchronized (this) {
                 this.notify();
@@ -846,6 +876,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public void printDice(Dice dice){
         Platform.runLater(() -> {
             DicePane dp = new DicePane(dice);
+            activeDice = dp;
             dp.bindDimension(draftPool.heightProperty());
             dp.setStyle(dp.getStyle() + "-fx-border-color:red; -fx-border-style:dashed;");
             draftPool.getChildren().add(dp);
@@ -874,7 +905,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public void alertDiceInDraftPool(Dice dice){
-
+        alertDiceUnplacable = true;
     }
 
     @Override
@@ -882,9 +913,27 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     }
 
+    private void addRollback(boolean rollback){
+        backed = false;
+        if(rollback){
+            Button rollbackButton = new Button("Rollback Toolcard");
+            rollbackButton.setOnAction(event -> {
+                backed = true;
+                toolBox.getChildren().remove(rollbackButton);
+                synchronized (this) {
+                    System.out.println(this.getClass());
+                    this.notifyAll();
+                }
+                printGame(client.getGameSnapshot());
+                printMenu(client.getGameSnapshot());
+            });
+            toolBox.getChildren().add(rollbackButton);
+        }
+    }
+
     public void handleLogin(boolean serverResult){
         Platform.runLater(() -> {
-            if(serverResult){
+            if(serverResult&&gameScene==null){
                 setWaitingRoom();
                 Stage stage = (Stage) login.getScene().getWindow();
                 stage.setOnCloseRequest( event ->
@@ -972,7 +1021,8 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     private void removeFromDraftIfNecessary(DicePane dp){
         String toolName = client.getGameSnapshot().getToolCards().get(toolcardInUse).getName();
-        if(toolName.equals("Pennello per pasta salda")||toolName.equals("Diluente per pasta salda")||toolName.equals("Pinza sgrossatrice")){
+        if(toolName.equals("Pennello per pasta salda")||toolName.equals("Diluente per pasta salda")||toolName.equals("Pinza Sgrossatrice")
+                ||toolName.equals("Tampone Diamantato")){
             draftPool.getChildren().remove(dp);
         }
     }

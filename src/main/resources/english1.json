@@ -7,6 +7,7 @@
   "info-tool-used":"Good idea, why not also place a dice?",
   "info-dice-bad":"You crazy!? Dice can't go there",
   "info-tool-fail": "You can't use that toolcard now",
+  "info-unplaceable-dice":"Unlucky guy, dice could not be placed so is back in draft pool",
   "alert-dice": "Dice cannot be placed and goes to draft pool.",
 
   "ask-plus-invalid":"Cannot choose this option, select either [+] or [-]?: ",
