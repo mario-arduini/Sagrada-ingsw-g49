@@ -22,9 +22,11 @@ public class DicePane extends StackPane {
         super();
         if(dice.getColor()!=null)this.setStyle("-fx-border-color: black; -fx-border-width: 3; -fx-border-style: solid; -fx-border-radius:15; -fx-background-radius:15; -fx-background-color: "+GuiMain.getColor(dice.getColor())+";");
         this.dice = dice;
-        this.valueLabel = new Label(dice.getValue()!=0 ? dice.getValue().toString() : "?");
-        this.valueLabel.setStyle("-fx-text-fill: white;");
-        this.getChildren().add(valueLabel);
+        if(dice.getValue()!=0){
+            this.valueLabel = new Label(dice.getValue().toString());
+            this.valueLabel.setStyle("-fx-text-fill: white;");
+            this.getChildren().add(valueLabel);
+        }
         this.idx = 0;
     }
 
@@ -32,9 +34,11 @@ public class DicePane extends StackPane {
         super();
         if(dice.getColor()!=null)this.setStyle("-fx-border-color: black; -fx-border-width: 3; -fx-border-style: solid; -fx-border-radius:15; -fx-background-radius:15; -fx-background-color: "+GuiMain.getColor(dice.getColor())+";");
         this.dice = dice;
-        this.valueLabel = new Label(dice.getValue()!=0 ? dice.getValue().toString() : "?");
-        this.valueLabel.setStyle("-fx-text-fill: white;");
-        this.getChildren().add(valueLabel);
+        if(dice.getValue()!=0){
+            this.valueLabel = new Label(dice.getValue().toString());
+            this.valueLabel.setStyle("-fx-text-fill: white;");
+            this.getChildren().add(valueLabel);
+        }
         this.idx = idx;
     }
 
@@ -47,8 +51,10 @@ public class DicePane extends StackPane {
         this.maxWidthProperty().bind(this.maxHeightProperty());
         this.prefHeightProperty().bind(this.maxHeightProperty());
         this.prefWidthProperty().bind(this.prefHeightProperty());
-        valueLabel.scaleXProperty().bind(Bindings.min(this.heightProperty(),this.widthProperty()).multiply(.04));
-        valueLabel.scaleYProperty().bind(valueLabel.scaleXProperty());
+        if(valueLabel!=null){
+            valueLabel.scaleXProperty().bind(Bindings.min(this.heightProperty(),this.widthProperty()).multiply(.04));
+            valueLabel.scaleYProperty().bind(valueLabel.scaleXProperty());
+        }
     }
 
     public void setDraggable(){

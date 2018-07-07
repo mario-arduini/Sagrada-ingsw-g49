@@ -15,6 +15,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -24,6 +25,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -39,6 +42,9 @@ import java.util.regex.Pattern;
 
 public class GUIHandler extends UnicastRemoteObject implements GraphicInterface {
 
+    public HBox topDisplay;
+    public Label nameLabel;
+    public HBox favToken;
     @FXML private VBox scoresBox;
     @FXML private HBox roundTrack;
     @FXML private FlowPane toolBox;
@@ -264,6 +270,8 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         tabPane.maxHeightProperty().bind(tabPane.widthProperty().multiply(.55));
         draftPool.setSpacing(draftPool.getHeight()*0.1);
         draftPool.spacingProperty().bind(draftPool.heightProperty().multiply(0.1));
+        roundTrack.setSpacing(roundTrack.getHeight()*0.1);
+        roundTrack.spacingProperty().bind(roundTrack.heightProperty().multiply(0.1));
 
         gameStarted = true;
     }
@@ -320,13 +328,20 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         playerGrid.initProperty();
         playerGrid.setSchema(client.getGameSnapshot().getPlayer().getWindow().getSchema());
         playerGrid.passController(this);
-        gameScene.add(playerGrid,1,1);
+        gameScene.add(playerGrid,1,2);
 
         otherPlayerGrids = new ArrayList<>();
 
-        info.prefWidthProperty().bind(toolBox.widthProperty());
+        info.setAlignment(Pos.CENTER);
         info.setStyle("-fx-border-width : 5; -fx-border-color: black; -fx-border-style:solid;");
         info.setText(MessageHandler.get("info-welcome"));
+
+        nameLabel.setText(client.getGameSnapshot().getPlayer().getNickname());
+        DicePane dp = new DicePane(new Dice(getColorFromGoal(client.getGameSnapshot().getPlayer().getPrivateGoal())));
+        dp.bindDimension(roundTrack.heightProperty());
+        topDisplay.getChildren().add(dp);
+
+
 
         int i = 0;
         for(PlayerSnapshot player : client.getGameSnapshot().getOtherPlayers()){
@@ -348,6 +363,17 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
         printGame(client.getGameSnapshot());
         printMenu(client.getGameSnapshot());
+    }
+
+    public it.polimi.ingsw.model.Color getColorFromGoal(String privateGoal){
+        switch (privateGoal){
+            case "Shades of Red": return it.polimi.ingsw.model.Color.RED;
+            case "Shades of Yellow": return it.polimi.ingsw.model.Color.YELLOW;
+            case "Shades of Green": return it.polimi.ingsw.model.Color.GREEN;
+            case "Shades of Blue": return it.polimi.ingsw.model.Color.BLUE;
+            case "Shades of Purple": return it.polimi.ingsw.model.Color.PURPLE;
+            default: return it.polimi.ingsw.model.Color.RED;
+        }
     }
 
     public void tryConnect(ActionEvent actionEvent) {
@@ -470,6 +496,16 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                     roundTrack.getChildren().add(dp);
                 }
 
+                favToken.getChildren().clear();
+                int favorTokens = client.getGameSnapshot().getPlayer().getFavorToken();
+                for(int i = 0;i<favorTokens;i++){
+                    Circle c = new Circle(roundTrack.heightProperty().get()*0.15);
+                    c.setFill(Paint.valueOf("white"));
+                    c.setStyle("-fx-border-color: black; -fx-border-width:1; -fx-border-style:solid;");
+                    c.radiusProperty().bind(roundTrack.heightProperty().multiply(0.15));
+                    favToken.getChildren().add(c);
+                }
+
                 playerGrid.updateWindow(client.getGameSnapshot().getPlayer().getWindow());
                 for(int i=0;i<otherPlayerGrids.size();i++){
                     otherPlayerGrids.get(i).updateWindow(client.getGameSnapshot().getOtherPlayers().get(i).getWindow());
@@ -510,6 +546,11 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                     if(toolUsed) info.setText(MessageHandler.get("info-tool-used"));
                     else if(dicePlaced) info.setText(MessageHandler.get("info-dice-placed"));
                     else info.setText(MessageHandler.get("info-your-turn"));
+                    try {
+                       client.verifyEndTurn();
+                    } catch (ServerReconnectedException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     info.setText(MessageHandler.get("info-not-turn"));
                 }
@@ -520,7 +561,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     @Override
     public void notifyUsedToolCard(String player, String toolCard) {
-
+        usingToolcard = false;
     }
 
     @Override
@@ -760,6 +801,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             List<ButtonType> buttonNumbers = new ArrayList<>();
 
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.getButtonTypes().clear();
             alert.setTitle("How many to move");
             alert.setHeaderText(MessageHandler.get(prompt));
 
@@ -825,6 +867,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 tool1.setDisable(false);
                 tool2.setDisable(false);
                 tool3.setDisable(false);
+                usingToolcard = false;
             });
         }
     }

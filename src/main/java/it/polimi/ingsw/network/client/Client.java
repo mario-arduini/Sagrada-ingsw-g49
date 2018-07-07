@@ -149,7 +149,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    void verifyEndTurn() throws ServerReconnectedException{
+    public void verifyEndTurn() throws ServerReconnectedException{
         if(gameSnapshot.getPlayer().isDiceAlreadyExtracted() && gameSnapshot.getPlayer().isToolCardAlreadyUsed())
             pass();
     }
