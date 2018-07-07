@@ -219,5 +219,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-
+log/
 # End of https://www.gitignore.io/api/java,maven,macos,linux,sonar,windows,intellij,sonarqube,intellij+all
