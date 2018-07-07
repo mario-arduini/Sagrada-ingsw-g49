@@ -8,7 +8,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-/***
+/**
  * Contains some methods to print on the CLI and write a file
  */
 class ClientLogger {
@@ -17,12 +17,12 @@ class ClientLogger {
     private static final String ANSI_HOME = "\u001b[H";
     private static FileHandler fh;
 
-    /***
+    /**
      * Private constructor because this class contains static methods only
      */
     private ClientLogger(){}
 
-    /***
+    /**
      * Prints something on the CLI without a new line at the end
      * @param message the message to print
      */
@@ -31,7 +31,7 @@ class ClientLogger {
         System.out.flush();
     }
 
-    /***
+    /**
      * Clears and prints something on the CLI without a new line at the end
      * @param message the message to print
      */
@@ -41,7 +41,7 @@ class ClientLogger {
         System.out.flush();
     }
 
-    /***
+    /**
      * Prints something on the CLI with a new line at the end
      * @param message the message to print
      */
@@ -50,7 +50,7 @@ class ClientLogger {
         System.out.flush();
     }
 
-    /***
+    /**
      * Clears and prints something on the CLI with a new line at the end
      * @param message the message to print
      */
@@ -60,7 +60,7 @@ class ClientLogger {
         System.out.flush();
     }
 
-    /***
+    /**
      * Initialises a logger so it can be used to write into a file
      * @param logger the logger to be initialised
      */
@@ -69,7 +69,7 @@ class ClientLogger {
         logger.addHandler(fh);
     }
 
-    /***
+    /**
      * Gets the references to the file where the logs will be written
      * @param name the name of file where the logs will be written
      */

@@ -555,7 +555,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     //region TOOLCARD
 
     /** Asks the user if to increment or decrement the value of the dice
-     * Asks the user to choose
      * @param prompt the code of the message to print to the user
      * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
      * @return true if user wants to the increment the value of the dice, false otherwise
@@ -567,7 +566,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     /**
-     * Asks the user to chose a dice from the draftpool
+     * Asks the user to chose a dice from the draft pool
      * @param prompt the code of the message to print to the user
      * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
      * @return the dice the user chose from the draft pool
@@ -619,7 +618,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
      * @param prompt the code of the message to print to the user
      * @param n the maximum number of dice the user can decide to move
      * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
-     * @return the numbre of dice the user decided to move
+     * @return the number of dice the user decided to move
      * @throws RollbackException if the users doesn't want to use the tool card anymore
      */
     @Override

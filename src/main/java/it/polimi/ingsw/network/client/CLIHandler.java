@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Logger;
 
+/**
+ * Handles all the interaction between the user and the CLI
+ * Contains methods to print and get information from the CLI
+ */
 class CLIHandler implements GraphicInterface{
 
     private static final int WINDOW_WIDTH = 27;
@@ -32,9 +36,12 @@ class CLIHandler implements GraphicInterface{
     private Object lock1;
     private boolean waitLock2;
     private Object lock2;
-
     private Object lockInput;
 
+    /**
+     * Creats a new objiect that handles the interaction between the user and the CLI
+     * Start a new thread that always listens what the user writes on the CLI
+     */
     CLIHandler() {
         ClientLogger.initLogger(LOGGER);
         flagContinue = false;
@@ -59,6 +66,10 @@ class CLIHandler implements GraphicInterface{
         thread.start();
     }
 
+    /**
+     * Aks some technical information to the user to connect to the server and to log in into the game
+     * While the user wants to play it creates new games
+     */
     synchronized void start() {
         int command;
         boolean ok = false;
@@ -119,6 +130,11 @@ class CLIHandler implements GraphicInterface{
         thread.interrupt();
     }
 
+    /**
+     * Handles the flow of a single game of the user
+     * @return true if the users wants to play a new game, false otherwise
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     */
     private boolean play() throws ServerReconnectedException{
         boolean logout = false;
         int command;
@@ -193,12 +209,20 @@ class CLIHandler implements GraphicInterface{
         return logout;
     }
 
+    /**
+     * Lets the users complete the use of a tool card already begun before a disconnection
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     */
     private void completeToolCard() throws ServerReconnectedException{
         ClientLogger.println("\nUsing the tool card " + toolCardNotCompleted + "\n");
         client.continueToolCard();
         waitResult(lock1);
     }
 
+    /**
+     * Asks the user if he wants to play a new game or log out
+     * @return true if the users wants to play a new game, false otherwise
+     */
     private boolean askNewGame(){
         boolean ok = true;
         ClientLogger.print("\nChoose an option:\n0) Logout\n1) New game\nYour choice: ");
@@ -219,6 +243,10 @@ class CLIHandler implements GraphicInterface{
         return false;
     }
 
+    /**
+     * Asks the users to insert the IP address of the server
+     * @return the IP address of the server
+     */
     private String askServerAddress(){
 
         String address = "";
@@ -234,11 +262,19 @@ class CLIHandler implements GraphicInterface{
         return  address;
     }
 
+    /**
+     * Asks the users to insert the port of the server
+     * @return the port of the server
+     */
     private int askServerPort(){
         ClientLogger.print("Insert server port: ");
         return readInt(1000, 65535);
     }
 
+    /**
+     * Asks the users to insert the type of connection (RMI or socket) to use with the server
+     * @return the type of connection to use with the server the server
+     */
     private Client.ConnectionType askConnectionType(){
         ClientLogger.printlnWithClear("Connection types:");
         ClientLogger.println("0) Socket");
@@ -250,6 +286,10 @@ class CLIHandler implements GraphicInterface{
         return Client.ConnectionType.SOCKET;
     }
 
+    /**
+     * Asks which nickname to use to the user
+     * @return the nickname chosen by the user
+     */
     private String askNickname(){
         String nickname = "user";
         boolean ok = false;
@@ -265,6 +305,10 @@ class CLIHandler implements GraphicInterface{
         return nickname;
     }
 
+    /**
+     * Asks which password to use to the user
+     * @return the password chosen by the user
+     */
     private String askPassword(){
         String password = null;
         boolean ok = false;
@@ -281,14 +325,27 @@ class CLIHandler implements GraphicInterface{
         return password;
     }
 
+    /**
+     * Checks if the nickname chosen by the user meets some requirements
+     * @param user the nickname to check
+     * @return true if the nickname meets the requirements, false otherwise
+     */
     private boolean checkNicknameProperties(String user){
         return user != null && !user.equals("");
     }
 
+    /**
+     * Checks if the password chosen by the user meets some requirements
+     * @param password the password to check
+     * @return true if the password meets the requirements, false otherwise
+     */
     private boolean checkPasswordProperties(String password){
         return password != null && !password.equals("") && password.length() >= 4;
     }
 
+    /**
+     * Prints on the CLI the nicknames of the users currently waiting for a game to start
+     */
     @Override
     public void printWaitingRoom(){
         ClientLogger.printlnWithClear("Waiting for game to start");
@@ -297,6 +354,12 @@ class CLIHandler implements GraphicInterface{
         client.getGameSnapshot().getOtherPlayers().forEach(nick -> ClientLogger.println(nick.getNickname()));
     }
 
+    /**
+     * Prints the public goals, the tool cards, the private goal
+     * Prints the schemas the user can chose from
+     * @param gameSnapshot
+     * @param schemas the schemas the user can chose from
+     */
     @Override
     public void printSchemaChoice(GameSnapshot gameSnapshot, List<Schema> schemas){
         ClientLogger.printlnWithClear("GAME STARTED!\n");
@@ -305,6 +368,12 @@ class CLIHandler implements GraphicInterface{
     }
 
 
+    /**
+     * Asks which dice to place and a cell where to place it to the user
+     * Asks the client to execute the move and waits for the result from the server, notifying the user
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     * @throws InputInterruptedException if the waiting for an input from the CLI was interrupted
+     */
     private void placeDice() throws ServerReconnectedException, InputInterruptedException{
         if(client.getGameSnapshot().getPlayer().isMyTurn()){
             int dice = -1;
@@ -346,6 +415,12 @@ class CLIHandler implements GraphicInterface{
             ClientLogger.println("Not your turn! You can only logout");
     }
 
+    /**
+     * Asks which tool card to use to the user
+     * Asks the client to execute the move and waits for the result from the server, notifying the user
+     * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
+     * @throws InputInterruptedException if the waiting for an input from the CLI was interrupted
+     */
     private void useToolCard() throws ServerReconnectedException, InputInterruptedException{
         if (client.getGameSnapshot().getPlayer().getFavorToken() < 1) {
             ClientLogger.print("Not enough favor token!\n\nRetry: ");
@@ -395,6 +470,11 @@ class CLIHandler implements GraphicInterface{
         }
     }
 
+    /**
+     * Waits that the server respond to an action of the user
+     * @param lock the object to lock on
+     * @return true if the action of the user was successful, false otherwise
+     */
     private boolean waitResult(Object lock){
         while (!flagContinue) {
             waiting = true;
@@ -411,6 +491,10 @@ class CLIHandler implements GraphicInterface{
         return serverResult;
     }
 
+    /**
+     * Waits that the user inserts something on the CLI
+     * @return what the user has written on the CLI
+     */
     private String waitInput(){
         while (!flagContinueInput) {
             waitingInput = true;
@@ -427,6 +511,12 @@ class CLIHandler implements GraphicInterface{
         return inputResult;
     }
 
+    /**
+     * Reads an integer between a minimum and a maximum number from the CLI
+     * @param minValue the minimum value accepted
+     * @param maxValue the maximum value accepted
+     * @return the value that the user inserted
+     */
     private int readInt(int minValue, int maxValue){
         int value = -1;
         boolean ask = true;
@@ -451,6 +541,10 @@ class CLIHandler implements GraphicInterface{
         return value;
     }
 
+    /**
+     * Prints a menu with same choice for the user based on the current situation of the turn
+     * @param gameSnapshot
+     */
     @Override
     public void printMenu(GameSnapshot gameSnapshot){
         if(gameSnapshot.getPlayer().isMyTurn()) {
@@ -470,7 +564,9 @@ class CLIHandler implements GraphicInterface{
     }
 
 
-
+    /**
+     * Notifies the user that the connection with the server went down
+     */
     @Override
     public void notifyServerDisconnected(){
         ClientLogger.printlnWithClear("Server disconnected, trying to reconnect");
@@ -478,11 +574,22 @@ class CLIHandler implements GraphicInterface{
 
     //region TOOLCARD
 
+    /**
+     * Notifies that a user used a certain tool card
+     * @param player the user who used the tool card
+     * @param toolCard the tool card used
+     */
     @Override
     public void notifyUsedToolCard(String player, String toolCard){
         ClientLogger.println("\n" + player + " used the tool card " + toolCard);
     }
 
+    /** Asks the user if to increment or decrement the value of the dice
+     * @param prompt the code of the message to print to the user
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return true if user wants to the increment the value of the dice, false otherwise
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     @Override
     public boolean askIfPlus(String prompt, boolean rollback) throws RollbackException{
         String choice = "";
@@ -500,6 +607,13 @@ class CLIHandler implements GraphicInterface{
         return choice.equalsIgnoreCase("+");
     }
 
+    /**
+     * Asks the user to chose a dice from the draft pool
+     * @param prompt the code of the message to print to the user
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return the dice the user chose from the draft pool
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     @Override
     public Dice askDiceDraftPool(String prompt, boolean rollback) throws RollbackException{
         int startingValue;
@@ -515,6 +629,13 @@ class CLIHandler implements GraphicInterface{
         return client.getGameSnapshot().getDraftPool().get(i - 1);
     }
 
+    /**
+     * Asks the user to chose a dice from the round track
+     * @param prompt the code of the message to print to the user
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return the dice the user chose from the round track
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     @Override
     public int askDiceRoundTrack(String prompt, boolean rollback) throws RollbackException{
         int startingValue;
@@ -531,12 +652,26 @@ class CLIHandler implements GraphicInterface{
         return i - 1;
     }
 
+    /**
+     * Asks the user to choose a free cell or a occupied one from the window based con the code message
+     * @param prompt the code of the message to print to the user
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return the cell form the windows chosen by the user
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     @Override
     public Coordinate askDiceWindow(String prompt, boolean rollback) throws RollbackException {
         ClientLogger.println(MessageHandler.get(prompt));
         return getPosition(rollback);
     }
 
+    /**
+     * Asks the user a value for a dice
+     * @param prompt the code of the message to print to the user
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return the value of the dice that the user decided
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     @Override
     public int askDiceValue(String prompt, boolean rollback) throws RollbackException{
         int startingValue;
@@ -552,12 +687,24 @@ class CLIHandler implements GraphicInterface{
         return i;
     }
 
+    /**
+     * Notifies the user that a dice has been inserted into the draft pool
+     * @param dice the dice inserted into the draft pool
+     */
     @Override
     public void alertDiceInDraftPool(Dice dice){
         ClientLogger.println(MessageHandler.get("alert-dice"));
         printDice(dice);
     }
 
+    /**
+     * Asks the user how many dice to move
+     * @param prompt the code of the message to print to the user
+     * @param n the maximum number of dice the user can decide to move
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return the number of dice the user decided to move
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     @Override
     public int askMoveNumber(String prompt, int n, boolean rollback) throws RollbackException{
         int startingValue;
@@ -573,6 +720,12 @@ class CLIHandler implements GraphicInterface{
         return i;
     }
 
+    /**
+     * Asks the user to choose a row and a column of a cell on the window
+     * @param rollback true if the use can decide not to use the tool card anymore, false otherwise
+     * @return the coordinate of the cell the user chose
+     * @throws RollbackException if the users doesn't want to use the tool card anymore
+     */
     private Coordinate getPosition(boolean rollback) throws RollbackException{
         int startingValue;
         if (rollback)
@@ -591,18 +744,39 @@ class CLIHandler implements GraphicInterface{
         return new Coordinate(row, column);
     }
 
+    /**
+     * Prints to the users a specif dice
+     * @param dice the dice to print
+     */
+    @Override
+    public void printDice(Dice dice){
+        ClientLogger.println("Dice: " + dice);
+    }
+
     //endregion
 
+    /**
+     * Sets the name of the tool card that the use had already begun before a disconnection
+     * @param toolCard the name of the tool card
+     */
     public void setToolCardNotCompleted(String toolCard){
         this.toolCardNotCompleted = toolCard;
     }
 
+    /**
+     * Prints the public goals, the tool cards and the private goal on the CLI
+     * @param gameSnapshot
+     */
     private static void printFooter(GameSnapshot gameSnapshot){
         printPublicGoals(gameSnapshot.getPublicGoals());
         printPrivateGoal(gameSnapshot.getPlayer().getPrivateGoal());
         printToolCards(gameSnapshot.getToolCards());
     }
 
+    /**
+     * Prints on the CLI the schemas that the user can choose from to play
+     * @param schemas the schemas the user can choose from
+     */
     private static void printSchemas(List<Schema> schemas){
         final String CLI_SCHEMA_ROW = "---------------------    ---------------------";
         ClientLogger.println("\nSCHEMA CHOICE");
@@ -624,6 +798,10 @@ class CLIHandler implements GraphicInterface{
         }
     }
 
+    /**
+     * Prints all the information a the game that the user is currently playing, with the information about the other users
+     * @param gameSnapshot
+     */
     @Override
     public void printGame(GameSnapshot gameSnapshot){
         final String CLI_21_DASH = "---------------------";
@@ -686,6 +864,11 @@ class CLIHandler implements GraphicInterface{
         printFooter(gameSnapshot);
     }
 
+    /**
+     * Prints a single row of a user's window on the CLI
+     * @param currentWindow the windows whose row is printed
+     * @param row the index of the row to print
+     */
     private static void printSchemaRow(Window currentWindow, int row) {
         Constraint constraint;
         for(int column = 0; column< COLUMNS; column++){
@@ -699,6 +882,10 @@ class CLIHandler implements GraphicInterface{
         }
     }
 
+    /**
+     * Prints all the users that are playing the game
+     * @param gameSnapshot
+     */
     private static void printPlayers(GameSnapshot gameSnapshot){
         PlayerSnapshot p = gameSnapshot.getPlayer();
         List<PlayerSnapshot> otherPlayers = gameSnapshot.getOtherPlayers();
@@ -716,24 +903,32 @@ class CLIHandler implements GraphicInterface{
 
     }
 
-    private static void printPlayer(PlayerSnapshot p){
+    /**
+     * Prints the information of a user playing the game
+     * @param playerSnapshot the player whose information are printed
+     */
+    private static void printPlayer(PlayerSnapshot playerSnapshot){
         int i;
         int whiteSpaceHalf;
         int whiteSpaceNum;
 
-        whiteSpaceNum = WINDOW_WIDTH - p.getNickname().length() - (p.isSuspended() ? 4 : 0) - 1 - p.getWindow().getSchema().getDifficulty();
+        whiteSpaceNum = WINDOW_WIDTH - playerSnapshot.getNickname().length() - (playerSnapshot.isSuspended() ? 4 : 0) - 1 - playerSnapshot.getWindow().getSchema().getDifficulty();
         whiteSpaceHalf = whiteSpaceNum/2;
 
         for(i=0;i<whiteSpaceHalf;i++) ClientLogger.print(" ");
 
-        ClientLogger.print(p.getNickname()+ (p.isSuspended() ? " (S) " : " "));
-        for(i=0;i<p.getFavorToken();i++) ClientLogger.print("\u25CF");
-        for(;i<p.getWindow().getSchema().getDifficulty();i++) ClientLogger.print("\u25CB");
+        ClientLogger.print(playerSnapshot.getNickname()+ (playerSnapshot.isSuspended() ? " (S) " : " "));
+        for(i=0;i<playerSnapshot.getFavorToken();i++) ClientLogger.print("\u25CF");
+        for(;i<playerSnapshot.getWindow().getSchema().getDifficulty();i++) ClientLogger.print("\u25CB");
 
         if(whiteSpaceNum%2 == 1) whiteSpaceHalf++;
         for(i=0;i<whiteSpaceHalf;i++) ClientLogger.print(" ");
     }
 
+    /**
+     * Prints the public goals of the current game
+     * @param publicGoals the list of the names of the public goals to print
+     */
     private static void printPublicGoals(List<String> publicGoals){
         StringBuilder names = new StringBuilder();
         for(String name : publicGoals)
@@ -742,10 +937,18 @@ class CLIHandler implements GraphicInterface{
         ClientLogger.println("PUBLIC GOAL:" + names + "\n");
     }
 
+    /**
+     * Prints the private goal of the user
+     * @param privateGoal the private goal to print
+     */
     private static void printPrivateGoal(String privateGoal){
         ClientLogger.println("PRIVATE GOAL: " + privateGoal);
     }
 
+    /**
+     * Prints the tool cards of the current game
+     * @param toolCards the list of the names of the tool cards to print
+     */
     private static void printToolCards(List<ToolCard> toolCards){
         int i = 0;
         ClientLogger.println("\nTOOL CARDS");
@@ -756,11 +959,18 @@ class CLIHandler implements GraphicInterface{
         }
     }
 
+    /**
+     * Interrupts the wait of a read on the CLI
+     */
     @Override
     public void interruptInput(){
         wakeUpInput(null);
     }
 
+    /**
+     * Prints that the game if finished and prints the ranking with users and their score
+     * @param scores the list with the users and their score
+     */
     @Override
     public void gameOver(List<Score> scores){
         ClientLogger.printlnWithClear("GAME FINISHED\n");
@@ -774,6 +984,10 @@ class CLIHandler implements GraphicInterface{
         wakeUp(true);
     }
 
+    /**
+     * Notifies that the server has responded to an action of the user and sets the result of the action
+     * @param serverResult the result of the action
+     */
     @Override
     public void wakeUp(boolean serverResult){
         this.serverResult = serverResult;
@@ -791,6 +1005,10 @@ class CLIHandler implements GraphicInterface{
                 }
     }
 
+    /**
+     * Notifies that the user has inserted something on the CLI and sets what the user wrote
+     * @param inputResult what the user inserted on the CLI
+     */
     void wakeUpInput(String inputResult){
         if(waitingInput) {
             this.inputResult = inputResult;
@@ -799,10 +1017,5 @@ class CLIHandler implements GraphicInterface{
                 lockInput.notifyAll();
             }
         }
-    }
-
-    @Override
-    public void printDice(Dice dice){
-        ClientLogger.println("Dice: " + dice);
     }
 }
