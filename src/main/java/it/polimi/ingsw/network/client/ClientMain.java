@@ -3,9 +3,15 @@ package it.polimi.ingsw.network.client;
 import it.polimi.ingsw.network.client.gui.GuiMain;
 import javafx.application.Application;
 
-import java.rmi.RemoteException;
-
+/***
+ * Starts a client program based on a chosen interface
+ */
 public class ClientMain {
+
+    /***
+     * Starts a CLI or GUI based interface of the client based on the parameters passed
+     * @param args parameters passed when the program is launched
+     */
     public static void main(String[] args) {
         final String ERROR = "usage:  sagrada  -g  [cli | gui]";
 
@@ -13,7 +19,7 @@ public class ClientMain {
             ClientLogger.println(ERROR);
             return;
         }
-        ClientLogger.LogToFile();
+        ClientLogger.LogToFile("clientLog.log");
 
         if(args[0].equalsIgnoreCase("-g")) {
             switch (args[1].toLowerCase()) {

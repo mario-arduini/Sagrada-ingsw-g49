@@ -4,19 +4,13 @@ package it.polimi.ingsw.model;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
-import it.polimi.ingsw.controller.exceptions.ToolcardAlreadyUsedException;
 import it.polimi.ingsw.model.exceptions.InvalidDiceValueException;
 import it.polimi.ingsw.model.exceptions.OutOfCardsException;
 import it.polimi.ingsw.model.goalcards.*;
 import it.polimi.ingsw.model.toolcards.*;
-import it.polimi.ingsw.network.server.Logger;
 import it.polimi.ingsw.utilities.FilesUtil;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
 
 public class Factory {
@@ -32,7 +26,7 @@ public class Factory {
 
     public Factory() {
         this.toolCards = new Stack<>();
-        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.TOOLCARD_FOLDER, 12);
+        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.TOOL_CARD_FOLDER, 12);
         for (BufferedReader file:files){
             //if (file.getName().matches("[a-zA-Z0-9_-]+\\.json"))
                 toolCards.push(file);
