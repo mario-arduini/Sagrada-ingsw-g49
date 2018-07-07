@@ -16,6 +16,7 @@ class FirstJUnitTest{
         ShadesSetTest shadesSetTest = new ShadesSetTest();
         VarietyTest varietyTest = new VarietyTest();
         WindowTest windowTest = new WindowTest();
+        EffectTest effectTest = new EffectTest();
 
         new DiceTest();
         new ConstraintTest();
@@ -53,5 +54,12 @@ class FirstJUnitTest{
 
         windowTest.tesAddDice();
         windowTest.testWindowCostructor();
+
+        effectTest.addDiceToWindowTest();
+        effectTest.flipTest();
+        effectTest.getDraftedDiceTest();
+        effectTest.rerollPoolTest();
+        effectTest.swapRoundTrackTest();
+        effectTest.setDiceFromBag();
     }
 }
