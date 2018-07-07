@@ -8,7 +8,7 @@ import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.toolcards.Effects;
-import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
+import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
 import it.polimi.ingsw.utilities.FilesUtil;
 import org.junit.jupiter.api.Test;
 

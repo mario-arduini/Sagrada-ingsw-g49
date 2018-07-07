@@ -5,8 +5,8 @@ import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
-import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
-import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
+import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
+import it.polimi.ingsw.network.RmiInterfaces.FlowHandlerInterface;
 import it.polimi.ingsw.network.server.Logger;
 
 import java.rmi.RemoteException;
@@ -14,18 +14,29 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A GameFlowHandler handles the course of the game.
+ * It is possible to create a GameFlowHandler and update its connection in order to keep alive the game status of a player.
+ */
 public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerInterface{
-    private Player player;
-    private GameRoom gameRoom;
-    private GamesHandler gamesHandler;
-    private List<Schema> initialSchemas = null;
+    private transient Player player;
+    private transient GameRoom gameRoom;
+    private transient GamesHandler gamesHandler;
+    private transient List<Schema> initialSchemas = null;
     private ToolCard activeToolCard;
     private ClientInterface connection;
     private boolean toolCardUsed;
-    private Timer timer;
+    private transient Timer timer;
     private int secondsTimerSchema = 1000000; //TODO: read value from file.
 
-    public GameFlowHandler(GamesHandler gamesHandler, ClientInterface connection, Player player) throws RemoteException{
+    /**
+     * Creates a GameFlowHandler.
+     * @param gamesHandler the main handler for every game.
+     * @param connection connection associated to the player.
+     * @param player the player that is playing.
+     * @throws RemoteException on RMI problems.
+     */
+    GameFlowHandler(GamesHandler gamesHandler, ClientInterface connection, Player player) throws RemoteException{
         this.player = player;
         this.gameRoom = null;
         this.gamesHandler = gamesHandler;
@@ -42,6 +53,10 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         return this.connection;
     }
 
+    /**
+     * Set a game to the FlowHandler and starts procedures to notify the initial state of the game to the client.
+     * @param game Game associated to the flow.
+     */
     public void setGame(GameRoom game) {
         this.gameRoom = game;
         initialSchemas = game.extractSchemas();
@@ -50,62 +65,52 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         try {
             connection.notifyGameInfo(toolCards, publicGoals, player.getPrivateGoal().getName());
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Logger.print("Disconnection: " + player.getNickname() + e.getMessage());
         }
         try {
             connection.notifySchemas(initialSchemas);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Logger.print("Disconnection: " + player.getNickname() + e.getMessage());
         }
         startTimer();
     }
 
-    public void chooseSchema(Integer schemaNumber) throws GameNotStartedException, GameOverException, WindowAlreadySetException{
-        if (gameRoom == null) throw new GameNotStartedException();
-        if (gameRoom.isGameFinished()) throw new GameOverException();
-        if (timer != null)
-            timer.cancel();
-        player.setWindow(initialSchemas.get(schemaNumber));
-        checkGameReady();
-    }
-
-    public void placeDice(int row, int column, Dice dice) throws GameNotStartedException, GameOverException, ToolCardInUseException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException , DiceAlreadyHereException{
-        if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
-        if (gameRoom.isGameFinished()) throw new GameOverException();
-        if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
-        if (activeToolCard != null && !toolCardUsed) throw new ToolCardInUseException();
-
-        gameRoom.placeDice(row, column, dice);
-        gameRoom.notifyAllDicePlaced(player.getNickname(), row, column, dice);
-    }
-
-    public void pass() throws GameOverException, GameNotStartedException, NotYourTurnException{
-        if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
-        if (gameRoom.isGameFinished()) throw new GameOverException();
-        if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
-        this.activeToolCard = null;
-        this.toolCardUsed = false;
-        gameRoom.goOn();
-    }
-
+    /**
+     * Check if game is ready to start after choosing the schema.
+     */
     private void checkGameReady(){
         if (!gameRoom.isGameStarted()) return;
         gameRoom.gameReady();
     }
 
+    /**
+     * Handles disconnection in case the player is in a waiting room.
+     */
     public void disconnected(){
         if (gameRoom == null)
             gamesHandler.waitingRoomDisconnection(this);
     }
 
+    /**
+     * Returns a list containing the initial schemas to choose from.
+     * @return List of Schemas if game started, none otherwise.
+     */
     public List<Schema> getInitialSchemas(){
         return this.initialSchemas;
     }
 
+    /**
+     * Returns a list of player in the same lobby.
+     * @return List of Strings containing the name of each player in the lobby.
+     */
     public List<String> getPlayers(){
         return gameRoom == null ? gamesHandler.getWaitingPlayers() : gameRoom.getPlayersNick();
     }
 
+    /**
+     * Updates the connection to a new connection and bring the player to the state he left the game through a series of notify.
+     * @param connection new connection.
+     */
     public void reconnection(ClientInterface connection){
         gameRoom.replaceConnection(this.connection, connection);
         this.connection = connection;
@@ -122,11 +127,9 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         try {
             connection.notifyGameInfo(toolCards, publicGoals, player.getPrivateGoal().getName());
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Logger.print("Disconnection: " + player.getNickname() + e.getMessage());
         }
 
-        //Reconnection while using toolcard.
-        //TODO: maybe overload notifyRound..? Find better way? Will see it with RMI
         if (player.getWindow() != null) {
             String toolCardName = "";
             if (activeToolCard != null && !toolCardUsed)
@@ -134,12 +137,12 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
             try {
                 connection.notifyReconInfo(windows, favorToken, gameRoom.getRoundTrack(), toolCardName);
             } catch (RemoteException e) {
-                e.printStackTrace();
+                Logger.print("Disconnection: " + player.getNickname() + e.getMessage());
             }
             try {
                 connection.notifyRound(gameRoom.getCurrentRound().getCurrentPlayer().getNickname(), gameRoom.getCurrentRound().getDraftPool(), false, null);
             } catch (RemoteException e) {
-                e.printStackTrace();
+                Logger.print("Disconnection: " + player.getNickname() + e.getMessage());
             }
         }
         else
@@ -147,24 +150,87 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
                 connection.notifyLogin(gameRoom.getPlayersNick().stream().filter(name -> !name.equalsIgnoreCase(player.getNickname())).collect(Collectors.toList()));
                 connection.notifySchemas(initialSchemas);
             } catch (RemoteException e) {
-                e.printStackTrace();
+                Logger.print("Disconnection: " + player.getNickname() + e.getMessage());
             }
 
     }
 
+    /**
+     * Timer Class.
+     */
+    class TimerExpired extends TimerTask {
+        public void run() {
+            try {
+                player.setWindow(new Schema(0, new Constraint[4][5], "Empty Schema"));
+            } catch (WindowAlreadySetException | InvalidDifficultyValueException
+                    | UnexpectedMatrixSizeException e) {
+            }
+            logout();
+            try {
+                connection.notifyEndGame(new ArrayList<>());
+            } catch (RemoteException e) {
+                Logger.print("Disconnection: " + player.getNickname() + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Starts the timer for the schema choice.
+     * To be cancelled if player chooses a schema.
+     */
+    private void startTimer(){
+        timer = new Timer();
+        timer.schedule(new GameFlowHandler.TimerExpired(), (long) secondsTimerSchema * 1000);
+    }
+
+    @Override
+    public void chooseSchema(Integer schemaNumber) throws GameNotStartedException, GameOverException, WindowAlreadySetException{
+        if (gameRoom == null) throw new GameNotStartedException();
+        if (gameRoom.isGameFinished()) throw new GameOverException();
+        if (timer != null)
+            timer.cancel();
+        player.setWindow(initialSchemas.get(schemaNumber));
+        checkGameReady();
+    }
+
+    @Override
+    public void placeDice(int row, int column, Dice dice) throws GameNotStartedException, GameOverException, ToolCardInUseException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException , DiceAlreadyHereException{
+        if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
+        if (gameRoom.isGameFinished()) throw new GameOverException();
+        if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
+        if (activeToolCard != null && !toolCardUsed) throw new ToolCardInUseException();
+
+        gameRoom.placeDice(row, column, dice);
+        gameRoom.notifyAllDicePlaced(player.getNickname(), row, column, dice);
+    }
+
+    @Override
+    public void pass() throws GameOverException, GameNotStartedException, NotYourTurnException{
+        if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
+        if (gameRoom.isGameFinished()) throw new GameOverException();
+        if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
+        this.activeToolCard = null;
+        this.toolCardUsed = false;
+        gameRoom.goOn();
+    }
+
+    @Override
     public void logout() {
         gamesHandler.logout(this.player.getNickname());
         gameRoom.logout(player.getNickname(), connection);
     }
 
+    @Override
     public void newGame(){
         if (gameRoom != null && !gameRoom.isGameFinished())
             gameRoom.logout(player.getNickname(), connection);
         this.gameRoom = null;
+        this.initialSchemas = null;
         this.player = new Player(player);
         gamesHandler.goToWaitingRoom(this);
     }
 
+    @Override
     public void useToolCard(String cardName) throws GameNotStartedException,  GameOverException, ToolCardInUseException, NoSuchToolCardException, ToolcardAlreadyUsedException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException {
         if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
         if (gameRoom.isGameFinished()) throw new GameOverException();
@@ -198,6 +264,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         }
     }
 
+    @Override
     public void continueToolCard() throws GameNotStartedException,  GameOverException, NoSuchToolCardException, ToolcardAlreadyUsedException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException {
         if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
         if (gameRoom.isGameFinished()) throw new GameOverException();
@@ -224,26 +291,6 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
             throw e;
         }
 
-    }
-
-    class TimerExpired extends TimerTask {
-        public void run() {
-            try {
-                player.setWindow(new Schema(0, new Constraint[4][5], "Empty Schema"));
-            } catch (WindowAlreadySetException | InvalidDifficultyValueException
-                    | UnexpectedMatrixSizeException e) {
-            }
-            logout();
-            try {
-                connection.notifyEndGame(new ArrayList<Score>());
-            } catch (RemoteException e) {
-            }
-        }
-    }
-
-    private void startTimer(){
-        timer = new Timer();
-        timer.schedule(new GameFlowHandler.TimerExpired(), (long) secondsTimerSchema * 1000);
     }
 
 }

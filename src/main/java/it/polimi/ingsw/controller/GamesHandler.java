@@ -2,16 +2,20 @@ package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
-import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
+import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
 import java.io.*;
-import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A GamesHandler is a sort of a database of every game that is being played.
+ * It stores the status of the waiting room and keeps track of every user that is playing.
+ * Every login or reconnection is achieved via an object of this class.
+ */
 public class GamesHandler {
     private List<GameFlowHandler> waitingRoom;
     private List<GameFlowHandler> playingUsers;
@@ -27,6 +31,15 @@ public class GamesHandler {
         //TODO: Throw exception if file does not exist
     }
 
+    /**
+     * Logs a player in a waiting room or in an existing game in case he was playing.
+     * @param nickname name of the player that wants to login.
+     * @param password token session of the player that wants to login.
+     * @param connection connection of the player that wants to login.
+     * @return the new/old GameFlowHandler of the player that wanted to login.
+     * @throws LoginFailedException if player already exists with a different token.
+     * @throws RemoteException on RMI problems.
+     */
     public synchronized GameFlowHandler login(String nickname, String password, ClientInterface connection) throws LoginFailedException, RemoteException {
         Player user;
         GameFlowHandler newGameFlow;
@@ -41,15 +54,19 @@ public class GamesHandler {
             }
         });
         user = new Player(nickname, password);
-        //TODO: Have a look at this notify, socket vs RMI
         connection.notifyLogin(getWaitingPlayers());
-        Logger.print("Logged in: " + nickname); //+ " " + connection.getRemoteAddress());
+        Logger.print("Logged in: " + nickname);
         newGameFlow = new GameFlowHandler(this, connection, user);
         waitingRoom.add(newGameFlow);
         waitingRoomNewPlayer();
         return newGameFlow;
     }
 
+    /**
+     * Given the name of a player returns its GameFlowHandler.
+     * @param nickname of the desired player.
+     * @return Optional GameFlowHandler.
+     */
     private synchronized Optional<GameFlowHandler> findGameFlow(String nickname){
         List <GameFlowHandler> allGameFlows = new ArrayList<>();
         allGameFlows.addAll(this.waitingRoom);
@@ -57,6 +74,16 @@ public class GamesHandler {
         return allGameFlows.stream().filter(gameFlow -> gameFlow.getPlayer().getNickname().equalsIgnoreCase(nickname)).findFirst();
     }
 
+    /**
+     * Reconnect a player to its GameFlowHandler if the player already exists.
+     * Updates the connection of the GameFlowHandler.
+     * Checks the token session.
+     * @param nickname name of the player that wants to reconnect.
+     * @param password session token of the player that wants to reconnect
+     * @param connection new connection of the player that wants to reconnect
+     * @return the GameFlowHandler of the player that was reconnected to the game.
+     * @throws LoginFailedException if name-token does not match saved name-token.
+     */
     private synchronized GameFlowHandler reconnection(String nickname, String password, ClientInterface connection) throws LoginFailedException {
         Optional<GameFlowHandler> gameFlowFetched = findGameFlow(nickname);
         GameFlowHandler gameFlow;
@@ -72,6 +99,11 @@ public class GamesHandler {
         throw new LoginFailedException();
     }
 
+    /**
+     * Log out a player from a waiting room or from a game.
+     * Makes its nick available again.
+     * @param nickname name of the player that logged out.
+     */
     public synchronized void logout(String nickname){
         Optional<GameFlowHandler> gameFlowFetched = findGameFlow(nickname);
         GameFlowHandler gameFlow;
@@ -90,35 +122,17 @@ public class GamesHandler {
             } else {
                 playingUsers.remove(gameFlow);
             }
-            Logger.print("Logged out: " + gameFlow.getPlayer().getNickname()); //+ " " + gameFlow.getConnection().getRemoteAddress());
+            Logger.print("Logged out: " + gameFlow.getPlayer().getNickname());
         }else {
             Logger.print("Logout failed: " + nickname);
         }
     }
 
-    //TODO: move to utils (?)
-    private int readIntFromFile(String filename){
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(GamesHandler.class.getClassLoader().getResourceAsStream(filename)));
-            String text;
-
-            if ((text = reader.readLine()) != null)
-                return Integer.parseInt(text);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (reader != null)
-                    reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return -1;
-    }
-
+    /**
+     * Check if the game is ready to start.
+     * If there are >2 players a timer is set.
+     * If there are 4 player a game is started.
+     */
     private synchronized void waitingRoomNewPlayer(){
         if(waitingRoom.size() == 2) {
             timer = new Timer();
@@ -128,6 +142,11 @@ public class GamesHandler {
             startGame();
     }
 
+    /**
+     * Remove a player from the waiting room.
+     * Nickname is available again.
+     * @param gameFlow the GameFlowHandler of the player that is leaving the waiting room.
+     */
     public synchronized void waitingRoomDisconnection(GameFlowHandler gameFlow){
         waitingRoom.remove(gameFlow);
         waitingRoom.forEach(player -> {
@@ -142,6 +161,10 @@ public class GamesHandler {
         }
     }
 
+    /**
+     * Spawns a GameRoom and cleans the waiting room.
+     * Every GameFlowHandler gets a game set.
+     */
     private synchronized void startGame() {
         List<Player> playerList;
         List<ClientInterface> connections;
@@ -163,16 +186,27 @@ public class GamesHandler {
         }
     }
 
+    /**
+     * Returns a list of all the players in the waiting room.
+     * @return List of players nicknames.
+     */
     public synchronized List<String> getWaitingPlayers() {
         return waitingRoom.stream().map(GameFlowHandler::getPlayer).map(Player::getNickname).collect(Collectors.toList());
     }
 
+    /**
+     * Timer Class to start games with n. of players >2 && <4.
+     */
     class TimerExpired extends TimerTask {
         public void run() {
             startGame();
         }
     }
 
+    /**
+     * Puts a GameFlowHandler from a Game back to a Waiting Room.
+     * @param gameFlow the gameFlow that is leaving a game.
+     */
     public synchronized void goToWaitingRoom(GameFlowHandler gameFlow){
         if (waitingRoom.contains(gameFlow)) return;
         playingUsers.remove(gameFlow);
@@ -193,4 +227,27 @@ public class GamesHandler {
         waitingRoomNewPlayer();
     }
 
+
+    //TODO: move to utils (?)
+    private int readIntFromFile(String filename){
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(GamesHandler.class.getClassLoader().getResourceAsStream(filename)));
+            String text;
+
+            if ((text = reader.readLine()) != null)
+                return Integer.parseInt(text);
+
+        } catch (IOException e) {
+            Logger.print("Read Int From File: parsing " + e.getMessage());
+        } finally {
+            try {
+                if (reader != null)
+                    reader.close();
+            } catch (IOException e) {
+                Logger.print("Read Int From File: closing " + e.getMessage());
+            }
+        }
+        return -1;
+    }
 }

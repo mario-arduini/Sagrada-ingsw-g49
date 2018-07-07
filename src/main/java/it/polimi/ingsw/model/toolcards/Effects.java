@@ -4,14 +4,12 @@ import it.polimi.ingsw.controller.exceptions.DisconnectionException;
 import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
-import it.polimi.ingsw.network.client.Client;
+import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 public final class Effects {
@@ -126,8 +124,9 @@ public final class Effects {
                     prompt = "move-to-same";
                 else {
                     try {
-                        removedDice = diceList.remove(0);
+                        removedDice = diceList.get(0);
                         placeDice(currentPlayerWindow,removedDice, end.getRow(), end.getColumn(), ignored);
+                        diceList.remove(0);
                         prompt = "move-to";
                     }catch (NoAdjacentDiceException | BadAdjacentDiceException
                             | FirstDiceMisplacedException | ConstraintViolatedException | NotWantedAdjacentDiceException e) {

@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import it.polimi.ingsw.model.Coordinate;
 import it.polimi.ingsw.model.Dice;
-import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
+import it.polimi.ingsw.network.RmiInterfaces.FlowHandlerInterface;
 
 import java.io.IOException;
 import java.io.PrintWriter;

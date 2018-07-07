@@ -1,4 +1,4 @@
-package it.polimi.ingsw.network.RMIInterfaces;
+package it.polimi.ingsw.network.RmiInterfaces;
 
 import it.polimi.ingsw.controller.exceptions.DisconnectionException;
 import it.polimi.ingsw.controller.exceptions.RollbackException;
@@ -16,7 +16,6 @@ public interface ClientInterface extends Remote, Serializable {
     void notifyLogin(List<String> nicknames) throws RemoteException;
     void notifyLogout(String nickname) throws RemoteException;
     void notifySchemas(List<Schema> schemas) throws RemoteException;
-    //TODO: as in gameRoom, maybe overload..??
     void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack) throws RemoteException;
     void notifyOthersSchemas(Map<String, Schema> playersSchemas) throws RemoteException;
     void notifyDicePlaced(String nickname, int row, int column, Dice dice) throws RemoteException;
@@ -25,8 +24,6 @@ public interface ClientInterface extends Remote, Serializable {
     void notifyReconInfo(Map<String, Window> windows, Map<String, Integer> favorToken, List<Dice> roundTrack, String toolCardName) throws RemoteException;
     void notifyEndGame(List<Score> scores) throws RemoteException;
     void notifySuspension(String nickname) throws RemoteException;
-
-    //void close();
 
     Coordinate askDiceWindow(String prompt, boolean rollback) throws RemoteException, RollbackException, DisconnectionException;
     Dice askDiceDraftPool(String prompt, boolean rollback) throws RemoteException, RollbackException, DisconnectionException;

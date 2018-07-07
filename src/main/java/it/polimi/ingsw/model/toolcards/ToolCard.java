@@ -4,22 +4,16 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import it.polimi.ingsw.controller.GameFlowHandler;
-import it.polimi.ingsw.controller.GameRoom;
 import it.polimi.ingsw.controller.exceptions.DisconnectionException;
 import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
 import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
-import it.polimi.ingsw.network.client.Client;
+import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
 
 import java.io.Serializable;
-import java.rmi.RemoteException;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class ToolCard implements Serializable {
     private String cardName;
@@ -255,7 +249,7 @@ public class ToolCard implements Serializable {
         this.used = true;
     }
 
-    public void putDiceInDraftPool(ClientInterface connection) throws DisconnectionException{
+    private void putDiceInDraftPool(ClientInterface connection) throws DisconnectionException{
         game.getRound().getDraftPool().add(game.getRound().getCurrentDiceDrafted());
         game.getRound().setCurrentDiceDrafted(null);
         try {

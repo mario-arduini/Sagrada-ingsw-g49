@@ -146,6 +146,14 @@ public class Game {
         return trackIndex == 10 || players.stream().filter(p -> !p.isSuspended()).count()<2;
     }
 
+    public boolean isGameStarted(){
+        List<Player> inGamePlayers = getPlayers();
+        for (Player p: inGamePlayers)
+            if (p.getWindow()==null)
+                return false;
+        return true;
+    }
+
     //TODO: consider moving this method to GameRoom
     public void nextRound(){
         Round round = new Round(currentRound);

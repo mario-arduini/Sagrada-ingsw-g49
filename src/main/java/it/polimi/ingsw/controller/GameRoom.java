@@ -2,14 +2,17 @@ package it.polimi.ingsw.controller;
 
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
-import it.polimi.ingsw.model.toolcards.ToolCard;
-import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
+import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
 
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Extending the class Game, provides methods with control functions.
+ * A GameRoom controls the flow of a Game, providing means to a GameFlowHandler.
+ */
 public class GameRoom extends Game{
     private List<ClientInterface> connections;
     private boolean notifyEndGame;
@@ -23,74 +26,43 @@ public class GameRoom extends Game{
         this.notifyEndGame = true;
     }
 
+    /**
+     * Notify the usage of a tool card to each player of the game.
+     * @param nickname the name of the user that used the tool card.
+     * @param toolcard the name of the tool card used.
+     * @param window the new window of the player.
+     */
     synchronized void notifyAllToolCardUsed(String nickname, String toolcard, Window window){
         connections.forEach(user -> {
             try {
                 user.notifyToolCardUse(nickname, toolcard, window, getCurrentRound().getDraftPool(), getRoundTrack());
             } catch (RemoteException e) {
-                Logger.print(e.toString());
+                Logger.print("Disconnection RMI on notify " + e.getMessage());
             }
         });
     }
 
+    /**
+     * Notify the usage of a dice to each player of the game.
+     * @param nickname the name of the user that placed the dice.
+     * @param row the row where the dice has been placed.
+     * @param column the column where the dice has been placed.
+     * @param dice the dice that has been placed.
+     */
     synchronized void notifyAllDicePlaced(String nickname, int row, int column, Dice dice){
         connections.forEach(user -> {
             try {
                 user.notifyDicePlaced(nickname, row, column, dice);
             } catch (RemoteException e) {
-                Logger.print(e.toString());
+                Logger.print("Disconnection RMI on notify " + e.getMessage());
             }
         });
     }
 
-    synchronized void goOn(){
-        if (timer != null)
-            timer.cancel();
-        boolean newRound = false;
-        try {
-            getCurrentRound().nextPlayer();
-        } catch (NoMorePlayersException e) {
-            nextRound();
-            newRound = true;
-        }
-        if (!checkGameFinished() && isGameStarted()) {
-            notifyRound(newRound);
-            startTimer();
-        }
-    }
-
-    boolean isGameStarted(){
-        List<Player> inGamePlayers = getPlayers();
-        for (Player p: inGamePlayers)
-            if (p.getWindow()==null)
-                return false;
-        return true;
-    }
-
-    private synchronized boolean checkGameFinished(){
-        if (!isGameFinished()) return false;
-        if (notifyEndGame){
-            List<Score> scoresList = isGameStarted() ? computeFinalScores() : new ArrayList<>();
-
-            //if player is alone, return only his score
-            if(getPlayers().stream().filter(p -> !p.isSuspended()).count() == 1)
-                scoresList = scoresList.stream().filter(score -> score.getPlayer().equalsIgnoreCase(getPlayers().stream().filter(p -> !p.isSuspended()).findFirst().get().getNickname())).collect(Collectors.toList());
-
-            final List<Score> scores = scoresList;
-            connections.forEach(user -> {
-                try {
-                    user.notifyEndGame(scores);
-                } catch (RemoteException e) {
-                    Logger.print(e.toString());
-                }
-            });
-
-            notifyEndGame = false;
-            Logger.print("Game Over: " + getPlayers().stream().map(Player::getNickname).collect(Collectors.toList()));
-        }
-        return true;
-    }
-
+    /**
+     * Notify the usage of a dice to each player of the game.
+     * @param newRound true if the round is a new round, false if it's just a turn.
+     */
     private void notifyRound(boolean newRound){
         String firstPlayer = getCurrentRound().getCurrentPlayer().getNickname();
         List<Dice> draftPool = getCurrentRound().getDraftPool();
@@ -105,11 +77,60 @@ public class GameRoom extends Game{
             try {
                 user.notifyRound(firstPlayer, draftPool, newRound, roundTrack);
             } catch (RemoteException e) {
-                Logger.print(e.toString());
+                Logger.print("Disconnection RMI on notify " + e.getMessage());
             }
         });
     }
 
+    /**
+     * Method used to go on with the game after the game is ready.
+     * Cancels timers and gets info about the next turn/round.
+     * Check if game is finished.
+     */
+    synchronized void goOn(){
+        if (timer != null)
+            timer.cancel();
+        boolean newRound = false;
+        try {
+            getCurrentRound().nextPlayer();
+        } catch (NoMorePlayersException e) {
+            nextRound();
+            newRound = true;
+        }
+        if (!checkGameFinished() && super.isGameStarted()) {
+            notifyRound(newRound);
+            startTimer();
+        }
+    }
+
+    private synchronized boolean checkGameFinished(){
+        if (!isGameFinished()) return false;
+        if (notifyEndGame){
+            List<Score> scoresList = super.isGameStarted() ? computeFinalScores() : new ArrayList<>();
+
+            //if player is alone, return only his score
+            if(getPlayers().stream().filter(p -> !p.isSuspended()).count() == 1)
+                scoresList = scoresList.stream().filter(score -> score.getPlayer().equalsIgnoreCase(getPlayers().stream().filter(p -> !p.isSuspended()).findFirst().get().getNickname())).collect(Collectors.toList());
+
+            final List<Score> scores = scoresList;
+            connections.forEach(user -> {
+                try {
+                    user.notifyEndGame(scores);
+                } catch (RemoteException e) {
+                    Logger.print("Disconnection RMI on notify " + e.getMessage());
+                }
+            });
+
+            notifyEndGame = false;
+            Logger.print("Game Over: " + getPlayers().stream().map(Player::getNickname).collect(Collectors.toList()));
+        }
+        return true;
+    }
+
+    /**
+     * Starts the game notifying each player the schemas other players chose and the info about the new round.
+     * Sets a timer for the first player.
+     */
     synchronized void gameReady(){
         if (!getPlaying()) {
             String firstPlayer = getCurrentRound().getCurrentPlayer().getNickname();
@@ -122,14 +143,14 @@ public class GameRoom extends Game{
                 try {
                     user.notifyOthersSchemas(playersSchemas);
                 } catch (RemoteException e) {
-                    Logger.print(e.toString());
+                    Logger.print("Disconnection RMI on notify " + e.getMessage());
                 }
             });
             connections.forEach(user -> {
                 try {
                     user.notifyRound(firstPlayer, draftPool, true, getRoundTrack());
                 } catch (RemoteException e) {
-                    Logger.print(e.toString());
+                    Logger.print("Disconnection RMI on notify " + e.getMessage());
                 }
             });
 
@@ -138,16 +159,21 @@ public class GameRoom extends Game{
         }
     }
 
-    private void startTimer(){
-        timer = new Timer();
-        timer.schedule(new GameRoom.TimerExpired(), (long) secondsTimer * 1000);
-    }
-
+    /**
+     * This method allows to replace a connection with another. E.g. in case of a reconnection.
+     * @param oldConnection connection to be removed.
+     * @param newConnection connection to be saved.
+     */
     synchronized void replaceConnection(ClientInterface oldConnection, ClientInterface newConnection){
         this.connections.remove(oldConnection);
         this.connections.add(newConnection);
     }
 
+    /**
+     * Logs out a player and notify the others.
+     * @param nickname player that is logging out.
+     * @param connection connection to be removed.
+     */
     synchronized void logout(String nickname, ClientInterface connection){
 
         connections.remove(connection);
@@ -155,7 +181,7 @@ public class GameRoom extends Game{
             try {
                 conn.notifyLogout(nickname);
             } catch (RemoteException e) {
-                Logger.print(e.toString());
+                Logger.print("Disconnection RMI on notify " + e.getMessage());
             }
         });
         suspendPlayer(nickname);
@@ -163,14 +189,30 @@ public class GameRoom extends Game{
         else checkGameFinished();
     }
 
+    /**
+     * Returns the list of players' names.
+     * @return list of players' names.
+     */
     synchronized List<String> getPlayersNick(){
         return super.getPlayers().stream().map(Player::getNickname).collect(Collectors.toList());
     }
 
+    /**
+     * Timer Class.
+     */
     class TimerExpired extends TimerTask {
         public void run() {
             suspendCurrentPlayer(); goOn();
         }
+    }
+
+    /**
+     * Sets the timer for timeout during a turn.
+     * To be cancelled on GoOn.
+     */
+    private void startTimer(){
+        timer = new Timer();
+        timer.schedule(new GameRoom.TimerExpired(), (long) secondsTimer * 1000);
     }
 
     @Override
@@ -180,7 +222,7 @@ public class GameRoom extends Game{
             try {
                 conn.notifySuspension(nickname);
             } catch (RemoteException e) {
-                Logger.print("SuspendPlayer on notify: " + nickname + " " + e.toString());
+                Logger.print("Disconnection RMI on notify " + e.getMessage());
             }
         });
     }
@@ -193,7 +235,7 @@ public class GameRoom extends Game{
             try {
                 conn.notifySuspension(nickname);
             } catch (RemoteException e) {
-                Logger.print("SuspendCurrentPlayer on notify: " + nickname + " " + e.toString());
+                Logger.print("Disconnection RMI on notify " + e.getMessage());
             }
         });
     }

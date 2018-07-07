@@ -3,9 +3,9 @@ package it.polimi.ingsw.network.client;
 import it.polimi.ingsw.controller.exceptions.*;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.network.RMIInterfaces.ClientInterface;
-import it.polimi.ingsw.network.RMIInterfaces.FlowHandlerInterface;
-import it.polimi.ingsw.network.RMIInterfaces.LoginInterface;
+import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
+import it.polimi.ingsw.network.RmiInterfaces.FlowHandlerInterface;
+import it.polimi.ingsw.network.RmiInterfaces.LoginInterface;
 import it.polimi.ingsw.network.client.model.*;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
