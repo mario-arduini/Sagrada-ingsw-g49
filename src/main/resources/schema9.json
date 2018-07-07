@@ -1,0 +1,6 @@
+{"difficulty":5,"constraint":[
+[{"number":6},{"color":"PURPLE","number":0},null,null,{"number":5}],
+[{"number":5},null,{"color":"PURPLE","number":0},null,null],
+[{"color":"RED","number":0},{"number":6},null,{"color":"PURPLE","number":0},null],
+[{"color":"YELLOW","number":0},{"color":"RED","number":0},{"number":5},{"number":4},{"number":3}]],
+"name":"Shadow Thief"}

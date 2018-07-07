@@ -10,7 +10,7 @@ import java.util.*;
  */
 public class FilesUtil {
 
-    /***
+    /**
      * Private constructor because this class contains static methods only
      */
     private FilesUtil(){
@@ -20,7 +20,7 @@ public class FilesUtil {
     public static final String TOOL_CARD_FOLDER = "toolcard";
     public static final String LOG_FOLDER = "log";
 
-    /***
+    /**
      * Creates a list of all the files with a same radix under a directory
      * @param radixName relative path with the radix the files have to have to be considered
      * @param number the number of files with the given radix
@@ -31,15 +31,13 @@ public class FilesUtil {
         List<BufferedReader> files = new ArrayList<>();
         String s;
         for(int i = 1; i <= number; i++) {
-            if(i == 7 && radixName.equals(SCHEMA_FOLDER))
-                i = 13;
             s = radixName + i + ".json";
             files.add(new BufferedReader(new InputStreamReader(FilesUtil.class.getClassLoader().getResourceAsStream(s))));
         }
         return files;
     }
 
-    /***
+    /**
      * Gets a file from a given directory
      * @param dir the directory where the file required is in
      * @param fileName the name of the file required
