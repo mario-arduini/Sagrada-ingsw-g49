@@ -358,8 +358,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         }
     }
 
-    void interruptInput(){
-        handler.interruptInput();
+    void wakeUp(){
+        handler.wakeUp(true);
     }
 
     void serverDisconnected() throws ServerReconnectedException{
@@ -367,16 +367,18 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             serverConnected = false;
             handler.notifyServerDisconnected();
             handler.interruptInput();
+            handler.wakeUp(false);
             int i = 0;
-            while (i < 2) {
+            while (i < 20) {
                 if (tryReconnection()) {
+                    serverConnected = true;
                     gameSnapshot.newGame();
                     if(password != null)
                         login(gameSnapshot.getPlayer().getNickname(), password);
                     throw new ServerReconnectedException();
                 }
                 try {
-                    TimeUnit.SECONDS.sleep(15);
+                    TimeUnit.SECONDS.sleep(2);
                     i++;
                 } catch (InterruptedException e) {
                     LOGGER.warning(e.toString());

@@ -54,6 +54,7 @@ public class ServerListener implements Runnable {
                     client.serverDisconnected();
                 } catch (ServerReconnectedException e1) {
                     LOGGER.info(e.toString());
+                    client.wakeUp();
                 }
                 continue;
             }

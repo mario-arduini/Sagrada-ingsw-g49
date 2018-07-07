@@ -104,8 +104,10 @@ class CLIHandler implements GraphicInterface{
         while (newGame) {
             flagContinue = false;
             try {
-                if(!play())
-                    newGame = askNewGame();
+                if(!play()) {
+                    if (client.getServerConnected())
+                        newGame = askNewGame();
+                }
                 else
                     newGame = false;
             } catch (ServerReconnectedException e) {
@@ -378,6 +380,9 @@ class CLIHandler implements GraphicInterface{
         flagContinue = false;
         client.useToolCard(client.getGameSnapshot().getToolCards().get(choice - 1).getName());
         if (!waitResult(lock1)) {
+            if(!client.getServerConnected())
+                if(waitResult(lock1))
+                    throw new ServerReconnectedException();
             printGame(client.getGameSnapshot());
             ClientLogger.println("\nYou can't use this card now");
             printMenu(client.getGameSnapshot());
