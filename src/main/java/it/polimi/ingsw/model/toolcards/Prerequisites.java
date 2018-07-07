@@ -71,7 +71,7 @@ final class Prerequisites {
                     try{
                         window.canBePlaced(dice,r,c,ruleIgnored);
                     } catch (NoAdjacentDiceException | BadAdjacentDiceException
-                            | FirstDiceMisplacedException | ConstraintViolatedException e) {
+                            | FirstDiceMisplacedException | ConstraintViolatedException | DiceAlreadyHereException e) {
                         expectedMinimumPositions = 1;
                     }
                     int possiblePositions = window.possiblePlaces(dice,ruleIgnored);

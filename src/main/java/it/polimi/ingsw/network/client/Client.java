@@ -110,7 +110,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     public void placeDice(int diceNumber, int row, int column) throws ServerReconnectedException{
         try {
             server.placeDice(row - 1, column - 1, gameSnapshot.getDraftPool().get(diceNumber - 1));
-        } catch (GameOverException | ToolCardInUseException | NotYourTurnException | NoAdjacentDiceException | BadAdjacentDiceException | DiceAlreadyExtractedException | FirstDiceMisplacedException | DiceNotInDraftPoolException | ConstraintViolatedException | GameNotStartedException | NoSameColorDicesException e) {
+        } catch (GameOverException | ToolCardInUseException | NotYourTurnException | NoAdjacentDiceException | BadAdjacentDiceException | DiceAlreadyExtractedException | FirstDiceMisplacedException | DiceNotInDraftPoolException | ConstraintViolatedException | GameNotStartedException | NoSameColorDicesException | DiceAlreadyHereException e) {
             setServerResult(false);
             LOGGER.warning(e.toString());
         } catch (RemoteException e){

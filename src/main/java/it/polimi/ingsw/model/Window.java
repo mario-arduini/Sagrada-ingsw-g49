@@ -50,7 +50,7 @@ public class Window implements Serializable {
         }
     }
 
-    public void addDice(int row, int column, Dice dice) throws ConstraintViolatedException, FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {
+    public void addDice(int row, int column, Dice dice) throws ConstraintViolatedException, FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException, DiceAlreadyHereException {
         Constraint constraint = schema.getConstraint(row, column);
         checkColorConstraint(constraint, dice);
         checkValueConstraint(constraint, dice);
@@ -59,12 +59,13 @@ public class Window implements Serializable {
         setDice(row,column,dice);
     }
 
-    public void checkPlacementConstraint(int row, int column, Dice dice) throws FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {
+    public void checkPlacementConstraint(int row, int column, Dice dice) throws FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException, DiceAlreadyHereException {
         if (!firstDicePlaced) {
             checkBorder(row, column);
+        } else {
+            if (getCell(row,column)!=null) throw new DiceAlreadyHereException();
+            checkAdjacencies(row, column, dice);
         }
-        else
-            checkAdjacencies(row,column, dice);
     }
 
     public boolean isFirstDicePlaced() {
@@ -102,7 +103,6 @@ public class Window implements Serializable {
         if(checkUpAdjacencies(row,column,color,value))
             adjacencyFlag = true;
 
-
         if(checkDownAdjacencies(row,column,color, value))
             adjacencyFlag = true;
 
@@ -128,7 +128,7 @@ public class Window implements Serializable {
                 if (tmp != null)
                     adjacencyFlag = true;
             }
-            if (column < COLUMN - 2) {
+            if (column <= COLUMN - 2) {
                 tmp = mosaic[row - 1][column + 1];
                 if (tmp != null)
                     adjacencyFlag = true;
@@ -156,7 +156,7 @@ public class Window implements Serializable {
                     adjacencyFlag = true;
             }
             //Check on dice down-right
-            if (column < COLUMN - 2) {
+            if (column <= COLUMN - 2) {
                 tmp = mosaic[row + 1][column + 1];
                 if (tmp != null)
                     adjacencyFlag = true;
@@ -208,7 +208,7 @@ public class Window implements Serializable {
         return this.schema.equals(((Window)window).getSchema());
     }
 
-    public void canBePlaced(Dice dice,int row,int column,RuleIgnored ruleIgnored) throws ConstraintViolatedException, FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException {
+    public void canBePlaced(Dice dice,int row,int column,RuleIgnored ruleIgnored) throws ConstraintViolatedException, FirstDiceMisplacedException, NoAdjacentDiceException, BadAdjacentDiceException, DiceAlreadyHereException {
         Constraint constraint = getSchema().getConstraint(row, column);
         switch (ruleIgnored){
             case COLOR:
@@ -239,7 +239,7 @@ public class Window implements Serializable {
                     canBePlaced(dice,r,c,ruleIgnored);
                     possiblePlaces++;
                 } catch (NoAdjacentDiceException | BadAdjacentDiceException
-                        | FirstDiceMisplacedException | ConstraintViolatedException e) {
+                        | FirstDiceMisplacedException | ConstraintViolatedException | DiceAlreadyHereException e) {
                 }
             }
         return possiblePlaces;

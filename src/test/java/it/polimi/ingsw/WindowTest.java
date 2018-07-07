@@ -81,6 +81,8 @@ public class WindowTest {
                 assertTrue(true);
             } catch (ConstraintViolatedException e) {
                 assertTrue(false);
+            } catch (DiceAlreadyHereException e) {
+                assertTrue(false);
             }
 
             //Add first dice in the first position the mosaic
@@ -95,6 +97,8 @@ public class WindowTest {
                 assertTrue(false);
             } catch (ConstraintViolatedException e) {
                 assertTrue(false);
+            }catch (DiceAlreadyHereException e) {
+                assertTrue(false);
             }
 
             //Place a non-adjacent dice
@@ -108,6 +112,8 @@ public class WindowTest {
             } catch (FirstDiceMisplacedException e) {
                 assertTrue(false);
             } catch (ConstraintViolatedException e) {
+                assertTrue(false);
+            }catch (DiceAlreadyHereException e) {
                 assertTrue(false);
             }
 
@@ -124,6 +130,8 @@ public class WindowTest {
                 assertTrue(false);
             } catch (ConstraintViolatedException e) {
                 assertTrue(false);
+            }catch (DiceAlreadyHereException e) {
+                assertTrue(false);
             }
 
             //Place a Bad-adjacent dice (Value)
@@ -139,6 +147,8 @@ public class WindowTest {
                 assertTrue(false);
             } catch (ConstraintViolatedException e) {
                 assertTrue(false);
+            }catch (DiceAlreadyHereException e) {
+                assertTrue(false);
             }
 
             //Place a good adjacent dice (diagonal)
@@ -152,6 +162,8 @@ public class WindowTest {
             } catch (FirstDiceMisplacedException e) {
                 assertTrue(false);
             } catch (ConstraintViolatedException e) {
+                assertTrue(false);
+            }catch (DiceAlreadyHereException e) {
                 assertTrue(false);
             }
 
@@ -167,6 +179,8 @@ public class WindowTest {
                 assertTrue(false);
             } catch (ConstraintViolatedException e) {
                 assertTrue(true);
+            }catch (DiceAlreadyHereException e) {
+                assertTrue(false);
             }
 
             //Place a bad adjacent dice
@@ -182,6 +196,8 @@ public class WindowTest {
                 assertTrue(false);
             } catch (ConstraintViolatedException e) {
                 assertTrue(false);
+            }catch (DiceAlreadyHereException e) {
+                assertTrue(false);
             }
 
             //Place a good constraint, good adjacent dice (orthogonal)
@@ -196,6 +212,8 @@ public class WindowTest {
             } catch (FirstDiceMisplacedException e) {
                 assertTrue(false);
             } catch (ConstraintViolatedException e) {
+                assertTrue(false);
+            }catch (DiceAlreadyHereException e) {
                 assertTrue(false);
             }
 

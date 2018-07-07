@@ -43,6 +43,8 @@ public class FullSetTest {
             e.printStackTrace();
         } catch (InvalidDiceValueException e) {
             e.printStackTrace();
+        } catch (DiceAlreadyHereException e) {
+            e.printStackTrace();
         }
     }
 
@@ -79,6 +81,8 @@ public class FullSetTest {
         } catch (BadAdjacentDiceException e) {
             e.printStackTrace();
         } catch (InvalidDiceValueException e) {
+            e.printStackTrace();
+        } catch (DiceAlreadyHereException e) {
             e.printStackTrace();
         }
     }
