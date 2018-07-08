@@ -254,7 +254,7 @@ public final class Effects {
         //Place dice
         Coordinate end;
         prompt = "move-to";
-        while (diceList.size() > 0) {
+        while (!diceList.isEmpty()) {
             try {
                 end = connection.askDiceWindow(prompt, rollback);
                 if (start.get(num - diceList.size()).getRow() == end.getRow() && start.get(num - diceList.size()).getColumn() == end.getColumn())
@@ -295,7 +295,7 @@ public final class Effects {
             e.printStackTrace();
         }
         Coordinate start = null;
-        Coordinate end = null;
+        Coordinate end;
         Dice removedDice = null;
         boolean valid = false;
         String message = "move-from";

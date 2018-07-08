@@ -287,11 +287,11 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public void notifyToolCardUse(String player, String toolcard, Window window, List<Dice> draftPool, List<Dice> roundTrack){
+    public void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack){
         JsonObject message;
         message = createMessage("toolcard-used");
         message.addProperty("player", player);
-        message.addProperty("toolcard", toolcard);
+        message.addProperty("toolcard", toolCard);
         message.addProperty("window", gson.toJson(window));
         message.addProperty("draft-pool", gson.toJson(draftPool));
         message.addProperty("round-track", gson.toJson(roundTrack));
@@ -307,14 +307,14 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundtrack){
+    public void notifyRound(String currentPlayer, List<Dice> draftPool, boolean newRound, List<Dice> roundTrack){
         JsonObject message;
         message = createMessage("round");
         message.addProperty("player", currentPlayer);
         message.addProperty("draft-pool", gson.toJson(draftPool));
         message.addProperty("new-round", newRound);
         if (newRound)
-            message.addProperty("round-track", gson.toJson(roundtrack));
+            message.addProperty("round-track", gson.toJson(roundTrack));
         socketSendMessage(message);
     }
 

@@ -197,7 +197,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     }
 
     @Override
-    public void placeDice(int row, int column, Dice dice) throws GameNotStartedException, GameOverException, ToolCardInUseException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException , DiceAlreadyHereException{
+    public void placeDice(int row, int column, Dice dice) throws GameNotStartedException, GameOverException, ToolCardInUseException, NotYourTurnException, NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException, DiceAlreadyHereException{
         if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
         if (gameRoom.isGameFinished()) throw new GameOverException();
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
