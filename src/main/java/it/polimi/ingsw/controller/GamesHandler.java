@@ -7,7 +7,6 @@ import it.polimi.ingsw.network.server.Logger;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 import it.polimi.ingsw.utilities.FilesUtil;
 
-import java.io.*;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
 public class GamesHandler {
     private List<GameFlowHandler> waitingRoom;
     private List<GameFlowHandler> playingUsers;
-    private static final String TIMEOUT_FILE_NAME = "timeout.txt";
+    private static final String TIMEOUT_START_GAME_FILE_NAME = "timeout_start_game.txt";
     private int secondsTimer;
     private Timer timer;
 
@@ -28,7 +27,7 @@ public class GamesHandler {
     public GamesHandler(){
         this.waitingRoom = new ArrayList<>();
         this.playingUsers = new ArrayList<>();
-        this.secondsTimer = FilesUtil.readIntFromFile(TIMEOUT_FILE_NAME);
+        this.secondsTimer = FilesUtil.readIntFromFile(TIMEOUT_START_GAME_FILE_NAME);
         //TODO: Throw exception if file does not exist
     }
 

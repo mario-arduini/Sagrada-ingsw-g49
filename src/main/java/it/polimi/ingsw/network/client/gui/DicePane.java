@@ -1,9 +1,7 @@
 package it.polimi.ingsw.network.client.gui;
 
-import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.Dice;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.control.Label;
 import javafx.scene.input.ClipboardContent;
@@ -11,14 +9,13 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 
+ class DicePane extends StackPane {
 
-public class DicePane extends StackPane {
+    private Label valueLabel;
+    private Dice dice;
+    private Integer idx;
 
-    Label valueLabel;
-    Dice dice;
-    Integer idx;
-
-    public DicePane(Dice dice){
+    DicePane(Dice dice){
         super();
         if(dice.getColor()!=null)this.setStyle("-fx-border-color: black; -fx-border-width: 3; -fx-border-style: solid; -fx-border-radius:15; -fx-background-radius:15; -fx-background-color: "+GuiMain.getColor(dice.getColor())+";");
         this.dice = dice;
@@ -30,7 +27,7 @@ public class DicePane extends StackPane {
         this.idx = 0;
     }
 
-    public DicePane(Dice dice,int idx){
+    DicePane(Dice dice,int idx){
         super();
         if(dice.getColor()!=null)this.setStyle("-fx-border-color: black; -fx-border-width: 3; -fx-border-style: solid; -fx-border-radius:15; -fx-background-radius:15; -fx-background-color: "+GuiMain.getColor(dice.getColor())+";");
         this.dice = dice;
@@ -42,7 +39,7 @@ public class DicePane extends StackPane {
         this.idx = idx;
     }
 
-    public void bindDimension(ReadOnlyDoubleProperty par){
+    void bindDimension(ReadOnlyDoubleProperty par){
         this.setMaxHeight(par.getValue()*.8);
         this.setMaxWidth(this.getMaxHeight());
         this.setHeight(this.getMaxHeight());
@@ -57,7 +54,7 @@ public class DicePane extends StackPane {
         }
     }
 
-    public void setDraggable(){
+    void setDraggable(){
         this.setOnDragDetected(event -> {
             Dragboard db = this.startDragAndDrop(TransferMode.MOVE);
             ClipboardContent diceData = new ClipboardContent();
@@ -69,7 +66,15 @@ public class DicePane extends StackPane {
         });
     }
 
-    public int getIdx(){
+    int getIdx(){
         return idx;
+    }
+
+    Dice getDice(){
+        return dice;
+    }
+
+    Label getLabel(){
+        return valueLabel;
     }
 }

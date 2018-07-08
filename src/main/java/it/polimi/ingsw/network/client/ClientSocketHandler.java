@@ -241,11 +241,11 @@ public class ClientSocketHandler implements FlowHandlerInterface {
 
     /**
      * Sends to the server the number of dices the user wants to move
-     * @param n the number of dices the user wants to move
+     * @param number the number of dices the user wants to move
      */
-    void sendMoveNumber(int n){
+    void sendMoveNumber(int number){
         createJsonCommand("move-dice-number");
-        jsonObject.addProperty("choice", n);
+        jsonObject.addProperty("choice", number);
         socketPrintLine(jsonObject);
     }
 

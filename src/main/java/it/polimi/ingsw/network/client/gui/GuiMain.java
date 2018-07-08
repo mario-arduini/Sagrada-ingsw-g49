@@ -7,7 +7,6 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 
@@ -31,7 +30,7 @@ public class GuiMain extends Application {
         launch();
     }
 
-    public static Image getGoalImage(String goal){
+    static Image getGoalImage(String goal){
         String fileName;
         switch (goal){
             case "RowColorVariety": fileName = "0002.jpg"; break;
@@ -61,7 +60,7 @@ public class GuiMain extends Application {
         return goalImage;
     }
 
-    public static Image getToolImage(String tool){
+    static Image getToolImage(String tool){
         String fileName;
         switch (tool){
             case "Pinza Sgrossatrice": fileName = "0002.jpg"; break;

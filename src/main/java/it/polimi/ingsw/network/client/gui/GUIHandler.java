@@ -84,8 +84,8 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     @FXML private ImageView publicGoal3;
 
     private ObservableList<String> playerList = FXCollections.observableArrayList();
-    private SagradaGridPane playerGrid;
-    private List<SagradaGridPane> otherPlayerGrids;
+    private transient SagradaGridPane playerGrid;
+    private transient List<SagradaGridPane> otherPlayerGrids;
     private List<Label> otherPlayerLabels;
     private List<HBox> otherPlayerTokens;
     private Button rollbackButton;
@@ -109,7 +109,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     private Coordinate askedCoordinate;
     private int askedNumber;
     private boolean askedBool;
-    private int toolcardInUse;
+    private int toolCardInUse;
     private boolean backed;
     private String tmpStyle;
 
@@ -122,7 +122,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
 
     private boolean alertDiceUnplacable;
-    private DicePane activeDice;
+    private transient DicePane activeDice;
 
     public GUIHandler() throws RemoteException {
         super();
@@ -452,7 +452,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                         URL path = GUIHandler.class.getClassLoader().getResource("gui-views/login.fxml");
                         FXMLLoader fxmlLoader = new FXMLLoader(path);
                         Parent root = fxmlLoader.load();
-                        GUIHandler controller = (GUIHandler) fxmlLoader.getController();
+                        GUIHandler controller = fxmlLoader.getController();
                         controller.passClient(client);
                         controller.passStage(stage);
                         client.setHandler(controller);
@@ -504,7 +504,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         tool1.setDisable(true);
         tool2.setDisable(true);
         tool3.setDisable(true);
-        toolcardInUse = toolNumber;
+        toolCardInUse = toolNumber;
     }
 
     public Client getClient(){
@@ -515,7 +515,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
      * Pass the client between different scenes
      * @param client reference to the Client instance
      */
-    public void passClient(Client client){
+    private void passClient(Client client){
         this.client = client;
     }
 
@@ -523,7 +523,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
      * Pass the stage between different scenes
      * @param stage reference to the primary Stage
      */
-    public void passStage(Stage stage){
+    private void passStage(Stage stage){
         this.stage = stage;
     }
 
@@ -531,7 +531,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
      * Pass the schemas between different scenes
      * @param schemas list of Schema objects
      */
-    public void passSchemas(List<Schema> schemas){
+    private void passSchemas(List<Schema> schemas){
         this.schemas = schemas;
     }
 
@@ -560,7 +560,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 URL path = GUIHandler.class.getClassLoader().getResource("gui-views/schema-choice.fxml");
                 FXMLLoader fxmlLoader = new FXMLLoader(path);
                 Parent root = fxmlLoader.load();
-                GUIHandler controller = (GUIHandler) fxmlLoader.getController();
+                GUIHandler controller = fxmlLoader.getController();
                 controller.passClient(client);
                 controller.passStage(stage);
                 controller.passSchemas(schemas);
@@ -668,7 +668,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
      */
     @Override
     public void notifyUsedToolCard(String player, String toolCard) {
-        toolcardInUse = 0;
+        toolCardInUse = 0;
     }
 
     /***
@@ -682,7 +682,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 URL path = GUIHandler.class.getClassLoader().getResource("gui-views/gameover.fxml");
                 FXMLLoader fxmlLoader = new FXMLLoader(path);
                 Parent root = fxmlLoader.load();
-                GUIHandler controller = (GUIHandler) fxmlLoader.getController();
+                GUIHandler controller = fxmlLoader.getController();
                 controller.passClient(client);
                 controller.passStage(stage);
                 controller.showScores(scores);
@@ -699,7 +699,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
      * Show the scores on the Gameover Scene
      * @param scores ordered list of scores associated with players
      */
-    public void showScores(List<Score> scores){
+    private void showScores(List<Score> scores){
         boolean first = true;
         for(Score score : scores){
             Label label;
@@ -750,7 +750,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     /**
      * reset styles added with the toolcard object selection
      */
-    public void resetStyles(){
+    private void resetStyles(){
         roundTrack.setStyle("");
         draftPool.setStyle("");
         if(tmpStyle!=null) playerGrid.setStyle(tmpStyle);
@@ -772,9 +772,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         }
         
         if(rollbackButton!=null){
-            Platform.runLater(() ->{
-                toolBox.getChildren().remove(rollbackButton);
-            });
+            Platform.runLater(() -> toolBox.getChildren().remove(rollbackButton));
         }
         if(tmpStyle!=null) tmpStyle = null;
 
@@ -810,7 +808,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             
 
             synchronized (this) {
-                this.notify();
+                this.notifyAll();
             }
 
         });
@@ -837,17 +835,15 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
             info.setText(MessageHandler.get(prompt));
             draftPool.setStyle(RED_DASHED_BORD);
-            draftPool.getChildren().forEach(child -> {
-                child.setOnMouseClicked(event -> {
-                    DicePane dp = (DicePane) event.getSource();
-                    askedDraft = dp.dice;
-                    removeFromDraftIfNecessary(dp);
-                    draftPool.setStyle("");
-                    synchronized (this) {
-                        this.notify();
-                    }
-                });
-            });
+            draftPool.getChildren().forEach(child -> child.setOnMouseClicked(event -> {
+                DicePane dp = (DicePane) event.getSource();
+                askedDraft = dp.getDice();
+                removeFromDraftIfNecessary(dp);
+                draftPool.setStyle("");
+                synchronized (this) {
+                    this.notify();
+                }
+            }));
         });
 
         waitForAnswer(rollback);
@@ -967,10 +963,10 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                 } else choose = false;
             }
 
-            if(activeDice!=null) activeDice.valueLabel.setText(askedNumber+"");
+            if(activeDice!=null) activeDice.getLabel().setText(askedNumber+"");
 
             synchronized (this) {
-                this.notify();
+                this.notifyAll();
             }
 
         });
@@ -1021,7 +1017,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             }
 
             synchronized (this) {
-                this.notify();
+                this.notifyAll();
             }
 
         });
@@ -1034,7 +1030,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     /**
      * Show and highlights dice received from the server
-     * @param dice
+     * @param dice the dice to show
      */
     @Override
     public void printDice(Dice dice){
@@ -1055,25 +1051,23 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public void wakeUp(boolean serverResult) {
         if(isLogging) handleLogin(serverResult);
         if(choosingSchema) handleSchema(serverResult);
-        if(toolcardInUse!=0&&!serverResult){
+        if(toolCardInUse !=0&&!serverResult){
             Platform.runLater(() -> {
                 info.setText(MessageHandler.get("info-tool-fail"));
                 tool1.setDisable(false);
                 tool2.setDisable(false);
                 tool3.setDisable(false);
-                toolcardInUse = 0;
+                toolCardInUse = 0;
             });
         }
         if(playerGrid!=null&&playerGrid.isPlacingDice()&&!serverResult){
-            Platform.runLater(() ->{
-                info.setText(MessageHandler.get("info-dice-bad"));
-            });
+            Platform.runLater(() -> info.setText(MessageHandler.get("info-dice-bad")));
         }
     }
 
     /**
      * Signal from server that an unplaceable dice from toolcard was reput in the draft pool
-     * @param dice
+     * @param dice the dice reput in the draft pool
      */
     @Override
     public void alertDiceInDraftPool(Dice dice){
@@ -1092,7 +1086,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
      * Handle login response from server
      * @param serverResult response
      */
-    public void handleLogin(boolean serverResult){
+    private void handleLogin(boolean serverResult){
         Platform.runLater(() -> {
             if(serverResult){
                 setWaitingRoom();
@@ -1115,7 +1109,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     /**
      * Set the waiting room, after a login or a gameover
      */
-    public void setWaitingRoom(){
+    void setWaitingRoom(){
         isLogging = false;
         status.textProperty().set("Logged in");
         password.setVisible(false);
@@ -1141,7 +1135,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
                     URL path = GUIHandler.class.getClassLoader().getResource("gui-views/game.fxml");
                     FXMLLoader fxmlLoader = new FXMLLoader(path);
                     Parent root = fxmlLoader.load();
-                    GUIHandler controller = (GUIHandler) fxmlLoader.getController();
+                    GUIHandler controller = fxmlLoader.getController();
                     controller.passClient(client);
                     controller.passStage(stage);
                     controller.populateGame();
@@ -1159,9 +1153,8 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
 
     /**
      * callback for button to pass
-     * @param actionEvent
      */
-    public void pass(ActionEvent actionEvent) {
+    public void pass() {
         try {
             client.pass();
         } catch (ServerReconnectedException e) {
@@ -1184,7 +1177,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             } catch (IOException e) {
                 LOGGER.warning(e.toString());
             }
-            GUIHandler controller = (GUIHandler) fxmlLoader.getController();
+            GUIHandler controller = fxmlLoader.getController();
             controller.passClient(client);
             controller.passStage(stage);
             controller.populateGame();
@@ -1208,7 +1201,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
      * @param dp DicePane to remove
      */
     private void removeFromDraftIfNecessary(DicePane dp){
-        String toolName = client.getGameSnapshot().getToolCards().get(toolcardInUse).getName();
+        String toolName = client.getGameSnapshot().getToolCards().get(toolCardInUse).getName();
         if(toolName.equals("Pennello per pasta salda")||toolName.equals("Diluente per pasta salda")||toolName.equals("Pinza Sgrossatrice")
                 ||toolName.equals("Tampone Diamantato")){
             draftPool.getChildren().remove(dp);
@@ -1229,7 +1222,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
             URL path = GUIHandler.class.getClassLoader().getResource("gui-views/login.fxml");
             FXMLLoader fxmlLoader = new FXMLLoader(path);
             Parent root = fxmlLoader.load();
-            GUIHandler controller = (GUIHandler) fxmlLoader.getController();
+            GUIHandler controller = fxmlLoader.getController();
             controller.passClient(client);
             controller.passStage(stage);
             controller.setWaitingRoom();

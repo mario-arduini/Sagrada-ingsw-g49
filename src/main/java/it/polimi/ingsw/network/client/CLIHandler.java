@@ -35,10 +35,10 @@ class CLIHandler implements GraphicInterface{
     private String inputResult;
     private Thread thread;
     private CLIListener cliListener;
-    private Object lock1;
+    private final Object lock1;
     private boolean waitLock2;
-    private Object lock2;
-    private Object lockInput;
+    private final Object lock2;
+    private final Object lockInput;
 
     /**
      * Creats a new objiect that handles the interaction between the user and the CLI
@@ -167,14 +167,14 @@ class CLIHandler implements GraphicInterface{
         }
 
         while (!logout) {
-            command = readInt(0, 3);
-            if (!client.isGameStarted())
-                break;
+            try {
+                command = readInt(0, 3);
+                if (!client.isGameStarted())
+                    throw new InputInterruptedException();
 
-            if (command > 0 && !client.getGameSnapshot().getPlayer().isMyTurn())
-                ClientLogger.print(ERROR);
-            else
-                try {
+                if (command > 0 && !client.getGameSnapshot().getPlayer().isMyTurn())
+                    ClientLogger.print(ERROR);
+                else
                     switch (command) {
                         case 0:
                             ClientLogger.printlnWithClear("Logged out");
@@ -204,9 +204,9 @@ class CLIHandler implements GraphicInterface{
                         default:
                             break;
                     }
-                }catch (InputInterruptedException e){
-                    break;
-                }
+            }catch (InputInterruptedException e){
+                break;
+            }
         }
         return logout;
     }
@@ -457,9 +457,8 @@ class CLIHandler implements GraphicInterface{
         flagContinue = false;
         client.useToolCard(client.getGameSnapshot().getToolCards().get(choice - 1).getName());
         if (!waitResult(lock1)) {
-            if(!client.getServerConnected())
-                if(waitResult(lock1))
-                    throw new ServerReconnectedException();
+            if(!client.getServerConnected() && waitResult(lock1))
+                throw new ServerReconnectedException();
             printGame(client.getGameSnapshot());
             ClientLogger.println("\nYou can't use this card now");
             printMenu(client.getGameSnapshot());

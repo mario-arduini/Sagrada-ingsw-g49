@@ -5,25 +5,14 @@ import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.model.Window;
 import it.polimi.ingsw.network.client.ServerReconnectedException;
-import it.polimi.ingsw.network.client.model.Color;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
-import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.geometry.VPos;
-import javafx.scene.control.Label;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
-
-import javax.swing.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static it.polimi.ingsw.network.client.gui.GuiMain.getColor;
 
@@ -33,7 +22,7 @@ public class SagradaGridPane extends GridPane {
     private GUIHandler controller;
     private boolean placingDice;
 
-    public void initProperty(){
+    void initProperty(){
         ColumnConstraints cc = new ColumnConstraints();
         cc.setPercentWidth(20.0);
         cc.setHalignment(HPos.CENTER);
@@ -50,7 +39,7 @@ public class SagradaGridPane extends GridPane {
 
     }
 
-    public void passController(GUIHandler controller){
+    void passController(GUIHandler controller){
         this.controller = controller;
     }
 
@@ -80,7 +69,7 @@ public class SagradaGridPane extends GridPane {
             }
     }
 
-    public void tryDice(CellPane cellToUpdate,int idx){
+    void tryDice(CellPane cellToUpdate,int idx){
         System.out.println("setting dice in : "+cellToUpdate.getRow()+":"+cellToUpdate.getCol());
         placingDice = true;
         if(controller!=null) {
@@ -92,15 +81,15 @@ public class SagradaGridPane extends GridPane {
         }
     }
 
-    public boolean isPlacingDice() {
+    boolean isPlacingDice() {
         return placingDice;
     }
 
-    CellPane getCell(int r, int c){
+    private CellPane getCell(int r, int c){
         return (CellPane) getChildren().stream().filter(cell -> GridPane.getRowIndex(cell)==r&&GridPane.getColumnIndex(cell)==c).findFirst().get();
     }
 
-    public void updateWindow(Window window){
+    void updateWindow(Window window){
         for(int r = 0;r<Window.ROW;r++)
             for(int c=0;c<Window.COLUMN;c++){
                 Dice dice = window.getCell(r,c);
@@ -128,7 +117,7 @@ class CellPane extends StackPane{
     private SagradaGridPane parent;
     private String tmpStyle;
 
-    public CellPane(int row,int col,SagradaGridPane parent){
+    CellPane(int row,int col,SagradaGridPane parent){
         super();
         this.row = row;
         this.col = col;
@@ -144,7 +133,7 @@ class CellPane extends StackPane{
         this.dice = dp;
     }
 
-    public int getCol() {
+    int getCol() {
         return col;
     }
 
@@ -152,7 +141,7 @@ class CellPane extends StackPane{
         return row;
     }
 
-    public void setDiceDroppable(){
+    void setDiceDroppable(){
         this.setOnDragOver(event -> {
             if (event.getGestureSource() != this  && this.getDice() == null) {
                 event.acceptTransferModes(TransferMode.MOVE);
@@ -165,9 +154,7 @@ class CellPane extends StackPane{
             this.setStyle(tmpStyle+"-fx-border-color: green; -fx-border-width:2; -fx-border-style: dashed;");
         });
 
-        this.setOnDragExited(event -> {
-            this.setStyle(tmpStyle);
-        });
+        this.setOnDragExited(event -> this.setStyle(tmpStyle));
 
         this.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
