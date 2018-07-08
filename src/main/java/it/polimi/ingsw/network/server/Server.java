@@ -85,6 +85,7 @@ public class Server {
 
     public static void main(String[] args){
         BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
+        ServerConfigFile.intiConfigParameters();
         int port = 0;
         while (port == 0)
             try {

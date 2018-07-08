@@ -4,8 +4,8 @@ import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
 import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
+import it.polimi.ingsw.network.server.ServerConfigFile;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
-import it.polimi.ingsw.utilities.FilesUtil;
 
 import java.rmi.RemoteException;
 import java.util.*;
@@ -19,15 +19,15 @@ import java.util.stream.Collectors;
 public class GamesHandler {
     private List<GameFlowHandler> waitingRoom;
     private List<GameFlowHandler> playingUsers;
-    private static final String TIMEOUT_START_GAME_FILE_NAME = "timeout_start_game.txt";
-    private int secondsTimer;
+    //private static final String TIMEOUT_START_GAME_FILE_NAME = "timeout_start_game.txt";
+    //private int secondsTimer;
     private Timer timer;
 
     //TODO: DONE, check for file exception
     public GamesHandler(){
         this.waitingRoom = new ArrayList<>();
         this.playingUsers = new ArrayList<>();
-        this.secondsTimer = FilesUtil.readIntFromFile(TIMEOUT_START_GAME_FILE_NAME);
+        //this.secondsTimer = FilesUtil.readIntFromFile(TIMEOUT_START_GAME_FILE_NAME);
         //TODO: Throw exception if file does not exist
     }
 
@@ -136,7 +136,7 @@ public class GamesHandler {
     private synchronized void waitingRoomNewPlayer(){
         if(waitingRoom.size() == 2) {
             timer = new Timer();
-            timer.schedule(new GamesHandler.TimerExpired(), (long) secondsTimer * 1000);
+            timer.schedule(new GamesHandler.TimerExpired(), (long) ServerConfigFile.getSecondsTimerStartGame() * 1000);
         }
         else if(waitingRoom.size() >= 4)
             startGame();
