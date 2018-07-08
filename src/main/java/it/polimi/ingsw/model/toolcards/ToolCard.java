@@ -4,13 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import it.polimi.ingsw.controller.exceptions.DisconnectionException;
-import it.polimi.ingsw.controller.exceptions.NoSuchToolCardException;
-import it.polimi.ingsw.controller.exceptions.RollbackException;
+import it.polimi.ingsw.server.controller.exceptions.DisconnectionException;
+import it.polimi.ingsw.server.controller.exceptions.NoSuchToolCardException;
+import it.polimi.ingsw.server.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
-import it.polimi.ingsw.network.server.Logger;
+import it.polimi.ingsw.RmiInterfaces.ClientInterface;
+import it.polimi.ingsw.server.Logger;
 
 import java.io.Serializable;
 import java.util.List;

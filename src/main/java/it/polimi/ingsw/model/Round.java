@@ -1,12 +1,9 @@
 package it.polimi.ingsw.model;
 
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.model.toolcards.ToolCard;
-import it.polimi.ingsw.network.server.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Class representing a Round of the Game

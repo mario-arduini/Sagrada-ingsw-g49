@@ -1,6 +1,6 @@
 package it.polimi.ingsw.utilities;
 
-import it.polimi.ingsw.network.server.Logger;
+import it.polimi.ingsw.server.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
