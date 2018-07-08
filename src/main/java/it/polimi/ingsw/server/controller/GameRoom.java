@@ -34,13 +34,13 @@ public class GameRoom extends Game{
     /**
      * Notify the usage of a tool card to each player of the game.
      * @param nickname the name of the user that used the tool card.
-     * @param toolcard the name of the tool card used.
+     * @param toolCard the name of the tool card used.
      * @param window the new window of the player.
      */
-    synchronized void notifyAllToolCardUsed(String nickname, String toolcard, Window window){
+    synchronized void notifyAllToolCardUsed(String nickname, String toolCard, Window window){
         connections.forEach(user -> {
             try {
-                user.notifyToolCardUse(nickname, toolcard, window, getCurrentRound().getDraftPool(), getRoundTrack());
+                user.notifyToolCardUse(nickname, toolCard, window, getCurrentRound().getDraftPool(), getRoundTrack());
             } catch (RemoteException e) {
                 Logger.print("Disconnection RMI on notify " + e.getMessage());
             }

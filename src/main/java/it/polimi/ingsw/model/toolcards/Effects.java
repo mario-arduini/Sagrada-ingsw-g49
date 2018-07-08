@@ -294,7 +294,7 @@ public final class Effects {
             throw new DisconnectionException();
         }
         Coordinate start = null;
-        Coordinate end = null;
+        Coordinate end;
         Dice removedDice = null;
         boolean valid = false;
         String message = "move-from";
