@@ -60,14 +60,6 @@ public class TransactionSnapshot {
     }
 
     /**
-     * Shuffle the bag of dice.
-     */
-    public void shuffleTheBag(){
-        Collections.shuffle(this.diceBag);
-    }
-
-
-    /**
      * Returns the window in the current snapshot.
      * @return window
      */
