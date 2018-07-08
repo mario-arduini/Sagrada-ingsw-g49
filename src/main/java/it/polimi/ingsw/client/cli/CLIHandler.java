@@ -358,7 +358,7 @@ public class CLIHandler implements GraphicInterface {
     /**
      * Prints the public goals, the tool cards, the private goal
      * Prints the schemas the user can chose from
-     * @param gameSnapshot
+     * @param gameSnapshot the object that contains the current game status
      * @param schemas the schemas the user can chose from
      */
     @Override
@@ -543,7 +543,7 @@ public class CLIHandler implements GraphicInterface {
 
     /**
      * Prints a menu with same choice for the user based on the current situation of the turn
-     * @param gameSnapshot
+     * @param gameSnapshot the object that contains the current game status
      */
     @Override
     public void printMenu(GameSnapshot gameSnapshot){
@@ -765,7 +765,7 @@ public class CLIHandler implements GraphicInterface {
 
     /**
      * Prints the public goals, the tool cards and the private goal on the CLI
-     * @param gameSnapshot
+     * @param gameSnapshot the object that contains the current game status
      */
     private static void printFooter(GameSnapshot gameSnapshot){
         printPublicGoals(gameSnapshot.getPublicGoals());
@@ -800,7 +800,7 @@ public class CLIHandler implements GraphicInterface {
 
     /**
      * Prints all the information a the game that the user is currently playing, with the information about the other users
-     * @param gameSnapshot
+     * @param gameSnapshot the object that contains the current game status
      */
     @Override
     public void printGame(GameSnapshot gameSnapshot){
@@ -884,7 +884,7 @@ public class CLIHandler implements GraphicInterface {
 
     /**
      * Prints all the users that are playing the game
-     * @param gameSnapshot
+     * @param gameSnapshot the object that contains the current game status
      */
     private static void printPlayers(GameSnapshot gameSnapshot){
         PlayerSnapshot p = gameSnapshot.getPlayer();

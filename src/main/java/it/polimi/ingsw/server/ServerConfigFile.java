@@ -27,7 +27,7 @@ public class ServerConfigFile {
      * Loads from file some parameters for the game and the server.
      */
     static void intiConfigParameters(){
-        List<BufferedReader> files = FilesUtil.listFiles(CONFIG_FILE_NAME, 1);
+        List<BufferedReader> files = FilesUtil.listFilesOutsideJar(CONFIG_FILE_NAME, 1, "");
         JsonParser parser = new JsonParser();
         JsonObject jsonObject = parser.parse(files.get(0)).getAsJsonObject();
 
@@ -65,7 +65,7 @@ public class ServerConfigFile {
      * Used to get the port to locate the rmi registry.
      * @return the port where to locate the rmi registry.
      */
-    public static int getRmiPort(){
+    static int getRmiPort(){
         return rmiPort;
     }
 

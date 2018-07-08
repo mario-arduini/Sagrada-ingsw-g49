@@ -34,7 +34,7 @@ public class Factory {
      */
     public Factory() {
         this.toolCards = new Stack<>();
-        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.TOOL_CARD_FOLDER, NUMBER_OF_TOOL_CARDS);
+        List<BufferedReader> files = FilesUtil.listFilesInsideJar(FilesUtil.TOOL_CARD_FOLDER, NUMBER_OF_TOOL_CARDS);
         for (BufferedReader file:files){
             toolCards.push(file);
         }
@@ -94,7 +94,7 @@ public class Factory {
      */
     private Stack<Schema> loadSchemasFromFile(){
         Stack<Schema> schemas= new Stack<>();
-        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER, NUMBER_OF_SCHEMAS);
+        List<BufferedReader> files = FilesUtil.listFilesOutsideJar(FilesUtil.SCHEMA_FOLDER, NUMBER_OF_SCHEMAS, "schemas");
         JsonParser parser = new JsonParser();
         JsonObject jsonObject;
         Gson gson = new Gson();

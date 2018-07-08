@@ -24,7 +24,7 @@ public class MessageHandler {
      */
     private static void init(String language){
         if(messages == null){
-            List<BufferedReader> languages = FilesUtil.listFiles(language, 1);
+            List<BufferedReader> languages = FilesUtil.listFilesInsideJar(language, 1);
             BufferedReader chosenLanguage = null;
             for(BufferedReader file:languages){
                 chosenLanguage = file;
