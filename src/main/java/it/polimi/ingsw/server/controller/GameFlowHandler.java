@@ -270,7 +270,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     }
 
     @Override
-    public void continueToolCard() throws GameNotStartedException,  GameOverException, NoSuchToolCardException, ToolcardAlreadyUsedException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NotYourTurnException, PlayerSuspendedException {
+    public void continueToolCard() throws GameNotStartedException, GameOverException, NoSuchToolCardException, ToolcardAlreadyUsedException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NotYourTurnException, PlayerSuspendedException, NoDiceInWindowException, NothingCanBeMovedException, NotDraftedYetException, AlreadyDraftedException, NoSameColorDicesException, NotYourFirstTurnException, NotYourSecondTurnException, NotEnoughDiceToMoveException, NoDiceInRoundTrackException {
         if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
         if (gameRoom.isGameFinished()) throw new GameOverException();
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();

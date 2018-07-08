@@ -1,7 +1,6 @@
 package it.polimi.ingsw.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -30,33 +29,6 @@ public class TransactionSnapshot {
         for (Dice d: diceBag){
             this.diceBag.add(new Dice(d));
         }
-    }
-
-    /**
-     * Creates a Transaction Snapshot of a Transaction Snapshot.
-     * @param game Transaction Snapshot from which data are copied.
-     */
-    public TransactionSnapshot(TransactionSnapshot game){
-        this.window = new Window(game.getRound().getCurrentPlayer().getWindow());
-        this.round = new Round(game.getRound());
-        this.roundTrack = new ArrayList<>();
-        for (Dice d: game.getRoundTrack())
-            roundTrack.add(new Dice(d));
-        this.diceBag = new ArrayList<>();
-        for (Dice d: game.getDiceBag()){
-            this.diceBag.add(new Dice(d));
-        }
-    }
-
-    /**
-     * Commits changes from a different TransactionSnapshot.
-     * @param game Transaction Snapshot with data to commit.
-     */
-    public void commit(TransactionSnapshot game){
-        this.window = game.window;
-        this.round = game.round;
-        this.roundTrack = game.roundTrack;
-        this.diceBag = game.diceBag;
     }
 
     /**
@@ -104,7 +76,7 @@ public class TransactionSnapshot {
      * Returns the dice bag.
      * @return diceBag as a list of dice.
      */
-    List<Dice> getDiceBag() {
+    public List<Dice> getDiceBag() {
         return diceBag;
     }
 }

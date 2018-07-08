@@ -218,13 +218,16 @@ public class SocketHandler implements Runnable, ClientInterface {
      * Private method that wraps GameFlowHandler's method.
      * Handles Exceptions and sends failure message if necessary.
      */
-    private void continueToolCard(){
+    private void continueToolCard() {
         try {
             gameFlowHandler.continueToolCard();
         } catch (InvalidParameterException | NoSuchToolCardException |
                 InvalidFavorTokenNumberException |
                 NotEnoughFavorTokenException | NotYourTurnException | PlayerSuspendedException |
                 GameNotStartedException | GameOverException |
+                NoDiceInWindowException | NotDraftedYetException | AlreadyDraftedException |
+                NoSameColorDicesException | NotYourFirstTurnException | NothingCanBeMovedException |
+                NotEnoughDiceToMoveException | NoDiceInRoundTrackException | NotYourSecondTurnException |
                 ToolcardAlreadyUsedException e) {
             Logger.print("Toolcard: continuing " + nickname + " " + e);
             socketSendMessage(createErrorMessage(e.toString()));
