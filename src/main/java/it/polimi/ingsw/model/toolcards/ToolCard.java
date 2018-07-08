@@ -15,6 +15,9 @@ import it.polimi.ingsw.server.Logger;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Class representing a ToolCard in the game
+ */
 public class ToolCard implements Serializable {
     private String cardName;
     private JsonArray effects;
@@ -26,6 +29,10 @@ public class ToolCard implements Serializable {
     private Game realGame;
     private int i;
 
+    /**
+     * Create a toolcard from a json object
+     * @param toolCard jsonObject to use
+     */
     public ToolCard(JsonObject toolCard){
         this.gson = new Gson();
         this.cardName = toolCard.get("name").getAsString();
@@ -35,6 +42,10 @@ public class ToolCard implements Serializable {
         this.used = false;
     }
 
+    /**
+     * Duplicate a toolcard
+     * @param toolCard card to duplicate
+     */
     public ToolCard(ToolCard toolCard){
         this.gson = new Gson();
         this.cardName = toolCard.cardName;
@@ -44,10 +55,33 @@ public class ToolCard implements Serializable {
         this.used = toolCard.used;
     }
 
+    /**
+     * Get toolcard name
+     * @return name of the ToolCard
+     */
     public String getName(){
         return this.cardName;
     }
 
+    /**
+     * Try to use the ToolCard
+     * @param realGame Game on which use the ToolCard
+     * @param connection Connection of the Player using the ToolCard
+     * @throws NotEnoughFavorTokenException signals active Player has not enough favor token
+     * @throws InvalidFavorTokenNumberException signals an invalid number of favor token to use
+     * @throws NoDiceInWindowException signals active Player has no Dice in his window, altough it is requested by the ToolCard
+     * @throws NoDiceInRoundTrackException signals there are no dice in the round track, altough it is requested by the ToolCard
+     * @throws NotYourSecondTurnException signals active Player is not in his second turn, altough it is requested by the ToolCard
+     * @throws AlreadyDraftedException signals active Player has already extracted a Dice, altough it is requested by the ToolCard that he has not
+     * @throws NotDraftedYetException signals active Player has not extracted a Dice yet, altough it is requested by the ToolCard
+     * @throws NotYourFirstTurnException signals is not first turn of the active Player, altough it is requested by the ToolCard
+     * @throws NoSameColorDicesException signals active Player has no Dice of the requested Color in his window, altough it is requested by the ToolCard
+     * @throws NothingCanBeMovedException signals active Player has no Dices that can be moved in his window, altough it is requested by the ToolCard
+     * @throws NotEnoughDiceToMoveException signals active Player has not enough Dices in his window, altough it is requested by the ToolCard
+     * @throws PlayerSuspendedException signals active Player has been suspended
+     * @throws RollbackException signals active Player asked for a rollback
+     * @throws DisconnectionException signals active Player has disconnected
+     */
     public void use(Game realGame, ClientInterface connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException, RollbackException, DisconnectionException {
         JsonObject effect;
         String command;
@@ -103,9 +137,6 @@ public class ToolCard implements Serializable {
                         }
                         break;
                     case "move":
-                        if (arguments.get("color-in-track") != null && arguments.get("color-in-track").getAsBoolean()) {
-                            multipurposeDice = Effects.move(game.getWindow(), game.getRoundTrack(), multipurposeDice, gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
-                        }
                         Effects.move(game.getWindow(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
                         break;
                     case "move-n":
@@ -157,6 +188,24 @@ public class ToolCard implements Serializable {
 
     }
 
+    /**
+     * Continue the use of a ToolCard after a disconnection in the middle of the ToolCard and a subsequent reconnection
+     * @param connection Connection of the Player using the ToolCard
+     * @throws NotEnoughFavorTokenException signals active Player has not enough favor token
+     * @throws InvalidFavorTokenNumberException signals an invalid number of favor token to use
+     * @throws NoDiceInWindowException signals active Player has no Dice in his window, altough it is requested by the ToolCard
+     * @throws NoDiceInRoundTrackException signals there are no dice in the round track, altough it is requested by the ToolCard
+     * @throws NotYourSecondTurnException signals active Player is not in his second turn, altough it is requested by the ToolCard
+     * @throws AlreadyDraftedException signals active Player has already extracted a Dice, altough it is requested by the ToolCard that he has not
+     * @throws NotDraftedYetException signals active Player has not extracted a Dice yet, altough it is requested by the ToolCard
+     * @throws NotYourFirstTurnException signals is not first turn of the active Player, altough it is requested by the ToolCard
+     * @throws NoSameColorDicesException signals active Player has no Dice of the requested Color in his window, altough it is requested by the ToolCard
+     * @throws NothingCanBeMovedException signals active Player has no Dices that can be moved in his window, altough it is requested by the ToolCard
+     * @throws NotEnoughDiceToMoveException signals active Player has not enough Dices in his window, altough it is requested by the ToolCard
+     * @throws PlayerSuspendedException signals active Player has been suspended
+     * @throws RollbackException signals active Player asked for a rollback
+     * @throws DisconnectionException signals active Player has disconnected
+     */
     public void continueToolCard(ClientInterface connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException, RollbackException, DisconnectionException {
         JsonObject effect;
         String command;
@@ -189,9 +238,6 @@ public class ToolCard implements Serializable {
                         }
                         break;
                     case "move":
-                        if (arguments.get("color-in-track") != null && arguments.get("color-in-track").getAsBoolean()) {
-                            multipurposeDice = Effects.move(game.getWindow(), game.getRoundTrack(), multipurposeDice, gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
-                        }
                         Effects.move(game.getWindow(), gson.fromJson(arguments.get("ignore"), Window.RuleIgnored.class), optional, connection, rollback);
                         break;
                     case "move-n":
@@ -241,14 +287,26 @@ public class ToolCard implements Serializable {
         }
     }
 
+    /**
+     * Check if toolcard has been used already
+     * @return true if has been used, false otherwise
+     */
     public boolean getUsed(){
         return used;
     }
 
+    /**
+     * set ToolCard as used
+     */
     public void setUsed(){
         this.used = true;
     }
 
+    /**
+     * Put the extracted Dice in the draftpool and notify the Connection
+     * @param connection Active Player Connection
+     * @throws DisconnectionException signals active player has disconnected
+     */
     private void putDiceInDraftPool(ClientInterface connection) throws DisconnectionException{
         game.getRound().getDraftPool().add(game.getRound().getCurrentDiceDrafted());
         game.getRound().setCurrentDiceDrafted(null);
