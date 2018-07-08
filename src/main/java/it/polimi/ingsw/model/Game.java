@@ -95,10 +95,6 @@ public class Game {
         return roundTrack;
     }
 
-    public List<Dice> getDiceFromPool(){
-        return currentRound.getDraftPool();
-    }
-
     private void addDiceToTracker(Dice dice){
         this.roundTrack.add(new Dice(dice));
         trackIndex++;
