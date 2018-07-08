@@ -1,4 +1,4 @@
-package it.polimi.ingsw.RmiInterfaces;
+package it.polimi.ingsw.rmiInterfaces;
 
 import it.polimi.ingsw.server.exception.LoginFailedException;
 

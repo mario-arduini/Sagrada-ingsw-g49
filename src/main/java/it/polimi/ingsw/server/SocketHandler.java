@@ -8,7 +8,7 @@ import it.polimi.ingsw.server.controller.GamesHandler;
 import it.polimi.ingsw.server.controller.exceptions.*;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.RmiInterfaces.ClientInterface;
+import it.polimi.ingsw.rmiInterfaces.ClientInterface;
 import it.polimi.ingsw.server.exception.LoginFailedException;
 
 import java.io.*;

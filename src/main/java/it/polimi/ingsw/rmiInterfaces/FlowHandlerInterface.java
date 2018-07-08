@@ -1,4 +1,4 @@
-package it.polimi.ingsw.RmiInterfaces;
+package it.polimi.ingsw.rmiInterfaces;
 
 import it.polimi.ingsw.server.controller.exceptions.*;
 import it.polimi.ingsw.model.Dice;

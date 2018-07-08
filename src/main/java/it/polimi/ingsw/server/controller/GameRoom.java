@@ -2,7 +2,7 @@ package it.polimi.ingsw.server.controller;
 
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
-import it.polimi.ingsw.RmiInterfaces.ClientInterface;
+import it.polimi.ingsw.rmiInterfaces.ClientInterface;
 import it.polimi.ingsw.server.Logger;
 import it.polimi.ingsw.server.ServerConfigFile;
 

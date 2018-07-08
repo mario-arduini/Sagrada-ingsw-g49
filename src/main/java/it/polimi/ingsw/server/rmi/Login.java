@@ -1,9 +1,9 @@
 package it.polimi.ingsw.server.rmi;
 
 import it.polimi.ingsw.server.controller.GamesHandler;
-import it.polimi.ingsw.RmiInterfaces.ClientInterface;
-import it.polimi.ingsw.RmiInterfaces.FlowHandlerInterface;
-import it.polimi.ingsw.RmiInterfaces.LoginInterface;
+import it.polimi.ingsw.rmiInterfaces.ClientInterface;
+import it.polimi.ingsw.rmiInterfaces.FlowHandlerInterface;
+import it.polimi.ingsw.rmiInterfaces.LoginInterface;
 import it.polimi.ingsw.server.Logger;
 import it.polimi.ingsw.server.exception.LoginFailedException;
 

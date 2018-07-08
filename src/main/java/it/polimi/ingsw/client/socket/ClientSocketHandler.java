@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import it.polimi.ingsw.model.Coordinate;
 import it.polimi.ingsw.model.Dice;
-import it.polimi.ingsw.RmiInterfaces.FlowHandlerInterface;
+import it.polimi.ingsw.rmiInterfaces.FlowHandlerInterface;
 import it.polimi.ingsw.client.Client;
 import it.polimi.ingsw.client.ClientLogger;
 

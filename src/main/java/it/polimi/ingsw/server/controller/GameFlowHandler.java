@@ -5,8 +5,8 @@ import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import it.polimi.ingsw.model.toolcards.ToolCard;
-import it.polimi.ingsw.RmiInterfaces.ClientInterface;
-import it.polimi.ingsw.RmiInterfaces.FlowHandlerInterface;
+import it.polimi.ingsw.rmiInterfaces.ClientInterface;
+import it.polimi.ingsw.rmiInterfaces.FlowHandlerInterface;
 import it.polimi.ingsw.server.Logger;
 import it.polimi.ingsw.server.ServerConfigFile;
 
