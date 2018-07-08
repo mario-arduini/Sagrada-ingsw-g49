@@ -1,139 +1,341 @@
-## Socket Protocol
+# Socket Protocol
+This document describes the socket protocol implemented through an exhaustive series of examples of interactions between server and client.
 
-s: welcomeCR
+## Main Actions
 
-c: login\<TAB>\<nickname>CR
+#### Login
 
-//new user login  
-s: login\<TAB>\<new_user_nickname>\<TAB>\<auth_token>CR
+Client:
+```
+{
+	"command":"login",
+	"nickname":<user_nickname>,
+	"password":<user_token>
+}
+```
+Server:
+```
+{
+	"message":"game-room",
+	"players":<list_of_players>
+}
+```
 
-//existing user login  
-s: login\<TAB>\<existing_nickname>\<TAB>tokenCR  
-c: token\<TAB>\<user_token>CR  
-s: \[verified | failed]CR   
+---
 
-//after log  
-s: lobbyplayers:\<TAB>\<player_list>CR  
+#### Reconnection
 
-//on new player connection  
-s: newplayer:\<TAB>\<player>CR  
+Client:
+```
+{
+	"command":"login",
+	"nickname":<user_nickname>,
+	"password":<user_token>
+}
+```
+Server: 
+```
+{
+	"message":"game-info",
+	"toolcards": {<toolcard_name>:<boolean_used>}, {3} },
+	"public-goals": [<public-card_name>, {3}],
+	"private-goal":<private-card_name>
+}
 
-//start game  
-s: game\<TAB>\<game_info_message>CR
+```
+```
+{
+	"message":"reconnect-info",
+	"windows":"{<player_name>:<window_obj>, +},
+	"round-track": [<dice>, *],
+	"favor-token":"{<player-name>:<num-token>, +}",
+	"toolcard": <active-toolcard>
+}
+```
+<i>active-toolcard</i> could be empty if there was no active toolcard.
+```
+{
+	"message":"round",
+	"player":<player_name>,
+	"draft-pool": [<dice_obj>, +],
+	"new-round":<boolean>
+}
+```
 
-//private goal extracted  
-s: privateGoal\<TAB><privateGoalID>CR
+---
 
-//schema choice  
-s: schemas\<TAB>\[\<schemaID>]<sup>4</sup>CR  
-c: schema\<TAB>\<schemaID>CR  
-s: \[ok|invalid]CR  
+#### Schema Choice
+Server:
+```
+{
+	"message":"schema-choice",
+	"schemas": [schema_obj, +]}
+```
+Client:
+```
+{
+	"command":"schema",
+	"id":<int>
+}
+```
+Server:
+```
+{
+	"message":"schema-chosen",
+	"content": {<player_name>:<schema_obj, +}
+}
+```
 
-//public goal choice  
-s: publicGoal\<TAB>\<publicGoalID>\<TAB>\<publicGoalID>\<TAB>\<publicGoalID>CR
+---
 
-//new round  
-s: round\<TAB>\<round_number>\<TAB>\<nickname>CR  
-c: extractCR  
-s: dice\[\<TAB>\<dice_extracted>]<sup>+</sup>CR  
+#### Place Dice
+Client:
+```
+{
+	"command":"place-dice",
+	"dice":"<dice_obj>,
+	"row":<int>,
+	"column":<int>
+}
+```
+Server:
+```
+{
+	"message":"update-window",
+	"nickname":<player_name>,
+	"row":<int>,
+	"column":<int>,
+	"dice":<dice_obj>
+}
+```
 
-//exhaustive user turn cases
+---
 
-//place a dice and pass  
-s: your-turnCR  
-c: place\<TAB>\<dice>\<TAB>\<row>\<TAB>\<column>\<TAB>\<option>CR  
-s: \[ok|invalid_dice|constrains_violated|bad_request]CR  
-c: passCR  
+#### Use Tool Card
+Client:
+```
+{
+	"command":"toolcard",
+	"name":<toolcard_name>
+}
+```
+##### Ask Message
+Server:
+```
+{
+	"message":<action_message>,
+	"prompt":<prompt_string>,
+	"rollback":<boolean>
+}
+```
+Client:
+```
+{
+	"message":<action_message>,
+	"choice":<coordinate_obj>
+}
+```
 
-//use tool card 1 and place dice  
-s: your-turnCR  
-c: active_tool_card\<TAB>\<toolCardID>CR  
-s: \[ok|not_enough_token|not_valid_choice]CR  
-c: place\<TAB>\<dice>\<TAB>\<row>\<TAB>\<column>\<TAB>\[+|-1]CR  
-s: \[ok|invalid_dice|constrains_violated|bad_request]CR  
-c: passCR
+Action_messages:
+* `toolcard-dice-window`
+* `toolcard-dice-draftpool`
+* `toolcard-dice-roundtrack`
+* `toolcard-plus-minus`
+* `toolcard-dice-value`
+* `move-dice-number`
 
-//use tool card 1, change your mind, use tool card 2 and pass  
-s: your-turnCR  
-c: active_tool_card\<TAB>\<toolCardID>CR  
-s: \[ok|not_enough_token|not_valid_choice]CR  
-c: deactive_tool_cardCR  
-s: \[ok|no]CR  
-c: active_tool_card\<TAB>\<toolCardID>CR  
-s: \[ok|not_enough_token|not_valid_choice]CR  
-c: move\<TAB>\<row>\<TAB>\<column>\<TAB>\<row>\<TAB>\<column>\<TAB>CR  
-s: \[ok|constraints_violated|empty_cell|cell_already_occupied]CR  
-c: passCR
 
-//use tool card 4, then place a dice  
-s: your-turnCR  
-c: active_tool_card\<TAB>\<toolCardID>CR  
-s: \[ok|not_enough_token|not_valid_choice]CR  
-c: move\<TAB>\<row>\<TAB>\<column>\<TAB>\<row>\<TAB>\<column>\<TAB>CR  
-c: move\<TAB>\<row>\<TAB>\<column>\<TAB>\<row>\<TAB>\<column>\<TAB>CR  
-s: \[ok|constraints_violated|empty_cell|cell_already_occupied]CR  
-c: place\<TAB>\<dice>\<TAB>\<row>\<TAB>\<column>CR  
-s: \[ok|invalid_dice|constrains_violated|bad_request]CR  
-c: passCR  
+##### Optional
+Client:
+```
+{
+	"command":<ask_command>,
+	"choice": "rollback"
+}
+```
+Server:
+```
+{
+	"message":"rollback-ok",
+}
+```
 
-//use tool card 5 and place a dice  
-s: your-turnCR  
-c: active_tool_card\<TAB>\<toolCardID>CR  
-s: \[ok|not_enough_token|not_valid_choice]CR  
-c: swap_dice\<TAB><dice>\<TAB><dice_track>CR  
-s: [ok|invalid_dice]CR  
-c: place\<TAB>\<dice>\<TAB>\<row>\<TAB>\<column>CR  
-s: \[ok|invalid_dice|constrains_violated|bad_request]CR  
-c: passCR  
-  
-//use tool card 6 and place a dice  
-s: your-turnCR  
-c: active_tool_card\<TAB>\<toolCardID>CR  
-s: \[ok|not_enough_token|not_valid_choice]CR  
-c: reroll_dice\<TAB><dice>CR
-s: new_dice\<TAB><dice>CR  
-c: place\<TAB>\<dice>\<TAB>\<row>\<TAB>\<column>CR  
-s: \[ok|invalid_dice|constrains_violated|bad_request]CR  
-c: passCR  
-  
-//use tool card 7 and pass
-s: your-turnCR  
-c: active_tool_card\<TAB>\<toolCardID>CR  
-s: \[ok|not_enough_token|not_valid_choice]CR  
-c: reroll_allCR  
-s: dice_list\[\<TAB>\<dice_rerolled>]<sup>+</sup>CR  
-c: passCR  
+---
 
-//use tool card 8 and place two dices  
-s: your-turnCR  
-c: active_tool_card\<TAB>\<toolCardID>CR  
-s: \[ok|not_enough_token|not_valid_choice]CR  
-c: place\<TAB>\<dice>\<TAB>\<row>\<TAB>\<column>CR  
-s: \[ok|invalid_dice|constrains_violated|bad_request]CR  
-c: passCR  
-s: your-turnCR  
-c: place\<TAB>\<dice>\<TAB>\<row>\<TAB>\<column>CR  
-s: \[ok|invalid_dice|constrains_violated|bad_request]CR  
-c: passCR  
+#### Pass
+Client:
+```
+{
+	"command":"pass"
+}
+```
 
-// use tool card 11 and place dice  
-s: your-turnCR  
-c: active_tool_card\<TAB>\<toolCardID>CR  
-s: \[ok|not_enough_token|not_valid_choice]CR  
-c: put_in_bag\<TAB><dice>CR  
-s: dice_from_pool\<TAB><dice>CR  
-c: set_value\<TAB><value>CR  
-s: [ok|not_valid]CR  
-c: place\<TAB>\<dice>\<TAB>\<row>\<TAB>\<column>CR  
-s: \[ok|invalid_dice|constrains_violated|bad_request]CR  
-c: passCR  
-s: your-turnCR  
-c: place\<TAB>\<dice>\<TAB>\<row>\<TAB>\<column>CR  
-s: \[ok|invalid_dice|constrains_violated|bad_request]CR  
-c: passCR  
-  
-//round done  
-s: endRound\<TAB>\<dice_added_to_tracker>CR 
+---
 
-//game done  
-s: endGame\<TAB>\[\<nickname>\<TAB>\<score>]<sup>+</sup>CR
+#### Logout
+Client:
+```
+{
+	"command":"logout"
+}
+```
+
+
+## Notifications
+
+#### Others' Login
+Server:
+```
+{
+	"message":"new-player",
+	"nickname": <player_name>
+}
+```
+
+---
+
+#### Others' Logout
+Server:
+```
+{
+	"message":"quit",
+	"nickname":<player_name>
+}
+```
+
+---
+
+#### Others' Suspention
+Server:
+```
+{
+	"message":"suspended",
+	"player":<player_name
+}
+```
+
+---
+
+#### Game Over
+Server:
+```
+{
+	"message":"game-over",
+	"scores": [<score_obj>, +]
+}
+```
+
+---
+
+#### Tool Card Use
+Server:
+```
+{
+	"message":"toolcard-used",
+	"player":<player_name>,
+	"toolcard":<toolcard_name>,
+	"window":<window_obj>,
+	"draft-pool": [<dice_obj>, +],
+	"round-track": [<dice_obj>, +]
+}
+```
+
+---
+
+#### Round
+Server:
+```
+{
+	"message":"round",
+	"player":<player_name>,
+	"draft-pool": [<dice_obj>, +],
+	"new-round":<boolean>
+	"round-track": [<dice_obj>, +]
+}
+```
+<i>round-track</i> only if <i>new-round</i>.
+
+#### Show Dice
+Server:
+```
+{
+	"message":"show-dice",
+	"dice":<dice_obj>
+}
+```
+
+#### Alert Dice Draft Pool
+```
+{
+	"message":"alert-dice",
+	"dice":<dice_obj>
+}
+```
+
+## Objects
+
+#### Window Obj
+```
+{
+	"schema":<schema_obj>,
+	"mosaic":[[<dice_obj>, +], +],
+	"firstDicePlaced":<boolean>
+}
+```
+
+---
+
+#### Schema Obj
+```
+{
+	"difficulty":<int_difficulty>,
+	"constraint":[[<constraint_obj>, +], +],
+	"name":<schema_name>
+}
+```
+
+---
+
+#### Constraint Obj
+```
+{
+	"color":<color>,
+	"number":<int>
+}
+```
+<i>color</i> optional, <i>number</i> 0 if constraint is on color.
+
+---
+
+#### Dice Obj
+```
+{
+	"color":<color>,
+	"value"<int>
+}
+```
+
+---
+
+#### Coordinate Obj
+```
+{
+	"row":<int>,
+	"color":<int>
+}
+```
+
+---
+
+#### Score Obj
+```
+{
+	"player":<player_name>,
+	"totalScore":<int>,
+	"privateScore":<int>,
+	"publicScore":<int>,
+	"favorToken":<int>,
+	"emptyCells":<int>,
+	"roundPosition":<int>
+}
+```
