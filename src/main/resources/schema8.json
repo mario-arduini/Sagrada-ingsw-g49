@@ -1,0 +1,6 @@
+{"difficulty":4,"constraint":[
+[{"color":"RED","number":0},null,{"color":"BLUE","number":0},null,{"color":"YELLOW","number":0}],
+[{"number":4},{"color":"PURPLE","number":0},{"number":3},{"color":"GREEN","number":0},{"number":2}],
+[null,{"number":1},null,{"number":5},null],
+[null,null,{"number":6},null,null]],
+"name":"Aurora Sagradis"}

@@ -196,6 +196,8 @@ class ConnectionHandlerStub implements ClientInterface {
         Gson gson = new Gson();
 
         BufferedReader is;
+
+
         is = new BufferedReader(new InputStreamReader(FilesUtil.class.getClassLoader().getResourceAsStream("schema"+schema+".json")));
 
         try {
