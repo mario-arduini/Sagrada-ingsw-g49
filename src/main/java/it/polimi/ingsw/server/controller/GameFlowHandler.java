@@ -229,6 +229,8 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
             gameRoom.logout(player.getNickname(), connection);
         this.gameRoom = null;
         this.initialSchemas = null;
+        this.activeToolCard = null;
+        this.toolCardUsed = false;
         this.player = new Player(player);
         gamesHandler.goToWaitingRoom(this);
     }
