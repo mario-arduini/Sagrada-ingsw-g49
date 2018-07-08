@@ -28,8 +28,6 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     private ClientInterface connection;
     private boolean toolCardUsed;
     private transient Timer timer;
-    //private int secondsTimerSchema;
-    //private static final String TIMEOUT_SCHEMA_FILE = "timeout_schema_choice.txt";
 
     /**
      * Creates a GameFlowHandler.
@@ -45,7 +43,6 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         this.activeToolCard = null;
         this.connection = connection;
         this.toolCardUsed = false;
-        //this.secondsTimerSchema = FilesUtil.readIntFromFile(TIMEOUT_SCHEMA_FILE);
     }
 
     public Player getPlayer(){
@@ -63,10 +60,12 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     public void setGame(GameRoom game) {
         this.gameRoom = game;
         initialSchemas = game.extractSchemas();
-        List<String> toolCards = game.getToolCards().stream().map(ToolCard::getName).collect(Collectors.toList());
         List<String> publicGoals = game.getPublicGoals().stream().map(PublicGoal::getName).collect(Collectors.toList());
+        HashMap<String, Boolean> toolCardsMap = new HashMap<>();
+        gameRoom.getToolCards().forEach(card -> toolCardsMap.put(card.getName(), card.getUsed()));
+
         try {
-            connection.notifyGameInfo(toolCards, publicGoals, player.getPrivateGoal().getName());
+            connection.notifyGameInfo(toolCardsMap, publicGoals, player.getPrivateGoal().getName());
         } catch (RemoteException e) {
             Logger.print("Disconnection: " + player.getNickname() + e.getMessage());
         }
@@ -125,10 +124,11 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         gameRoom.getPlayers().forEach(p -> windows.put(p.getNickname(), p.getWindow()));
         gameRoom.getPlayers().forEach(p -> favorToken.put(p.getNickname(), p.getFavorToken()));
 
-        List<String> toolCards = gameRoom.getToolCards().stream().map(ToolCard::getName).collect(Collectors.toList());
         List<String> publicGoals = gameRoom.getPublicGoals().stream().map(PublicGoal::getName).collect(Collectors.toList());
+        HashMap<String, Boolean> toolCardsMap = new HashMap<>();
+        gameRoom.getToolCards().forEach(card -> toolCardsMap.put(card.getName(), card.getUsed()));
         try {
-            connection.notifyGameInfo(toolCards, publicGoals, player.getPrivateGoal().getName());
+            connection.notifyGameInfo(toolCardsMap, publicGoals, player.getPrivateGoal().getName());
         } catch (RemoteException e) {
             Logger.print("Disconnection: " + player.getNickname() + e.getMessage());
         }

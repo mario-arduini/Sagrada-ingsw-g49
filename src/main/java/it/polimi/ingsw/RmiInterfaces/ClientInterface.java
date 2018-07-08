@@ -20,7 +20,7 @@ public interface ClientInterface extends Remote, Serializable {
     void notifyOthersSchemas(Map<String, Schema> playersSchemas) throws RemoteException;
     void notifyDicePlaced(String nickname, int row, int column, Dice dice) throws RemoteException;
     void notifyToolCardUse(String player, String toolCard, Window window, List<Dice> draftPool, List<Dice> roundTrack) throws RemoteException;
-    void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal) throws RemoteException;
+    void notifyGameInfo(Map<String, Boolean> toolCardsMap, List<String> publicGoals, String privateGoal) throws RemoteException;
     void notifyReconInfo(Map<String, Window> windows, Map<String, Integer> favorToken, List<Dice> roundTrack, String toolCardName) throws RemoteException;
     void notifyEndGame(List<Score> scores) throws RemoteException;
     void notifySuspension(String nickname) throws RemoteException;

@@ -268,7 +268,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal){
+    public void notifyGameInfo(Map<String, Boolean> toolCards, List<String> publicGoals, String privateGoal){
         JsonObject message;
         message = createMessage("game-info");
 

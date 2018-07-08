@@ -18,15 +18,17 @@ public class GameRoom extends Game{
     private List<ClientInterface> connections;
     private boolean notifyEndGame;
     private Timer timer;
-    //private int secondsTimer;
-    //private static final String TIMEOUT_TURN_FILE_NAME = "timeout_turn.txt";
 
-
+    /**
+     * Creates a Game Room.
+     * @param playerList List of players in the game.
+     * @param connections List of connections to which notify.
+     * @throws NoMorePlayersException couldn't start a round.
+     */
     GameRoom(List<Player> playerList, List<ClientInterface> connections) throws NoMorePlayersException {
         super(playerList);
         this.connections = connections;
         this.notifyEndGame = true;
-        //this.secondsTimer = FilesUtil.readIntFromFile(TIMEOUT_TURN_FILE_NAME);
     }
 
     /**
@@ -106,6 +108,11 @@ public class GameRoom extends Game{
         }
     }
 
+    /**
+     * Check whether the game is finished or not.
+     * Notify game over if necessary.
+     * @return true if game finished, false otherwise.
+     */
     private synchronized boolean checkGameFinished(){
         if (!isGameFinished()) return false;
         if (notifyEndGame){

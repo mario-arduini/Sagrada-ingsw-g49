@@ -94,7 +94,7 @@ public class ServerListener implements Runnable {
                         break;
                     case "game-info":
                         listType = new TypeToken<List<String>>(){}.getType();
-                        client.notifyGameInfo(gson.fromJson(jsonObject.get("toolcards").getAsString(), listType), gson.fromJson(jsonObject.get("public-goals").getAsString(), listType), jsonObject.get("private-goal").getAsString());
+                        client.notifyGameInfo(gson.fromJson(jsonObject.get("toolcards").getAsString(), new TypeToken<HashMap<String, Boolean>>(){}.getType()), gson.fromJson(jsonObject.get("public-goals").getAsString(), listType), jsonObject.get("private-goal").getAsString());
                         break;
                     case "schema-choice":
                         client.notifySchemas(gson.fromJson(jsonObject.get("schemas").getAsString(), new TypeToken<List<Schema>>(){}.getType()));

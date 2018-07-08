@@ -19,16 +19,11 @@ import java.util.stream.Collectors;
 public class GamesHandler {
     private List<GameFlowHandler> waitingRoom;
     private List<GameFlowHandler> playingUsers;
-    //private static final String TIMEOUT_START_GAME_FILE_NAME = "timeout_start_game.txt";
-    //private int secondsTimer;
     private Timer timer;
 
-    //TODO: DONE, check for file exception
     public GamesHandler(){
         this.waitingRoom = new ArrayList<>();
         this.playingUsers = new ArrayList<>();
-        //this.secondsTimer = FilesUtil.readIntFromFile(TIMEOUT_START_GAME_FILE_NAME);
-        //TODO: Throw exception if file does not exist
     }
 
     /**
@@ -153,7 +148,7 @@ public class GamesHandler {
             try {
                 player.getConnection().notifyLogout(gameFlow.getPlayer().getNickname());
             } catch (RemoteException e) {
-                e.printStackTrace();
+                Logger.print("Disconnection: notify disconnection " + e.getMessage());
             }
         });
         if(waitingRoom.size() < 2 && timer != null) {
@@ -222,7 +217,8 @@ public class GamesHandler {
             } catch (RemoteException e) {
                 Logger.print(e.toString());
             }
-        });        waitingRoom.add(gameFlow);
+        });
+        waitingRoom.add(gameFlow);
 
         waitingRoomNewPlayer();
     }
