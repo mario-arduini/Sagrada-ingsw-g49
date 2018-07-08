@@ -15,6 +15,7 @@ public class ServerConfigFile {
     private static int secondsTimerSchema;
     private static int secondsTimerStartGame;
     private static int secondsTimerTurn;
+    private static int rmiPort;
 
     /**
      * Private constructor because the class contains static methods only
@@ -23,7 +24,7 @@ public class ServerConfigFile {
     }
 
     /**
-     * Loads from file some parameters for the game
+     * Loads from file some parameters for the game and the server.
      */
     static void intiConfigParameters(){
         List<BufferedReader> files = FilesUtil.listFiles(CONFIG_FILE_NAME, 1);
@@ -33,6 +34,7 @@ public class ServerConfigFile {
         secondsTimerSchema = jsonObject.get("timer_schema").getAsInt();
         secondsTimerStartGame = jsonObject.get("timer_start_game").getAsInt();
         secondsTimerTurn = jsonObject.get("timer_schema").getAsInt();
+        rmiPort = jsonObject.get("rmi-port").getAsInt();
     }
 
     /**
@@ -58,4 +60,13 @@ public class ServerConfigFile {
     public static int getSecondsTimerTurn() {
         return secondsTimerTurn;
     }
+
+    /**
+     * Used to get the port to locate the rmi registry.
+     * @return the port where to locate the rmi registry.
+     */
+    public static int getRmiPort(){
+        return rmiPort;
+    }
+
 }

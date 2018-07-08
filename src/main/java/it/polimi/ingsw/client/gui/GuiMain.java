@@ -10,11 +10,19 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 
+/**
+ * Initial class to launch the GUI, includes GUI utility functions
+ */
 public class GuiMain extends Application {
 
     private static final String DEF_COLOR = "#f8f6f7";
 
 
+    /**
+     * Start method overwritten from Application class, set up first scene
+     * @param primaryStage stage
+     * @throws Exception possible exceptions in setting up the GUI
+     */
     @Override
     public void start(Stage primaryStage) throws Exception{
         URL path = GuiMain.class.getClassLoader().getResource("gui-views/connessione.fxml");
@@ -25,11 +33,11 @@ public class GuiMain extends Application {
         primaryStage.show();
     }
 
-
-    public static void main(String[] args) {
-        launch();
-    }
-
+    /**
+     * Retrieve the Image for the corresponding goal name
+     * @param goal Name of the Goal
+     * @return Image of the goal
+     */
     static Image getGoalImage(String goal){
         String fileName;
         switch (goal){
@@ -60,6 +68,11 @@ public class GuiMain extends Application {
         return goalImage;
     }
 
+    /**
+     * Retrieve the Image for the corresponding Tool name
+     * @param tool Name of the ToolCard
+     * @return Image of the ToolCard
+     */
     static Image getToolImage(String tool){
         String fileName;
         switch (tool){

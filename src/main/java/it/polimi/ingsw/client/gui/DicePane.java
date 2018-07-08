@@ -9,12 +9,19 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 
+/**
+ * Class representing a Dice in the GUI
+ */
  class DicePane extends StackPane {
 
     private Label valueLabel;
     private Dice dice;
     private Integer idx;
 
+    /**
+     * Construct the GUI element from the given Dice
+     * @param dice Dice to represent
+     */
     DicePane(Dice dice){
         super();
         if(dice.getColor()!=null)this.setStyle("-fx-border-color: black; -fx-border-width: 3; -fx-border-style: solid; -fx-border-radius:15; -fx-background-radius:15; -fx-background-color: "+GuiMain.getColor(dice.getColor())+";");
@@ -27,6 +34,11 @@ import javafx.scene.layout.StackPane;
         this.idx = 0;
     }
 
+    /**
+     * Construct the GUI element from the given Dice and assign the given index
+     * @param dice Dice to represent
+     * @param idx indec
+     */
     DicePane(Dice dice,int idx){
         super();
         if(dice.getColor()!=null)this.setStyle("-fx-border-color: black; -fx-border-width: 3; -fx-border-style: solid; -fx-border-radius:15; -fx-background-radius:15; -fx-background-color: "+GuiMain.getColor(dice.getColor())+";");
@@ -39,6 +51,10 @@ import javafx.scene.layout.StackPane;
         this.idx = idx;
     }
 
+    /**
+     * Make dice resizible, binding its dimensions to the Height property of the parent
+     * @param par Expected Height Property of the parent
+     */
     void bindDimension(ReadOnlyDoubleProperty par){
         this.setMaxHeight(par.getValue()*.8);
         this.setMaxWidth(this.getMaxHeight());
@@ -54,6 +70,9 @@ import javafx.scene.layout.StackPane;
         }
     }
 
+    /**
+     * Allow the drag and drop operation for the DicePane
+     */
     void setDraggable(){
         this.setOnDragDetected(event -> {
             Dragboard db = this.startDragAndDrop(TransferMode.MOVE);
@@ -66,14 +85,26 @@ import javafx.scene.layout.StackPane;
         });
     }
 
+    /**
+     * Get index of the DicePane
+     * @return index of DicePane
+     */
     int getIdx(){
         return idx;
     }
 
+    /**
+     * Get the Dice represented by the DicePane
+     * @return the Dice represented
+     */
     Dice getDice(){
         return dice;
     }
 
+    /**
+     * Get the Label containing the value of the Dice
+     * @return the Label element containing the value of the Dice
+     */
     Label getLabel(){
         return valueLabel;
     }

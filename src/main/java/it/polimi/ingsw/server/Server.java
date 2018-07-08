@@ -43,7 +43,7 @@ public class Server {
         Login rmiLogger = new Login(gamesHandler);
         Socket clientSocket;
 
-        Registry registry = LocateRegistry.createRegistry(1099);
+        Registry registry = LocateRegistry.createRegistry(ServerConfigFile.getRmiPort());
         registry.rebind("logger", rmiLogger);
         Logger.print("Server: Rmi registry ready.");
 
@@ -85,11 +85,17 @@ public class Server {
 
     public static void main(String[] args){
         BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
-        ServerConfigFile.intiConfigParameters();
+        try {
+            ServerConfigFile.intiConfigParameters();
+        } catch (Exception e){
+            Logger.print("Configuration Error: " + e.toString());
+            System.exit(1);
+        }
+        Logger.print("Configuration File loaded correctly.");
         int port = 0;
         while (port == 0)
             try {
-                System.out.print("Enter a port: ");
+                System.out.print("Enter a port for socket connections: ");
                 port = Integer.parseInt(buffer.readLine());
                 if (port < 10000 || port > 65355){
                     System.out.println("Valid port number above 10000 and below 65355.");
