@@ -16,12 +16,18 @@ import javafx.scene.text.Text;
 
 import static it.polimi.ingsw.client.gui.GuiMain.getColor;
 
+/**
+ * Class representing the Window of a Player in the GUI
+ */
 public class SagradaGridPane extends GridPane {
 
     private static final String DEF_COLOR = "#f8f6f7";
     private GUIHandler controller;
     private boolean placingDice;
 
+    /**
+     * Init the property of the object
+     */
     void initProperty(){
         ColumnConstraints cc = new ColumnConstraints();
         cc.setPercentWidth(20.0);
@@ -39,10 +45,18 @@ public class SagradaGridPane extends GridPane {
 
     }
 
+    /**
+     * Pass the controller of the GUI
+     * @param controller controller of the GUI
+     */
     void passController(GUIHandler controller){
         this.controller = controller;
     }
 
+    /**
+     * Set the Schema associated with the Window
+     * @param schema Schema of the Window
+     */
     public void setSchema(Schema schema){
         Constraint constraint;
         this.setStyle("-fx-background-color: #05040c;");
@@ -69,8 +83,12 @@ public class SagradaGridPane extends GridPane {
             }
     }
 
+    /**
+     * Try to place the dice on the GUI
+     * @param cellToUpdate CellPane that called the function
+     * @param idx index of the dice
+     */
     void tryDice(CellPane cellToUpdate,int idx){
-        System.out.println("setting dice in : "+cellToUpdate.getRow()+":"+cellToUpdate.getCol());
         placingDice = true;
         if(controller!=null) {
             try {
@@ -81,18 +99,35 @@ public class SagradaGridPane extends GridPane {
         }
     }
 
+    /**
+     * @return true if we are placing a dice, false otherwise
+     */
     boolean isPlacingDice() {
         return placingDice;
     }
 
+    /**
+     * Set the value of the flag placing dice
+     * @param bool value to set
+     */
     public void setPlacingDice(boolean bool){
         this.placingDice = bool;
     }
 
+    /**
+     * Get the cell by row and column
+     * @param r row of the cell
+     * @param c column of the cell
+     * @return Corresponding cellpane
+     */
     private CellPane getCell(int r, int c){
         return (CellPane) getChildren().stream().filter(cell -> GridPane.getRowIndex(cell)==r&&GridPane.getColumnIndex(cell)==c).findFirst().get();
     }
 
+    /**
+     * Update the GUI view basing on the corresponding Window
+     * @param window
+     */
     void updateWindow(Window window){
         for(int r = 0;r<Window.ROW;r++)
             for(int c=0;c<Window.COLUMN;c++){
@@ -113,6 +148,9 @@ public class SagradaGridPane extends GridPane {
 
 }
 
+/**
+ * Inner class to represent a Cell of the Window in the GUI
+ */
 class CellPane extends StackPane{
 
     private int row;
@@ -121,6 +159,12 @@ class CellPane extends StackPane{
     private SagradaGridPane parent;
     private String tmpStyle;
 
+    /**
+     * Pass row, column and parent
+     * @param row row of the cell
+     * @param col col of the cell
+     * @param parent parent window
+     */
     CellPane(int row,int col,SagradaGridPane parent){
         super();
         this.row = row;
@@ -129,22 +173,39 @@ class CellPane extends StackPane{
         this.parent = parent;
     }
 
+    /**
+     * Get the Dice of the cell or null
+     * @return Dice stored in the cell or null
+     */
     public DicePane getDice() {
         return dice;
     }
 
+    /**
+     * Set the DicePane of the Cell
+     * @param dp
+     */
     public void setDice(DicePane dp){
         this.dice = dp;
     }
 
-    int getCol() {
+    /**
+     * @return column of the cell
+     */
+    public int getCol() {
         return col;
     }
 
+    /**
+     * @return row of the cell
+     */
     public int getRow() {
         return row;
     }
 
+    /**
+     * Make the cell a dropping place, for drag and drop operation with DicePane
+     */
     void setDiceDroppable(){
         this.setOnDragOver(event -> {
             if (event.getGestureSource() != this  && this.getDice() == null) {
