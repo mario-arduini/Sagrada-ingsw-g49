@@ -1,11 +1,11 @@
 package it.polimi.ingsw.model.toolcards;
 
-import it.polimi.ingsw.controller.exceptions.DisconnectionException;
-import it.polimi.ingsw.controller.exceptions.RollbackException;
+import it.polimi.ingsw.server.controller.exceptions.DisconnectionException;
+import it.polimi.ingsw.server.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
-import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
-import it.polimi.ingsw.network.server.Logger;
+import it.polimi.ingsw.RmiInterfaces.ClientInterface;
+import it.polimi.ingsw.server.Logger;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;

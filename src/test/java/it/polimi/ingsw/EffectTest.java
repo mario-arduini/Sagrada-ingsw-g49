@@ -3,12 +3,12 @@ package it.polimi.ingsw;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import it.polimi.ingsw.controller.exceptions.DisconnectionException;
-import it.polimi.ingsw.controller.exceptions.RollbackException;
+import it.polimi.ingsw.server.controller.exceptions.DisconnectionException;
+import it.polimi.ingsw.server.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.toolcards.Effects;
-import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
+import it.polimi.ingsw.RmiInterfaces.ClientInterface;
 import it.polimi.ingsw.utilities.FilesUtil;
 import org.junit.jupiter.api.Test;
 

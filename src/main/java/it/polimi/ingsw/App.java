@@ -5,7 +5,7 @@ import it.polimi.ingsw.model.Color;
 import it.polimi.ingsw.model.Constraint;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.model.goalcards.FullShadeVariety;
-import it.polimi.ingsw.network.client.Client;
+import it.polimi.ingsw.client.Client;
 
 import java.io.IOException;
 import java.util.HashMap;
