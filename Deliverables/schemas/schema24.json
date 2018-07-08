@@ -1,0 +1,6 @@
+{"difficulty":5,"constraint":[
+[null,{"color":"BLUE","number":0},{"color":"RED","number":0},null,null],
+[null,{"number":4},{"number":5},null,{"color":"BLUE","number":0}],
+[{"color":"BLUE","number":0},{"number":2},null,{"color":"RED","number":0},{"number":5}],
+[{"number":6},{"color":"RED","number":0},{"number":3},{"number":1},null]],
+"name":"Fulgor del Cielo"}

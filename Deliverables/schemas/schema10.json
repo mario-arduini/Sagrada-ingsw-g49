@@ -1,0 +1,6 @@
+{"difficulty":6,"constraint":[
+[{"number":2},null,{"number":5},null,{"number":1}],
+[{"color":"YELLOW","number":0},{"number":6},{"color":"PURPLE","number":0},{"number":2},{"color":"RED","number":0}],
+[null,{"color":"BLUE","number":0},{"number":4},{"color":"GREEN","number":0},null],
+[null,{"number":3},null,{"number":5},null]],
+"name":"Symphony of Light"}

@@ -1,0 +1,6 @@
+{
+	"timer_turn":1000,
+	"timer_start_game":5,
+	"timer_schema":1000,
+	"rmi-port":1099
+}
