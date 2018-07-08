@@ -16,6 +16,8 @@ import java.util.logging.Logger;
  */
 class CLIHandler implements GraphicInterface{
 
+    private static final int MIN_PORT = 10000;
+    private static final int MAX_PORT = 65535;
     private static final int WINDOW_WIDTH = 27;
     private static final int ROWS = 4;
     private static final int COLUMNS = 5;
@@ -268,7 +270,7 @@ class CLIHandler implements GraphicInterface{
      */
     private int askServerPort(){
         ClientLogger.print("Insert server port: ");
-        return readInt(1000, 65535);
+        return readInt(MIN_PORT, MAX_PORT);
     }
 
     /**

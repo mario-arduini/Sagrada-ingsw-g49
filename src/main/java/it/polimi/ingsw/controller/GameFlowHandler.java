@@ -8,6 +8,7 @@ import it.polimi.ingsw.model.toolcards.ToolCard;
 import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
 import it.polimi.ingsw.network.RmiInterfaces.FlowHandlerInterface;
 import it.polimi.ingsw.network.server.Logger;
+import it.polimi.ingsw.utilities.FilesUtil;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -27,7 +28,8 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     private ClientInterface connection;
     private boolean toolCardUsed;
     private transient Timer timer;
-    private int secondsTimerSchema = 1000000; //TODO: read value from file.
+    private int secondsTimerSchema;
+    private static final String TIMEOUT_SCHEMA_FILE = "timeout_schema_choice.txt";
 
     /**
      * Creates a GameFlowHandler.
@@ -43,7 +45,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         this.activeToolCard = null;
         this.connection = connection;
         this.toolCardUsed = false;
-
+        this.secondsTimerSchema = FilesUtil.readIntFromFile(TIMEOUT_SCHEMA_FILE);
     }
 
     public Player getPlayer(){

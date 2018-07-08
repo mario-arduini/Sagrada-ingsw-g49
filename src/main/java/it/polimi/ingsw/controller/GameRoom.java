@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
 import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
 import it.polimi.ingsw.network.server.Logger;
+import it.polimi.ingsw.utilities.FilesUtil;
 
 import java.rmi.RemoteException;
 import java.util.*;
@@ -17,13 +18,15 @@ public class GameRoom extends Game{
     private List<ClientInterface> connections;
     private boolean notifyEndGame;
     private Timer timer;
-    private int secondsTimer = 30000000; //TODO: read value from file.
+    private int secondsTimer;
+    private static final String TIMEOUT_TURN_FILE_NAME = "timeout_turn.txt";
 
 
     GameRoom(List<Player> playerList, List<ClientInterface> connections) throws NoMorePlayersException {
         super(playerList);
         this.connections = connections;
         this.notifyEndGame = true;
+        this.secondsTimer = FilesUtil.readIntFromFile(TIMEOUT_TURN_FILE_NAME);
     }
 
     /**

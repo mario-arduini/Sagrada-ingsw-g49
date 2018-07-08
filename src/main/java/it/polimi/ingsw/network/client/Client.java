@@ -27,6 +27,7 @@ import java.util.logging.*;
 public class Client extends UnicastRemoteObject implements ClientInterface {
 
     private static final Logger LOGGER = Logger.getLogger( Client.class.getName() );
+    private static final int NUMBER_RECONNECTION_ATTEMPTS = 20;
 
     private String serverAddress;
     private int serverPort;
@@ -102,7 +103,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
         else {
             try {
                 server = serverInterface.login(nickname, password,this);
-                //setServerResult(true);
             } catch (LoginFailedException e) {
                 setServerResult(false);
             }catch (RemoteException e){
@@ -509,7 +509,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             handler.interruptInput();
             handler.wakeUp(false);
             int i = 0;
-            while (i < 20) {
+            while (i < NUMBER_RECONNECTION_ATTEMPTS) {
                 if (tryReconnection()) {
                     serverConnected = true;
                     gameSnapshot.newGame();
