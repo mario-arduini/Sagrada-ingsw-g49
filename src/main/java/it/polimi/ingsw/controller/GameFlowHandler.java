@@ -43,6 +43,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         this.activeToolCard = null;
         this.connection = connection;
         this.toolCardUsed = false;
+
     }
 
     public Player getPlayer(){

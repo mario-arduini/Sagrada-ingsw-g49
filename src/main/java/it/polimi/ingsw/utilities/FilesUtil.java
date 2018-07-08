@@ -1,5 +1,7 @@
 package it.polimi.ingsw.utilities;
 
+import it.polimi.ingsw.network.server.Logger;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -51,5 +53,33 @@ public class FilesUtil {
         } catch (IOException e) {
         }
          return new File(new File(dir + "/" + fileName).getAbsolutePath());
+    }
+
+
+    /**
+     * Reads an integer value from a certain file
+     * @param filename the name of the from where to read
+     * @return the integer value read
+     */
+    public static int readIntFromFile(String filename){
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(FilesUtil.class.getClassLoader().getResourceAsStream(filename)));
+            String text;
+
+            if ((text = reader.readLine()) != null)
+                return Integer.parseInt(text);
+
+        } catch (IOException e) {
+            Logger.print("Read Int From File: parsing " + e.getMessage());
+        } finally {
+            try {
+                if (reader != null)
+                    reader.close();
+            } catch (IOException e) {
+                Logger.print("Read Int From File: closing " + e.getMessage());
+            }
+        }
+        return -1;
     }
 }

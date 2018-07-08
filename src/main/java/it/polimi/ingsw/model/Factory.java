@@ -23,13 +23,14 @@ public class Factory {
     private Stack<Schema> schemas;
 
     private static final int DICE_NUMBER_PER_COLOR = 18;
+    private static final int NUMBER_OF_SCHEMAS = 24;
+    private static final int NUMBER_OF_TOOL_CARDS = 12;
 
     public Factory() {
         this.toolCards = new Stack<>();
-        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.TOOL_CARD_FOLDER, 12);
+        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.TOOL_CARD_FOLDER, NUMBER_OF_TOOL_CARDS);
         for (BufferedReader file:files){
-            //if (file.getName().matches("[a-zA-Z0-9_-]+\\.json"))
-                toolCards.push(file);
+            toolCards.push(file);
         }
         this.privateGoalCards = Arrays.asList(Color.BLUE,Color.GREEN,Color.PURPLE,Color.RED,Color.YELLOW);
         this.privateGoalCardsIndex = 0;
@@ -59,11 +60,11 @@ public class Factory {
 
     }
 
-    public List<Dice> getDiceBag() {
+    List<Dice> getDiceBag() {
         return diceBag;
     }
 
-    public List<Schema> extractSchemas(int schemasToExtract) throws IndexOutOfBoundsException {
+    List<Schema> extractSchemas(int schemasToExtract) throws IndexOutOfBoundsException {
         Stack<Schema> extracted = new Stack<>();
         for(int i=0;i<schemasToExtract;i++){
             extracted.add(schemas.pop());
@@ -73,19 +74,14 @@ public class Factory {
 
     private Stack<Schema> loadSchemasFromFile(){
         Stack<Schema> schemas= new Stack<>();
-        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER, 24);
+        List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER, NUMBER_OF_SCHEMAS);
         JsonParser parser = new JsonParser();
         JsonObject jsonObject;
         Gson gson = new Gson();
 
         for (BufferedReader file:files){
-            //try {
-                jsonObject = parser.parse(file).getAsJsonObject();
-                schemas.push(gson.fromJson(jsonObject, Schema.class));
-            //} catch (FileNotFoundException e) {
-                //Logger.print(String.format("Schema not found %s", file..getAbsolutePath()));
-                //e.printStackTrace();
-            //}
+            jsonObject = parser.parse(file).getAsJsonObject();
+            schemas.push(gson.fromJson(jsonObject, Schema.class));
         }
         return schemas;
     }
@@ -135,7 +131,7 @@ public class Factory {
         return pub;
     }
 
-    public List<Dice> extractPool(int dicesNumber) throws IndexOutOfBoundsException{
+    List<Dice> extractPool(int dicesNumber) throws IndexOutOfBoundsException{
         List<Dice> extracted = new ArrayList<Dice>();
         for(int i=0;i<dicesNumber;i++)
             extracted.add( diceBag.remove(diceBag.size()-1) );
