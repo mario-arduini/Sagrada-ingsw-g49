@@ -1,9 +1,11 @@
-package it.polimi.ingsw.network.client;
+package it.polimi.ingsw.network.client.cli;
 
 import it.polimi.ingsw.controller.exceptions.RollbackException;
 import it.polimi.ingsw.model.*;
+import it.polimi.ingsw.network.client.*;
+import it.polimi.ingsw.network.client.exception.InputInterruptedException;
+import it.polimi.ingsw.network.client.exception.ServerReconnectedException;
 import it.polimi.ingsw.network.client.model.*;
-import it.polimi.ingsw.network.client.model.Color;
 
 import java.rmi.RemoteException;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.logging.Logger;
  * Handles all the interaction between the user and the CLI
  * Contains methods to print and get information from the CLI
  */
-class CLIHandler implements GraphicInterface{
+public class CLIHandler implements GraphicInterface {
 
     private static final int MIN_PORT = 10000;
     private static final int MAX_PORT = 65535;
@@ -41,10 +43,10 @@ class CLIHandler implements GraphicInterface{
     private final Object lockInput;
 
     /**
-     * Creats a new objiect that handles the interaction between the user and the CLI
+     * Creates a new object that handles the interaction between the user and the CLI
      * Start a new thread that always listens what the user writes on the CLI
      */
-    CLIHandler() {
+    public CLIHandler() {
         ClientLogger.initLogger(LOGGER);
         flagContinue = false;
         waiting = false;
@@ -72,7 +74,7 @@ class CLIHandler implements GraphicInterface{
      * Aks some technical information to the user to connect to the server and to log in into the game
      * While the user wants to play it creates new games
      */
-    synchronized void start() {
+    public synchronized void start() {
         int command;
         boolean ok = false;
 

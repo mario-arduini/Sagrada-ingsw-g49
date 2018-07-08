@@ -1,4 +1,4 @@
-package it.polimi.ingsw.network.client;
+package it.polimi.ingsw.network.client.socket;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -9,6 +9,9 @@ import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.model.Score;
 import it.polimi.ingsw.model.Window;
+import it.polimi.ingsw.network.client.Client;
+import it.polimi.ingsw.network.client.ClientLogger;
+import it.polimi.ingsw.network.client.exception.ServerReconnectedException;
 
 import java.io.BufferedReader;
 import java.io.IOException;

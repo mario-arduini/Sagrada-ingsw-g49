@@ -4,7 +4,7 @@ import it.polimi.ingsw.model.Constraint;
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.model.Schema;
 import it.polimi.ingsw.model.Window;
-import it.polimi.ingsw.network.client.ServerReconnectedException;
+import it.polimi.ingsw.network.client.exception.ServerReconnectedException;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;

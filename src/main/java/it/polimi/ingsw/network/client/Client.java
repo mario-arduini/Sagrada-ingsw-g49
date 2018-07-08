@@ -6,7 +6,9 @@ import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.network.RmiInterfaces.ClientInterface;
 import it.polimi.ingsw.network.RmiInterfaces.FlowHandlerInterface;
 import it.polimi.ingsw.network.RmiInterfaces.LoginInterface;
+import it.polimi.ingsw.network.client.exception.ServerReconnectedException;
 import it.polimi.ingsw.network.client.model.*;
+import it.polimi.ingsw.network.client.socket.ClientSocketHandler;
 import it.polimi.ingsw.network.server.exception.LoginFailedException;
 
 import java.net.SocketException;
@@ -85,7 +87,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
      * Used to know if the connection with the server is active
      * @return true if the connection with the server is active, false otherwise
      */
-    boolean getServerConnected(){
+    public boolean getServerConnected(){
         return serverConnected;
     }
 
@@ -502,7 +504,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
      * Notifies to the user that the connection with the server went down and try to reconnect with the server
      * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
      */
-    void serverDisconnected() throws ServerReconnectedException{
+    public void serverDisconnected() throws ServerReconnectedException{
         if(logged) {
             serverConnected = false;
             handler.notifyServerDisconnected();
@@ -540,7 +542,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
      * Used to know if the game started
      * @return true if the game has already started, false otherwise
      */
-    boolean isGameStarted() {
+    public boolean isGameStarted() {
         return gameStarted;
     }
 
@@ -548,7 +550,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
      * Notifies that the server has responded
      * @param serverResult is true if everything went ok, false otherwise
      */
-    void setServerResult(boolean serverResult){
+    public void setServerResult(boolean serverResult){
         handler.wakeUp(serverResult);
     }
 

@@ -2,7 +2,6 @@ package it.polimi.ingsw.network.client.model;
 
 public class ToolCard {
     private String cardName;
-    private String description;
     private boolean used;
 
     public ToolCard(String name){
@@ -13,8 +12,6 @@ public class ToolCard {
     public String getName(){
         return this.cardName;
     }
-
-    public String getDescription() { return this.description; }
 
     public void setUsed() { used = true; }
 

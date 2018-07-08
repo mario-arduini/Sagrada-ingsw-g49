@@ -1,4 +1,4 @@
-package it.polimi.ingsw.network.client;
+package it.polimi.ingsw.network.client.exception;
 
 /**
  * This exception is thrown when the waiting for an input from the user was interrupted

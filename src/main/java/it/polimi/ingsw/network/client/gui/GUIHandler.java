@@ -5,7 +5,7 @@ import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.network.client.Client;
 import it.polimi.ingsw.network.client.GraphicInterface;
 import it.polimi.ingsw.network.client.MessageHandler;
-import it.polimi.ingsw.network.client.ServerReconnectedException;
+import it.polimi.ingsw.network.client.exception.ServerReconnectedException;
 import it.polimi.ingsw.network.client.model.GameSnapshot;
 import it.polimi.ingsw.network.client.model.PlayerSnapshot;
 import it.polimi.ingsw.network.client.model.ToolCard;

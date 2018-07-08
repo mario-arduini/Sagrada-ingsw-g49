@@ -11,7 +11,7 @@ import java.util.logging.SimpleFormatter;
 /**
  * Contains some methods to print on the CLI and write a file
  */
-class ClientLogger {
+public class ClientLogger {
 
     private static final String ANSI_CLS = "\u001b[2J";
     private static final String ANSI_HOME = "\u001b[H";
@@ -26,7 +26,7 @@ class ClientLogger {
      * Prints something on the CLI without a new line at the end
      * @param message the message to print
      */
-    static synchronized void print(String message){
+    public static synchronized void print(String message){
         System.out.print(message);
         System.out.flush();
     }
@@ -35,7 +35,7 @@ class ClientLogger {
      * Clears and prints something on the CLI without a new line at the end
      * @param message the message to print
      */
-    static synchronized void printWithClear(String message){
+    public static synchronized void printWithClear(String message){
         System.out.print(ANSI_CLS + ANSI_HOME);
         System.out.print(message);
         System.out.flush();
@@ -45,7 +45,7 @@ class ClientLogger {
      * Prints something on the CLI with a new line at the end
      * @param message the message to print
      */
-    static synchronized void println(String message){
+    public static synchronized void println(String message){
         System.out.println(message);
         System.out.flush();
     }
@@ -54,7 +54,7 @@ class ClientLogger {
      * Clears and prints something on the CLI with a new line at the end
      * @param message the message to print
      */
-    static synchronized void printlnWithClear(String message){
+    public static synchronized void printlnWithClear(String message){
         System.out.print(ANSI_CLS + ANSI_HOME);
         System.out.println(message);
         System.out.flush();
@@ -64,7 +64,7 @@ class ClientLogger {
      * Initialises a logger so it can be used to write into a file
      * @param logger the logger to be initialised
      */
-    static void initLogger(Logger logger){
+    public static void initLogger(Logger logger){
         logger.setUseParentHandlers(false);
         logger.addHandler(fh);
     }
@@ -73,7 +73,7 @@ class ClientLogger {
      * Gets the references to the file where the logs will be written
      * @param name the name of file where the logs will be written
      */
-    static synchronized void LogToFile(String name) {
+    public static synchronized void LogToFile(String name) {
         try {
             File file = FilesUtil.fileToWrite(FilesUtil.LOG_FOLDER, name);
             fh = new FileHandler(file.getAbsolutePath());

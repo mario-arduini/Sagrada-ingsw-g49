@@ -20,8 +20,6 @@ public class MessageHandler {
             List<BufferedReader> languages = FilesUtil.listFiles(language, 1);
             BufferedReader chosenLanguage = null;
             for(BufferedReader file:languages){
-                //if(file.getName().equals(language+".json")||
-                        //(chosenLanguage==null&&file.getName().equals("english.json")))
                 chosenLanguage = file;
             }
 

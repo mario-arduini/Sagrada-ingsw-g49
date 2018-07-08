@@ -1,10 +1,12 @@
-package it.polimi.ingsw.network.client;
+package it.polimi.ingsw.network.client.socket;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import it.polimi.ingsw.model.Coordinate;
 import it.polimi.ingsw.model.Dice;
 import it.polimi.ingsw.network.RmiInterfaces.FlowHandlerInterface;
+import it.polimi.ingsw.network.client.Client;
+import it.polimi.ingsw.network.client.ClientLogger;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -34,7 +36,7 @@ public class ClientSocketHandler implements FlowHandlerInterface {
      * @param serverPort the port of the server
      * @throws SocketException RMI exception
      */
-    ClientSocketHandler(Client client, String serverAddress, int serverPort) throws SocketException {
+    public ClientSocketHandler(Client client, String serverAddress, int serverPort) throws SocketException {
         ClientLogger.initLogger(LOGGER);
         try {
             socket = new Socket(serverAddress, serverPort);
@@ -55,7 +57,7 @@ public class ClientSocketHandler implements FlowHandlerInterface {
      * @param password the password the user chose
      * @return itself
      */
-    ClientSocketHandler login(String nickname, String password) {
+    public ClientSocketHandler login(String nickname, String password) {
         createJsonCommand("login");
         jsonObject.addProperty("nickname", nickname);
         jsonObject.addProperty("password", password);

@@ -1,4 +1,4 @@
-package it.polimi.ingsw.network.client;
+package it.polimi.ingsw.network.client.exception;
 
 /**
  * This exception is thrown when the connection with the server had gone down and a reconnection was successful
