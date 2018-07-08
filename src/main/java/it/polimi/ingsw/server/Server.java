@@ -74,7 +74,7 @@ public class Server {
     /**
      * Method that interrupts socket connections and prepares server to halt.
      */
-    public void stop(){
+    void stop(){
         Logger.print("Shutting down.");
         this.listening=false;
         try {

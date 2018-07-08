@@ -73,7 +73,7 @@ public class ClientLogger {
      * Gets the references to the file where the logs will be written
      * @param name the name of file where the logs will be written
      */
-    public static synchronized void LogToFile(String name) {
+    static synchronized void logToFile(String name) {
         try {
             File file = FilesUtil.fileToWrite(FilesUtil.LOG_FOLDER, name);
             fh = new FileHandler(file.getAbsolutePath());

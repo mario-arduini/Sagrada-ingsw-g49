@@ -237,7 +237,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
      */
     @Override
     public void notifyLogin(List<String> nicknames){
-        //setServerResult(true);
         for(String nickname : nicknames)
             gameSnapshot.addOtherPlayer(nickname);
         handler.printWaitingRoom();

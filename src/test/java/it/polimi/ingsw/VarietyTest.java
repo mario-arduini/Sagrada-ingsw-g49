@@ -5,10 +5,9 @@ import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.*;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class VarietyTest {
+class VarietyTest {
 
     private static final int ROW = 4;
     private static final int COLUMN = 5;
@@ -30,17 +29,7 @@ public class VarietyTest {
             window.addDice(0,3,new Dice(Color.GREEN,4));
             window.addDice(0,4,new Dice(Color.BLUE,5));
             window.addDice(1,4,new Dice(Color.RED,3));
-        } catch (ConstraintViolatedException e) {
-            e.printStackTrace();
-        } catch (FirstDiceMisplacedException e) {
-            e.printStackTrace();
-        } catch (NoAdjacentDiceException e) {
-            e.printStackTrace();
-        } catch (BadAdjacentDiceException e) {
-            e.printStackTrace();
-        } catch (InvalidDiceValueException e) {
-            e.printStackTrace();
-        } catch (DiceAlreadyHereException e) {
+        } catch (ConstraintViolatedException | FirstDiceMisplacedException | NoAdjacentDiceException | InvalidDiceValueException | BadAdjacentDiceException | DiceAlreadyHereException e) {
             e.printStackTrace();
         }
     }
@@ -69,17 +58,7 @@ public class VarietyTest {
             window.addDice(2,2,new Dice(Color.YELLOW,3));
             window.addDice(2,3,new Dice(Color.PURPLE,4));
             window.addDice(2,4,new Dice(Color.GREEN,5));
-        } catch (ConstraintViolatedException e) {
-            e.printStackTrace();
-        } catch (FirstDiceMisplacedException e) {
-            e.printStackTrace();
-        } catch (NoAdjacentDiceException e) {
-            e.printStackTrace();
-        } catch (BadAdjacentDiceException e) {
-            e.printStackTrace();
-        } catch (InvalidDiceValueException e) {
-            e.printStackTrace();
-        }catch (DiceAlreadyHereException e) {
+        } catch (ConstraintViolatedException | FirstDiceMisplacedException | BadAdjacentDiceException | NoAdjacentDiceException | DiceAlreadyHereException | InvalidDiceValueException e) {
             e.printStackTrace();
         }
     }
@@ -103,10 +82,8 @@ public class VarietyTest {
             assertEquals(12,goal.computeScore(window));
 
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
     }
@@ -130,10 +107,8 @@ public class VarietyTest {
             assertEquals(5,goal.computeScore(window));
 
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
     }
@@ -157,10 +132,8 @@ public class VarietyTest {
             assertEquals(5,goal.computeScore(window));
 
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
     }
@@ -184,10 +157,8 @@ public class VarietyTest {
             assertEquals(4,goal.computeScore(window));
 
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
     }

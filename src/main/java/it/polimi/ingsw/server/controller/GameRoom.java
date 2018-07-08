@@ -18,15 +18,11 @@ public class GameRoom extends Game{
     private List<ClientInterface> connections;
     private boolean notifyEndGame;
     private Timer timer;
-    //private int secondsTimer;
-    //private static final String TIMEOUT_TURN_FILE_NAME = "timeout_turn.txt";
-
 
     GameRoom(List<Player> playerList, List<ClientInterface> connections) throws NoMorePlayersException {
         super(playerList);
         this.connections = connections;
         this.notifyEndGame = true;
-        //this.secondsTimer = FilesUtil.readIntFromFile(TIMEOUT_TURN_FILE_NAME);
     }
 
     /**

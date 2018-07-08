@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SchemaTest {
 
-    public final static String name = "Schema";
+    final static String name = "Schema";
 
 
     private boolean checkConstraints(Constraint[][] constraint, Schema schema){

@@ -17,13 +17,13 @@ import java.util.List;
 
 public class ToolCard implements Serializable {
     private String cardName;
-    private JsonArray effects;
+    private transient JsonArray effects;
     private List<String> prerequisites;
-    private Gson gson;
+    private transient Gson gson;
     private boolean used;
     private boolean rollback;
-    private TransactionSnapshot game;
-    private Game realGame;
+    private transient TransactionSnapshot game;
+    private transient Game realGame;
     private int i;
 
     public ToolCard(JsonObject toolCard){
@@ -71,6 +71,7 @@ public class ToolCard implements Serializable {
                 case "movable-value" : Prerequisites.checkMovable(game.getRound().getCurrentPlayer(), Window.RuleIgnored.NUMBER); break;
                 case "movable" : Prerequisites.checkMovable(game.getRound().getCurrentPlayer(), Window.RuleIgnored.NONE); break;
                 case "two-dices-window" : Prerequisites.checkTwoDiceInWindow(game.getWindow()); break;
+                default: break;
             }
 
         }
@@ -84,7 +85,7 @@ public class ToolCard implements Serializable {
             }catch (NullPointerException e) {
                 Logger.print("ToolCard " + e);
             }
-            Boolean optional = arguments.get("optional")!=null ? arguments.get("optional").getAsBoolean() : false;
+            Boolean optional = arguments.get("optional") != null && arguments.get("optional").getAsBoolean();
             try {
 
                 switch (command) {
@@ -138,6 +139,8 @@ public class ToolCard implements Serializable {
                     case "set-from-bag":
                         Effects.setDiceFromBag(game.getRound(), game.getFromBag(), connection, rollback);
                         break;
+                    default:
+                        break;
                 }
             }catch (RollbackException e){
                 if (this.rollback)
@@ -157,7 +160,7 @@ public class ToolCard implements Serializable {
 
     }
 
-    public void continueToolCard(ClientInterface connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException, RollbackException, DisconnectionException {
+    public void continueToolCard(ClientInterface connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, PlayerSuspendedException, RollbackException, DisconnectionException {
         JsonObject effect;
         String command;
         JsonObject arguments = null;
@@ -171,7 +174,7 @@ public class ToolCard implements Serializable {
             }catch (NullPointerException e) {
                 Logger.print("ToolCard " + e);
             }
-            Boolean optional = arguments.get("optional")!=null ? arguments.get("optional").getAsBoolean() : false;
+            Boolean optional = arguments.get("optional") != null && arguments.get("optional").getAsBoolean();
             try {
 
                 switch (command) {
@@ -223,6 +226,8 @@ public class ToolCard implements Serializable {
                         break;
                     case "set-from-bag":
                         Effects.setDiceFromBag(game.getRound(), game.getFromBag(), connection, rollback);
+                        break;
+                    default:
                         break;
                 }
             }catch (RollbackException e){

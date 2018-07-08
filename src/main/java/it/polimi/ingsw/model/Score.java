@@ -106,7 +106,7 @@ public class Score implements Serializable {
      * @param scores Lis to Score to sort
      * @return Sorted List
      */
-    public static List<Score> sort(List<Score> scores){
+    static List<Score> sort(List<Score> scores){
         List<Score> sortedScores = new ArrayList<>(scores);
 
         //Sort by Total Score

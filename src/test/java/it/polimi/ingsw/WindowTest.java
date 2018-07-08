@@ -4,22 +4,19 @@ import it.polimi.ingsw.model.*;
 import it.polimi.ingsw.model.exceptions.*;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 
-public class WindowTest {
+class WindowTest {
     private static final int ROW = 4;
     private static final int COLUMN = 5;
     private static final int MIN_DIFFICULTY = 3;
 
     @Test
-    void testWindowCostructor(){
+    void testWindowConstructor(){
         Schema schema;
         Constraint[][] constraint;
         Window window;
-        Dice dice;
 
         //Create window w/ schema
         try {
@@ -27,10 +24,8 @@ public class WindowTest {
             schema = new Schema(MIN_DIFFICULTY, constraint, SchemaTest.name);
             window = new Window(schema);
             assertEquals(schema, window.getSchema());
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
         //Create window w/ schema and constraints, check for every cell
@@ -43,14 +38,10 @@ public class WindowTest {
 
             for (int i = 0; i < constraint.length; i++)
                 for (int j = 0; j<constraint[0].length ; j++)
-                    assertEquals(null, window.getCell(i,j));
+                    assertNull(window.getCell(i, j));
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
-        } catch (InvalidConstraintValueException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException | InvalidConstraintValueException e) {
+            fail();
         }
     }
 
@@ -72,132 +63,80 @@ public class WindowTest {
             //Add first dice in the middle of the mosaic
             try {
                 window.addDice(ROW / 2, COLUMN / 2, dice);
-                assertTrue(false);
-            } catch (NoAdjacentDiceException e) {
-                assertTrue(false);
-            } catch (BadAdjacentDiceException e) {
-                assertTrue(false);
+                fail();
+            } catch (NoAdjacentDiceException | BadAdjacentDiceException | ConstraintViolatedException | DiceAlreadyHereException e) {
+                fail();
             } catch (FirstDiceMisplacedException e) {
                 assertTrue(true);
-            } catch (ConstraintViolatedException e) {
-                assertTrue(false);
-            } catch (DiceAlreadyHereException e) {
-                assertTrue(false);
             }
 
             //Add first dice in the first position the mosaic
             try {
                 window.addDice(0, 0, dice);
                 assertEquals(dice, window.getCell(0, 0));
-            } catch (NoAdjacentDiceException e) {
-                assertTrue(false);
-            } catch (BadAdjacentDiceException e) {
-                assertTrue(false);
-            } catch (FirstDiceMisplacedException e) {
-                assertTrue(false);
-            } catch (ConstraintViolatedException e) {
-                assertTrue(false);
-            }catch (DiceAlreadyHereException e) {
-                assertTrue(false);
+            } catch (NoAdjacentDiceException | BadAdjacentDiceException | FirstDiceMisplacedException | ConstraintViolatedException | DiceAlreadyHereException e) {
+                fail();
             }
 
             //Place a non-adjacent dice
             try {
                 window.addDice(ROW - 1, COLUMN - 1, dice);
-                assertTrue(false);
+                fail();
             } catch (NoAdjacentDiceException e) {
                 assertTrue(true);
-            } catch (BadAdjacentDiceException e) {
-                assertTrue(false);
-            } catch (FirstDiceMisplacedException e) {
-                assertTrue(false);
-            } catch (ConstraintViolatedException e) {
-                assertTrue(false);
-            }catch (DiceAlreadyHereException e) {
-                assertTrue(false);
+            } catch (BadAdjacentDiceException | FirstDiceMisplacedException | DiceAlreadyHereException | ConstraintViolatedException e) {
+                fail();
             }
 
             //Place a Bad-adjacent dice (Color)
             try {
                 dice.setValue(4);
                 window.addDice(0, 1, dice);
-                assertTrue(false);
-            } catch (NoAdjacentDiceException e) {
-                assertTrue(false);
+                fail();
+            } catch (NoAdjacentDiceException | FirstDiceMisplacedException | ConstraintViolatedException | DiceAlreadyHereException e) {
+                fail();
             } catch (BadAdjacentDiceException e) {
                 assertTrue(true);
-            } catch (FirstDiceMisplacedException e) {
-                assertTrue(false);
-            } catch (ConstraintViolatedException e) {
-                assertTrue(false);
-            }catch (DiceAlreadyHereException e) {
-                assertTrue(false);
             }
 
             //Place a Bad-adjacent dice (Value)
             try {
                 dice = new Dice(Color.GREEN, 3);
                 window.addDice(0, 1, dice);
-                assertTrue(false);
-            } catch (NoAdjacentDiceException e) {
-                assertTrue(false);
+                fail();
+            } catch (NoAdjacentDiceException | FirstDiceMisplacedException | ConstraintViolatedException | DiceAlreadyHereException e) {
+                fail();
             } catch (BadAdjacentDiceException e) {
                 assertTrue(true);
-            } catch (FirstDiceMisplacedException e) {
-                assertTrue(false);
-            } catch (ConstraintViolatedException e) {
-                assertTrue(false);
-            }catch (DiceAlreadyHereException e) {
-                assertTrue(false);
             }
 
             //Place a good adjacent dice (diagonal)
             try {
                 window.addDice(1, 1, dice);
                 assertEquals(dice, window.getCell(1, 1));
-            } catch (NoAdjacentDiceException e) {
-                assertTrue(false);
-            } catch (BadAdjacentDiceException e) {
-                assertTrue(false);
-            } catch (FirstDiceMisplacedException e) {
-                assertTrue(false);
-            } catch (ConstraintViolatedException e) {
-                assertTrue(false);
-            }catch (DiceAlreadyHereException e) {
-                assertTrue(false);
+            } catch (NoAdjacentDiceException | BadAdjacentDiceException | ConstraintViolatedException | FirstDiceMisplacedException | DiceAlreadyHereException e) {
+                fail();
             }
 
             //Place a bad-constraint dice
             try {
                 window.addDice(1, 0, dice);
-                assertTrue(false);
-            } catch (NoAdjacentDiceException e) {
-                assertTrue(false);
-            } catch (BadAdjacentDiceException e) {
-                assertTrue(false);
-            } catch (FirstDiceMisplacedException e) {
-                assertTrue(false);
+                fail();
+            } catch (NoAdjacentDiceException | BadAdjacentDiceException | FirstDiceMisplacedException | DiceAlreadyHereException e) {
+                fail();
             } catch (ConstraintViolatedException e) {
                 assertTrue(true);
-            }catch (DiceAlreadyHereException e) {
-                assertTrue(false);
             }
 
             //Place a bad adjacent dice
             try {
                 dice.setValue(6);
                 window.addDice(1, 0, dice);
-                assertTrue(false);
-            } catch (NoAdjacentDiceException e) {
-                assertTrue(false);
+                fail();
+            } catch (NoAdjacentDiceException | FirstDiceMisplacedException | ConstraintViolatedException | DiceAlreadyHereException e) {
+                fail();
             } catch (BadAdjacentDiceException e) {
                 assertTrue(true);
-            } catch (FirstDiceMisplacedException e) {
-                assertTrue(false);
-            } catch (ConstraintViolatedException e) {
-                assertTrue(false);
-            }catch (DiceAlreadyHereException e) {
-                assertTrue(false);
             }
 
             //Place a good constraint, good adjacent dice (orthogonal)
@@ -205,16 +144,8 @@ public class WindowTest {
                 dice = new Dice(Color.PURPLE, 6);
                 window.addDice(1, 0, dice);
                 assertEquals(dice, window.getCell(1,0));
-            } catch (NoAdjacentDiceException e) {
-                assertTrue(false);
-            } catch (BadAdjacentDiceException e) {
-                assertTrue(false);
-            } catch (FirstDiceMisplacedException e) {
-                assertTrue(false);
-            } catch (ConstraintViolatedException e) {
-                assertTrue(false);
-            }catch (DiceAlreadyHereException e) {
-                assertTrue(false);
+            } catch (NoAdjacentDiceException | BadAdjacentDiceException | FirstDiceMisplacedException | ConstraintViolatedException | DiceAlreadyHereException e) {
+                fail();
             }
 
             window.removeDice(0,0);
@@ -223,14 +154,8 @@ public class WindowTest {
             window.removeDice(1,0);
             assertFalse(window.isFirstDicePlaced());
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (InvalidDiceValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
-        } catch (InvalidConstraintValueException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | InvalidDiceValueException | InvalidConstraintValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
     }
 }

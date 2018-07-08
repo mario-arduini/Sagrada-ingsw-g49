@@ -148,7 +148,7 @@ public class Round {
      * @param player Player which position is wanted
      * @return 0-based position of the Player in the Round
      */
-    public int getPlayerPosition(Player player){
+    int getPlayerPosition(Player player){
         return this.players.indexOf(player);
     }
 

@@ -20,14 +20,14 @@ public class PrivateGoal implements Goal{
     }
 
     public int computeScore(Window window) {
-        List<Dice> mosaic = new ArrayList<Dice>();
+        List<Dice> mosaic = new ArrayList<>();
         for(int i=0;i<Window.ROW;i++)
             for(int j=0;j<Window.COLUMN;j++)
                 mosaic.add( window.getCell(i,j) );
 
         return mosaic.stream().filter(Objects::nonNull)
                 .filter(dice -> dice.getColor() == this.color)
-                .map(dice -> dice.getValue())
+                .map(Dice::getValue)
                 .reduce(0, (sum,val) -> sum+val);
     }
 }

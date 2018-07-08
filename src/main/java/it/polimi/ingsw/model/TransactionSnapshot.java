@@ -10,7 +10,7 @@ public class TransactionSnapshot {
     private List<Dice> roundTrack;
     private List<Dice> diceBag;
 
-    public TransactionSnapshot(Game game, List<Dice> diceBag){
+    TransactionSnapshot(Game game, List<Dice> diceBag){
         this.window = new Window(game.getCurrentRound().getCurrentPlayer().getWindow());
         this.round = new Round(game.getCurrentRound());
         this.roundTrack = new ArrayList<>();
@@ -43,7 +43,7 @@ public class TransactionSnapshot {
         return diceBag.remove(diceBag.size()-1);
     }
 
-    public List<Dice> getDiceBag() {
+    List<Dice> getDiceBag() {
         return diceBag;
     }
 }

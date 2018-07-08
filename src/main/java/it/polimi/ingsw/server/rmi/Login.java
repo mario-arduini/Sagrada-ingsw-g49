@@ -15,7 +15,7 @@ import java.rmi.server.UnicastRemoteObject;
  * A login action allows a client to receive a GameFlowHandler.
  */
 public class Login extends UnicastRemoteObject implements LoginInterface {
-    private GamesHandler gamesHandler;
+    private transient GamesHandler gamesHandler;
 
     /**
      * Creates a Login object.

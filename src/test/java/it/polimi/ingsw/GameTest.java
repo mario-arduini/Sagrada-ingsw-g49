@@ -2,7 +2,6 @@ package it.polimi.ingsw;
 
 import it.polimi.ingsw.model.Game;
 import it.polimi.ingsw.model.Player;
-import it.polimi.ingsw.model.exceptions.NoMorePlayersException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -11,9 +10,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GameTest {
-    String nick1 = "Daniel";
-    String nick2 = "Thanos";
+class GameTest {
+    private String nick1 = "Daniel";
+    private String nick2 = "Thanos";
 
     private List<Player> createPlayers(){
         List<Player> players = new ArrayList<>();
@@ -51,7 +50,7 @@ public class GameTest {
     void testNextRound(){
         AtomicReference<Game> game = new AtomicReference<>();
         List<Player> players;
-        int index = 0;
+        int index;
 
         players = createPlayers();
         assertDoesNotThrow(() -> game.getAndSet(new Game(players)));
