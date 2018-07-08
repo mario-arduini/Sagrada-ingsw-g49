@@ -1,5 +1,8 @@
 package it.polimi.ingsw.model;
 
+/**
+ * Enum representing the possible colors used in the game
+ */
 public enum Color{
 
     RED("\u001B[31m"),
@@ -15,10 +18,18 @@ public enum Color{
         this.escape = escape;
     }
 
+    /**
+     * return unicode representation needed to change color
+     * @return Unicode String
+     */
     public String escape() {
         return escape;
     }
 
+    /**
+     * get the name of the color
+     * @return String with name of the color
+     */
     @Override
     public String toString(){
         switch (this){

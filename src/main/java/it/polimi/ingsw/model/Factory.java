@@ -13,6 +13,9 @@ import it.polimi.ingsw.utilities.FilesUtil;
 import java.io.BufferedReader;
 import java.util.*;
 
+/**
+ * Class representing the dealer of the game, handles card shuffleing and extraction, bag of dice and schemas extraction
+ */
 public class Factory {
     private Stack<BufferedReader> toolCards;
     private List<Color> privateGoalCards;
@@ -26,6 +29,9 @@ public class Factory {
     private static final int NUMBER_OF_SCHEMAS = 24;
     private static final int NUMBER_OF_TOOL_CARDS = 12;
 
+    /**
+     * Create the factory, read toolcards and schemas from file
+     */
     public Factory() {
         this.toolCards = new Stack<>();
         List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.TOOL_CARD_FOLDER, NUMBER_OF_TOOL_CARDS);
@@ -60,10 +66,20 @@ public class Factory {
 
     }
 
+    /**
+     * Get the Dice Bag
+     * @return List<Dice> representing the dice bag
+     */
     List<Dice> getDiceBag() {
         return diceBag;
     }
 
+    /**
+     * Extract the desired number of schemas from a previously shuffled Stack
+     * @param schemasToExtract Number of schemas to extract
+     * @return List of Schemas extracted
+     * @throws IndexOutOfBoundsException Signal that there are not enough Schemas left
+     */
     List<Schema> extractSchemas(int schemasToExtract) throws IndexOutOfBoundsException {
         Stack<Schema> extracted = new Stack<>();
         for(int i=0;i<schemasToExtract;i++){
@@ -72,6 +88,10 @@ public class Factory {
         return extracted;
     }
 
+    /**
+     * Utility function the loads schemas from files, used internally by the constructor
+     * @return Stack of Schemas parsed form files
+     */
     private Stack<Schema> loadSchemasFromFile(){
         Stack<Schema> schemas= new Stack<>();
         List<BufferedReader> files = FilesUtil.listFiles(FilesUtil.SCHEMA_FOLDER, NUMBER_OF_SCHEMAS);
@@ -86,6 +106,11 @@ public class Factory {
         return schemas;
     }
 
+    /**
+     * Extract a toolcard from the deck
+     * @return ToolCard extracted
+     * @throws OutOfCardsException signals that all the toolcards have already been extracted
+     */
     public ToolCard extractToolCard() throws OutOfCardsException {
         ToolCard toolCard;
         try {
@@ -96,6 +121,11 @@ public class Factory {
         return toolCard;
     }
 
+    /**
+     * Utility to load a Toolcard from a file
+     * @param file file object as BufferedReader
+     * @return ToolCard read
+     */
     private ToolCard loadToolCardFromFile(BufferedReader file) {
         ToolCard toolCard;
         JsonParser parser = new JsonParser();
@@ -107,11 +137,21 @@ public class Factory {
         return toolCard;
     }
 
+    /**
+     * Extract a private goal from the deck
+     * @return PrivateGoal extracted
+     * @throws OutOfCardsException signals that all the private goals have already been extracted
+     */
     public PrivateGoal extractPrivateGoal() throws OutOfCardsException {
         if(privateGoalCardsIndex>=privateGoalCards.size()) throw new OutOfCardsException("Cannot extract Private Goal");
         return new PrivateGoal(privateGoalCards.get(privateGoalCardsIndex++));
     }
 
+    /**
+     * Extract a public goal from the deck
+     * @return PublicGoal extracted
+     * @throws OutOfCardsException signals that all the public goals have already been extracted
+     */
     public PublicGoal extractPublicGoal() throws  OutOfCardsException {
         if(publicGoalCardsIndex>=publicGoalCards.size()) throw new OutOfCardsException("Cannot extract Public Goal");
         int index = publicGoalCards.get(publicGoalCardsIndex++);
@@ -131,6 +171,12 @@ public class Factory {
         return pub;
     }
 
+    /**
+     * Extract the Draft Pool from the dice bag, given the dimension of the draftpool
+     * @param dicesNumber size of the draft pool
+     * @return List of Dice representing the draftpool
+     * @throws IndexOutOfBoundsException signals that there are not enough Dice left in the bag
+     */
     List<Dice> extractPool(int dicesNumber) throws IndexOutOfBoundsException{
         List<Dice> extracted = new ArrayList<Dice>();
         for(int i=0;i<dicesNumber;i++)

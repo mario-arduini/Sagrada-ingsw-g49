@@ -5,6 +5,9 @@ import it.polimi.ingsw.model.exceptions.UnexpectedMatrixSizeException;
 
 import java.io.Serializable;
 
+/**
+ * Class representing a Schema of the Game
+ */
 public final class Schema implements Serializable {
     private final int difficulty;
     private final Constraint[][] constraint;
@@ -12,6 +15,14 @@ public final class Schema implements Serializable {
     private static final int COLUMN = 5;
     private final String name;
 
+    /**
+     * Create a Schema from its difficulty, a matrix of Constraint and its Name
+     * @param difficulty difficulty of the Schema
+     * @param constraint Matrix of the Constraints
+     * @param name Name of the Schema
+     * @throws InvalidDifficultyValueException signals an invalid Difficulty
+     * @throws UnexpectedMatrixSizeException signals an invalid Constraints Matrix
+     */
     public Schema(int difficulty, Constraint[][] constraint, String name) throws InvalidDifficultyValueException, UnexpectedMatrixSizeException {
         if (difficulty < 3 || difficulty > 6)
             throw new InvalidDifficultyValueException();
@@ -30,16 +41,31 @@ public final class Schema implements Serializable {
         return name;
     }
 
+    /**
+     * Get difficulty of the Schema
+     * @return difficulty value
+     */
     public int getDifficulty() {
 
         return difficulty;
     }
 
+    /**
+     * Get constraint of given cell
+     * @param row row of the cell
+     * @param column column of the cell
+     * @return Constraint of the Cell if present or null otherwise
+     */
     public Constraint getConstraint(int row, int column) {
 
         return constraint[row][column];
     }
 
+    /**
+     * Compare the given Schema to the caller
+     * @param schema Schema to compare
+     * @return true if the Schemas are equal, false otherwise
+     */
     @Override
     public boolean equals(Object schema) {
 
