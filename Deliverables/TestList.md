@@ -1,18 +1,26 @@
 # Test list for Sagrada
 
-## Model tests
+## Tests
 
 - [x] *Player*		construction
-- [x] *Player*		gameplay functions
+- [x] *Player* 		gameplay functions
 - [x] *Schema*		construction
-- [x] *Schema*		funcions
+- [x] *Schema* 		gameplay functions
 - [x] *Window*		construction
-- [x] *Window*		add Dice to the Mosaic
+- [x] *Window*		gameplay functions
 - [x] *Constraint*	construction
-- [x] *Dice*		construction and functionality
-- [x] *Private Goal*	compute score
-- [x] *Public Goal*	compute score
-- [x] *Round*
-- [x] *Factory*
-- [x] *Game*
-- [x] *Toolcard*  effects
+- [x] *Constraint*	gameplay functions
+- [x] *Dice*		construction
+- [x] *Dice*		gameplay functions
+- [x] *Private Goal*	construction
+- [x] *Private Goal*	gameplay functions
+- [x] *Public Goal*	construction 
+- [x] *Public Goal*	computing scores
+- [x] *Round* 		construction 
+- [x] *Round* 		 gameplay functions
+- [x] *Factory* 	construction 
+- [x] *Factory*		gameplay functions
+- [x] *Game*		construction
+- [x] *Game*		gameplay functions
+- [x] *Effects*  	construction
+- [x] *Effects*  	gameplay functions
