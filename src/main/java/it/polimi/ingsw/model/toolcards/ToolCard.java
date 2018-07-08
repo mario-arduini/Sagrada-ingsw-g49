@@ -20,13 +20,13 @@ import java.util.List;
  */
 public class ToolCard implements Serializable {
     private String cardName;
-    private JsonArray effects;
+    private transient JsonArray effects;
     private List<String> prerequisites;
-    private Gson gson;
+    private transient Gson gson;
     private boolean used;
     private boolean rollback;
-    private TransactionSnapshot game;
-    private Game realGame;
+    private transient TransactionSnapshot gameTransaction;
+    private transient Game realGame;
     private int i;
 
     /**
@@ -88,23 +88,24 @@ public class ToolCard implements Serializable {
         JsonObject arguments = null;
         Dice multipurposeDice = null;
         this.realGame = realGame;
-        this.game = realGame.beginTransaction();
-        Logger.print("Player " + game.getRound().getCurrentPlayer().getNickname() + " using toolcard " + this.cardName);
+        this.gameTransaction = realGame.beginTransaction();
+        this.gameTransaction.shuffleTheBag();
+        Logger.print("Player " + gameTransaction.getRound().getCurrentPlayer().getNickname() + " using toolcard " + this.cardName);
 
         for (String prerequisite : prerequisites) {
             switch (prerequisite) {
-                case "favor-token": Prerequisites.checkFavorToken(game.getRound().getCurrentPlayer(), used ? 2 : 1); break;
-                case "dice-window": Prerequisites.checkDiceInWindow(game.getRound().getCurrentPlayer()); break;
-                case "dice-round-track": Prerequisites.checkDiceInRoundTrack(game.getRoundTrack()); break;
-                case "same-color-window-track": Prerequisites.checkSameColorInWindowAndRoundTrack(game.getRound().getCurrentPlayer(),game.getRoundTrack()); break;
-                case "first-turn": Prerequisites.checkFirstTurn(game.getRound()); break;
-                case "second-turn": Prerequisites.checkSecondTurn(game.getRound()); break;
-                case "before-draft": Prerequisites.checkBeforeDraft(game.getRound().isDiceExtracted()); break;
-                case "after-draft": Prerequisites.checkAfterDraft(game.getRound().isDiceExtracted()); break;
-                case "movable-color" : Prerequisites.checkMovable(game.getRound().getCurrentPlayer(), Window.RuleIgnored.COLOR); break;
-                case "movable-value" : Prerequisites.checkMovable(game.getRound().getCurrentPlayer(), Window.RuleIgnored.NUMBER); break;
-                case "movable" : Prerequisites.checkMovable(game.getRound().getCurrentPlayer(), Window.RuleIgnored.NONE); break;
-                case "two-dices-window" : Prerequisites.checkTwoDiceInWindow(game.getWindow()); break;
+                case "favor-token": Prerequisites.checkFavorToken(gameTransaction.getRound().getCurrentPlayer(), used ? 2 : 1); break;
+                case "dice-window": Prerequisites.checkDiceInWindow(gameTransaction.getRound().getCurrentPlayer()); break;
+                case "dice-round-track": Prerequisites.checkDiceInRoundTrack(gameTransaction.getRoundTrack()); break;
+                case "same-color-window-track": Prerequisites.checkSameColorInWindowAndRoundTrack(gameTransaction.getRound().getCurrentPlayer(),gameTransaction.getRoundTrack()); break;
+                case "first-turn": Prerequisites.checkFirstTurn(gameTransaction.getRound()); break;
+                case "second-turn": Prerequisites.checkSecondTurn(gameTransaction.getRound()); break;
+                case "before-draft": Prerequisites.checkBeforeDraft(gameTransaction.getRound().isDiceExtracted()); break;
+                case "after-draft": Prerequisites.checkAfterDraft(gameTransaction.getRound().isDiceExtracted()); break;
+                case "movable-color" : Prerequisites.checkMovable(gameTransaction.getRound().getCurrentPlayer(), Window.RuleIgnored.COLOR); break;
+                case "movable-value" : Prerequisites.checkMovable(gameTransaction.getRound().getCurrentPlayer(), Window.RuleIgnored.NUMBER); break;
+                case "movable" : Prerequisites.checkMovable(gameTransaction.getRound().getCurrentPlayer(), Window.RuleIgnored.NONE); break;
+                case "two-dices-window" : Prerequisites.checkTwoDiceInWindow(gameTransaction.getWindow()); break;
             }
 
         }
@@ -113,6 +114,7 @@ public class ToolCard implements Serializable {
         for (i = 0; i < effects.size(); i++) {
             effect = effects.get(i).getAsJsonObject();
             command = effect.keySet().toArray()[0].toString();
+            TransactionSnapshot game = new TransactionSnapshot(gameTransaction);
             try {
                 arguments = effect.get(command).getAsJsonObject();
             }catch (NullPointerException e) {
@@ -132,8 +134,7 @@ public class ToolCard implements Serializable {
                         else
                             ruleIgnored = Window.RuleIgnored.NONE;
                         if (!Effects.addDiceToWindow(game.getWindow(), game.getRound().getCurrentDiceDrafted(), connection, ruleIgnored, rollback)) {
-                            game.getRound().getDraftPool().add(game.getRound().getCurrentDiceDrafted());
-                            game.getRound().setCurrentDiceDrafted(null);
+                            putDiceInDraftPool(game, connection);
                         }
                         break;
                     case "move":
@@ -178,12 +179,13 @@ public class ToolCard implements Serializable {
             if (!game.getRound().getCurrentPlayer().equals(realGame.getCurrentRound().getCurrentPlayer())){
                 throw new PlayerSuspendedException();
             }
+            gameTransaction.commit(game);
         }
         try {
-            realGame.commit(game, cardName);
-            Logger.print("Player " + game.getRound().getCurrentPlayer().getNickname() + " successfully used " + this.cardName);
+            realGame.commit(gameTransaction, cardName);
+            Logger.print("Player " + gameTransaction.getRound().getCurrentPlayer().getNickname() + " successfully used " + this.cardName);
         } catch (NoSuchToolCardException e) {
-            Logger.print("Toolcard " + cardName + " played by " + game.getRound().getCurrentPlayer().getNickname() + "throws " + e.toString());
+            Logger.print("Toolcard " + cardName + " played by " + gameTransaction.getRound().getCurrentPlayer().getNickname() + "throws " + e.toString());
         }
 
     }
@@ -213,6 +215,7 @@ public class ToolCard implements Serializable {
         Dice multipurposeDice = null;
 
         for (; i < effects.size(); i++) {
+            TransactionSnapshot game = new TransactionSnapshot(gameTransaction);
             effect = effects.get(i).getAsJsonObject();
             command = effect.keySet().toArray()[0].toString();
             try {
@@ -234,7 +237,7 @@ public class ToolCard implements Serializable {
                         else
                             ruleIgnored = Window.RuleIgnored.NONE;
                         if (!Effects.addDiceToWindow(game.getWindow(), game.getRound().getCurrentDiceDrafted(), connection, ruleIgnored, rollback)) {
-                            putDiceInDraftPool(connection);
+                            putDiceInDraftPool(game, connection);
                         }
                         break;
                     case "move":
@@ -279,11 +282,12 @@ public class ToolCard implements Serializable {
             if (!game.getRound().getCurrentPlayer().equals(realGame.getCurrentRound().getCurrentPlayer())){
                 throw new PlayerSuspendedException();
             }
+            gameTransaction.commit(game);
         }
         try {
-            realGame.commit(game, cardName);
+            realGame.commit(gameTransaction, cardName);
         } catch (NoSuchToolCardException e) {
-            Logger.print("Toolcard " + cardName + " played by " + game.getRound().getCurrentPlayer().getNickname() + "throws " + e.toString());
+            Logger.print("Toolcard " + cardName + " played by " + gameTransaction.getRound().getCurrentPlayer().getNickname() + "throws " + e.toString());
         }
     }
 
@@ -304,10 +308,11 @@ public class ToolCard implements Serializable {
 
     /**
      * Put the extracted Dice in the draftpool and notify the Connection
-     * @param connection Connection to be notified
-     * @throws DisconnectionException signals Player has disconnected
+     * @param game Current Game
+     * @param connection Active Player Connection
+     * @throws DisconnectionException signals active player has disconnected
      */
-    private void putDiceInDraftPool(ClientInterface connection) throws DisconnectionException{
+    private void putDiceInDraftPool(TransactionSnapshot game, ClientInterface connection) throws DisconnectionException{
         game.getRound().getDraftPool().add(game.getRound().getCurrentDiceDrafted());
         game.getRound().setCurrentDiceDrafted(null);
         try {
