@@ -109,6 +109,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     private int askedNumber;
     private boolean askedBool;
     private int toolCardInUse;
+    private boolean usingToolCard;
     private boolean backed;
     private String tmpStyle;
 
@@ -504,6 +505,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
         tool2.setDisable(true);
         tool3.setDisable(true);
         toolCardInUse = toolNumber;
+        usingToolCard = true;
     }
 
     public Client getClient(){
@@ -671,6 +673,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     @Override
     public void notifyUsedToolCard(String player, String toolCard) {
         toolCardInUse = 0;
+        usingToolCard = false;
     }
 
     /***
@@ -1053,13 +1056,14 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public void wakeUp(boolean serverResult) {
         if(isLogging) handleLogin(serverResult);
         if(choosingSchema) handleSchema(serverResult);
-        if(toolCardInUse !=0&&!serverResult){
+        if(usingToolCard&&!serverResult){
             Platform.runLater(() -> {
                 info.setText(MessageHandler.get("info-tool-fail"));
                 tool1.setDisable(false);
                 tool2.setDisable(false);
                 tool3.setDisable(false);
                 toolCardInUse = 0;
+                usingToolCard = false;
             });
         }
         if(playerGrid!=null&&playerGrid.isPlacingDice()&&!serverResult){
