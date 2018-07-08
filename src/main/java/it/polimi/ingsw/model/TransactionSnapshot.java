@@ -1,8 +1,10 @@
 package it.polimi.ingsw.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * A Transaction Snapshot is an object that represents a game in a particular round status.
@@ -30,6 +32,41 @@ public class TransactionSnapshot {
             this.diceBag.add(new Dice(d));
         }
     }
+
+    /**
+     * Creates a Transaction Snapshot of a Transaction Snapshot.
+     * @param game Transaction Snapshot from which data are copied.
+     */
+    public TransactionSnapshot(TransactionSnapshot game){
+        this.window = new Window(game.getRound().getCurrentPlayer().getWindow());
+        this.round = new Round(game.getRound());
+        this.roundTrack = new ArrayList<>();
+        for (Dice d: game.getRoundTrack())
+            roundTrack.add(new Dice(d));
+        this.diceBag = new ArrayList<>();
+        for (Dice d: game.getDiceBag()){
+            this.diceBag.add(new Dice(d));
+        }
+    }
+
+    /**
+     * Commits changes from a different TransactionSnapshot.
+     * @param game Transaction Snapshot with data to commit.
+     */
+    public void commit(TransactionSnapshot game){
+        this.window = game.window;
+        this.round = game.round;
+        this.roundTrack = game.roundTrack;
+        this.diceBag = game.diceBag;
+    }
+
+    /**
+     * Shuffle the bag of dice.
+     */
+    public void shuffleTheBag(){
+        Collections.shuffle(this.diceBag);
+    }
+
 
     /**
      * Returns the window in the current snapshot.
