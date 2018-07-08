@@ -9,6 +9,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BinaryOperator;
 
+/**
+ * Class representing a single Game of Sagrada
+ */
 public class Game {
     private final Factory dealer;
     private final List<Player> players;
@@ -22,7 +25,12 @@ public class Game {
     private boolean playing;
     private List<Dice> diceBag;
 
-    public Game(List<Player> playerList) throws NoMorePlayersException { //Fix UML for players
+    /**
+     * Initialize a new Game given the list of Players
+     * @param playerList List of Player for this Game
+     * @throws NoMorePlayersException signals there are no more player
+     */
+    public Game(List<Player> playerList) throws NoMorePlayersException {
         this.dealer = new Factory();
         this.roundTrack = new ArrayList<>();
         this.toolCards = new ArrayList<>();
@@ -63,14 +71,26 @@ public class Game {
         this.diceBag = dealer.getDiceBag();
     }
 
+    /**
+     * set flag Playing
+     * @param playing new value of the flag
+     */
     protected void setPlaying(boolean playing){
         this.playing = playing;
     }
 
+    /**
+     * Check if playing
+     * @return value of flag playing
+     */
     public boolean getPlaying(){
         return playing;
     }
 
+    /**
+     * Get List of Players
+     * @return List of Player of this Game
+     */
     public List<Player> getPlayers() {
         return players;
     }
@@ -87,23 +107,36 @@ public class Game {
         return toolCardsCopy;
     }
 
+    /**
+     * Get the Public Goals for the Game
+     * @return List of Public Goals
+     */
     public List<PublicGoal> getPublicGoals() {
         return publicGoals;
     }
 
+    /**
+     * Get the round track
+     * @return Ordered List of Dice representing the round track
+     */
     public List<Dice> getRoundTrack() {
         return roundTrack;
     }
 
-    public List<Dice> getDiceFromPool(){
-        return currentRound.getDraftPool();
-    }
-
+    /**
+     * Add Dice to the Round Track
+     * @param dice Dice to add
+     */
     private void addDiceToTracker(Dice dice){
         this.roundTrack.add(new Dice(dice));
         trackIndex++;
     }
 
+    /**
+     * Get Player given his nickname
+     * @param nick nickname of the wanted player
+     * @return Player with the given nick
+     */
     public Player getPlayerByNick(String nick){
         Optional<Player> playerFetched = players.stream().filter(player -> player.getNickname().equals(nick)).findFirst();
 
@@ -111,23 +144,50 @@ public class Game {
         return playerFetched.get();
     }
 
-    //TODO: Fix UML
+    /**
+     * Get current round
+     * @return current Round
+     */
     public Round getCurrentRound(){
         return this.currentRound;
     }
 
+    /**
+     * Try to place the Dice on current player window
+     * @param row row of the cell
+     * @param column column of the cell
+     * @param dice Dice to place
+     * @throws NoAdjacentDiceException signals that a non-first dice is placed not adjacent to another dice
+     * @throws BadAdjacentDiceException signals that one of the orthogonal was of the same color or value of dice
+     * @throws ConstraintViolatedException signals that a constraint of the schema was not respected
+     * @throws FirstDiceMisplacedException signals that the first was not place in the proper position (border of the window)
+     * @throws DiceNotInDraftPoolException signals that the Dice is not present in the Draft Pool
+     * @throws DiceAlreadyExtractedException signals that a Dice was already extracted in the current turn
+     * @throws DiceAlreadyHereException signals the cell is already occupied
+     */
     public void placeDice(int row, int column, Dice dice) throws NoAdjacentDiceException, DiceAlreadyExtractedException, BadAdjacentDiceException, FirstDiceMisplacedException, ConstraintViolatedException, DiceNotInDraftPoolException, DiceAlreadyHereException {
         currentRound.useDice(row, column, dice);
     }
 
+    /**
+     * Suspend current player
+     */
     protected void suspendCurrentPlayer(){
         currentRound.suspendPlayer();
     }
 
+    /**
+     * Suspend player by nickname
+     * @param nickname nickname of the Player to suspend
+     */
     protected void suspendPlayer(String nickname){
          getPlayerByNick(nickname).suspend();
     }
 
+    /**
+     * Compute a List of Scores
+     * @return List of Scores computed
+     */
     protected List<Score> computeFinalScores(){
         List <Score> scores = new ArrayList<>();
         BinaryOperator<Integer> adder = (n1, n2) -> n1 + n2;
@@ -142,10 +202,18 @@ public class Game {
         return Score.sort(scores);
     }
 
+    /**
+     * Check if Game is finished
+     * @return true if Game is finished, false otherwise
+     */
     public boolean isGameFinished(){
         return trackIndex == 10 || players.stream().filter(p -> !p.isSuspended()).count()<2;
     }
 
+    /**
+     * Check if Game is started
+     * @return true if Game is started, false otherwise
+     */
     public boolean isGameStarted(){
         List<Player> inGamePlayers = getPlayers();
         for (Player p: inGamePlayers)
@@ -154,7 +222,9 @@ public class Game {
         return true;
     }
 
-    //TODO: consider moving this method to GameRoom
+    /**
+     * Start the next Round
+     */
     public void nextRound(){
         Round round = new Round(currentRound);
         List<Player> roundPlayers;
@@ -175,6 +245,10 @@ public class Game {
         }
     }
 
+    /**
+     * Create the Turn's List of Players for the Round
+     * @return List of Players for the Round
+     */
     private synchronized List<Player> createRoundPlayers(){
         List<Player> roundPlayers = new ArrayList<>();
         int j, size;
@@ -192,10 +266,18 @@ public class Game {
 
     }
 
+    /**
+     * Extract schemas from the factory
+     * @return List of extracted Schemas
+     */
     public List<Schema> extractSchemas(){
         return this.dealer.extractSchemas(schemaPerPlayer);
     }
 
+    /**
+     * Start a Transaction
+     * @return Transaction Snapshot
+     */
     public TransactionSnapshot beginTransaction(){
         return new TransactionSnapshot(this, diceBag);
     }
