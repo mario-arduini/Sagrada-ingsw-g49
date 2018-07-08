@@ -86,10 +86,8 @@ public class ToolCard implements Serializable {
         JsonObject effect;
         String command;
         JsonObject arguments = null;
-        Dice multipurposeDice = null;
         this.realGame = realGame;
         this.gameTransaction = realGame.beginTransaction();
-        this.gameTransaction.shuffleTheBag();
         Logger.print("Player " + gameTransaction.getRound().getCurrentPlayer().getNickname() + " using toolcard " + this.cardName);
 
         for (String prerequisite : prerequisites) {
@@ -215,7 +213,6 @@ public class ToolCard implements Serializable {
         JsonObject effect;
         String command;
         JsonObject arguments = null;
-        Dice multipurposeDice = null;
 
         for (; i < effects.size(); i++) {
             TransactionSnapshot game = new TransactionSnapshot(gameTransaction);

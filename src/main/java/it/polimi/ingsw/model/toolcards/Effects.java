@@ -7,7 +7,6 @@ import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.RmiInterfaces.ClientInterface;
 import it.polimi.ingsw.server.Logger;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -150,7 +149,7 @@ public final class Effects {
         //Place dice
         Coordinate end;
         prompt = "move-to";
-        while (diceList.size() > 0) {
+        while (!diceList.isEmpty()) {
             try {
                 end = connection.askDiceWindow(prompt, rollback);
                 if (start.get(num - diceList.size()).getRow() == end.getRow() && start.get(num - diceList.size()).getColumn() == end.getColumn())
@@ -254,7 +253,7 @@ public final class Effects {
         //Place dice
         Coordinate end;
         prompt = "move-to";
-        while (diceList.size() > 0) {
+        while (!diceList.isEmpty()) {
             try {
                 end = connection.askDiceWindow(prompt, rollback);
                 if (start.get(num - diceList.size()).getRow() == end.getRow() && start.get(num - diceList.size()).getColumn() == end.getColumn())
@@ -291,8 +290,8 @@ public final class Effects {
     public static void move(Window currentPlayerWindow,Window.RuleIgnored ruleIgnored,boolean optional, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         try {
             if(optional && !connection.askIfPlus("want-move", rollback)) return;
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new DisconnectionException();
         }
         Coordinate start = null;
         Coordinate end = null;
@@ -426,7 +425,7 @@ public final class Effects {
             dice.setValue(7-dice.getValue());
             connection.showDice(dice);
         } catch (InvalidDiceValueException e) {
-            e.printStackTrace();
+            Logger.print("Toolcard: flip " + e.getMessage());
         }catch (Exception e){
             throw new DisconnectionException();
         }
@@ -442,7 +441,7 @@ public final class Effects {
             try {
                 d.setValue(random.nextInt(6)+1);
             } catch (InvalidDiceValueException e) {
-                e.printStackTrace();
+                Logger.print("Toolcard: re-roll " + e.getMessage());
             }
         });
     }
@@ -496,7 +495,6 @@ public final class Effects {
         boolean valid = false;
         String prompt = "choose-value";
 
-        //TODO: what if disconnection here?!
         try {
             connection.showDice(dice);
         }catch (Exception e){
