@@ -239,7 +239,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
         if (gameRoom.isGameFinished()) throw new GameOverException();
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();
         if (toolCardUsed) throw new ToolcardAlreadyUsedException();
-        if (activeToolCard != null && !toolCardUsed) throw new ToolCardInUseException();
+        if (activeToolCard != null) throw new ToolCardInUseException();
 
         Optional<ToolCard> fetch = (gameRoom.getToolCards()).stream().filter(card -> card.getName().equalsIgnoreCase(cardName)).findFirst();
 
@@ -268,7 +268,7 @@ public class GameFlowHandler extends UnicastRemoteObject implements FlowHandlerI
     }
 
     @Override
-    public void continueToolCard() throws GameNotStartedException,  GameOverException, NoSuchToolCardException, ToolcardAlreadyUsedException, NotYourSecondTurnException, AlreadyDraftedException, NoDiceInRoundTrackException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NoDiceInWindowException, NotYourTurnException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException {
+    public void continueToolCard() throws GameNotStartedException,  GameOverException, NoSuchToolCardException, ToolcardAlreadyUsedException, InvalidFavorTokenNumberException, NotEnoughFavorTokenException, NotYourTurnException, PlayerSuspendedException {
         if (gameRoom == null || !gameRoom.getPlaying()) throw new GameNotStartedException();
         if (gameRoom.isGameFinished()) throw new GameOverException();
         if (!gameRoom.getCurrentRound().getCurrentPlayer().equals(player)) throw new NotYourTurnException();

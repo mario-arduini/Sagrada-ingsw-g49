@@ -3,6 +3,7 @@ import it.polimi.ingsw.model.exceptions.*;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Class representing the window of a player and the current state of his mosaic
@@ -70,7 +71,7 @@ public class Window implements Serializable {
      */
     public void removeDice(int row,int column){
         mosaic[row][column] = null;
-        if (Arrays.stream(mosaic).flatMap(Arrays::stream).noneMatch(dice -> dice!=null)) {
+        if (Arrays.stream(mosaic).flatMap(Arrays::stream).noneMatch(Objects::nonNull)) {
             firstDicePlaced = false;
         }
     }
@@ -139,7 +140,7 @@ public class Window implements Serializable {
      * @param column column of the cell
      * @throws FirstDiceMisplacedException signals Dice is not being placed on the border of the window
      */
-    public void checkBorder(int row, int column) throws FirstDiceMisplacedException {
+    private void checkBorder(int row, int column) throws FirstDiceMisplacedException {
         if(row != 0 && column != 0 && row != ROW - 1 && column != COLUMN - 1)
             throw new FirstDiceMisplacedException();
     }
@@ -151,9 +152,8 @@ public class Window implements Serializable {
      * @throws ConstraintViolatedException signals Dice is not respecting the constraint
      */
     public void checkColorConstraint(Constraint constraint, Dice dice) throws ConstraintViolatedException {
-        if (constraint != null)
-            if (constraint.getColor() != null && dice.getColor() != constraint.getColor())
-                throw new ConstraintViolatedException();
+        if (constraint != null && constraint.getColor() != null && dice.getColor() != constraint.getColor())
+            throw new ConstraintViolatedException();
     }
 
     /**
@@ -163,9 +163,8 @@ public class Window implements Serializable {
      * @throws ConstraintViolatedException signals Dice is not respecting the constraint
      */
     public void checkValueConstraint(Constraint constraint, Dice dice) throws ConstraintViolatedException {
-        if (constraint != null)
-           if(constraint.getNumber() != 0 && dice.getValue() != constraint.getNumber())
-                throw new ConstraintViolatedException();
+        if (constraint != null && constraint.getNumber() != 0 && !dice.getValue().equals(constraint.getNumber()))
+            throw new ConstraintViolatedException();
     }
 
     /**
@@ -180,7 +179,6 @@ public class Window implements Serializable {
         Color color = dice.getColor();
         int value = dice.getValue();
         boolean adjacencyFlag = false;
-        Dice tmp;
 
         if(checkUpAdjacencies(row,column,color,value))
             adjacencyFlag = true;
@@ -381,11 +379,11 @@ public class Window implements Serializable {
      * Find the number of empty cells in the Window
      * @return Number of empty cells in the Window
      */
-    public int getEmptySpaces(){
+    int getEmptySpaces(){
         int count = 0;
-        for (int i = 0; i<mosaic.length; i++)
-            for (int j = 0; j<mosaic[0].length; j++)
-                if (mosaic[i][j] == null)
+        for (Dice[] aMosaic : mosaic)
+            for (int j = 0; j < mosaic[0].length; j++)
+                if (aMosaic[j] == null)
                     count++;
         return count;
     }
@@ -396,10 +394,10 @@ public class Window implements Serializable {
      */
     public int numOfDicePlaced(){
         int count = 0;
-        for (int i = 0; i<mosaic.length; i++)
-            for (int j = 0; j<mosaic[0].length; j++)
-                if (mosaic[i][j] != null)
-                        count++;
+        for (Dice[] aMosaic : mosaic)
+            for (int j = 0; j < mosaic[0].length; j++)
+                if (aMosaic[j] != null)
+                    count++;
         return count;
     }
 }

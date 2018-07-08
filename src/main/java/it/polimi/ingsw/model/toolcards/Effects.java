@@ -64,7 +64,7 @@ public final class Effects {
         if(window.possiblePlaces(dice, ignore)==0) return false;
 
         boolean valid = false;
-        Coordinate coords = null;
+        Coordinate coords;
         String prompt = "place-dice";
         while (!valid){
             try {
@@ -102,7 +102,7 @@ public final class Effects {
      * @throws RollbackException signals Connection asked for a rollback
      * @throws DisconnectionException signals active player disconnected
      */
-    public static void moveN (int n , Window currentPlayerWindow, Window.RuleIgnored ignored, boolean optional, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException{
+    static void moveN (int n , Window currentPlayerWindow, Window.RuleIgnored ignored, boolean optional, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException{
         String prompt;
         //If optional asks number of moves till it's <= n
         int num = n;
@@ -186,7 +186,7 @@ public final class Effects {
      * @throws RollbackException signals Connection asked for a rollback
      * @throws DisconnectionException signals active player disconnected
      */
-    public static void moveNColor (int n , Window currentPlayerWindow, List<Dice> roundTrack, Window.RuleIgnored ignored, boolean optional, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException{
+    static void moveNColor (int n , Window currentPlayerWindow, List<Dice> roundTrack, Window.RuleIgnored ignored, boolean optional, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException{
         String prompt;
         //If optional asks number of moves till it's <= n
         int num = n;
@@ -219,7 +219,7 @@ public final class Effects {
                     prompt = "move-from-empty";
                     start.remove(diceList.size());
                 }else {
-                    if (diceList.size()>0){
+                    if (diceList.isEmpty()){
                         if (removedDice.getColor().equals(diceList.get(0).getColor())){
                             currentPlayerWindow.removeDice(start.get(diceList.size()).getRow(), start.get(diceList.size()).getColumn());
                             diceList.add(removedDice);
@@ -363,7 +363,7 @@ public final class Effects {
      * @param connection Connection to notify
      * @throws DisconnectionException signals Player has disconnected
      */
-    public static void changeValue(Dice dice, ClientInterface connection) throws DisconnectionException{
+    static void changeValue(Dice dice, ClientInterface connection) throws DisconnectionException{
         dice.roll();
         try {
             connection.showDice(dice);
@@ -381,7 +381,7 @@ public final class Effects {
      * @throws RollbackException signals Connection asked for a rollback
      * @throws DisconnectionException signals active player disconnected
      */
-    public static void changeValue(Dice dice, int value, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
+    static void changeValue(Dice dice, int value, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
         String message = "ask-plus";
         boolean valid=false;
         while (!valid){
@@ -426,7 +426,7 @@ public final class Effects {
             dice.setValue(7-dice.getValue());
             connection.showDice(dice);
         } catch (InvalidDiceValueException e) {
-            e.printStackTrace(); // it will never happen
+            e.printStackTrace();
         }catch (Exception e){
             throw new DisconnectionException();
         }
@@ -492,10 +492,11 @@ public final class Effects {
      * @throws DisconnectionException signals active player disconnected
      */
     public static void setDiceFromBag(Round round, Dice dice, ClientInterface connection, boolean rollback) throws RollbackException, DisconnectionException {
-        int value = 0;
+        int value;
         boolean valid = false;
         String prompt = "choose-value";
 
+        //TODO: what if disconnection here?!
         try {
             connection.showDice(dice);
         }catch (Exception e){

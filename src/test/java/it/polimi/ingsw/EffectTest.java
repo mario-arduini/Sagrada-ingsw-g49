@@ -28,7 +28,7 @@ class ConnectionHandlerStub implements ClientInterface {
     private List<Integer> diceValues;
     private int idxDraftPoolDices, idxWindowPositions, idxBooleans, idxRoundTrackIndexes, idxDiceValues;
 
-    public ConnectionHandlerStub(List<Dice> draftPoolDices,List<Coordinate> windowPositions,List<Boolean> booleans,List<Integer> roundTrackIndexes,List<Integer> diceValues){
+    ConnectionHandlerStub(List<Dice> draftPoolDices,List<Coordinate> windowPositions,List<Boolean> booleans,List<Integer> roundTrackIndexes,List<Integer> diceValues){
         this.draftPoolDices = draftPoolDices;
         this.windowPositions = windowPositions;
         this.booleans = booleans;
@@ -45,19 +45,19 @@ class ConnectionHandlerStub implements ClientInterface {
         return idxBooleans;
     }
 
-    public int getIdxDiceValues() {
+    int getIdxDiceValues() {
         return idxDiceValues;
     }
 
-    public int getIdxWindowPositions() {
+    int getIdxWindowPositions() {
         return idxWindowPositions;
     }
 
-    public int getIdxDraftPoolDices() {
+    int getIdxDraftPoolDices() {
         return idxDraftPoolDices;
     }
 
-    public int getIdxRoundTrackIndexes() {
+    int getIdxRoundTrackIndexes() {
         return idxRoundTrackIndexes;
     }
 
@@ -126,15 +126,6 @@ class ConnectionHandlerStub implements ClientInterface {
 
     }
 
-    //@Override
-    public String getRemoteAddress() {
-        return null;
-    }
-
-    //@Override
-    public void close() {
-    }
-
     @Override
     public Coordinate askDiceWindow(String prompt, boolean rollback) {
         return windowPositions.get(idxWindowPositions++);
@@ -177,8 +168,7 @@ class ConnectionHandlerStub implements ClientInterface {
     public void showDice(Dice dice){
     }
 }
-
-public class EffectTest {
+ class EffectTest {
 
     private List<Dice> setDraft() {
         List<Dice> fakeDraftPool = new ArrayList<>();
@@ -190,7 +180,7 @@ public class EffectTest {
             fakeDraftPool.add(new Dice(Color.PURPLE, 6));
             fakeDraftPool.add(new Dice(Color.YELLOW, 5));
         } catch (InvalidDiceValueException e) {
-
+            fail();
         }
         return fakeDraftPool;
     }
@@ -213,13 +203,13 @@ public class EffectTest {
             players.get(0).setWindow(gson.fromJson(jsonObject, Schema.class));
             players.get(1).setWindow(gson.fromJson(jsonObject, Schema.class));
         } catch (WindowAlreadySetException e) {
-            assertTrue(false);
+            fail();
         }
 
         try {
             return new Game(players);
         } catch (NoMorePlayersException e) {
-            assertTrue(false);
+            fail();
         }
 
         return null;
@@ -227,7 +217,7 @@ public class EffectTest {
 
 
     @Test
-    public void getDraftedDiceTest() {
+    void getDraftedDiceTest() {
 
         Game game = initGame(1);
         assertNotNull(game);
@@ -293,7 +283,7 @@ public class EffectTest {
     }
 
     @Test
-    public void addDiceToWindowTest() {
+    void addDiceToWindowTest() {
 
         Game game = initGame(4);
         assertNotNull(game);
@@ -329,7 +319,7 @@ public class EffectTest {
         try {
             returned = Effects.addDiceToWindow(window,new Dice(Color.BLUE,6), connectionHandlerStub, Window.RuleIgnored.NONE, true);
         } catch (RollbackException | DisconnectionException | InvalidDiceValueException e) {
-            assertFalse(true);
+            fail();
         }
 
         assertFalse(returned);
@@ -353,7 +343,7 @@ public class EffectTest {
     }
 
     @Test
-    public void flipTest(){
+    void flipTest(){
         Dice d=null,flipped=null;
 
         ConnectionHandlerStub stub = new ConnectionHandlerStub(null,null,null,null,null);
@@ -362,13 +352,13 @@ public class EffectTest {
             d = new Dice(Color.BLUE,4);
             flipped = new Dice(Color.BLUE,3);
         } catch (InvalidDiceValueException e) {
-            assertFalse(true);
+            fail();
         }
 
         try {
             Effects.flip(d,stub);
         } catch (DisconnectionException e) {
-            assertFalse(true);
+            fail();
         }
 
         assertEquals(flipped,d);
@@ -377,13 +367,13 @@ public class EffectTest {
             d = new Dice(Color.PURPLE,2);
             flipped = new Dice(Color.PURPLE,5);
         } catch (InvalidDiceValueException e) {
-            assertFalse(true);
+            fail();
         }
 
         try {
             Effects.flip(d,stub);
         } catch (DisconnectionException e) {
-            assertFalse(true);
+            fail();
         }
 
         assertEquals(flipped,d);
@@ -392,13 +382,13 @@ public class EffectTest {
             d = new Dice(Color.YELLOW,5);
             flipped = new Dice(Color.YELLOW,2);
         } catch (InvalidDiceValueException e) {
-            assertFalse(true);
+            fail();
         }
 
         try {
             Effects.flip(d,stub);
         } catch (DisconnectionException e) {
-            assertFalse(true);
+            fail();
         }
 
         assertEquals(flipped,d);
@@ -407,13 +397,13 @@ public class EffectTest {
             d = new Dice(Color.RED,3);
             flipped = new Dice(Color.RED,4);
         } catch (InvalidDiceValueException e) {
-            assertFalse(true);
+            fail();
         }
 
         try {
             Effects.flip(d,stub);
         } catch (DisconnectionException e) {
-            assertFalse(true);
+            fail();
         }
 
         assertEquals(flipped,d);
@@ -422,13 +412,13 @@ public class EffectTest {
             d = new Dice(Color.BLUE,6);
             flipped = new Dice(Color.BLUE,1);
         } catch (InvalidDiceValueException e) {
-            assertFalse(true);
+            fail();
         }
 
         try {
             Effects.flip(d,stub);
         } catch (DisconnectionException e) {
-            assertFalse(true);
+            fail();
         }
 
         assertEquals(flipped,d);
@@ -437,20 +427,20 @@ public class EffectTest {
             d = new Dice(Color.GREEN,1);
             flipped = new Dice(Color.GREEN,6);
         } catch (InvalidDiceValueException e) {
-            assertFalse(true);
+            fail();
         }
 
         try {
             Effects.flip(d,stub);
         } catch (DisconnectionException e) {
-            assertFalse(true);
+            fail();
         }
 
         assertEquals(flipped,d);
     }
 
     @Test
-    public void rerollPoolTest(){
+    void rerollPoolTest(){
         List<Dice> fakeDraftPool = new ArrayList<>();
         List<Dice> copy = new ArrayList<>();
         try {
@@ -467,7 +457,7 @@ public class EffectTest {
             copy.add(new Dice(Color.PURPLE, 6));
             copy.add(new Dice(Color.YELLOW, 5));
         } catch (InvalidDiceValueException e) {
-            assertFalse(true);
+            fail();
         }
 
         Effects.rerollPool(fakeDraftPool);
@@ -479,7 +469,7 @@ public class EffectTest {
     }
 
     @Test
-    public void swapRoundTrackTest(){
+    void swapRoundTrackTest(){
         Game game = initGame(4);
         assertNotNull(game);
 
@@ -537,7 +527,7 @@ public class EffectTest {
     }
 
     @Test
-    public void setDiceFromBag(){
+    void setDiceFromBag(){
         Game game = initGame(4);
         assertNotNull(game);
 
@@ -553,11 +543,10 @@ public class EffectTest {
 
         ConnectionHandlerStub connectionHandlerStub = new ConnectionHandlerStub(null, null, null, null, values);
 
-        Dice d = null;
-        Dice d2 = null;
+        Dice dice = null;
 
         try {
-            d2 = new Dice(Color.BLUE,6);
+            dice = new Dice(Color.BLUE,6);
         } catch (InvalidDiceValueException e) {
             e.printStackTrace();
         }
@@ -567,17 +556,17 @@ public class EffectTest {
 
         assertDoesNotThrow(() -> Effects.setDiceFromBag(round,new Dice(Color.BLUE, 5),connectionHandlerStub,true));
         assertEquals(4,connectionHandlerStub.getIdxDiceValues());
-        assertEquals(d2,round.getCurrentDiceDrafted());
+        assertEquals(dice,round.getCurrentDiceDrafted());
 
         try {
-            d2 = new Dice(Color.RED,1);
+            dice = new Dice(Color.RED,1);
         } catch (InvalidDiceValueException e) {
             e.printStackTrace();
         }
 
         assertDoesNotThrow(() -> Effects.setDiceFromBag(round,new Dice(Color.RED,4),connectionHandlerStub,true));
         assertEquals(5,connectionHandlerStub.getIdxDiceValues());
-        assertEquals(d2,round.getCurrentDiceDrafted());
+        assertEquals(dice,round.getCurrentDiceDrafted());
 
     }
 }

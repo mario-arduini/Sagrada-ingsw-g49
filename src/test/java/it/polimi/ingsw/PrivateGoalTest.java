@@ -5,10 +5,9 @@ import it.polimi.ingsw.model.exceptions.*;
 import it.polimi.ingsw.model.goalcards.PrivateGoal;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class PrivateGoalTest {
+class PrivateGoalTest {
 
     private static final int ROW = 4;
     private static final int COLUMN = 5;
@@ -25,17 +24,7 @@ public class PrivateGoalTest {
             window.addDice(0,3,new Dice(Color.GREEN,4));
             window.addDice(0,4,new Dice(Color.BLUE,5));
             window.addDice(1,4,new Dice(Color.RED,3));
-        } catch (ConstraintViolatedException e) {
-            e.printStackTrace();
-        } catch (FirstDiceMisplacedException e) {
-            e.printStackTrace();
-        } catch (NoAdjacentDiceException e) {
-            e.printStackTrace();
-        } catch (BadAdjacentDiceException e) {
-            e.printStackTrace();
-        } catch (InvalidDiceValueException e) {
-            e.printStackTrace();
-        }catch (DiceAlreadyHereException e) {
+        } catch (ConstraintViolatedException | FirstDiceMisplacedException | NoAdjacentDiceException | BadAdjacentDiceException | InvalidDiceValueException | DiceAlreadyHereException e) {
             e.printStackTrace();
         }
     }
@@ -55,10 +44,8 @@ public class PrivateGoalTest {
             fillMosaic(window);
             assertEquals(7,goal.computeScore(window));
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
     }
@@ -78,10 +65,8 @@ public class PrivateGoalTest {
             fillMosaic(window);
             assertEquals(16,goal.computeScore(window));
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
     }
@@ -101,10 +86,8 @@ public class PrivateGoalTest {
             fillMosaic(window);
             assertEquals(7,goal.computeScore(window));
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
     }
@@ -124,10 +107,8 @@ public class PrivateGoalTest {
             fillMosaic(window);
             assertEquals(6,goal.computeScore(window));
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
     }
@@ -147,10 +128,8 @@ public class PrivateGoalTest {
             fillMosaic(window);
             assertEquals(0,goal.computeScore(window));
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
     }

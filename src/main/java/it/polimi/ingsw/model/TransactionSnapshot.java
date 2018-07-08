@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 /**
  * A Transaction Snapshot is an object that represents a game in a particular round status.
@@ -113,7 +112,7 @@ public class TransactionSnapshot {
      * Returns the dice bag.
      * @return diceBag as a list of dice.
      */
-    public List<Dice> getDiceBag() {
+    List<Dice> getDiceBag() {
         return diceBag;
     }
 }

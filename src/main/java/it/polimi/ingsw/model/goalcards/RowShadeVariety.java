@@ -11,7 +11,7 @@ public class RowShadeVariety extends PublicGoal {
             flag = true;
             for(int j=1;j<Window.COLUMN&&flag;j++)
                 for(int k=0;k<j;k++) {
-                    if (window.getCell(i,j)==null||window.getCell(i,k)==null||window.getCell(i, j).getValue() == window.getCell(i, k).getValue()) {
+                    if (window.getCell(i,j)==null||window.getCell(i,k)==null|| window.getCell(i, j).getValue().equals(window.getCell(i, k).getValue())) {
                         flag = false;
                     }
                 }

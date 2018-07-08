@@ -106,6 +106,7 @@ public class ToolCard implements Serializable {
                 case "movable-value" : Prerequisites.checkMovable(gameTransaction.getRound().getCurrentPlayer(), Window.RuleIgnored.NUMBER); break;
                 case "movable" : Prerequisites.checkMovable(gameTransaction.getRound().getCurrentPlayer(), Window.RuleIgnored.NONE); break;
                 case "two-dices-window" : Prerequisites.checkTwoDiceInWindow(gameTransaction.getWindow()); break;
+                default: break;
             }
 
         }
@@ -120,7 +121,7 @@ public class ToolCard implements Serializable {
             }catch (NullPointerException e) {
                 Logger.print("ToolCard " + e);
             }
-            Boolean optional = arguments.get("optional")!=null ? arguments.get("optional").getAsBoolean() : false;
+            Boolean optional = arguments.get("optional") != null && arguments.get("optional").getAsBoolean();
             try {
 
                 switch (command) {
@@ -169,6 +170,8 @@ public class ToolCard implements Serializable {
                         break;
                     case "set-from-bag":
                         Effects.setDiceFromBag(game.getRound(), game.getFromBag(), connection, rollback);
+                        break;
+                    default:
                         break;
                 }
             }catch (RollbackException e){
@@ -208,7 +211,7 @@ public class ToolCard implements Serializable {
      * @throws RollbackException signals active Player asked for a rollback
      * @throws DisconnectionException signals active Player has disconnected
      */
-    public void continueToolCard(ClientInterface connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, NoDiceInWindowException, NoDiceInRoundTrackException, NotYourSecondTurnException, AlreadyDraftedException, NotDraftedYetException, NotYourFirstTurnException, NoSameColorDicesException, NothingCanBeMovedException, NotEnoughDiceToMoveException, PlayerSuspendedException, RollbackException, DisconnectionException {
+    public void continueToolCard(ClientInterface connection) throws NotEnoughFavorTokenException, InvalidFavorTokenNumberException, PlayerSuspendedException, RollbackException, DisconnectionException {
         JsonObject effect;
         String command;
         JsonObject arguments = null;
@@ -223,7 +226,7 @@ public class ToolCard implements Serializable {
             }catch (NullPointerException e) {
                 Logger.print("ToolCard " + e);
             }
-            Boolean optional = arguments.get("optional")!=null ? arguments.get("optional").getAsBoolean() : false;
+            Boolean optional = arguments.get("optional") != null && arguments.get("optional").getAsBoolean();
             try {
 
                 switch (command) {
@@ -272,6 +275,8 @@ public class ToolCard implements Serializable {
                         break;
                     case "set-from-bag":
                         Effects.setDiceFromBag(game.getRound(), game.getFromBag(), connection, rollback);
+                        break;
+                    default:
                         break;
                 }
             }catch (RollbackException e){

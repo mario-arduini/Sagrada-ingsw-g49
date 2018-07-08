@@ -21,7 +21,7 @@ public class Game {
     private final List<PublicGoal> publicGoals;
     private int nextFirstPlayer;
     private Round currentRound;
-    private static final int schemaPerPlayer = 4;
+    private static final int SCHEMA_PER_PLAYER = 4;
     private boolean playing;
     private List<Dice> diceBag;
 
@@ -57,9 +57,7 @@ public class Game {
         playerList.forEach(player -> {
             try {
                 player.setPrivateGoal(dealer.extractPrivateGoal());
-            } catch (PrivateGoalAlreadySetException e) {
-                e.printStackTrace();
-            } catch (OutOfCardsException e) {
+            } catch (PrivateGoalAlreadySetException | OutOfCardsException e) {
                 e.printStackTrace();
             }
         });
@@ -190,7 +188,6 @@ public class Game {
      */
     protected List<Score> computeFinalScores(){
         List <Score> scores = new ArrayList<>();
-        BinaryOperator<Integer> adder = (n1, n2) -> n1 + n2;
         int privateScore;
         for(Player player: this.players){
             AtomicInteger publicScore = new AtomicInteger();
@@ -251,7 +248,8 @@ public class Game {
      */
     private synchronized List<Player> createRoundPlayers(){
         List<Player> roundPlayers = new ArrayList<>();
-        int j, size;
+        int j;
+        int size;
         size = players.size();
 
         nextFirstPlayer = (nextFirstPlayer + 1)%size;
@@ -271,7 +269,7 @@ public class Game {
      * @return List of extracted Schemas
      */
     public List<Schema> extractSchemas(){
-        return this.dealer.extractSchemas(schemaPerPlayer);
+        return this.dealer.extractSchemas(SCHEMA_PER_PLAYER);
     }
 
     /**

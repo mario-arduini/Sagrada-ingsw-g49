@@ -6,7 +6,7 @@ public class FullColorVariety extends PublicGoal {
 
     @Override
     public int computeScore(Window window) {
-        int count[] = new int[5];
+        int[] count = new int[5];
         for(int i=0;i<Window.ROW;i++)
             for(int j=0;j<Window.COLUMN;j++)
                 if(window.getCell(i,j)!= null) switch (window.getCell(i,j).getColor()){

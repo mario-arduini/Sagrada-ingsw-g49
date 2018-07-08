@@ -126,7 +126,6 @@ public class CLIHandler implements GraphicInterface {
                 else
                     newGame = false;
             } catch (ServerReconnectedException e) {
-                //waitResult(lock2);
                 LOGGER.info(e.toString());
             }
         }
@@ -143,8 +142,6 @@ public class CLIHandler implements GraphicInterface {
         boolean logout = false;
         int command;
         if (!client.isGameStarted()) {
-            //waitLock2 = true;
-            //waitResult(lock2);
             do {
                 ClientLogger.print("\nYour choice: ");
                 command = readInt(1, 4);

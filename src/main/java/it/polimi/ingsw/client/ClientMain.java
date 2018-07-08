@@ -20,7 +20,7 @@ public class ClientMain {
             ClientLogger.println(ERROR);
             return;
         }
-        ClientLogger.LogToFile("clientLog.log");
+        ClientLogger.logToFile("clientLog.log");
 
         if(args[0].equalsIgnoreCase("-g")) {
             switch (args[1].toLowerCase()) {
@@ -31,7 +31,6 @@ public class ClientMain {
                     try{
                         Application.launch(GuiMain.class);
                     } catch (Exception e){
-                        e.printStackTrace();
                         ClientLogger.println(MessageHandler.get("error-gui"));
                         (new CLIHandler()).start();
                     }

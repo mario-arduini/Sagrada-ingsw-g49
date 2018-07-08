@@ -6,7 +6,7 @@ public class FullShadeVariety extends PublicGoal {
 
     @Override
     public int computeScore(Window window) {
-        int count[] = new int[6];
+        int[] count = new int[6];
         for(int i=0;i<Window.ROW;i++)
             for(int j=0;j<Window.COLUMN;j++)
                 if(window.getCell(i,j)!= null)

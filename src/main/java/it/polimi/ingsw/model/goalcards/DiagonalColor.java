@@ -7,7 +7,7 @@ public class DiagonalColor extends PublicGoal {
 
     @Override
     public int computeScore(Window window) {
-        boolean check[][] = new boolean[Window.ROW][Window.COLUMN];
+        boolean[][] check = new boolean[Window.ROW][Window.COLUMN];
         int score = 0;
         for(int i=0;i<Window.ROW;i++) {
             for(int j = 0; j<Window.COLUMN; j++) {

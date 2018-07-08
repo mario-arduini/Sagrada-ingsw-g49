@@ -42,7 +42,7 @@ final class Prerequisites {
      * @throws NoDiceInRoundTrackException signals there are no dice in the round track, altough it is requested by the ToolCard
      */
     static void checkDiceInRoundTrack(List<Dice> roundTrack) throws NoDiceInRoundTrackException{
-        if(roundTrack.size()==0) throw new NoDiceInRoundTrackException();
+        if(roundTrack.isEmpty()) throw new NoDiceInRoundTrackException();
 
     }
 
@@ -113,7 +113,7 @@ final class Prerequisites {
     static void checkMovable(Player player, Window.RuleIgnored ruleIgnored) throws NothingCanBeMovedException {
         Window window = player.getWindow();
         boolean valid = false;
-        Dice dice = null;
+        Dice dice;
         for(int r = 0;r<Window.ROW; r++)
             for(int c = 0;c<Window.COLUMN; c++){
                 dice = window.getCell(r,c);

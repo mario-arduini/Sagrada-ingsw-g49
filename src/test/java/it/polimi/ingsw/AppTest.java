@@ -1,6 +1,5 @@
 package it.polimi.ingsw;
 
-import it.polimi.ingsw.model.toolcards.ToolCard;
 import org.junit.jupiter.api.Test;
 
 class FirstJUnitTest{
@@ -35,7 +34,7 @@ class FirstJUnitTest{
         gameTest.testNextRound();
 
         playerTest.testConstructor();
-        playerTest.testGameplay();
+        playerTest.testGamePlay();
 
         privateGoalTest.blueTest();
         privateGoalTest.greenTest();
@@ -53,7 +52,7 @@ class FirstJUnitTest{
         varietyTest.rowShadeTest();
 
         windowTest.tesAddDice();
-        windowTest.testWindowCostructor();
+        windowTest.testWindowConstructor();
 
         effectTest.addDiceToWindowTest();
         effectTest.flipTest();

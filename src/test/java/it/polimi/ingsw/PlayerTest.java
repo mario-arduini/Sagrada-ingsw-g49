@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class PlayerTest {
+class PlayerTest {
     private static final String NICKNAME = "Player1";
     private static final String AUTH_TOKEN = "\"c3VwZXJwaXBwbw==\"";
     private static final int ROW = 4;
@@ -26,7 +26,7 @@ public class PlayerTest {
         player = new Player(NICKNAME, AUTH_TOKEN);
         assertEquals(NICKNAME, player.getNickname());
         assertTrue(player.verifyAuthToken(AUTH_TOKEN));
-        assertEquals(null, player.getPrivateGoal());
+        assertNull(player.getPrivateGoal());
         assertEquals(0, player.getFavorToken());
         assertFalse(player.isSuspended());
 
@@ -34,11 +34,11 @@ public class PlayerTest {
         assertEquals(player, player2);
 
         player3 = new Player(NICKNAME + "A", AUTH_TOKEN);
-        assertFalse(player.equals(player3));
+        assertNotEquals(player, player3);
     }
 
     @Test
-    void testGameplay() {
+    void testGamePlay() {
         Player player;
 
         Schema schema;
@@ -57,21 +57,19 @@ public class PlayerTest {
             //Try negative value for favor token
             try {
                 player.useFavorToken(-3);
-                assertTrue(false);
+                fail();
             } catch (InvalidFavorTokenNumberException e) {
                 assertTrue(true);
             } catch (NotEnoughFavorTokenException e) {
-                assertTrue(false);
+                fail();
             }
 
             //Use favor token
             try {
                 player.useFavorToken(2);
                 assertEquals(schema.getDifficulty() - 2, player.getFavorToken());
-            } catch (InvalidFavorTokenNumberException e) {
-                assertTrue(false);
-            } catch (NotEnoughFavorTokenException e) {
-                assertTrue(false);
+            } catch (InvalidFavorTokenNumberException | NotEnoughFavorTokenException e) {
+                fail();
             }
             //Use favor token till 0
             try {
@@ -80,15 +78,15 @@ public class PlayerTest {
             } catch (InvalidFavorTokenNumberException e) {
                 assertTrue(true);
             } catch (NotEnoughFavorTokenException e) {
-                assertTrue(false);
+                fail();
             }
 
             //Use more favor Token than expected
             try {
                 player.useFavorToken(5);
-                assertTrue(false);
+                fail();
             } catch (InvalidFavorTokenNumberException e) {
-                assertTrue(false);
+                fail();
             } catch (NotEnoughFavorTokenException e) {
                 assertTrue(true);
             }
@@ -97,9 +95,7 @@ public class PlayerTest {
 
             //TEST FOR GOALS TO BE DONE
 
-        } catch (InvalidDifficultyValueException e) {
-            e.printStackTrace();
-        } catch (UnexpectedMatrixSizeException e) {
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
             e.printStackTrace();
         }
 

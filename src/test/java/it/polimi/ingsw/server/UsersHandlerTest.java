@@ -2,8 +2,7 @@ package it.polimi.ingsw.server;
 
 import org.junit.jupiter.api.Test;
 
-
-public class UsersHandlerTest {
+class UsersHandlerTest {
     @Test
     void test(){
     }

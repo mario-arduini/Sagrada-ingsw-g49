@@ -30,7 +30,7 @@ public class Factory {
     private static final int NUMBER_OF_TOOL_CARDS = 12;
 
     /**
-     * Create the factory, read toolcards and schemas from file
+     * Create the factory, read tool cards and schemas from file
      */
     public Factory() {
         this.toolCards = new Stack<>();
@@ -80,7 +80,7 @@ public class Factory {
      * @return List of Schemas extracted
      * @throws IndexOutOfBoundsException Signal that there are not enough Schemas left
      */
-    List<Schema> extractSchemas(int schemasToExtract) throws IndexOutOfBoundsException {
+    List<Schema> extractSchemas(int schemasToExtract) {
         Stack<Schema> extracted = new Stack<>();
         for(int i=0;i<schemasToExtract;i++){
             extracted.add(schemas.pop());
@@ -107,9 +107,9 @@ public class Factory {
     }
 
     /**
-     * Extract a toolcard from the deck
+     * Extract a tool card from the deck
      * @return ToolCard extracted
-     * @throws OutOfCardsException signals that all the toolcards have already been extracted
+     * @throws OutOfCardsException signals that all the tool cards have already been extracted
      */
     public ToolCard extractToolCard() throws OutOfCardsException {
         ToolCard toolCard;
@@ -167,18 +167,19 @@ public class Factory {
             case 8: pub = new FullShadeVariety(); break;
             case 9: pub = new DiagonalColor(); break;
             case 10: pub = new FullColorVariety(); break;
+            default: break;
         }
         return pub;
     }
 
     /**
-     * Extract the Draft Pool from the dice bag, given the dimension of the draftpool
+     * Extract the Draft Pool from the dice bag, given the dimension of the draft pool
      * @param dicesNumber size of the draft pool
-     * @return List of Dice representing the draftpool
+     * @return List of Dice representing the draft pool
      * @throws IndexOutOfBoundsException signals that there are not enough Dice left in the bag
      */
-    List<Dice> extractPool(int dicesNumber) throws IndexOutOfBoundsException{
-        List<Dice> extracted = new ArrayList<Dice>();
+    List<Dice> extractPool(int dicesNumber) {
+        List<Dice> extracted = new ArrayList<>();
         for(int i=0;i<dicesNumber;i++)
             extracted.add( diceBag.remove(diceBag.size()-1) );
 

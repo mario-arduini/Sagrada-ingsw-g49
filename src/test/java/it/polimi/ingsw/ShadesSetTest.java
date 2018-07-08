@@ -8,10 +8,9 @@ import it.polimi.ingsw.model.goalcards.MediumShades;
 import it.polimi.ingsw.model.goalcards.PublicGoal;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class ShadesSetTest {
+class ShadesSetTest {
 
     private static final int ROW = 4;
     private static final int COLUMN = 5;
@@ -33,17 +32,7 @@ public class ShadesSetTest {
             window.addDice(0,3,new Dice(Color.GREEN,4));
             window.addDice(0,4,new Dice(Color.BLUE,5));
             window.addDice(1,4,new Dice(Color.RED,3));
-        } catch (ConstraintViolatedException e) {
-            e.printStackTrace();
-        } catch (FirstDiceMisplacedException e) {
-            e.printStackTrace();
-        } catch (NoAdjacentDiceException e) {
-            e.printStackTrace();
-        } catch (BadAdjacentDiceException e) {
-            e.printStackTrace();
-        } catch (InvalidDiceValueException e) {
-            e.printStackTrace();
-        }catch (DiceAlreadyHereException e) {
+        } catch (ConstraintViolatedException | FirstDiceMisplacedException | NoAdjacentDiceException | InvalidDiceValueException | BadAdjacentDiceException | DiceAlreadyHereException e) {
             e.printStackTrace();
         }
     }
@@ -72,17 +61,7 @@ public class ShadesSetTest {
             window.addDice(2,2,new Dice(Color.YELLOW,3));
             window.addDice(2,3,new Dice(Color.PURPLE,4));
             window.addDice(2,4,new Dice(Color.GREEN,5));
-        } catch (ConstraintViolatedException e) {
-            e.printStackTrace();
-        } catch (FirstDiceMisplacedException e) {
-            e.printStackTrace();
-        } catch (NoAdjacentDiceException e) {
-            e.printStackTrace();
-        } catch (BadAdjacentDiceException e) {
-            e.printStackTrace();
-        } catch (InvalidDiceValueException e) {
-            e.printStackTrace();
-        } catch (DiceAlreadyHereException e) {
+        } catch (ConstraintViolatedException | FirstDiceMisplacedException | NoAdjacentDiceException | BadAdjacentDiceException | DiceAlreadyHereException | InvalidDiceValueException e) {
             e.printStackTrace();
         }
     }
@@ -106,10 +85,8 @@ public class ShadesSetTest {
             assertEquals(2,goal.computeScore(window));
 
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
     }
@@ -133,10 +110,8 @@ public class ShadesSetTest {
             assertEquals(4,goal.computeScore(window));
 
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
     }
@@ -160,10 +135,8 @@ public class ShadesSetTest {
             assertEquals(4,goal.computeScore(window));
 
 
-        } catch (InvalidDifficultyValueException e) {
-            assertTrue(false);
-        } catch (UnexpectedMatrixSizeException e) {
-            assertTrue(false);
+        } catch (InvalidDifficultyValueException | UnexpectedMatrixSizeException e) {
+            fail();
         }
 
     }
