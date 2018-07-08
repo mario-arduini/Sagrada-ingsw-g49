@@ -390,10 +390,13 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
      * @param privateGoal the private goal of the user
      */
     @Override
-    public void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal){
+    public void notifyGameInfo(Map<String, Boolean> toolCards, List<String> publicGoals, String privateGoal){
         List<ToolCard> toolCardsClass = new ArrayList<>();
-        for(String name : toolCards)
-            toolCardsClass.add(new ToolCard(name));
+        for(Map.Entry<String, Boolean> card : toolCards.entrySet()){
+            ToolCard toolCard = new ToolCard(card.getKey());
+            if (card.getValue()) toolCard.setUsed();
+            toolCardsClass.add(toolCard);
+        }
         gameSnapshot.setToolCards(toolCardsClass);
 
         gameSnapshot.setPublicGoals(publicGoals);

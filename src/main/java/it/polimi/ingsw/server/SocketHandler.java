@@ -222,14 +222,10 @@ public class SocketHandler implements Runnable, ClientInterface {
         try {
             gameFlowHandler.continueToolCard();
         } catch (InvalidParameterException | NoSuchToolCardException |
-                NoDiceInWindowException | NothingCanBeMovedException |
-                InvalidFavorTokenNumberException | AlreadyDraftedException |
-                NotEnoughFavorTokenException | NotYourSecondTurnException |
-                NoDiceInRoundTrackException | NotYourTurnException |
-                NoSameColorDicesException | PlayerSuspendedException |
-                NotDraftedYetException | NotYourFirstTurnException |
+                InvalidFavorTokenNumberException |
+                NotEnoughFavorTokenException | NotYourTurnException | PlayerSuspendedException |
                 GameNotStartedException | GameOverException |
-                ToolcardAlreadyUsedException | NotEnoughDiceToMoveException e) {
+                ToolcardAlreadyUsedException e) {
             Logger.print("Toolcard: continuing " + nickname + " " + e);
             socketSendMessage(createErrorMessage(e.toString()));
         }
@@ -268,7 +264,7 @@ public class SocketHandler implements Runnable, ClientInterface {
     }
 
     @Override
-    public void notifyGameInfo(List<String> toolCards, List<String> publicGoals, String privateGoal){
+    public void notifyGameInfo(Map<String, Boolean> toolCards, List<String> publicGoals, String privateGoal){
         JsonObject message;
         message = createMessage("game-info");
 

@@ -19,6 +19,12 @@ public class GameRoom extends Game{
     private boolean notifyEndGame;
     private Timer timer;
 
+    /**
+     * Creates a Game Room.
+     * @param playerList List of players in the game.
+     * @param connections List of connections to which notify.
+     * @throws NoMorePlayersException couldn't start a round.
+     */
     GameRoom(List<Player> playerList, List<ClientInterface> connections) throws NoMorePlayersException {
         super(playerList);
         this.connections = connections;
@@ -102,6 +108,11 @@ public class GameRoom extends Game{
         }
     }
 
+    /**
+     * Check whether the game is finished or not.
+     * Notify game over if necessary.
+     * @return true if game finished, false otherwise.
+     */
     private synchronized boolean checkGameFinished(){
         if (!isGameFinished()) return false;
         if (notifyEndGame){

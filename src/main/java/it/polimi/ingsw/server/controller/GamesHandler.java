@@ -148,7 +148,7 @@ public class GamesHandler {
             try {
                 player.getConnection().notifyLogout(gameFlow.getPlayer().getNickname());
             } catch (RemoteException e) {
-                e.printStackTrace();
+                Logger.print("Disconnection: notify disconnection " + e.getMessage());
             }
         });
         if(waitingRoom.size() < 2 && timer != null) {
@@ -217,7 +217,8 @@ public class GamesHandler {
             } catch (RemoteException e) {
                 Logger.print(e.toString());
             }
-        });        waitingRoom.add(gameFlow);
+        });
+        waitingRoom.add(gameFlow);
 
         waitingRoomNewPlayer();
     }
