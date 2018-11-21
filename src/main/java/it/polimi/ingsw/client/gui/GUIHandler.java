@@ -127,7 +127,7 @@ public class GUIHandler extends UnicastRemoteObject implements GraphicInterface 
     public GUIHandler() throws RemoteException {
         super();
         try {
-            this.client = new Client(this);
+            this.client = new Client(this, Client.GraphicType.GUI);
         }catch (RemoteException e){
             LOGGER.warning(e.toString());
         }

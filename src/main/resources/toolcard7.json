@@ -1,11 +1,9 @@
-{"name":"Pinza Sgrossatrice",
-	
+{"name":"Riga in sughero",
 	"effects":[
 		{"get-draft-dice":{}},
-		{"change-value":{"plus":true,"value":1}},
-		{"place-dice":{"ignore" : "NONE"}}
-	],
-	"prerequisites":[
+		{"place-dice":{"ignore":"ADJACENCIES"}}
+	]
+	,"prerequisites":[
 		"favor-token",
 		"before-draft"
 	],

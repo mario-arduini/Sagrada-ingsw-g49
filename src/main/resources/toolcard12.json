@@ -1,13 +1,12 @@
-{"name":"Tenaglia a rotelle",
+{"name":"Tampone Diamantato",
 	"effects":[
 		{"get-draft-dice":{}},
-		{"place-dice":{"ignore":"NONE"}},
-		{"remove-turn":{}}
+		{"flip":{}},
+		{"place-dice":{"ignore":"NONE"}}
 	],
 	"prerequisites":[
 		"favor-token",
-		"after-draft",
-		"first-turn"
+		"before-draft"
 	],
-	"rollback":true
+	"rollback" : true
 }

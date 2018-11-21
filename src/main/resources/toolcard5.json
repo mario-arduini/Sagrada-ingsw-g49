@@ -1,12 +1,14 @@
-{"name":"Pennello per Eglomise",
+{"name":"Pennello per pasta salda",
 
 	"effects":[
-		{"move":{"ignore":"COLOR"}}
+		{"get-draft-dice":{}},
+		{"change-value":{"random":true}},
+		{"place-dice":{"ignore" : "NONE"}}
 	],
+
 	"prerequisites":[
 		"favor-token",
-		"dice-window",
-		"movable-color"
+		"before-draft"
 	],
-	"rollback":true
+	"rollback":false
 }

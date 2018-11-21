@@ -1,12 +1,11 @@
-{"name":"Lathekin",
-	
+{"name":"Alesatore per lamina di rame",
+
 	"effects":[
-		{"move-n" : {"ignore" : "NONE", "number":2 }}
+		{"move":{"ignore":"NUMBER"}}
 	],
-	
 	"prerequisites":[
 		"favor-token",
-		"two-dices-window"
+		"dice-window"
 	],
 	"rollback":true
 }

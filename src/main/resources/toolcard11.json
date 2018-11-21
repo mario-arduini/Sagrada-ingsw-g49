@@ -1,12 +1,14 @@
-{"name":"Tampone Diamantato",
+{"name":"Taglierina Circolare",
 	"effects":[
 		{"get-draft-dice":{}},
-		{"flip":{}},
+		{"swap-round-dice":{}},
 		{"place-dice":{"ignore":"NONE"}}
 	],
-	"prerequisites":[
+	"prerequisites":
+	[
 		"favor-token",
+		"dice-round-track",
 		"before-draft"
 	],
-	"rollback" : true
+	"rollback":true
 }

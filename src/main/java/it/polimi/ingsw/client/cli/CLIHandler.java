@@ -60,7 +60,7 @@ public class CLIHandler implements GraphicInterface {
         lockInput = new Object();
 
         try {
-            this.client = new Client(this);
+            this.client = new Client(this, Client.GraphicType.CLI);
         }catch (RemoteException e){
             LOGGER.warning(e.toString());
         }

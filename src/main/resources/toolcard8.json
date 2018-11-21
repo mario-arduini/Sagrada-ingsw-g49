@@ -1,11 +1,12 @@
-{"name":"Riga in sughero",
+{"name":"Pennello per Eglomise",
+
 	"effects":[
-		{"get-draft-dice":{}},
-		{"place-dice":{"ignore":"ADJACENCIES"}}
-	]
-	,"prerequisites":[
+		{"move":{"ignore":"COLOR"}}
+	],
+	"prerequisites":[
 		"favor-token",
-		"before-draft"
+		"dice-window",
+		"movable-color"
 	],
 	"rollback":true
 }

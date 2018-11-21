@@ -36,6 +36,8 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     private transient GraphicInterface handler;
     private FlowHandlerInterface server;
     public enum ConnectionType{ RMI, SOCKET }
+    public enum GraphicType{ CLI, GUI }
+    private GraphicType graphicType;
     private boolean logged;
     private String password;
     private boolean gameStarted;
@@ -45,13 +47,15 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     private ClientSocketHandler socketHandler;
     private boolean reconnectionInsideToolCard;
 
+
     /**
      * Creates a new Client object and initialises some parameters like the graphic handler chosen
      * @param handler the object that represents either the CLI or the GUI
      * @throws RemoteException RMI exception
      */
-    public Client(GraphicInterface handler) throws RemoteException {
+    public Client(GraphicInterface handler, GraphicType graphicType) throws RemoteException {
         ClientLogger.initLogger(LOGGER);
+        this.graphicType = graphicType;
         this.gameSnapshot = new GameSnapshot();
         this.handler = handler;
         gameStarted = false;
@@ -168,28 +172,40 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     /**
-     * Sends to the server a request to use a specific tool card
+     * Decides whether to send to the server a request to use a specific tool card inside a thread based on the graphic type chosen by the user
      * @param name the name of the tool card chosen by the user
      * @throws ServerReconnectedException if the connection with the server had gone down and a reconnection was successful
      */
     public void useToolCard(String name) throws ServerReconnectedException{
         AtomicReference<Boolean> reconnection = new AtomicReference<>(false);
-        new Thread(()->{
-            try {
-                server.useToolCard(name);
-            } catch (GameNotStartedException | ToolCardInUseException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException | PlayerSuspendedException e) {
-                setServerResult(false);
-                LOGGER.warning(e.toString());
-            } catch (RemoteException e){
-                try {
-                    serverDisconnected();
-                } catch (ServerReconnectedException e1) {
-                    reconnection.getAndSet(true);
-                }
-            }
-        }).start();
+        if(graphicType == GraphicType.CLI)
+            reconnection.getAndSet(executeUseToolCard(name));
+        else
+            new Thread(()-> reconnection.getAndSet(executeUseToolCard(name))).start();
         if(reconnection.get())
             throw new ServerReconnectedException();
+    }
+
+    /**
+     * Sends to the server a request to use a specific tool card
+     * @param name the name of the tool card chosen by the user
+     * @return true if the connection with the server had gone down and a reconnection was successful, false otherwise
+     */
+    private Boolean executeUseToolCard(String name){
+        AtomicReference<Boolean> reconnection = new AtomicReference<>(false);
+        try {
+            server.useToolCard(name);
+        } catch (GameNotStartedException | ToolCardInUseException | NotEnoughDiceToMoveException | GameOverException | ToolcardAlreadyUsedException | NoSuchToolCardException | NotYourSecondTurnException | NoDiceInRoundTrackException | AlreadyDraftedException | NotEnoughFavorTokenException | InvalidFavorTokenNumberException | NotYourTurnException | NoDiceInWindowException | NotDraftedYetException | NotYourFirstTurnException | NoSameColorDicesException | NothingCanBeMovedException | PlayerSuspendedException e) {
+            setServerResult(false);
+            LOGGER.warning(e.toString());
+        } catch (RemoteException e){
+            try {
+                serverDisconnected();
+            } catch (ServerReconnectedException e1) {
+                reconnection.getAndSet(true);
+            }
+        }
+        return reconnection.get();
     }
 
     /**
